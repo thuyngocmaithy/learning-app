@@ -1,0 +1,109 @@
+@import 'normalize.css';
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    --primary: #3465D4;
+    --black: #000;
+    --white: #fff;
+    --text-gray-color: #8D8B8B;
+    --text-black-color: #000;
+
+    --font-family: 'Noto Sans', sans-serif;
+    /* Default layout */
+    --default-layout-header-height: 60px;
+    --default-layout-width: 1150px;
+    --default-layout-horizontal-spacer: 24px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+    color: var(--text-black-color);
+    background-color: #F6F6F6;
+    overflow-y: overlay;
+    overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+html *::-webkit-scrollbar {
+    border-radius: 0;
+    width: 8px;
+}
+
+html *::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(22, 24, 35, .06);
+}
+
+html *::-webkit-scrollbar-track {
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+button,
+input,
+[tabindex] {
+    outline: none;
+    border: none;
+}
+
+a {
+    color: var(--text-black-color);
+    text-decoration: none;
+}
+
+
+
+/* Custom tippy */
+/* body {
+    .tippy-box {
+        background-color: rgba(84, 84, 84, 0.92);
+        font-size: 1.6rem;
+        font-weight: 600;
+        border-radius: 8px;
+        line-height: 2.2rem;
+    }
+
+    .tippy-arrow {
+        color: rgba(84, 84, 84, 0.92);
+    }
+
+    .tippy-content {
+        padding: 8px 9px;
+    }
+
+    .tippy-box[data-placement^=bottom]>.tippy-arrow:before {
+        top: -8px;
+    }
+} */
+body {
+    .MuiTableCell-root {
+        font-size: 1.1rem;
+
+        &.title {
+            font-weight: 600;
+        }
+    }
+
+    .wrapper-score {
+        .MuiInputBase-input {
+            padding: 8px 12px;
+            font-size: 1.5rem;
+            width: 100px;
+        }
+    }
+
+}

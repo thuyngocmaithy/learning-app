@@ -1,0 +1,21 @@
+.wrapper {
+    margin: -45px 15px 0 15px;
+}
+
+.info {
+    display: flex;
+}
+
+.title {
+    display: flex;
+    margin-bottom: 35px;
+    margin-left: 20px;
+    font-weight: 700;
+}
+
+.icon {
+    display: inline-block;
+    width: 24px;
+    text-align: center;
+    color: var(--primary);
+}
