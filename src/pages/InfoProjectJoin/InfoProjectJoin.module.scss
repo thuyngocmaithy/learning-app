@@ -1,0 +1,23 @@
+.container-header {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.container-icon-back {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.icon-back svg {
+    width: 2rem;
+    height: 2rem;
+}
+
+.title {
+    margin-left: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}

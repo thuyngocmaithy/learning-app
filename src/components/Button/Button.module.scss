@@ -30,9 +30,10 @@
 }
 
 .icon {
-    display: inline-block;
+    display: flex;
     width: 24px;
     text-align: center;
+    justify-content: center;
 }
 
 // Button types
@@ -82,9 +83,15 @@
 
 
 //Button sizes
+.verysmall {
+    min-width: 60px;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
 .small {
     min-width: 88px;
-    padding: 4px 16px;
+    padding: 6px 16px;
 }
 
 .large {

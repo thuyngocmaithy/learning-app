@@ -1,7 +1,9 @@
 .wrapper {
-    margin: 0px 15px 0 15px;
+    margin: 0 15px 0 15px;
+    height: calc(100% - 80px);
 }
 
+// INFO
 .info {
     display: flex;
     margin-bottom: 30px;
@@ -20,17 +22,17 @@
     color: var(--primary);
 }
 
+// 
 .select-time {
-    margin-bottom: 30px;
+    margin-bottom: 50px;
 }
 
 .select-time,
 .select-time div {
     display: flex;
     align-items: center;
-    justify-content: space-between;
 }
 
-.select-time>div>div>div {
+.select-time>div>div {
     margin: 0 10px;
 }

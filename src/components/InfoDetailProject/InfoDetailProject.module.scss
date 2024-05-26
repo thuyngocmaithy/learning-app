@@ -1,0 +1,27 @@
+.container-title {
+    display: flex;
+    margin-bottom: 20px;
+
+    h2 {
+        margin-right: 20px;
+    }
+}
+
+.container-info-detail {
+    display: flex;
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+.container-description {
+    margin-top: 30px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    border-radius: 17px;
+    padding: 20px;
+    font-size: 15px;
+
+    h4 {
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+}

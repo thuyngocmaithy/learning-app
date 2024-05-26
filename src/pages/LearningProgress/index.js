@@ -1,8 +1,9 @@
 import Aos from 'aos';
 import 'aos/dist/aos.css';
 import { useEffect } from 'react';
-import CardProgress from '../../components/CardProgress';
+import CardLearningProgress from '../../components/CardLearningProgress';
 import images from '../../assets/images';
+import config from '../../config';
 
 function LearningProgress() {
     window.addEventListener('load', () => {
@@ -16,9 +17,27 @@ function LearningProgress() {
     }, []);
     return (
         <div>
-            <CardProgress data-aos="fade-left" title="Sắp xếp môn học dự kiến" image={images.timeTable} />
-            <CardProgress data-aos="fade-left" title="Kế hoạch thực tập tốt nghiệp" image={images.intern} imageLeft />
-            <CardProgress data-aos="fade-left" title="Dự án khóa luận tốt nghiệp" image={images.thesis} />
+            <CardLearningProgress
+                data-aos="fade-left"
+                title="Theo dõi tiến độ học tập"
+                image={images.timeTable}
+                contentButton="Theo dõi"
+                to={config.routes.TrackProgress}
+            />
+            <CardLearningProgress
+                data-aos="fade-left"
+                title="Kế hoạch thực tập tốt nghiệp"
+                image={images.intern}
+                contentButton="Sắp xếp"
+                imageLeft
+            />
+            <CardLearningProgress
+                data-aos="fade-left"
+                title="Dự án khóa luận tốt nghiệp"
+                image={images.thesis}
+                contentButton="Sắp xếp"
+                to={config.routes.Thesis}
+            />
         </div>
     );
 }

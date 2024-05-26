@@ -1,5 +1,5 @@
 /* eslint-disable array-callback-return */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -17,7 +17,7 @@ import styles from './Table.module.scss';
 const cx = classNames.bind(styles);
 
 const columns = [
-    { id: 'stt', label: 'TT', minWidth: 50 },
+    { id: 'id', label: 'TT', minWidth: 50 },
     { id: 'code', label: 'Mã HP', minWidth: 100 },
     {
         id: 'name',
@@ -141,7 +141,7 @@ function ColumnGroupingTable() {
     // }, [status]);
 
     return (
-        <Paper sx={{ width: '100%' }}>
+        <div className={cx('container-table')}>
             <TableContainer sx={{ maxHeight: 440 }}>
                 <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                     <InputLabel id="demo-simple-select-filled-label">Trạng thái</InputLabel>
@@ -170,7 +170,7 @@ function ColumnGroupingTable() {
                             {columns.map((column) => (
                                 <TableCell
                                     className={cx('title')}
-                                    key={column.id}
+                                    key={column.id + '-title'}
                                     align={column.align}
                                     style={{ top: 48, minWidth: column.minWidth }}
                                 >
@@ -180,10 +180,10 @@ function ColumnGroupingTable() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {listCourse.map((course) => {
+                        {listCourse.map((course, index) => {
                             return (
-                                <>
-                                    <TableRow key={course.id}>
+                                <Fragment key={index + '-frag'}>
+                                    <TableRow key={index + '-course'}>
                                         <TableCell className={cx('title')} align="center" colSpan={3}>
                                             {course.title}
                                         </TableCell>
@@ -192,10 +192,10 @@ function ColumnGroupingTable() {
                                         </TableCell>
                                         <TableCell align="center" colSpan={10}></TableCell>
                                     </TableRow>
-                                    {course.data.map((data1) => {
+                                    {course.data.map((data1, index1) => {
                                         return (
-                                            <>
-                                                <TableRow key={data1.id}>
+                                            <Fragment key={index1 + '-frag1'}>
+                                                <TableRow key={index1 + 'data1'}>
                                                     <TableCell className={cx('title')} align="center" colSpan={3}>
                                                         {data1.title}
                                                     </TableCell>
@@ -204,10 +204,10 @@ function ColumnGroupingTable() {
                                                     </TableCell>
                                                     <TableCell align="center" colSpan={10}></TableCell>
                                                 </TableRow>
-                                                {data1.data.map((data2, index) => {
+                                                {data1.data.map((data2, index2) => {
                                                     return course.divide ? (
-                                                        <>
-                                                            <TableRow key={data2.id}>
+                                                        <Fragment key={index2 + '-frag2'}>
+                                                            <TableRow key={index2 + '-course2'}>
                                                                 <TableCell
                                                                     className={cx('title')}
                                                                     align="center"
@@ -222,13 +222,13 @@ function ColumnGroupingTable() {
                                                             </TableRow>
 
                                                             {data2.data &&
-                                                                data2.data.map((data3, index) => {
+                                                                data2.data.map((data3, index3) => {
                                                                     return (
                                                                         <TableRow
                                                                             hover
                                                                             role="checkbox"
                                                                             tabIndex={-1}
-                                                                            key={data3.id}
+                                                                            key={index3 + '-course3'}
                                                                         >
                                                                             {columns.map((column) => {
                                                                                 const value = data3[column.id] ? (
@@ -258,9 +258,14 @@ function ColumnGroupingTable() {
                                                                         </TableRow>
                                                                     );
                                                                 })}
-                                                        </>
+                                                        </Fragment>
                                                     ) : (
-                                                        <TableRow hover role="checkbox" tabIndex={-1} key={data2.id}>
+                                                        <TableRow
+                                                            hover
+                                                            role="checkbox"
+                                                            tabIndex={-1}
+                                                            key={index2 + '-course2'}
+                                                        >
                                                             {columns.map((column) => {
                                                                 const value = data2[column.id] ? (
                                                                     data2[column.id]
@@ -283,15 +288,15 @@ function ColumnGroupingTable() {
                                                         </TableRow>
                                                     );
                                                 })}
-                                            </>
+                                            </Fragment>
                                         );
                                     })}
-                                </>
+                                </Fragment>
                             );
                         })}
                         {/* {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                             return (
-                                <TableRow hover role="checkbox" tabIndex={-1} key={row.stt}>
+                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                                     {columns.map((column) => {
                                         const value = row[column.id] ? (
                                             row[column.id]
@@ -299,8 +304,8 @@ function ColumnGroupingTable() {
                                             <input
                                                 className={cx('radio-period')}
                                                 type="radio"
-                                                value={row['stt'] + '-' + column.label}
-                                                name={row['stt']}
+                                                value={row['id'] + '-' + column.label}
+                                                name={row['id']}
                                             />
                                         );
                                         return (
@@ -317,7 +322,7 @@ function ColumnGroupingTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Paper>
+        </div>
     );
 }
 export default ColumnGroupingTable;

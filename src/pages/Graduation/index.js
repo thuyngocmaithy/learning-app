@@ -1,13 +1,14 @@
 import classNames from 'classnames/bind';
-import styles from './Score.module.scss';
+import styles from './Graduation.module.scss';
 import TextField from '@mui/material/TextField';
 import { GraduateActiveIcon } from '../../components/Icons';
+import { InputNumber } from 'antd';
 
 const cx = classNames.bind(styles);
 
-function Score() {
+function Graduation() {
     return (
-        <div className={cx('wrapper-score')}>
+        <div className={cx('wrapper-graduation')}>
             <div className={cx('info')}>
                 <span className={cx('icon')}>
                     <GraduateActiveIcon />
@@ -18,73 +19,31 @@ function Score() {
                 <div className={cx('content-left')}>
                     <div className={cx('content-left-item')}>
                         <label>Điểm trung bình tích lũy hiện tại (hệ 4)</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0.0} max={4.0} defaultValue={3} step={0.1} />
                     </div>
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ tích lũy hiện tại</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0} max={150} defaultValue={59} />
                     </div>
                     <div className={cx('content-left-item')}>
                         <label>Tổng số tín chỉ của ngành</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0} max={150} defaultValue={150} />
                     </div>
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ đạt loại A (dự kiến)</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0} max={150} defaultValue={19} />
                     </div>
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ đạt loại B (dự kiến)</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0} max={150} defaultValue={20} />
                     </div>
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ đạt loại C (dự kiến)</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0} max={150} defaultValue={10} />
                     </div>
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ đạt loại D (dự kiến)</label>
-                        <TextField
-                            id="outlined-number"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+                        <InputNumber id="outlined-number" min={0} max={150} defaultValue={10} />
                     </div>
                 </div>
                 <div className={cx('content-right')}>
@@ -118,4 +77,4 @@ function Score() {
     );
 }
 
-export default Score;
+export default Graduation;

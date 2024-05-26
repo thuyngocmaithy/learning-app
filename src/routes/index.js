@@ -2,18 +2,25 @@ import config from '../config';
 
 // Pages
 import Home from '../pages/Home';
-import CourseWillOpen from '../pages/CourseWillOpen';
 import AllCourse from '../pages/AllCourse';
 import LearningProgress from '../pages/LearningProgress';
-import Score from '../pages/Score';
+import ResearchProjects from '../pages/ResearchProjects';
+import TrackProgress from '../pages/TrackProgress';
+import Graduation from '../pages/Graduation';
+import InfoProjectJoin from '../pages/InfoProjectJoin';
+import Thesis from '../pages/Thesis';
 
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
-    { path: config.routes.home, component: Home },
-    { path: config.routes.coursewillopen, component: CourseWillOpen },
-    { path: config.routes.allcourse, component: AllCourse },
-    { path: config.routes.learningprogress, component: LearningProgress },
-    { path: config.routes.score, component: Score },
+    { path: config.routes.Home, component: Home },
+    { path: config.routes.AllCourse, component: AllCourse },
+    { path: config.routes.LearningProgress, component: LearningProgress },
+    { path: config.routes.Graduation, component: Graduation },
+    { path: config.routes.TrackProgress, component: TrackProgress },
+    { path: config.routes.ResearchProjects, component: ResearchProjects },
+    { path: config.routes.InfoProjectJoin, component: InfoProjectJoin },
+    { path: config.routes.InfoThesisJoin, component: InfoProjectJoin, thesis: true },
+    { path: config.routes.Thesis, component: Thesis },
 ];
 
 //Không đăng nhập => chuyển login

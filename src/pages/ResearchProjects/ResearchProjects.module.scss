@@ -20,17 +20,25 @@
     color: var(--primary);
 }
 
-.select-time {
+// list project
+.stt {
+    color: var(--primary);
+}
+
+.name {
+    font-weight: 400;
+    font-size: 17px;
+}
+
+.container-deadline-register {
+    font-style: italic;
+    display: flex;
+}
+
+.card-project-join {
     margin-bottom: 30px;
 }
 
-.select-time,
-.select-time div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.select-time>div>div>div {
-    margin: 0 10px;
+.tag-status {
+    margin-left: 10px;
 }

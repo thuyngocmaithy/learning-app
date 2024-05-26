@@ -6,9 +6,18 @@
 
 .logo {
     border-radius: 999px;
-    width: 100px;
+    max-width: 100px;
     margin: 0 auto;
     margin-top: 12px;
     margin-bottom: 30px;
     display: flex;
+    transition: width 0.3s;
+}
+
+.logo-collapsed {
+    width: 40px;
+}
+
+.logo-expanded {
+    width: 100px;
 }

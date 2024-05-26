@@ -4,12 +4,12 @@ import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import Aos from 'aos';
 import 'aos/dist/aos.css';
 import { useEffect } from 'react';
-import styles from './CardProgress.module.scss';
+import styles from './CardLearningProgress.module.scss';
 import Button from '../Button';
 
 const cx = classNames.bind(styles);
 
-function CardProgress({ title, image, imageLeft = false, ...props }) {
+function CardLearningProgress({ title, image, imageLeft = false, to, contentButton, ...props }) {
     useEffect(() => {
         Aos.init({ duration: 2000 });
         return () => Aos.refreshHard();
@@ -25,8 +25,8 @@ function CardProgress({ title, image, imageLeft = false, ...props }) {
                 <h2 data-aos="fade-right" className={cx('title')}>
                     {title}
                 </h2>
-                <Button className={cx('button')} primary rightIcon={<FontAwesomeIcon icon={faAngleRight} />}>
-                    Sắp xếp
+                <Button className={cx('button')} primary rightIcon={<FontAwesomeIcon icon={faAngleRight} />} to={to}>
+                    {contentButton}
                 </Button>
             </div>
             <img className={cx('img')} src={image} alt="time-table" />
@@ -34,4 +34,4 @@ function CardProgress({ title, image, imageLeft = false, ...props }) {
     );
 }
 
-export default CardProgress;
+export default CardLearningProgress;

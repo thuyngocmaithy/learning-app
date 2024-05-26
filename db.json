@@ -12,35 +12,35 @@
                     "tinchi": "32/32",
                     "data": [
                         {
-                            "stt": 1,
+                            "id": 1,
                             "code": "861301",
                             "name": "Triết học Mác - Lênin",
                             "tinchi": 3,
                             "codeBefore": " "
                         },
                         {
-                            "stt": 2,
+                            "id": 2,
                             "code": "861302",
                             "name": "Kinh tế chính trị Mác - Lênin",
                             "tinchi": 2,
                             "codeBefore": "861301"
                         },
                         {
-                            "stt": 3,
+                            "id": 3,
                             "code": "861303",
                             "name": "Chủ nghĩa xã hội khoa học",
                             "tinchi": 2,
                             "codeBefore": "861302"
                         },
                         {
-                            "stt": 4,
+                            "id": 4,
                             "code": "861304",
                             "name": "Tư tưởng Hồ Chí Minh",
                             "tinchi": 2,
                             "codeBefore": "861303"
                         },
                         {
-                            "stt": 5,
+                            "id": 5,
                             "code": "861305",
                             "name": "Lịch sử Đảng Cộng sản Việt Nam",
                             "tinchi": 2,
@@ -54,14 +54,14 @@
                     "tinchi": "2/10",
                     "data": [
                         {
-                            "stt": 6,
+                            "id": 6,
                             "code": "BOBA11",
                             "name": "Bóng bàn 1",
                             "tinchi": 1,
                             "codeBefore": "862101"
                         },
                         {
-                            "stt": 7,
+                            "id": 7,
                             "code": "BOBA12",
                             "name": "Bóng bàn 2",
                             "tinchi": 1,
@@ -88,35 +88,35 @@
                             "tinchi": "48/48",
                             "data": [
                                 {
-                                    "stt": 8,
+                                    "id": 8,
                                     "code": "841405",
                                     "name": "Xác suất thống kê",
                                     "tinchi": 3,
                                     "codeBefore": " "
                                 },
                                 {
-                                    "stt": 9,
+                                    "id": 9,
                                     "code": "861401",
                                     "name": "Giải tích 1",
                                     "tinchi": 3,
                                     "codeBefore": " "
                                 },
                                 {
-                                    "stt": 10,
+                                    "id": 10,
                                     "code": "861406",
                                     "name": "Giải tích 2",
                                     "tinchi": 3,
                                     "codeBefore": "861401"
                                 },
                                 {
-                                    "stt": 11,
+                                    "id": 11,
                                     "code": "861402",
                                     "name": "Đại số tuyến tính",
                                     "tinchi": 3,
                                     "codeBefore": " "
                                 },
                                 {
-                                    "stt": 12,
+                                    "id": 12,
                                     "code": "841020",
                                     "name": "Cơ sở lập trình",
                                     "tinchi": 3,
@@ -142,35 +142,35 @@
                             "tinchi": "30/30",
                             "data": [
                                 {
-                                    "stt": 13,
+                                    "id": 13,
                                     "code": "841310",
                                     "name": "Lý thuyết đồ thị",
                                     "tinchi": 3,
                                     "codeBefore": "841108"
                                 },
                                 {
-                                    "stt": 14,
+                                    "id": 14,
                                     "code": "841047",
                                     "name": "Công nghệ phần mềm",
                                     "tinchi": 4,
                                     "codeBefore": " "
                                 },
                                 {
-                                    "stt": 15,
+                                    "id": 15,
                                     "code": "841414",
                                     "name": "Thiết kế và phân tích giải thuật",
                                     "tinchi": 3,
                                     "codeBefore": " "
                                 },
                                 {
-                                    "stt": 16,
+                                    "id": 16,
                                     "code": "841048",
                                     "name": "Phân tích thiết kế HTTT",
                                     "tinchi": 4,
                                     "codeBefore": "841109"
                                 },
                                 {
-                                    "stt": 17,
+                                    "id": 17,
                                     "code": "841070",
                                     "name": "Thực tập tốt nghiệp",
                                     "tinchi": 6,

@@ -1,4 +1,4 @@
-export const HomeIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const HomeIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         className={className}
         width={width}
@@ -16,7 +16,7 @@ export const HomeIcon = ({ width = '3.2rem', height = '3.2rem', className }) => 
     </svg>
 );
 
-export const HomeActiveIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const HomeActiveIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         className={className}
         width={width}
@@ -34,7 +34,7 @@ export const HomeActiveIcon = ({ width = '3.2rem', height = '3.2rem', className 
     </svg>
 );
 
-export const ListCourseIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const ListCourseIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         className={className}
@@ -52,7 +52,7 @@ export const ListCourseIcon = ({ width = '3.2rem', height = '3.2rem', className 
         />
     </svg>
 );
-export const ListCourseActiveIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const ListCourseActiveIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         className={className}
@@ -70,7 +70,7 @@ export const ListCourseActiveIcon = ({ width = '3.2rem', height = '3.2rem', clas
     </svg>
 );
 
-export const CourseOpenIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const CourseOpenIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         className={className}
@@ -102,7 +102,7 @@ export const CourseOpenIcon = ({ width = '3.2rem', height = '3.2rem', className 
         <path d="M13 16L18 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
-export const CourseOpenActiveIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const CourseOpenActiveIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         className={className}
@@ -120,7 +120,7 @@ export const CourseOpenActiveIcon = ({ width = '3.2rem', height = '3.2rem', clas
     </svg>
 );
 
-export const ScheduleIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const ScheduleIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.0"
@@ -184,7 +184,7 @@ export const ScheduleIcon = ({ width = '3.2rem', height = '3.2rem', className })
     </svg>
 );
 
-export const ScheduleActiveIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const ScheduleActiveIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.0"
@@ -204,7 +204,7 @@ export const ScheduleActiveIcon = ({ width = '3.2rem', height = '3.2rem', classN
     </svg>
 );
 
-export const GraduateIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const GraduateIcon = ({ width = '1em', height = '1em', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
@@ -220,7 +220,7 @@ export const GraduateIcon = ({ width = '3.2rem', height = '3.2rem', className })
         </g>
     </svg>
 );
-export const GraduateActiveIcon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+export const GraduateActiveIcon = ({ width = '3rem', height = '3rem', className }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
@@ -238,5 +238,39 @@ export const GraduateActiveIcon = ({ width = '3.2rem', height = '3.2rem', classN
                 <polygon points="458.506,358.195 458.506,222.599 439.359,232.255 439.359,358.195 426.883,396.203 445.742,421.445     452.123,421.445 470.981,396.203   " />
             </g>
         </g>
+    </svg>
+);
+export const Number1Icon = ({ width = '3.2rem', height = '3.2rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.0"
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 512.000000 512.000000"
+        preserveAspectRatio="xMidYMid meet"
+    >
+        <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+            <path d="M1321 4784 c-169 -45 -301 -180 -346 -351 -23 -86 -23 -3020 0 -3106 45 -173 178 -307 350 -352 52 -13 244 -15 1555 -15 1311 0 1503 2 1555 15 172 45 305 179 350 352 23 86 23 3020 0 3106 -45 173 -178 307 -350 352 -87 22 -3030 22 -3114 -1z m3085 -330 c15 -11 37 -33 48 -48 21 -27 21 -28 21 -1526 0 -1498 0 -1499 -21 -1526 -11 -15 -33 -37 -48 -48 -27 -21 -28 -21 -1526 -21 -1498 0 -1499 0 -1526 21 -15 11 -37 33 -48 48 -21 27 -21 31 -24 1499 -1 810 0 1486 3 1504 7 40 49 91 90 109 25 11 296 13 1517 11 1484 -2 1487 -2 1514 -23z" />
+            <path d="M2736 3747 c-253 -86 -271 -94 -299 -129 -56 -70 -45 -168 27 -223 60 -45 100 -43 268 14 l148 49 2 -718 c3 -708 3 -719 24 -746 39 -53 71 -69 134 -69 63 0 95 16 134 69 21 27 21 34 21 886 0 852 0 859 -21 886 -34 46 -69 67 -121 70 -40 3 -94 -12 -317 -89z" />
+            <path d="M415 4306 c-37 -17 -70 -52 -84 -89 -8 -20 -11 -464 -11 -1440 0 -1530 0 -1512 54 -1680 96 -292 302 -527 581 -662 118 -58 219 -88 348 -105 55 -7 543 -10 1499 -8 1413 3 1417 3 1444 24 53 39 69 71 69 134 0 63 -16 95 -69 134 -27 21 -32 21 -1484 26 -1584 6 -1471 2 -1621 59 -182 69 -375 261 -441 439 -59 156 -54 37 -60 1624 -5 1452 -5 1457 -26 1484 -11 15 -32 37 -46 47 -34 25 -113 32 -153 13z" />
+        </g>
+    </svg>
+);
+export const ResearchProjectsIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        width={width}
+        height={height}
+        viewBox="0 0 24 24"
+        fill="none"
+    >
+        <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M21.1213 2.70705C19.9497 1.53548 18.0503 1.53547 16.8787 2.70705L15.1989 4.38685L7.29289 12.2928C7.16473 12.421 7.07382 12.5816 7.02986 12.7574L6.02986 16.7574C5.94466 17.0982 6.04451 17.4587 6.29289 17.707C6.54127 17.9554 6.90176 18.0553 7.24254 17.9701L11.2425 16.9701C11.4184 16.9261 11.5789 16.8352 11.7071 16.707L19.5556 8.85857L21.2929 7.12126C22.4645 5.94969 22.4645 4.05019 21.2929 2.87862L21.1213 2.70705ZM18.2929 4.12126C18.6834 3.73074 19.3166 3.73074 19.7071 4.12126L19.8787 4.29283C20.2692 4.68336 20.2692 5.31653 19.8787 5.70705L18.8622 6.72357L17.3068 5.10738L18.2929 4.12126ZM15.8923 6.52185L17.4477 8.13804L10.4888 15.097L8.37437 15.6256L8.90296 13.5112L15.8923 6.52185ZM4 7.99994C4 7.44766 4.44772 6.99994 5 6.99994H10C10.5523 6.99994 11 6.55223 11 5.99994C11 5.44766 10.5523 4.99994 10 4.99994H5C3.34315 4.99994 2 6.34309 2 7.99994V18.9999C2 20.6568 3.34315 21.9999 5 21.9999H16C17.6569 21.9999 19 20.6568 19 18.9999V13.9999C19 13.4477 18.5523 12.9999 18 12.9999C17.4477 12.9999 17 13.4477 17 13.9999V18.9999C17 19.5522 16.5523 19.9999 16 19.9999H5C4.44772 19.9999 4 19.5522 4 18.9999V7.99994Z"
+            fill="currentColor"
+        />
     </svg>
 );

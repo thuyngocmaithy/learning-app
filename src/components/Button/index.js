@@ -13,6 +13,7 @@ function Button({
     text = false,
     rounded = false,
     disabled = false,
+    verysmall = false,
     small = false,
     large = false,
     children,
@@ -66,6 +67,7 @@ function Button({
         text,
         rounded,
         disabled,
+        verysmall,
         small,
         large,
     });

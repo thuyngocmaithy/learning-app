@@ -1,7 +1,26 @@
-.list-card{
+.info {
     display: flex;
-    
+    margin-bottom: 30px;
 }
-.chart{
+
+.title {
+    margin-left: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+}
+
+.list-card {
+    display: flex;
+
+}
+
+.chart {
     margin: 20px 10px;
 }
