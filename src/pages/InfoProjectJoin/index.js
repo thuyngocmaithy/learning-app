@@ -1,13 +1,12 @@
 import classNames from 'classnames/bind';
 import styles from './InfoProjectJoin.module.scss';
-import { Avatar, Descriptions, List, Table, Tabs, Tag } from 'antd';
+import { Tabs } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
-import config from '../../config';
 import { Link } from 'react-router-dom';
 import ChatBox from '../../components/ChatBox';
 import InfoDetailProject from '../../components/InfoDetailProject';
 import Attach from '../../components/Attach';
-import Follower from '../../components/Follower';
+import System from '../../components/System';
 import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
@@ -122,12 +121,18 @@ const dataFollower = [
         title: 'Phạm Thanh B',
     },
 ];
+const dataInfoSystem = [
+    { title: 'Người tạo', description: 'Nguyễn Văn A' },
+    { title: 'Ngày tạo', description: '10/03/2024 08:00:00' },
+    { title: 'Người chỉnh sửa', description: 'Nguyễn Văn B' },
+    { title: 'Ngày chỉnh sửa', description: '15/03/2024 08:00:00' },
+];
 
 const ITEM_TABS = [
     {
         id: 1,
         title: 'Chi tiết',
-        children: <InfoDetailProject item={DISCRIPTION_ITEMS} />,
+        children: <InfoDetailProject item={DISCRIPTION_ITEMS} thesis={true} />,
     },
     {
         id: 2,
@@ -141,8 +146,8 @@ const ITEM_TABS = [
     },
     {
         id: 4,
-        title: 'Người theo dõi',
-        children: <Follower data={dataFollower} />,
+        title: 'Hệ thống',
+        children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
     },
 ];
 function InfoProjectJoin({ thesis = false }) {
