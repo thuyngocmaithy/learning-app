@@ -100,7 +100,7 @@ function DuAnNghienCuu() {
                         let color = item.status === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
-                                className={cx('card-project-join')}
+                                className={cx('card-duanthamgia')}
                                 key={index}
                                 type="inner"
                                 title={item.name}

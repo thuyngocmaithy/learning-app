@@ -10,6 +10,7 @@ const routes = {
     KhoaLuan: '/TienDoHocTap/KhoaLuan',
     ThucTap: '/TienDoHocTap/ThucTap',
     ThongTinThucTap: '/TienDoHocTap/ThucTap/:idThucTap',
+    ChuanDauRa: '/TienDoHocTap/ChuanDauRa',
 };
 
 export default routes;

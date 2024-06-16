@@ -11,6 +11,7 @@ import DuAnThamGia from '../pages/DuAnThamGia';
 import KhoaLuan from '../pages/KhoaLuan';
 import ThucTap from '../pages/ThucTap';
 import ThongTinThucTap from '../pages/ThongTinThucTap';
+import ChuanDauRa from '../pages/ChuanDauRa';
 
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
@@ -25,6 +26,7 @@ const publicRoutes = [
     { path: config.routes.KhoaLuan, component: KhoaLuan },
     { path: config.routes.ThucTap, component: ThucTap },
     { path: config.routes.ThongTinThucTap, component: ThongTinThucTap, layout: null },
+    { path: config.routes.ChuanDauRa, component: ChuanDauRa },
 ];
 
 //Không đăng nhập => chuyển login

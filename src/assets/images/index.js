@@ -4,6 +4,7 @@ const images = {
     timeTable: require('../images/timetable.png'),
     intern: require('../images/intern.png'),
     thesis: require('../images/thesis.png'),
+    chuandaura: require('../images/chuandaura.png'),
     background_detail_internship: require('../images/background-DetailInternship.png'),
 };
 

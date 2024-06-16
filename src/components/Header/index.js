@@ -5,6 +5,9 @@ import styles from './Header.module.scss';
 import Image from '../Image';
 import Menu from '../../components/Popper/Menu';
 import { BellIcon, SupportIcon, UserIcon } from '../../components/Icons';
+import Notification from '../Popper/Notification';
+import Button from '../Button';
+import Support from '../Popper/Support';
 
 const cx = classNames.bind(styles);
 
@@ -34,18 +37,21 @@ function Header() {
         <div className={cx('wrapper')}>
             <div className={cx('actions')}>
                 <span>
-                    <SupportIcon className={cx('icon')} />
+                    <Support>
+                        <span>
+                            <SupportIcon className={cx('icon')} />
+                        </span>
+                    </Support>
                 </span>
                 <span>
-                    <BellIcon className={cx('icon', 'bell-icon')} />
+                    <Notification>
+                        <span>
+                            <BellIcon className={cx('icon', 'bell-icon')} />
+                        </span>
+                    </Notification>
                 </span>
                 <span>
                     <Menu items={MENU_ITEMS} onChange={handleMenuChange}>
-                        {/* <Image
-                            src="https://p16-sign-useast2a.tiktokcdn.com/tos-useast2a-avt-0068-giso/4be145ab73bac1279a5588d11cebb885~c5_100x100.jpeg?x-expires=1693670400&x-signature=MVBliC8dMMD5hOL9yBE%2BY9RT2q4%3D"
-                            className={cx('icon', 'user-icon')}
-                            alt="Nguyen Van A"
-                        /> */}
                         <span>
                             <UserIcon className={cx('icon', 'user-icon')} />
                         </span>

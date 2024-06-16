@@ -12,7 +12,7 @@ const cx = classNames.bind(styles);
 
 const defaultFn = () => {};
 
-function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn }) {
+function Menu({ children, items = [], hideOnClick = true, onChange = defaultFn }) {
     const [history, setHistory] = useState([{ data: items }]);
     const current = history[history.length - 1]; //Phần tử cuối (children)
 
@@ -58,8 +58,8 @@ function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn 
     return (
         <Tippy
             interactive
-            delay={[0, 700]} //Khi show không bị delay
-            // Khi ẩn bị delay 700ms
+            trigger="click"
+            delay={[0, 0]} //Khi show không bị delay
             offset={[12, 8]}
             placement="bottom-end"
             hideOnClick={hideOnClick}

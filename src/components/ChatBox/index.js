@@ -8,10 +8,10 @@ import {
     MessageHeader,
 } from '@minchat/react-chat-ui';
 
-function ChatBox() {
+function ChatBox({ height = '100vh' }) {
     return (
         <MinChatUiProvider theme="#6ea9d7">
-            <MainContainer style={{ height: '100vh' }}>
+            <MainContainer style={{ height: { height } }}>
                 <MessageContainer>
                     <MessageList
                         currentUserId="nguyenvana"
@@ -21,6 +21,83 @@ function ChatBox() {
                                 user: {
                                     id: 'mark',
                                     name: 'Markus',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
+                                },
+                            },
+                            {
+                                text: 'Hello',
+                                user: {
+                                    id: 'nguyenvana',
+                                    name: 'Nguyễn Văn A',
                                 },
                             },
                             {

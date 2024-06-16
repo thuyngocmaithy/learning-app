@@ -14,7 +14,7 @@ const cx = classNames.bind(styles);
 const items = [
     {
         key: '/',
-        label: <Link to={config.routes.Home}>Dashboard</Link>,
+        label: <Link to={config.routes.Dashboard}>Dashboard</Link>,
         icon: <HomeOutlined />,
     },
     {

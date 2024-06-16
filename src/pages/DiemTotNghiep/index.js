@@ -8,7 +8,7 @@ const cx = classNames.bind(styles);
 
 function DiemTotNghiep() {
     return (
-        <div className={cx('wrapper-graduation')}>
+        <div className={cx('wrapper-diemtotnghiep')}>
             <div className={cx('info')}>
                 <span className={cx('icon')}>
                     <GraduateActiveIcon />

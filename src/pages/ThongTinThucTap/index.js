@@ -98,9 +98,9 @@ function ThongTinThucTap() {
                                     <List.Item.Meta
                                         avatar={<h4>{item.title}</h4>}
                                         title={
-                                            <h4 className={cx('container-header-info-description')}>
+                                            <p className={cx('container-header-info-description')}>
                                                 {item.description}
-                                            </h4>
+                                            </p>
                                         }
                                     />
                                 </List.Item>
@@ -116,9 +116,9 @@ function ThongTinThucTap() {
                                     <List.Item.Meta
                                         avatar={<h4>{item.title}</h4>}
                                         title={
-                                            <h4 className={cx('container-header-info-description')}>
+                                            <p className={cx('container-header-info-description')}>
                                                 {item.description}
-                                            </h4>
+                                            </p>
                                         }
                                     />
                                 </List.Item>
