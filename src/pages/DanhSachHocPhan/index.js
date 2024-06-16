@@ -1,5 +1,5 @@
 import classNames from 'classnames/bind';
-import styles from './AllCourse.module.scss';
+import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../components/Table';
 import { ListCourseActiveIcon } from '../../components/Icons';
 import { InputNumber } from 'antd';
@@ -7,7 +7,7 @@ import Button from '../../components/Button';
 
 const cx = classNames.bind(styles);
 
-function AllCourse() {
+function DanhSachHocPhan() {
     const onChangeNam = (value) => {
         // console.log('changed', value);
     };
@@ -49,4 +49,4 @@ function AllCourse() {
     );
 }
 
-export default AllCourse;
+export default DanhSachHocPhan;

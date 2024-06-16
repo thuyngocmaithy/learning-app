@@ -1,8 +1,8 @@
 import classNames from 'classnames/bind';
-import styles from './TrackProgress.module.scss';
+import styles from './TienDoHocPhan.module.scss';
 import { ScheduleActiveIcon } from '../../components/Icons';
 import Button from '../../components/Button';
-import {  InputNumber, Space, Table, Tag } from 'antd';
+import { InputNumber, Space, Table, Tag } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 
 const cx = classNames.bind(styles);
@@ -109,7 +109,7 @@ const data = [
         tags: ['Chưa hoàn thành'],
     },
 ];
-function TrackProgress() {
+function TienDoHocPhan() {
     const onChangeNam = (value) => {
         // console.log('changed', value);
     };
@@ -124,7 +124,7 @@ function TrackProgress() {
                     <ScheduleActiveIcon />
                 </span>
 
-                <h3 className={cx('title')}>Theo dõi tiến độ học tập</h3>
+                <h3 className={cx('title')}>Theo dõi tiến độ học phần</h3>
             </div>
             <div>
                 <div className={cx('select-time')}>
@@ -152,4 +152,4 @@ function TrackProgress() {
     );
 }
 
-export default TrackProgress;
+export default TienDoHocPhan;

@@ -1,13 +1,10 @@
 import classNames from 'classnames/bind';
-import styles from './Internship.module.scss';
-import { Checkbox, Col, Form, List, Row, Select, Skeleton, Tabs, Tag } from 'antd';
-import { ScheduleActiveIcon, FilterIcon, LocationIcon, ViewIcon, SalaryIcon } from '../../components/Icons';
+import styles from './ThucTap.module.scss';
+import { Checkbox, Col, List, Row, Skeleton, Tabs, Tag } from 'antd';
+import { ScheduleActiveIcon, FilterIcon, LocationIcon, SalaryIcon } from '../../components/Icons';
 import { useEffect, useState } from 'react';
 import Button from '../../components/Button';
-import { useNavigate } from 'react-router-dom';
 import Filter from '../../components/Popper/Filter';
-import FormItem from '../../components/FormItem';
-import config from '../../config';
 
 const cx = classNames.bind(styles);
 
@@ -74,7 +71,7 @@ const listProject = [
     },
 ];
 
-function Internship() {
+function ThucTap() {
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     useEffect(() => {
@@ -145,7 +142,7 @@ function Internship() {
                                     <Button
                                         outline
                                         verysmall
-                                        onClick={() => openInNewTab(`/LearningProgress/Internship/${index}`)}
+                                        onClick={() => openInNewTab(`/TienDoHocTap/ThucTap/${index}`)}
                                     >
                                         Xem chi tiết
                                     </Button>,
@@ -302,4 +299,4 @@ function Internship() {
     );
 }
 
-export default Internship;
+export default ThucTap;

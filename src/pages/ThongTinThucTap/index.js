@@ -1,5 +1,5 @@
 import classNames from 'classnames/bind';
-import styles from './DetailInternship.module.scss';
+import styles from './ThongTinThucTap.module.scss';
 import images from '../../assets/images';
 import { Col, Divider, List, Row, Skeleton, Tag } from 'antd';
 import Button from '../../components/Button';
@@ -71,7 +71,7 @@ const dataInfoRight = [
     { title: 'Lương:', description: 'Lương thỏa thuận' },
     { title: 'Hết hạn:', description: '21/06/2024' },
 ];
-function DetailInternship() {
+function ThongTinThucTap() {
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     useEffect(() => {
@@ -84,7 +84,7 @@ function DetailInternship() {
     };
 
     return (
-        <div className={cx('wrapper-detailInternship')}>
+        <div className={cx('wrapper-thontinthuctap')}>
             <div className={cx('container-header')}>
                 <img className={cx('background')} src={images.background_detail_internship} alt="" />
                 <h2>FLUTTER INTERN</h2>
@@ -162,7 +162,7 @@ function DetailInternship() {
                                     <Button
                                         outline
                                         verysmall
-                                        onClick={() => openInNewTab(`/LearningProgress/Internship/${index}`)}
+                                        onClick={() => openInNewTab(`/TienDoHocTap/ThucTap/${index}`)}
                                     >
                                         Xem chi tiết
                                     </Button>,
@@ -208,4 +208,4 @@ function DetailInternship() {
     );
 }
 
-export default DetailInternship;
+export default ThongTinThucTap;

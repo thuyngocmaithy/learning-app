@@ -1,11 +1,11 @@
 import Aos from 'aos';
 import 'aos/dist/aos.css';
 import { useEffect } from 'react';
-import CardLearningProgress from '../../components/CardLearningProgress';
+import CardTienDoHocTap from '../../components/CardTienDoHocTap';
 import images from '../../assets/images';
 import config from '../../config';
 
-function LearningProgress() {
+function TienDoHocTap() {
     window.addEventListener('load', () => {
         Aos.init({
             duration: 1000,
@@ -17,30 +17,30 @@ function LearningProgress() {
     }, []);
     return (
         <div>
-            <CardLearningProgress
+            <CardTienDoHocTap
                 data-aos="fade-left"
-                title="Theo dõi tiến độ học tập"
+                title="Theo dõi tiến độ học phần"
                 image={images.timeTable}
                 contentButton="Theo dõi"
-                to={config.routes.TrackProgress}
+                to={config.routes.TienDoHocPhan}
             />
-            <CardLearningProgress
+            <CardTienDoHocTap
                 data-aos="fade-left"
                 title="Kế hoạch thực tập tốt nghiệp"
                 image={images.intern}
                 contentButton="Sắp xếp"
                 imageLeft
-                to={config.routes.Internship}
+                to={config.routes.ThucTap}
             />
-            <CardLearningProgress
+            <CardTienDoHocTap
                 data-aos="fade-left"
                 title="Dự án khóa luận tốt nghiệp"
                 image={images.thesis}
                 contentButton="Sắp xếp"
-                to={config.routes.Thesis}
+                to={config.routes.KhoaLuan}
             />
         </div>
     );
 }
 
-export default LearningProgress;
+export default TienDoHocTap;

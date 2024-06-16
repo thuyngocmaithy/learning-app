@@ -1,10 +1,10 @@
 import classNames from 'classnames/bind';
-import styles from './InfoProjectJoin.module.scss';
+import styles from './DuAnThamGia.module.scss';
 import { Tabs } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import ChatBox from '../../components/ChatBox';
-import InfoDetailProject from '../../components/InfoDetailProject';
+import ThongTinDuAnThamGia from '../../components/ThongTinDuAnThamGia';
 import Attach from '../../components/Attach';
 import System from '../../components/System';
 import { useNavigate } from 'react-router-dom';
@@ -132,7 +132,7 @@ const ITEM_TABS = [
     {
         id: 1,
         title: 'Chi tiết',
-        children: <InfoDetailProject item={DISCRIPTION_ITEMS} thesis={true} />,
+        children: <ThongTinDuAnThamGia item={DISCRIPTION_ITEMS} thesis={true} />,
     },
     {
         id: 2,
@@ -150,7 +150,7 @@ const ITEM_TABS = [
         children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
     },
 ];
-function InfoProjectJoin({ thesis = false }) {
+function DuAnThamGia({ thesis = false }) {
     const navigate = useNavigate();
 
     const handleGoBack = () => {
@@ -158,7 +158,7 @@ function InfoProjectJoin({ thesis = false }) {
     };
 
     return (
-        <div className={cx('wrapper-InfoProjectJoin')}>
+        <div className={cx('wrapper-DuAnThamGia')}>
             <div className={cx('container-header')}>
                 <span onClick={handleGoBack} className={cx('container-icon-back')}>
                     <LeftOutlined className={cx('icon-back')} />
@@ -182,4 +182,4 @@ function InfoProjectJoin({ thesis = false }) {
     );
 }
 
-export default InfoProjectJoin;
+export default DuAnThamGia;

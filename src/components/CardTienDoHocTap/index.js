@@ -4,12 +4,12 @@ import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import Aos from 'aos';
 import 'aos/dist/aos.css';
 import { useEffect } from 'react';
-import styles from './CardLearningProgress.module.scss';
+import styles from './CardTienDoHocTap.module.scss';
 import Button from '../Button';
 
 const cx = classNames.bind(styles);
 
-function CardLearningProgress({ title, image, imageLeft = false, to, contentButton, ...props }) {
+function CardTienDoHocTap({ title, image, imageLeft = false, to, contentButton, ...props }) {
     useEffect(() => {
         Aos.init({ duration: 2000 });
         return () => Aos.refreshHard();
@@ -34,4 +34,4 @@ function CardLearningProgress({ title, image, imageLeft = false, to, contentButt
     );
 }
 
-export default CardLearningProgress;
+export default CardTienDoHocTap;

@@ -1,10 +1,10 @@
 import classNames from 'classnames/bind';
-import styles from './InfoDetailProject.module.scss';
+import styles from './ThongTinDuAnThamGia.module.scss';
 import { Descriptions, Tag } from 'antd';
 
 const cx = classNames.bind(styles);
 
-function InfoDetailProject({ item, thesis = false }) {
+function ThongTinDuAnThamGia({ item, thesis = false }) {
     return (
         <div className={cx('wrapper-info-detail')}>
             <div className={cx('container-info')}>
@@ -38,4 +38,4 @@ function InfoDetailProject({ item, thesis = false }) {
     );
 }
 
-export default InfoDetailProject;
+export default ThongTinDuAnThamGia;

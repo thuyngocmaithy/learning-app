@@ -1,16 +1,15 @@
 const routes = {
-    Home: '/',
-    AllCourse: '/AllCourse',
-    LearningProgress: '/LearningProgress',
-    Graduation: '/Graduation',
-    TrackProgress: '/LearningProgress/TrackProgress',
-    ResearchProjects: '/ResearchProjects',
-    YearSchedule: '/LearningProgress/SchoolSchedule/YearSchedule',
-    InfoProjectJoin: '/ResearchProjects/InfoProjectJoin',
-    InfoThesisJoin: '/LearningProgress/InfoThesisJoin',
-    Thesis: '/LearningProgress/Thesis',
-    Internship: '/LearningProgress/Internship',
-    DetailInternship: '/LearningProgress/Internship/:idInternship',
+    Dashboard: '/',
+    DanhSachHocPhan: '/DanhSachHocPhan',
+    TienDoHocTap: '/TienDoHocTap',
+    DiemTotNghiep: '/DiemTotNghiep',
+    TienDoHocPhan: '/TienDoHocTap/TienDoHocPhan',
+    DuAnNghienCuu: '/DuAnNghienCuu',
+    DuAnThamGia: '/DuAnNghienCuu/DuAnThamGia',
+    KhoaLuanThamGia: '/TienDoHocTap/KhoaLuan/KhoaLuanThamGia',
+    KhoaLuan: '/TienDoHocTap/KhoaLuan',
+    ThucTap: '/TienDoHocTap/ThucTap',
+    ThongTinThucTap: '/TienDoHocTap/ThucTap/:idThucTap',
 };
 
 export default routes;
