@@ -1,9 +1,8 @@
 import classNames from 'classnames/bind';
 import styles from './TrackProgress.module.scss';
-import { Number1Icon, ScheduleActiveIcon } from '../../components/Icons';
+import { ScheduleActiveIcon } from '../../components/Icons';
 import Button from '../../components/Button';
-import { Card, Flex, InputNumber, Select, Space, Table, Tag } from 'antd';
-import config from '../../config';
+import {  InputNumber, Space, Table, Tag } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 
 const cx = classNames.bind(styles);

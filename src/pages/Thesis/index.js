@@ -42,15 +42,6 @@ const listProject = [
     },
 ];
 
-const listProjectJoin = [
-    { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
-    {
-        id: '2',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        status: 'Chờ duyệt',
-    },
-];
-
 function Thesis() {
     const navigate = useNavigate();
     const [list, setList] = useState([]);

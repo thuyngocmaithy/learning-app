@@ -9,6 +9,8 @@ import TrackProgress from '../pages/TrackProgress';
 import Graduation from '../pages/Graduation';
 import InfoProjectJoin from '../pages/InfoProjectJoin';
 import Thesis from '../pages/Thesis';
+import Internship from '../pages/Internship';
+import DetailInternship from '../pages/DetailInternship';
 
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
@@ -21,6 +23,8 @@ const publicRoutes = [
     { path: config.routes.InfoProjectJoin, component: InfoProjectJoin },
     { path: config.routes.InfoThesisJoin, component: InfoProjectJoin, thesis: true },
     { path: config.routes.Thesis, component: Thesis },
+    { path: config.routes.Internship, component: Internship },
+    { path: config.routes.DetailInternship, component: DetailInternship, layout: null },
 ];
 
 //Không đăng nhập => chuyển login

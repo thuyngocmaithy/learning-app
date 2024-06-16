@@ -30,6 +30,7 @@ function LearningProgress() {
                 image={images.intern}
                 contentButton="Sắp xếp"
                 imageLeft
+                to={config.routes.Internship}
             />
             <CardLearningProgress
                 data-aos="fade-left"

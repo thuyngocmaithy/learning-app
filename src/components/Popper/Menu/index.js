@@ -10,7 +10,7 @@ import styles from './Menu.module.scss';
 
 const cx = classNames.bind(styles);
 
-const defaultFn = () => { };
+const defaultFn = () => {};
 
 function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn }) {
     const [history, setHistory] = useState([{ data: items }]);
@@ -59,7 +59,7 @@ function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn 
         <Tippy
             interactive
             delay={[0, 700]} //Khi show không bị delay
-            // Khi ẩn bị delay 500ms'
+            // Khi ẩn bị delay 700ms
             offset={[12, 8]}
             placement="bottom-end"
             hideOnClick={hideOnClick}

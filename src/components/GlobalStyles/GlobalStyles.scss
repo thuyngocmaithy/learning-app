@@ -4,11 +4,17 @@
 
 :root {
     --primary: #3465D4;
+    --blue-900: rgb(5, 63, 121);
     --blue-100: #b6cde5;
     --black: #000;
     --white: #fff;
     --text-gray-color: #e9e9e9;
     --text-black-color: #000;
+
+    // BOX-SHADOW
+    --box-shadow-1: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
+    --box-shadow-2: rgba(0, 0, 0, 0.12) 0px 2px 12px;
+    --box-shadow-button: 0 2px 8px rgb(0 0 0 / 6%);
 
     --font-family: 'Noto Sans', sans-serif;
     /* Default layout */
@@ -118,6 +124,7 @@ body {
         line-height: 2rem;
         white-space: normal;
         display: flex;
+        align-items: center;
     }
 
     .ant-card-small>.ant-card-body {
@@ -134,6 +141,10 @@ body {
 
     .ant-list .ant-list-item .ant-list-item-meta {
         align-items: center;
+    }
+
+    .wrapper-detailInternship .ant-list .ant-list-item .ant-list-item-meta {
+        align-items: normal;
     }
 
     .wrapper-graduation {
@@ -168,6 +179,9 @@ body {
         }
     }
 
-
-
+    // 
+    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal.ant-divider-with-text::before,
+    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal.ant-divider-with-text::after {
+        border-block-start-color: var(--blue-100);
+    }
 }

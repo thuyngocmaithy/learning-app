@@ -1,0 +1,61 @@
+.wrapper {
+    margin: 0px 15px 0 15px;
+}
+
+.info {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.title {
+    margin-left: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+}
+
+// list thesis
+.filter-icon {
+    g {
+        fill: var(--primary);
+    }
+}
+
+.container-filter {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.stt {
+    color: var(--primary);
+}
+
+.name {
+    font-weight: 400;
+    font-size: 17px;
+}
+
+.description-icon {
+    margin-right: 10px;
+}
+
+
+
+.container-count-register {
+    font-style: italic;
+    display: flex;
+}
+
+.card-project-join {
+    margin-bottom: 30px;
+}
+
+.tag-status {
+    margin-left: 10px;
+}
