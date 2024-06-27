@@ -1,0 +1,75 @@
+// login.module.scss
+.loginContainer {
+    display: flex;
+    background-color: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 50px auto;
+}
+
+.welcomeSection {
+    background-color: #8e44ad;
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+.welcomeTitle {
+    color: white !important;
+    margin-bottom: 20px !important;
+}
+
+.welcomeText {
+    margin-bottom: 30px;
+}
+
+.registerButton {
+    background-color: transparent !important;
+    border-color: white !important;
+    color: white !important;
+    width: 150px;
+    height: 40px;
+    font-weight: bold;
+}
+
+.formSection {
+    padding: 40px;
+    flex: 1;
+}
+
+.signInTitle {
+    margin-bottom: 30px !important;
+    color: #8e44ad !important;
+}
+
+.loginForm {
+    max-width: 300px;
+}
+
+.loginButton {
+    width: 100%;
+    background-color: #8e44ad !important;
+    border-color: #8e44ad !important;
+}
+
+.forgotPassword {
+    float: right;
+    color: #8e44ad;
+}
+
+:global {
+    .ant-input-affix-wrapper {
+        border-radius: 4px;
+    }
+
+    .ant-btn {
+        border-radius: 4px;
+    }
+}

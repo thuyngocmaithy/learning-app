@@ -9,9 +9,10 @@ import TrackProgress from '../pages/TrackProgress';
 import Graduation from '../pages/Graduation';
 import InfoProjectJoin from '../pages/InfoProjectJoin';
 import Thesis from '../pages/Thesis';
-
+import LoginForm from '../pages/Login';
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
+    { path: config.routes.Login , component : LoginForm , layout : null} ,
     { path: config.routes.Home, component: Home },
     { path: config.routes.AllCourse, component: AllCourse },
     { path: config.routes.LearningProgress, component: LearningProgress },

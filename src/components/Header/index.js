@@ -20,7 +20,7 @@ function Header() {
         {
             icon: <FontAwesomeIcon icon={faArrowRightFromBracket} />,
             title: 'Log out',
-            to: '/logout',
+            to: '/Login',
             separate: true,
         },
     ];

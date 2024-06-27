@@ -9,6 +9,7 @@ const routes = {
     InfoProjectJoin: '/ResearchProjects/InfoProjectJoin',
     InfoThesisJoin: '/LearningProgress/InfoThesisJoin',
     Thesis: '/LearningProgress/Thesis',
+    Login :  '/Login',
 };
 
 export default routes;
