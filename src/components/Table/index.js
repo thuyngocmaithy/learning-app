@@ -1,10 +1,5 @@
 /* eslint-disable array-callback-return */
 import { useState, useEffect, Fragment } from 'react';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -93,14 +88,9 @@ const columns = [
     },
 ];
 
-function ColumnGroupingTable() {
+function ColumnGroupingTable({ department = false }) {
     const [listCourse, setListCourse] = useState([]);
-    const [listCode, setListCode] = useState([]);
-    const [status, setStatus] = useState('');
-
-    const handleChange = (event) => {
-        setStatus(event.target.value);
-    };
+    // const [listCode, setListCode] = useState([]);
 
     useEffect(() => {
         console.log('re-render2');
@@ -119,20 +109,20 @@ function ColumnGroupingTable() {
         return () => (mounted = false);
     }, []);
 
-    useEffect(() => {
-        console.log('re-render1');
-        listCourse.map((list) => {
-            list.data.map((data1) => {
-                data1.data.map((data2) => {
-                    data2.code && setListCode((prev) => [...prev, data2.code]);
-                    data2.data &&
-                        data2.data.map((data3) => {
-                            data3.code && setListCode((prev) => [...prev, data3.code]);
-                        });
-                });
-            });
-        });
-    }, [listCourse]);
+    // useEffect(() => {
+    //     // console.log('re-render1');
+    //     listCourse.map((list) => {
+    //         list.data.map((data1) => {
+    //             // data1.data.map((data2) => {
+    //             //     data2.code && setListCode((prev) => [...prev, data2.code]);
+    //             //     data2.data &&
+    //             //         data2.data.map((data3) => {
+    //             //             data3.code && setListCode((prev) => [...prev, data3.code]);
+    //             //         });
+    //             // });
+    //         });
+    //     });
+    // }, [listCourse]);
 
     // useEffect(() => {
     //     listCode.map(code=>{
@@ -142,22 +132,7 @@ function ColumnGroupingTable() {
 
     return (
         <div className={cx('container-table')}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id="demo-simple-select-filled-label">Trạng thái</InputLabel>
-                    <Select
-                        labelId="demo-simple-select-filled-label"
-                        id="demo-simple-select-filled"
-                        value={status}
-                        onChange={handleChange}
-                    >
-                        <MenuItem value="">
-                            <em>None</em>
-                        </MenuItem>
-                        <MenuItem value="done">Đã học</MenuItem>
-                        <MenuItem value="not">Chưa học</MenuItem>
-                    </Select>
-                </FormControl>
+            <TableContainer sx={{ maxHeight: 490 }}>
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
@@ -235,8 +210,16 @@ function ColumnGroupingTable() {
                                                                                     data3[column.id]
                                                                                 ) : (
                                                                                     <input
-                                                                                        className={cx('radio-period')}
-                                                                                        type="radio"
+                                                                                        className={
+                                                                                            department
+                                                                                                ? cx('checkbox-period')
+                                                                                                : cx('radio-period')
+                                                                                        }
+                                                                                        type={
+                                                                                            department
+                                                                                                ? 'checkbox'
+                                                                                                : 'radio'
+                                                                                        }
                                                                                         value={
                                                                                             index + '-' + column.label
                                                                                         }
@@ -271,8 +254,12 @@ function ColumnGroupingTable() {
                                                                     data2[column.id]
                                                                 ) : (
                                                                     <input
-                                                                        className={cx('radio-period')}
-                                                                        type="radio"
+                                                                        className={
+                                                                            department
+                                                                                ? cx('checkbox-period')
+                                                                                : cx('radio-period')
+                                                                        }
+                                                                        type={department ? 'checkbox' : 'radio'}
                                                                         value={index + '-' + column.label}
                                                                         name={data2['code']}
                                                                     />

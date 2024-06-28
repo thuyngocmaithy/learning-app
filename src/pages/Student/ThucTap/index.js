@@ -1,10 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './ThucTap.module.scss';
 import { Checkbox, Col, List, Row, Skeleton, Tabs, Tag } from 'antd';
-import { ScheduleActiveIcon, FilterIcon, LocationIcon, SalaryIcon } from '../../components/Icons';
+import { ScheduleActiveIcon, FilterIcon, LocationIcon, SalaryIcon } from '../../../components/Icons';
 import { useEffect, useState } from 'react';
-import Button from '../../components/Button';
-import Filter from '../../components/Popper/Filter';
+import Button from '../../../components/Button';
+import Filter from '../../../components/Popper/Filter';
 
 const cx = classNames.bind(styles);
 

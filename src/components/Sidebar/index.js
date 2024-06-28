@@ -39,7 +39,15 @@ const items = [
     },
 ];
 
-function Sidebar() {
+const itemsDepartment = [
+    {
+        key: '/Department/MoHocPhan',
+        label: <Link to={config.routes.MoHocPhan}>Mở học phần</Link>,
+        icon: <OrderedListOutlined />,
+    },
+];
+
+function Sidebar({ department = false }) {
     const [collapsed, setCollapsed] = useState(false);
 
     let location = useLocation();
@@ -53,7 +61,11 @@ function Sidebar() {
     useEffect(() => {
         if (location) {
             if (current !== location.pathname) {
-                setCurrent('/' + location.pathname.split('/')[1]);
+                if (department) {
+                    setCurrent('/Department/' + location.pathname.split('/')[2]);
+                } else {
+                    setCurrent('/' + location.pathname.split('/')[1]);
+                }
             }
         }
     }, [location, current]);
@@ -74,7 +86,13 @@ function Sidebar() {
                     alt="SGU"
                 />
             </div>
-            <Menu theme="dark" mode="inline" onClick={handleClick} selectedKeys={[current]} items={items} />
+            <Menu
+                theme="dark"
+                mode="inline"
+                onClick={handleClick}
+                selectedKeys={[current]}
+                items={department ? itemsDepartment : items}
+            />
         </Sider>
     );
 }

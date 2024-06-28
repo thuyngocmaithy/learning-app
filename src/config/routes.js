@@ -1,4 +1,5 @@
 const routes = {
+    // STUDENT
     Dashboard: '/',
     DanhSachHocPhan: '/DanhSachHocPhan',
     TienDoHocTap: '/TienDoHocTap',
@@ -11,6 +12,9 @@ const routes = {
     ThucTap: '/TienDoHocTap/ThucTap',
     ThongTinThucTap: '/TienDoHocTap/ThucTap/:idThucTap',
     ChuanDauRa: '/TienDoHocTap/ChuanDauRa',
+
+    // DEPARTMENT
+    MoHocPhan: '/Department/MoHocPhan',
 };
 
 export default routes;

@@ -3,10 +3,10 @@ import { faChartLine, faBook, faGraduationCap } from '@fortawesome/free-solid-sv
 import classNames from 'classnames/bind';
 import { useState } from 'react';
 import Chart from 'react-apexcharts';
-import Card from '../../components/Card';
+import Card from '../../../components/Card';
 import styles from './Dashboard.module.scss';
 import { HomeOutlined } from '@ant-design/icons';
-import { HomeActiveIcon } from '../../components/Icons';
+import { HomeActiveIcon } from '../../../components/Icons';
 
 const cx = classNames.bind(styles);
 

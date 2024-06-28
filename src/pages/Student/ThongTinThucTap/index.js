@@ -1,9 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinThucTap.module.scss';
-import images from '../../assets/images';
+import images from '../../../assets/images';
 import { Col, Divider, List, Row, Skeleton, Tag } from 'antd';
-import Button from '../../components/Button';
-import { LocationIcon, SalaryIcon } from '../../components/Icons';
+import Button from '../../../components/Button';
+import { LocationIcon, SalaryIcon } from '../../../components/Icons';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);

@@ -1,7 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
-import TextField from '@mui/material/TextField';
-import { GraduateActiveIcon } from '../../components/Icons';
+import { GraduateActiveIcon } from '../../../components/Icons';
 import { InputNumber } from 'antd';
 
 const cx = classNames.bind(styles);

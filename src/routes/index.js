@@ -1,20 +1,23 @@
 import config from '../config';
 
 // Pages
-import Dashboard from '../pages/Dashboard';
-import DanhSachHocPhan from '../pages/DanhSachHocPhan';
-import TienDoHocTap from '../pages/TienDoHocTap';
-import DuAnNghienCuu from '../pages/DuAnNghienCuu';
-import TienDoHocPhan from '../pages/TienDoHocPhan';
-import DiemTotNghiep from '../pages/DiemTotNghiep';
-import DuAnThamGia from '../pages/DuAnThamGia';
-import KhoaLuan from '../pages/KhoaLuan';
-import ThucTap from '../pages/ThucTap';
-import ThongTinThucTap from '../pages/ThongTinThucTap';
-import ChuanDauRa from '../pages/ChuanDauRa';
+import Dashboard from '../pages/Student/Dashboard';
+import DanhSachHocPhan from '../pages/Student/DanhSachHocPhan';
+import TienDoHocTap from '../pages/Student/TienDoHocTap';
+import DuAnNghienCuu from '../pages/Student/DuAnNghienCuu';
+import TienDoHocPhan from '../pages/Student/TienDoHocPhan';
+import DiemTotNghiep from '../pages/Student/DiemTotNghiep';
+import DuAnThamGia from '../pages/Student/DuAnThamGia';
+import KhoaLuan from '../pages/Student/KhoaLuan';
+import ThucTap from '../pages/Student/ThucTap';
+import ThongTinThucTap from '../pages/Student/ThongTinThucTap';
+import ChuanDauRa from '../pages/Student/ChuanDauRa';
+import MoHocPhan from '../pages/Department/MoHocPhan';
+import { DepartmentLayout } from '../layouts';
 
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
+    // STUDENT
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },
     { path: config.routes.TienDoHocTap, component: TienDoHocTap },
@@ -27,6 +30,9 @@ const publicRoutes = [
     { path: config.routes.ThucTap, component: ThucTap },
     { path: config.routes.ThongTinThucTap, component: ThongTinThucTap, layout: null },
     { path: config.routes.ChuanDauRa, component: ChuanDauRa },
+
+    // DEPARTMENT
+    { path: config.routes.MoHocPhan, component: MoHocPhan, layout: DepartmentLayout },
 ];
 
 //Không đăng nhập => chuyển login

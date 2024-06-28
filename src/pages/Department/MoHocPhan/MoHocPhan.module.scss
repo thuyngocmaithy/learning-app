@@ -1,0 +1,113 @@
+.mohocphan_wrapper {
+    margin: 0px 15px 0 15px;
+}
+
+.info {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.title {
+    margin-left: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+}
+
+.container-toolbar {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.container-item-hocky {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    p {
+        margin-left: 20px;
+    }
+
+    .detail-item-hocky {
+        margin-right: 20px;
+    }
+}
+
+.container-managed {
+    display: flex;
+
+
+    .container-sapxep-hocphan {
+        width: 60%;
+        max-height: 650px;
+        margin: 20px 30px;
+        border-radius: 16px;
+        overflow-y: scroll;
+    }
+
+    .container-action {
+        width: 40%;
+        max-height: 650px;
+        margin: 20px 30px;
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container-add {
+
+            .form-input {
+                padding: 5px 10px 25px 10px;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+            }
+
+            button {
+                display: flex;
+                margin: 0 auto;
+            }
+
+        }
+
+        .container-list {
+            margin-top: 50px;
+
+            .btnDelete {
+                margin-left: 5px;
+
+            }
+        }
+    }
+}
+
+// CHI TIẾT MỞ HỌC PHẦN
+.detail-mohocphan-container-toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+
+    .container-title {
+        display: flex;
+    }
+}
+
+.container-icon-back {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.icon-back svg {
+    width: 2rem;
+    height: 2rem;
+}

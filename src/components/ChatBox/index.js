@@ -1,12 +1,4 @@
-import React, { useState } from 'react';
-import {
-    MinChatUiProvider,
-    MainContainer,
-    MessageInput,
-    MessageContainer,
-    MessageList,
-    MessageHeader,
-} from '@minchat/react-chat-ui';
+import { MinChatUiProvider, MainContainer, MessageInput, MessageContainer, MessageList } from '@minchat/react-chat-ui';
 
 function ChatBox({ height = '100vh' }) {
     return (
@@ -21,55 +13,6 @@ function ChatBox({ height = '100vh' }) {
                                 user: {
                                     id: 'mark',
                                     name: 'Markus',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
-                                },
-                            },
-                            {
-                                text: 'Hello',
-                                user: {
-                                    id: 'nguyenvana',
-                                    name: 'Nguyễn Văn A',
                                 },
                             },
                             {

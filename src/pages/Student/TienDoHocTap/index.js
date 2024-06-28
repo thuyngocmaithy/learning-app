@@ -1,6 +1,6 @@
-import CardTienDoHocTap from '../../components/CardTienDoHocTap';
-import images from '../../assets/images';
-import config from '../../config';
+import CardTienDoHocTap from '../../../components/CardTienDoHocTap';
+import images from '../../../assets/images';
+import config from '../../../config';
 
 function TienDoHocTap() {
     return (

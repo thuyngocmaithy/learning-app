@@ -5,6 +5,11 @@
 .info {
     display: flex;
     margin-bottom: 30px;
+    justify-content: space-between;
+
+    .container-title {
+        display: flex;
+    }
 }
 
 .title {
@@ -18,19 +23,4 @@
     display: flex;
     width: 30px;
     color: var(--primary);
-}
-
-.select-time {
-    margin-bottom: 30px;
-}
-
-.select-time,
-.select-time div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.select-time>div>div>div {
-    margin: 0 10px;
 }
