@@ -21,6 +21,7 @@ const publicRoutes = [
     // SHARED
     { path: config.routes.Login, component: LoginForm, layout: null },
     // STUDENT
+    { path: config.routes.Login , component : LoginForm , layout : null} ,
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },
     { path: config.routes.TienDoHocTap, component: TienDoHocTap },
