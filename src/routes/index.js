@@ -14,9 +14,12 @@ import ThongTinThucTap from '../pages/Student/ThongTinThucTap';
 import ChuanDauRa from '../pages/Student/ChuanDauRa';
 import MoHocPhan from '../pages/Department/MoHocPhan';
 import { DepartmentLayout } from '../layouts';
+import LoginForm from '../pages/Shared/Login';
 
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
+    // SHARED
+    { path: config.routes.Login, component: LoginForm, layout: null },
     // STUDENT
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },

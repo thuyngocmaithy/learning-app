@@ -12,6 +12,7 @@ const routes = {
     ThucTap: '/TienDoHocTap/ThucTap',
     ThongTinThucTap: '/TienDoHocTap/ThucTap/:idThucTap',
     ChuanDauRa: '/TienDoHocTap/ChuanDauRa',
+    Login: '/Login',
 
     // DEPARTMENT
     MoHocPhan: '/Department/MoHocPhan',
