@@ -4,11 +4,21 @@
 
 :root {
     --primary: #3465D4;
+    --primary-pastel: #6ba6e9;
+    --blue-900: rgb(5, 63, 121);
     --blue-100: #b6cde5;
+    --blue-50: rgb(217, 235, 251);
     --black: #000;
     --white: #fff;
     --text-gray-color: #e9e9e9;
+    --text-gray-dark-color: #778aa2;
     --text-black-color: #000;
+
+    // BOX-SHADOW
+    --box-shadow-1: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
+    --box-shadow-2: rgba(0, 0, 0, 0.12) 0px 2px 12px;
+    --box-shadow-hover-button: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    --box-shadow-button: 0 2px 8px rgb(0 0 0 / 6%);
 
     --font-family: 'Noto Sans', sans-serif;
     /* Default layout */
@@ -118,6 +128,7 @@ body {
         line-height: 2rem;
         white-space: normal;
         display: flex;
+        align-items: center;
     }
 
     .ant-card-small>.ant-card-body {
@@ -136,7 +147,11 @@ body {
         align-items: center;
     }
 
-    .wrapper-graduation {
+    .wrapper-thontinthuctap .ant-list .ant-list-item .ant-list-item-meta {
+        align-items: normal;
+    }
+
+    .wrapper-diemtotnghiep {
         .ant-input-number-input {
             padding: 8px 12px;
             font-size: 1.5rem;
@@ -154,7 +169,7 @@ body {
 
     }
 
-    .wrapper-InfoProjectJoin {
+    .wrapper-DuAnThamGia {
         .ant-list-item-meta-title {
             margin: 0;
         }
@@ -168,6 +183,88 @@ body {
         }
     }
 
+    //Devider 
+    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal.ant-divider-with-text::before,
+    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal.ant-divider-with-text::after {
+        border-block-start-color: var(--blue-100);
+    }
 
+    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal {
+        background-color: var(--blue-50);
+    }
+
+    //NOTIFICATION
+    .wrapper-notification {
+        width: 400px;
+        padding-bottom: 8px;
+
+        .ant-divider-horizontal {
+            margin: 12px 0;
+        }
+    }
+
+    //SUPPORT
+    .wrapper-support {
+        width: 400px;
+        height: 300px;
+
+        .kqCcih {
+            padding-right: 0;
+        }
+
+        .daFsOe {
+            padding-right: 0;
+        }
+
+        .hdrmPI {
+            padding-right: 0;
+        }
+    }
+
+    // NOTE
+    .dsVAmA {
+        height: 480px;
+    }
+
+    .kqCcih {
+        border-top-right-radius: 16px;
+        border-top-left-radius: 16px;
+    }
+
+    // TREE
+    .ant-tree-title {
+        font-size: 16px;
+        line-height: 4rem;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-switcher {
+        justify-content: center;
+        display: flex;
+        align-items: center;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-treenode {
+        width: 100%;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-node-content-wrapper {
+        width: 100%;
+    }
+
+    .ant-tree-list {
+        background-color: var(--blue-50);
+        border-radius: 16px;
+    }
+
+    // BUTTON
+    :where(.css-dev-only-do-not-override-17seli4).ant-btn-lg.ant-btn-icon-only {
+        margin-left: 15px;
+        background-color: #3465D4;
+    }
+
+    // TABLE    
+    .ant-table-body {
+        min-height: 250px;
+    }
 
 }

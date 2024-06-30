@@ -274,3 +274,92 @@ export const ResearchProjectsIcon = ({ width = '3rem', height = '3rem', classNam
         />
     </svg>
 );
+
+export const BellIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height={height}
+        width={width}
+        className={className}
+        version="1.1"
+        id="_x32_"
+        viewBox="0 0 512 512"
+        fill="#000000"
+    >
+        <g>
+            <path d="M193.499,459.298c5.237,30.54,31.518,52.702,62.49,52.702c30.98,0,57.269-22.162,62.506-52.702l0.32-1.86   H193.179L193.499,459.298z" />
+            <path d="M469.782,371.98c-5.126-5.128-10.349-9.464-15.402-13.661c-21.252-17.648-39.608-32.888-39.608-96.168v-50.194   c0-73.808-51.858-138.572-123.61-154.81c2.876-5.64,4.334-11.568,4.334-17.655C295.496,17.718,277.777,0,255.995,0   c-21.776,0-39.492,17.718-39.492,39.492c0,6.091,1.456,12.018,4.334,17.655c-71.755,16.238-123.61,81.002-123.61,154.81v50.194   c0,63.28-18.356,78.521-39.608,96.168c-5.052,4.196-10.276,8.533-15.402,13.661l-0.466,0.466v49.798h428.496v-49.798   L469.782,371.98z" />
+        </g>
+    </svg>
+);
+
+export const SupportIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="#000000"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 24 24"
+    >
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
+    </svg>
+);
+export const UserIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 24 24"
+        fill="#000000"
+    >
+        <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" />
+        <path d="M12.0002 14.5C6.99016 14.5 2.91016 17.86 2.91016 22C2.91016 22.28 3.13016 22.5 3.41016 22.5H20.5902C20.8702 22.5 21.0902 22.28 21.0902 22C21.0902 17.86 17.0102 14.5 12.0002 14.5Z" />
+    </svg>
+);
+export const FilterIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 16 16"
+        fill="none"
+    >
+        <g fill="#000000">
+            <path d="M1 3.75A.75.75 0 011.75 3h12.5a.75.75 0 010 1.5H1.75A.75.75 0 011 3.75zM3.5 7.75A.75.75 0 014.25 7h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM6.75 11a.75.75 0 000 1.5h2.5a.75.75 0 000-1.5h-2.5z" />
+        </g>
+    </svg>
+);
+export const LocationIcon = ({ width = '1rem', height = '1rem', className }) => (
+    <svg
+        version="1.0"
+        id="Layer_1"
+        xmlns="http://www.w3.org/2000/svg"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 64 64"
+        enableBackground="new 0 0 64 64"
+    >
+        <path
+            fill="rgba(0, 0, 0, 0.45)"
+            d="M32,0C18.746,0,8,10.746,8,24c0,5.219,1.711,10.008,4.555,13.93c0.051,0.094,0.059,0.199,0.117,0.289l16,24
+	C29.414,63.332,30.664,64,32,64s2.586-0.668,3.328-1.781l16-24c0.059-0.09,0.066-0.195,0.117-0.289C54.289,34.008,56,29.219,56,24
+	C56,10.746,45.254,0,32,0z M32,32c-4.418,0-8-3.582-8-8s3.582-8,8-8s8,3.582,8,8S36.418,32,32,32z"
+        />
+    </svg>
+);
+export const SalaryIcon = ({ width = '1rem', height = '1rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="rgba(0, 0, 0, 0.45)"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 24 24"
+    >
+        <path d="M21,5H3A1,1,0,0,0,2,6V18a1,1,0,0,0,1,1H21a1,1,0,0,0,1-1V6A1,1,0,0,0,21,5ZM4,17V14a3,3,0,0,1,3,3Zm0-7V7H7A3,3,0,0,1,4,10Zm8,4.5A2.5,2.5,0,1,1,14.5,12,2.5,2.5,0,0,1,12,14.5ZM20,17H17a3,3,0,0,1,3-3Zm0-7a3,3,0,0,1-3-3h3Z" />
+    </svg>
+);

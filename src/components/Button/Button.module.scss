@@ -31,7 +31,7 @@
 
 .icon {
     display: flex;
-    width: 24px;
+    width: 20px;
     text-align: center;
     justify-content: center;
 }
@@ -40,7 +40,7 @@
 
 .rounded {
     border-radius: 999px; //Để số lớn => tự động bo tròn
-    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+    box-shadow: var(--box-shadow-button);
     border-color: rgba(22, 24, 35, 0.12);
 
     &:hover {
@@ -87,11 +87,13 @@
     min-width: 60px;
     padding: 4px 10px;
     font-size: 12px;
+    max-height: 25.5px;
 }
 
 .small {
     min-width: 88px;
-    padding: 6px 16px;
+    padding: 4px 16px;
+    font-size: 14px;
 }
 
 .large {

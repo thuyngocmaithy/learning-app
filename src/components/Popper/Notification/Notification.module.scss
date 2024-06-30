@@ -1,0 +1,48 @@
+// POPPER
+
+.container-popper {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+// FILTER 
+.container-title {
+    display: flex;
+    align-items: center;
+
+    h4 {
+        color: var(--text-gray-dark-color);
+    }
+}
+
+
+
+.option {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+
+
+}
+
+// ITEM
+.wrapper-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .container-info {
+        margin-right: 20px;
+
+        h4 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-style: italic;
+            color: var(--text-gray-dark-color);
+            font-size: 13px;
+        }
+    }
+
+}

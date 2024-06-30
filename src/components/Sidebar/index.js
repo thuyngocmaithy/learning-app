@@ -14,46 +14,58 @@ const cx = classNames.bind(styles);
 const items = [
     {
         key: '/',
-        label: <Link to={config.routes.Home}>Dashboard</Link>,
+        label: <Link to={config.routes.Dashboard}>Dashboard</Link>,
         icon: <HomeOutlined />,
     },
     {
-        key: '/AllCourse',
-        label: <Link to={config.routes.AllCourse}>Danh sách học phần</Link>,
+        key: '/DanhSachHocPhan',
+        label: <Link to={config.routes.DanhSachHocPhan}>Danh sách học phần</Link>,
         icon: <OrderedListOutlined />,
     },
     {
-        key: '/LearningProgress',
-        label: <Link to={config.routes.LearningProgress}>Tiến độ học tập</Link>,
+        key: '/TienDoHocTap',
+        label: <Link to={config.routes.TienDoHocTap}>Tiến độ học tập</Link>,
         icon: <ScheduleOutlined />,
     },
     {
-        key: '/ResearchProjects',
-        label: <Link to={config.routes.ResearchProjects}>Dự án nghiên cứu</Link>,
+        key: '/DuAnNghienCuu',
+        label: <Link to={config.routes.DuAnNghienCuu}>Dự án nghiên cứu</Link>,
         icon: <FormOutlined />,
     },
     {
-        key: '/Graduation',
-        label: <Link to={config.routes.Graduation}>Điểm tốt nghiệp</Link>,
+        key: '/DiemTotNghiep',
+        label: <Link to={config.routes.DiemTotNghiep}>Điểm tốt nghiệp</Link>,
         icon: <GraduateIcon />,
     },
 ];
 
-function Sidebar() {
+const itemsDepartment = [
+    {
+        key: '/Department/MoHocPhan',
+        label: <Link to={config.routes.MoHocPhan}>Mở học phần</Link>,
+        icon: <OrderedListOutlined />,
+    },
+];
+
+function Sidebar({ department = false }) {
     const [collapsed, setCollapsed] = useState(false);
 
     let location = useLocation();
     const [current, setCurrent] = useState(
         // sử dụng location.pathname.split('/')[1] để lấy đường dẫn đầu tiên
         // => truy cập đường dẫn con vẫn active được menuitem
-        // ví dụ: /learningprogress/schoolschedule vẫn active được /learningprogress
+        // ví dụ: /TienDoHocTap/schoolschedule vẫn active được /TienDoHocTap
         location.pathname === '/' || location.pathname === '' ? '/' : '/' + location.pathname.split('/')[1],
     );
 
     useEffect(() => {
         if (location) {
             if (current !== location.pathname) {
-                setCurrent('/' + location.pathname.split('/')[1]);
+                if (department) {
+                    setCurrent('/Department/' + location.pathname.split('/')[2]);
+                } else {
+                    setCurrent('/' + location.pathname.split('/')[1]);
+                }
             }
         }
     }, [location, current]);
@@ -74,7 +86,13 @@ function Sidebar() {
                     alt="SGU"
                 />
             </div>
-            <Menu theme="dark" mode="inline" onClick={handleClick} selectedKeys={[current]} items={items} />
+            <Menu
+                theme="dark"
+                mode="inline"
+                onClick={handleClick}
+                selectedKeys={[current]}
+                items={department ? itemsDepartment : items}
+            />
         </Sider>
     );
 }

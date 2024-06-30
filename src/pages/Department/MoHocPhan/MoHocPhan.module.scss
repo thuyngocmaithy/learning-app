@@ -1,0 +1,93 @@
+.mohocphan-wrapper {
+    margin: 0px 15px 0 15px;
+}
+
+.conatainer-header {
+    display: flex;
+    justify-content: space-between;
+
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+
+}
+
+
+
+.container-manage-NH {
+    margin-top: 50px;
+    display: flex;
+
+
+    .container-table {
+        width: 65%;
+        height: 340px;
+
+        .btnArrange {
+            margin-left: 5px;
+
+        }
+    }
+
+    .container-add {
+        width: 35%;
+        margin-left: 30px;
+        text-align: center;
+        border: 2.5px solid var(--blue-100);
+        border-radius: 10px;
+        box-shadow: var(--box-shadow-1);
+        align-content: space-around;
+
+
+        .form-input {
+            padding: 5px 10px 25px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 25px;
+        }
+
+        button {
+            display: flex;
+            margin: 0 auto;
+        }
+
+    }
+}
+
+// CHI TIẾT MỞ HỌC PHẦN
+.detail-mohocphan-container-toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+
+    .container-title {
+        display: flex;
+    }
+}
+
+.container-icon-back {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.icon-back svg {
+    width: 2rem;
+    height: 2rem;
+}

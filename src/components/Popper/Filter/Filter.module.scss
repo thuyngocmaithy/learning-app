@@ -1,0 +1,38 @@
+// POPPER
+.wrapper {
+    width: 300px;
+    padding-bottom: 8px;
+}
+
+.container-popper {
+    padding: 20px;
+}
+
+.body {
+    overflow-y: auto;
+}
+
+// FILTER 
+.container-title {
+    display: flex;
+    align-items: center;
+
+    h4 {
+        margin-left: 20px;
+    }
+}
+
+.filter-icon {
+    width: 20px;
+}
+
+.option {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 25px;
+
+
+    >button {
+        margin-left: 10px;
+    }
+}

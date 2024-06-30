@@ -4,7 +4,8 @@ const images = {
     timeTable: require('../images/timetable.png'),
     intern: require('../images/intern.png'),
     thesis: require('../images/thesis.png'),
-    sgu : require('../images/sgu.jpg')
+    chuandaura: require('../images/chuandaura.png'),
+    background_detail_internship: require('../images/background-DetailInternship.png'),
 };
 
 export default images;

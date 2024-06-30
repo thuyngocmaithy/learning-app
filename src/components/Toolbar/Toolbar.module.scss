@@ -1,0 +1,18 @@
+.wrapper {
+    padding: 9px 12px;
+    font-size: 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    // border: 2px solid var(--primary);
+    color: var(--blue-900);
+    background-color: #a5bbf3;
+
+    +.wrapper {
+        margin-left: 20px;
+    }
+
+    &:hover {
+        background-color: rgb(180, 193, 245);
+        box-shadow: var(--box-shadow-hover-button);
+    }
+}
