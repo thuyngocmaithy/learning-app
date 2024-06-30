@@ -4,6 +4,7 @@
 
 :root {
     --primary: #3465D4;
+    --primary-pastel: #6ba6e9;
     --blue-900: rgb(5, 63, 121);
     --blue-100: #b6cde5;
     --blue-50: rgb(217, 235, 251);
@@ -16,6 +17,7 @@
     // BOX-SHADOW
     --box-shadow-1: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
     --box-shadow-2: rgba(0, 0, 0, 0.12) 0px 2px 12px;
+    --box-shadow-hover-button: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     --box-shadow-button: 0 2px 8px rgb(0 0 0 / 6%);
 
     --font-family: 'Noto Sans', sans-serif;
@@ -254,5 +256,15 @@ body {
         border-radius: 16px;
     }
 
+    // BUTTON
+    :where(.css-dev-only-do-not-override-17seli4).ant-btn-lg.ant-btn-icon-only {
+        margin-left: 15px;
+        background-color: #3465D4;
+    }
+
+    // TABLE    
+    .ant-table-body {
+        min-height: 250px;
+    }
 
 }

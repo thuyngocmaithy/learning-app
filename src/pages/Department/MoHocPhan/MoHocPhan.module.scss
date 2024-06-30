@@ -1,91 +1,71 @@
-.mohocphan_wrapper {
+.mohocphan-wrapper {
     margin: 0px 15px 0 15px;
 }
 
-.info {
-    display: flex;
-    margin-bottom: 30px;
-}
-
-.title {
-    margin-left: 15px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-}
-
-.icon {
-    display: flex;
-    width: 30px;
-    color: var(--primary);
-}
-
-.container-toolbar {
-    margin-bottom: 30px;
+.conatainer-header {
     display: flex;
     justify-content: space-between;
+
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+
 }
 
-.container-item-hocky {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 
-    p {
-        margin-left: 20px;
-    }
 
-    .detail-item-hocky {
-        margin-right: 20px;
-    }
-}
-
-.container-managed {
+.container-manage-NH {
+    margin-top: 50px;
     display: flex;
 
 
-    .container-sapxep-hocphan {
-        width: 60%;
-        max-height: 650px;
-        margin: 20px 30px;
-        border-radius: 16px;
-        overflow-y: scroll;
+    .container-table {
+        width: 65%;
+        height: 340px;
+
+        .btnArrange {
+            margin-left: 5px;
+
+        }
     }
 
-    .container-action {
-        width: 40%;
-        max-height: 650px;
-        margin: 20px 30px;
+    .container-add {
+        width: 35%;
+        margin-left: 30px;
+        text-align: center;
+        border: 2.5px solid var(--blue-100);
+        border-radius: 10px;
+        box-shadow: var(--box-shadow-1);
+        align-content: space-around;
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
+
+        .form-input {
+            padding: 5px 10px 25px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 25px;
         }
 
-        .container-add {
-
-            .form-input {
-                padding: 5px 10px 25px 10px;
-                display: flex;
-                align-items: center;
-                justify-content: space-around;
-            }
-
-            button {
-                display: flex;
-                margin: 0 auto;
-            }
-
+        button {
+            display: flex;
+            margin: 0 auto;
         }
 
-        .container-list {
-            margin-top: 50px;
-
-            .btnDelete {
-                margin-left: 5px;
-
-            }
-        }
     }
 }
 
