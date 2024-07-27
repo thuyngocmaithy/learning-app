@@ -1,8 +1,8 @@
 import classNames from 'classnames/bind';
 // import Content from '../../components/Content';
 
-import Header from '../../components/Header';
-import Sidebar from '../../components/Sidebar';
+import Header from '../../components/Core/Header';
+import Sidebar from '../../components/Core/Sidebar';
 import styles from './DepartmentLayout.module.scss';
 import { Layout, theme } from 'antd';
 import { Content } from 'antd/es/layout/layout';
@@ -36,9 +36,10 @@ function DepartmentLayout({ children }) {
                         style={{
                             padding: 24,
                             minHeight: 360,
-                            height: '97%',
+                            height: 'auto',
                             background: colorBgContainer,
                             borderRadius: borderRadiusLG,
+                            marginBottom: '30px',
                         }}
                     >
                         <Content style={{ marginBottom: '20px' }}>{children}</Content>

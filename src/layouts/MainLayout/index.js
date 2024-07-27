@@ -1,8 +1,8 @@
 import classNames from 'classnames/bind';
 // import Content from '../../components/Content';
 
-import Header from '../../components/Header';
-import Sidebar from '../../components/Sidebar';
+import Header from '../../components/Core/Header';
+import Sidebar from '../../components/Core/Sidebar';
 import styles from './MainLayout.module.scss';
 import { Layout, theme } from 'antd';
 import { Content } from 'antd/es/layout/layout';

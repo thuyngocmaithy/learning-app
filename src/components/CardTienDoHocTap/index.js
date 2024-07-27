@@ -2,7 +2,7 @@ import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import styles from './CardTienDoHocTap.module.scss';
-import Button from '../Button';
+import Button from '../Core/Button';
 
 const cx = classNames.bind(styles);
 

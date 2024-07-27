@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './TienDoHocPhan.module.scss';
-import { ScheduleActiveIcon } from '../../../components/Icons';
-import Button from '../../../components/Button';
+import { ScheduleActiveIcon } from '../../../assets/icons';
+import Button from '../../../components/Core/Button';
 import { InputNumber, Space, Table, Tag } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 

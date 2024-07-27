@@ -1,31 +1,26 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
-import { ListCourseActiveIcon } from '../../../components/Icons';
-import { Divider, InputNumber, Segmented, Space, Table, Tag, Tree, Button, Tooltip } from 'antd';
-import ButtonCustom from '../../../components/Button';
-import Search from 'antd/es/input/Search';
-import {
-    DeleteOutlined,
-    EditOutlined,
-    ExportOutlined,
-    FormOutlined,
-    ImportOutlined,
-    LeftOutlined,
-    PlusOutlined,
-} from '@ant-design/icons';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { ListCourseActiveIcon } from '../../../assets/icons';
+import { Empty, Input, InputNumber, Progress, Segmented } from 'antd';
+import ButtonCustom from '../../../components/Core/Button';
 import TableHP from '../../../components/Table';
-import Toolbar from '../../../components/Toolbar';
+import { useState } from 'react'; //
+import TableCustomAnt from '../../../components/Core/TableCustomAnt';
+import Toolbar from '../../../components/Core/Toolbar';
+import Update from '../../../components/Core/Update';
+import { showDeleteConfirm } from '../../../components/Core/Delete';
+import { Tag } from 'antd';
+import { EditOutlined, FormOutlined } from '@ant-design/icons';
+import FormItem from '../../../components/Core/FormItem';
 
-const cx = classNames.bind(styles);
+const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
-const columns = [
+const columns = (showModalUpdated, handleArrange) => [
     {
         title: 'Năm học',
         dataIndex: 'NH',
         key: 'NH',
-        width: '35%',
+        width: '30%',
         defaultSortOrder: 'descend',
         sorter: (a, b) => a.NH - b.NH,
         filters: [
@@ -47,7 +42,7 @@ const columns = [
     {
         title: 'Tiến độ',
         key: 'tags',
-        width: '25%',
+        width: '30%',
         dataIndex: 'tags',
         render: (_, { tags }) => (
             <>
@@ -76,18 +71,31 @@ const columns = [
     {
         title: 'Action',
         key: 'action',
-        render: (_) => (
+        render: (_, record) => (
             <div className={cx('action-item-nh')}>
-                <ButtonCustom leftIcon={<EditOutlined />} outline verysmall>
+                <ButtonCustom
+                    className={cx('btnEdit')}
+                    leftIcon={<EditOutlined />}
+                    outline
+                    verysmall
+                    onClick={() => showModalUpdated(record.NH)}
+                >
                     Sửa
                 </ButtonCustom>
-                <ButtonCustom className={cx('btnArrange')} leftIcon={<FormOutlined />} primary verysmall>
+                <ButtonCustom
+                    className={cx('btnArrange')}
+                    leftIcon={<FormOutlined />}
+                    primary
+                    verysmall
+                    onClick={() => handleArrange(record.NH)}
+                >
                     Sắp xếp
                 </ButtonCustom>
             </div>
         ),
     },
 ];
+
 const data = [
     {
         key: '1',
@@ -106,101 +114,117 @@ const data = [
     },
 ];
 
-function useQuery() {
-    return new URLSearchParams(useLocation().search);
-}
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    getCheckboxProps: (record) => ({
-        disabled: record.name === 'Disabled User',
-        // Column configuration not to be checked
-        name: record.name,
-    }),
-};
 function MoHocPhan() {
-    let query = useQuery();
-    let NH = query.get('NH');
-    let HK = query.get('HK');
+    const [NHUpdated, setNHUpdated] = useState(''); // Trạng thái để lưu giá trị năm học hiện tại
+    const [showModalAdd, setShowModalAdd] = useState(false); //hiển thị model add
+    const [showModalUpdated, setShowModalUpdated] = useState(false); // hiển thị model updated
 
-    const onSelect = (keys, info) => {
-        console.log('Trigger Select', keys, info);
-    };
-    const onExpand = (keys, info) => {
-        console.log('Trigger Expand', keys, info);
-    };
+    // Trạng thái để lưu giá trị năm học nhập vào
+    const [inputValueNH, setInputValueNH] = useState('');
 
-    console.log(NH);
-    console.log(HK);
-    console.log(NH == null || HK == null);
-
-    const navigate = useNavigate();
-
-    const handleGoBack = () => {
-        navigate(-1);
+    // Hàm xử lý thay đổi giá trị năm học
+    const handleInputChange = (e) => {
+        setInputValueNH(e.target.value);
     };
 
-    return NH == null || HK == null ? (
+    // Hàm xử lý khi nhấn nút Reset
+    const handleReset = () => {
+        setInputValueNH('');
+    };
+
+    // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
+    const handleCloseModal = () => {
+        if (showModalAdd) {
+            setShowModalAdd(false);
+        }
+        if (showModalUpdated) {
+            setShowModalUpdated(false);
+        }
+    };
+
+    return (
         <div className={cx('mohocphan-wrapper')}>
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
                         <ListCourseActiveIcon />
                     </span>
-
                     <h3 className={cx('title')}>Mở học phần</h3>
                 </div>
-                <div className={cx('toolbar')}>
-                    <Toolbar type="delete" />
-                    <Toolbar type="import" />
-                    <Toolbar type="export" />
+                {/* Truyền hàm setShowModalAdd vào Toolbar */}
+                <div className={cx('wrapper')}>
+                    <Toolbar type={'add'} onClick={() => setShowModalAdd(true)} />
+                    <Toolbar type={'delete'} onClick={() => showDeleteConfirm('năm học')} />
+                    <Toolbar type={'import'} />
+                    <Toolbar type={'export'} />
                 </div>
             </div>
             <div className={cx('container-manage-NH')}>
                 <div className={cx('container-table')}>
-                    <Table
-                        rowSelection={{
-                            type: 'checkbox',
-                            ...rowSelection,
-                        }}
-                        columns={columns}
-                        dataSource={data}
-                        showSorterTooltip={{
-                            target: 'sorter-icon',
-                        }}
-                        scroll={{
-                            y: 280,
-                        }}
-                    />
-                </div>
-                <div className={cx('container-add')}>
-                    <h2>Cập nhật năm học</h2>
-                    <div className={cx('form-input')}>
-                        <label>Năm học</label>
-                        <InputNumber id="outlined-number" min={2020} max={2025} defaultValue={2020} step={1} />
+                    <div className={cx('select-time')}>
+                        <h4>Năm học</h4>
+                        {/* Input hiển thị giá trị năm học hiện tại */}
+                        <Input value={inputValueNH} onChange={handleInputChange} style={{ width: '80px' }} readOnly />
+                        {/* Nút Reset để xóa giá trị năm học */}
+                        <ButtonCustom outline small onClick={handleReset}>
+                            Reset
+                        </ButtonCustom>
                     </div>
-                    <ButtonCustom primary small>
-                        Lưu
-                    </ButtonCustom>
+                    <div className={cx('arrange')}>
+                        {inputValueNH !== '' ? (
+                            <>
+                                {/* Hiển thị bảng nếu có năm học */}
+                                <TableHP department={true} />
+                                <div className={cx('footer-table')}>
+                                    <ButtonCustom primary small className={cx('btnSave')}>
+                                        Lưu
+                                    </ButtonCustom>
+                                </div>
+                            </>
+                        ) : (
+                            // Hiển thị thông báo khi không chọn năm học
+                            <Empty description="Bạn chưa chọn năm học sắp xếp" />
+                        )}
+                    </div>
                 </div>
+                {/* TABLE MANAGE NĂM HỌC */}
+                <TableCustomAnt
+                    columns={columns}
+                    data={data}
+                    showModalUpdated={(value) => {
+                        setShowModalUpdated(true);
+                        setNHUpdated(value);
+                    }}
+                    handleCustom={setInputValueNH}
+                    width={'40%'}
+                    isOutline={true}
+                />
             </div>
-        </div>
-    ) : (
-        <div className={cx('detail-mohocphan-wrapper')}>
-            <div className={cx('detail-mohocphan-container-toolbar')}>
-                <div className={cx('container-title')}>
-                    <span onClick={handleGoBack} className={cx('container-icon-back')}>
-                        <LeftOutlined className={cx('icon-back')} />
-                    </span>
-                    <h3 className={cx('title')}>Năm học 2020 - Học kỳ 1</h3>
-                </div>
-                <ButtonCustom primary small>
-                    Lưu
-                </ButtonCustom>
-            </div>
-
-            <TableHP department={true} />
+            <Progress
+                percent={80}
+                percentposition={{
+                    align: 'start',
+                    type: 'outer',
+                }}
+                size={['100%', 15]}
+            />
+            {/* Modal để thêm năm học */}
+            <Update
+                title="năm học"
+                showModalAdd={showModalAdd}
+                showModalUpdated={showModalUpdated}
+                onClose={handleCloseModal}
+            >
+                <FormItem label={'Năm học'}>
+                    <InputNumber
+                        style={{ marginLeft: '20px', width: '100%' }}
+                        min={2020}
+                        max={2030}
+                        value={showModalUpdated ? NHUpdated : ''}
+                        step={1}
+                    />
+                </FormItem>
+            </Update>
         </div>
     );
 }

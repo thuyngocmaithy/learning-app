@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
 import { InputNumber } from 'antd';
-import { GraduateActiveIcon } from '../../../components/Icons';
+import { GraduateActiveIcon } from '../../../assets/icons';
 
 const cx = classNames.bind(styles);
 
@@ -24,6 +24,7 @@ function DiemTotNghiep() {
     // Handle input changes
     useEffect(() => {
         calculateResults();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGPA, currentCredits, totalCredits, creditsA, creditsB, creditsC, creditsD, improvedCredits]);
 
     const calculateResults = () => {

@@ -2,12 +2,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo, faMoon, faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import classNames from 'classnames/bind';
 import styles from './Header.module.scss';
-import Image from '../Image';
-import Menu from '../../components/Popper/Menu';
-import { BellIcon, SupportIcon, UserIcon } from '../../components/Icons';
-import Notification from '../Popper/Notification';
-import Button from '../Button';
-import Support from '../Popper/Support';
+import Menu from '../../Popper/Menu';
+import { BellIcon, SupportIcon, UserIcon } from '../../../assets/icons';
+import Notification from '../../Popper/Notification';
+import Support from '../../Popper/Support';
 
 const cx = classNames.bind(styles);
 

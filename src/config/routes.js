@@ -15,7 +15,11 @@ const routes = {
     Login: '/Login',
 
     // DEPARTMENT
+    Dashboard_Department: '/Department',
     MoHocPhan: '/Department/MoHocPhan',
+    KhungCTDT: '/Department/KhungCTDT',
+    DuAnNghienCuu_Department: '/Department/DuAnNghienCuu',
+    DuAnThamGia_Department: '/Department/DuAnNghienCuu/DuAnThamGia',
 };
 
 export default routes;

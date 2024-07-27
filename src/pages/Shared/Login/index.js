@@ -1,11 +1,14 @@
 import React from 'react';
-import { Form, Input, Button, Typography, Checkbox, message } from 'antd';
+import { Form, Input, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../../services/userService';
-import styles from './Login.module.scss';
+import classNames from 'classnames/bind';
+import styles from './Login.module.scss'; // Đảm bảo import CSS/SASS của bạn
+import sgu from '../../../assets/images/sgu.jpg';
+import Button from '../../../components/Core/Button';
 
-const { Title, Text } = Typography;
+const cx = classNames.bind(styles);
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -13,62 +16,66 @@ const LoginForm = () => {
     const onFinish = async (values) => {
         try {
             const response = await login(values.mssv, values.password);
-            console.log(response.status);
+            // Lưu token vào localStorage
             if (response.status === 200) {
-                message.success('Login successful');
-                localStorage.setItem('token', response.data.token);
-                navigate('/'); // Chuyển hướng về trang home
+                console.log(response.data.data.accessToken);
+                message.success('Đăng nhập thành công');
+                localStorage.setItem('token', response.data.data.accessToken);
+                navigate('/'); // Chuyển hướng về trang chủ
             } else {
-                message.error(response.message || 'Login failed');
+                message.error(response.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
-            message.error('Login failed: ' + (error.response?.data?.message || error.message));
+            message.error('Đăng nhập thất bại: ' + (error.response?.data?.message || error.message));
         }
     };
 
     return (
-        <div className={styles.loginContainer}>
-            <div className={styles.welcomeSection}>
-                <Title level={2} className={styles.welcomeTitle}>
-                    Welcome
-                </Title>
-                <Text className={styles.welcomeText}>Join Our Unique Platform, Explore a New Experience</Text>
-                <Button type="primary" className={styles.registerButton}>
-                    REGISTER
-                </Button>
-            </div>
-            <div className={styles.formSection}>
-                <Title level={2} className={styles.signInTitle}>
-                    Sign In
-                </Title>
-                <Form
-                    name="normal_login"
-                    className={styles.loginForm}
-                    initialValues={{ remember: true }}
-                    onFinish={onFinish}
-                >
-                    <Form.Item name="mssv" rules={[{ required: true, message: 'Please input your MSSV!' }]}>
-                        <Input prefix={<UserOutlined />} placeholder="MSSV" />
-                    </Form.Item>
-                    <Form.Item name="password" rules={[{ required: true, message: 'Please input your Password!' }]}>
-                        <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
-                    </Form.Item>
-                    <Form.Item>
-                        <Form.Item name="remember" valuePropName="checked" noStyle>
-                            <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
-
-                        <a className={styles.forgotPassword} href="">
-                            Forgot password?
-                        </a>
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" className={styles.loginButton}>
-                            LOGIN
-                        </Button>
-                    </Form.Item>
-                </Form>
+        <div className={cx('wrapper')}>
+            <div className={cx('container')}>
+                <div className={cx('cover')}>
+                    <img src={sgu} alt="" />
+                </div>
+                <div className={cx('forms')}>
+                    <div className={cx('form-content')}>
+                        <div className={cx('login-form')}>
+                            <div className={cx('title')}>SGU</div>
+                            <Form
+                                name="normal_login"
+                                className={cx('login-form')}
+                                initialValues={{ remember: true }}
+                                onFinish={onFinish}
+                            >
+                                <div className={cx('input-boxes')}>
+                                    <div className={cx('input-box')}>
+                                        <Form.Item
+                                            name="mssv"
+                                            rules={[{ required: true, message: 'Vui lòng nhập MSSV!' }]}
+                                        >
+                                            <Input prefix={<UserOutlined />} placeholder="Mã" />
+                                        </Form.Item>
+                                    </div>
+                                    <div className={cx('input-box')}>
+                                        <Form.Item
+                                            name="password"
+                                            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                                        >
+                                            <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
+                                        </Form.Item>
+                                    </div>
+                                    <div className={cx('text')}>
+                                        <Button verysmall text>
+                                            Quên mật khẩu?
+                                        </Button>
+                                    </div>
+                                    <div className={cx('btnLogin')}>
+                                        <Button primary>Đăng nhập</Button>
+                                    </div>
+                                </div>
+                            </Form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

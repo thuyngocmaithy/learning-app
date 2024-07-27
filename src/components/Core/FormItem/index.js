@@ -1,5 +1,9 @@
+import classNames from 'classnames/bind';
+import styles from './FormItem.module.scss';
 import { Form } from 'antd';
 import { createContext, useContext } from 'react';
+
+const cx = classNames.bind(styles);
 
 function FormItem({ name, label, children }) {
     const MyFormItemContext = createContext([]);
@@ -15,7 +19,7 @@ function FormItem({ name, label, children }) {
     };
 
     return (
-        <FormItem name={name} label={label}>
+        <FormItem name={name} label={label} className={cx('form-item')}>
             {children}
         </FormItem>
     );

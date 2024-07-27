@@ -363,3 +363,69 @@ export const SalaryIcon = ({ width = '1rem', height = '1rem', className }) => (
         <path d="M21,5H3A1,1,0,0,0,2,6V18a1,1,0,0,0,1,1H21a1,1,0,0,0,1-1V6A1,1,0,0,0,21,5ZM4,17V14a3,3,0,0,1,3,3Zm0-7V7H7A3,3,0,0,1,4,10Zm8,4.5A2.5,2.5,0,1,1,14.5,12,2.5,2.5,0,0,1,12,14.5ZM20,17H17a3,3,0,0,1,3-3Zm0-7a3,3,0,0,1-3-3h3Z" />
     </svg>
 );
+// DASHBOARD DEPARTMENT
+export const UserGroupIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+    >
+        <path
+            d="M3 19V18C3 15.7909 4.79086 14 7 14H11C13.2091 14 15 15.7909 15 18V19M15 11C16.6569 11 18 9.65685 18 8C18 6.34315 16.6569 5 15 5M21 19V18C21 15.7909 19.2091 14 17 14H16.5M12 8C12 9.65685 10.6569 11 9 11C7.34315 11 6 9.65685 6 8C6 6.34315 7.34315 5 9 5C10.6569 5 12 6.34315 12 8Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+export const CompleteIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 96 96"
+    >
+        <title />
+
+        <g>
+            <path d="M58.3945,32.1563,42.9961,50.625l-5.3906-6.4629a5.995,5.995,0,1,0-9.211,7.6758l9.9961,12a5.9914,5.9914,0,0,0,9.211.0059l20.0039-24a5.9988,5.9988,0,1,0-9.211-7.6875Z" />
+
+            <path d="M48,0A48,48,0,1,0,96,48,48.0512,48.0512,0,0,0,48,0Zm0,84A36,36,0,1,1,84,48,36.0393,36.0393,0,0,1,48,84Z" />
+        </g>
+    </svg>
+);
+
+export const CheckListIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        viewBox="0 0 48 48"
+        xmlns="http://www.w3.org/2000/svg"
+        height={height}
+        width={width}
+        className={className}
+        fill="#3465D4"
+    >
+        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+        <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+            {' '}
+            <title>list-check</title>{' '}
+            <g id="Layer_2" dataname="Layer 2">
+                {' '}
+                <g id="invisible_box" dataname="invisible box">
+                    {' '}
+                    <rect width="48" height="48" fill="none"></rect>{' '}
+                </g>{' '}
+                <g id="icons_Q2" dataname="icons Q2">
+                    {' '}
+                    <path d="M24,12h0a2,2,0,0,1,2-2H42a2,2,0,0,1,2,2h0a2,2,0,0,1-2,2H26A2,2,0,0,1,24,12Zm2,14H42a2,2,0,0,0,2-2h0a2,2,0,0,0-2-2H26a2,2,0,0,0-2,2h0A2,2,0,0,0,26,26Zm0,12H42a2,2,0,0,0,2-2h0a2,2,0,0,0-2-2H26a2,2,0,0,0-2,2h0A2,2,0,0,0,26,38ZM10,26h2a2,2,0,0,0,2-2h0a2,2,0,0,0-2-2H10a2,2,0,0,0-2,2H8A2,2,0,0,0,10,26Zm0,12h2a2,2,0,0,0,2-2h0a2,2,0,0,0-2-2H10a2,2,0,0,0-2,2H8A2,2,0,0,0,10,38Zm2.4-22.6,10-10a1.9,1.9,0,0,0,0-2.8,1.9,1.9,0,0,0-2.8,0L11,11.2,8.4,8.6a1.9,1.9,0,0,0-3,.2,2.1,2.1,0,0,0,.2,2.7l4,3.9A1.9,1.9,0,0,0,12.4,15.4Z"></path>{' '}
+                </g>{' '}
+            </g>{' '}
+        </g>
+    </svg>
+);

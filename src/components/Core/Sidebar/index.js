@@ -1,12 +1,12 @@
 import classNames from 'classnames/bind';
 import styles from './Sidebar.module.scss';
-import { GraduateIcon } from '../../components/Icons';
-import config from '../../config';
-import images from '../../assets/images';
+import { GraduateIcon } from '../../../assets/icons';
+import config from '../../../config';
+import logo from '../../../assets/images/logo.png';
 import { useEffect, useState } from 'react';
-import { Menu, theme } from 'antd';
+import { Menu } from 'antd';
 import Sider from 'antd/es/layout/Sider';
-import { FormOutlined, HomeOutlined, OrderedListOutlined, ScheduleOutlined } from '@ant-design/icons';
+import { FormOutlined, HomeOutlined, OrderedListOutlined, ScheduleOutlined, BlockOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
@@ -41,9 +41,24 @@ const items = [
 
 const itemsDepartment = [
     {
+        key: '/Department',
+        label: <Link to={config.routes.Dashboard_Department}>Dashboard</Link>,
+        icon: <HomeOutlined />,
+    },
+    {
+        key: '/Department/KhungCTDT',
+        label: <Link to={config.routes.KhungCTDT}>Khung CT Đào tạo</Link>,
+        icon: <BlockOutlined />,
+    },
+    {
         key: '/Department/MoHocPhan',
         label: <Link to={config.routes.MoHocPhan}>Mở học phần</Link>,
         icon: <OrderedListOutlined />,
+    },
+    {
+        key: '/Department/DuAnNghienCuu',
+        label: <Link to={config.routes.DuAnNghienCuu_Department}>Dự án nghiên cứu</Link>,
+        icon: <FormOutlined />,
     },
 ];
 
@@ -82,7 +97,7 @@ function Sidebar({ department = false }) {
                         'logo-collapsed': collapsed,
                         'logo-expanded': !collapsed,
                     })}
-                    src={images.logo}
+                    src={logo}
                     alt="SGU"
                 />
             </div>

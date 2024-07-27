@@ -17,6 +17,7 @@
     // BOX-SHADOW
     --box-shadow-1: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
     --box-shadow-2: rgba(0, 0, 0, 0.12) 0px 2px 12px;
+    --box-shadow-3: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     --box-shadow-hover-button: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     --box-shadow-button: 0 2px 8px rgb(0 0 0 / 6%);
 
@@ -48,6 +49,14 @@ body {
     overflow-x: hidden;
 }
 
+text,
+h2,
+h3,
+h4,
+p {
+    font-family: var(--font-family) !important;
+}
+
 /* Custom scrollbar */
 html *::-webkit-scrollbar {
     border-radius: 0;
@@ -76,7 +85,9 @@ a {
     text-decoration: none;
 }
 
-
+span {
+    font-weight: 450;
+}
 
 /* Custom tippy */
 /* body {
@@ -191,6 +202,13 @@ body {
 
     :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal {
         background-color: var(--blue-50);
+        border-radius: 4px;
+        padding: 7px 0;
+    }
+
+    .ant-divider-inner-text {
+        font-weight: 500;
+        color: var(--primary);
     }
 
     //NOTIFICATION
@@ -266,5 +284,27 @@ body {
     .ant-table-body {
         min-height: 250px;
     }
+
+    // MODAL
+    .ant-modal-header {
+        text-align: center;
+    }
+
+    .modal-add .ant-modal-body {
+        margin: 50px;
+    }
+
+    // FORM ITEM
+    :where(.css-dev-only-do-not-override-17seli4).ant-form-item .ant-form-item-label {
+        width: 150px;
+        margin-right: 10px;
+        text-align: left;
+    }
+
+    .ant-form-item-control {
+        flex: 1;
+    }
+
+
 
 }

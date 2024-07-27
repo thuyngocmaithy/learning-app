@@ -1,9 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './DuAnNghienCuu.module.scss';
 import { Card, List, Skeleton, Tabs, Tag } from 'antd';
-import { ResearchProjectsIcon } from '../../../components/Icons';
+import { ResearchProjectsIcon } from '../../../assets/icons';
 import { useEffect, useState } from 'react';
-import Button from '../../../components/Button';
+import Button from '../../../components/Core/Button';
 import config from '../../../config';
 
 const cx = classNames.bind(styles);
@@ -68,7 +68,7 @@ function DuAnNghienCuu() {
                         <List.Item
                             actions={[
                                 <Button outline verysmall>
-                                    Xem chi tiết
+                                    Chi tiết
                                 </Button>,
                                 <Button primary verysmall>
                                     Đăng ký
@@ -106,7 +106,7 @@ function DuAnNghienCuu() {
                                 title={item.name}
                                 extra={
                                     <Button primary verysmall to={config.routes.DuAnThamGia}>
-                                        Xem chi tiết
+                                        Chi tiết
                                     </Button>
                                 }
                             >

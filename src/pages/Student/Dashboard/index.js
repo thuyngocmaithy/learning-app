@@ -5,8 +5,7 @@ import { useState } from 'react';
 import Chart from 'react-apexcharts';
 import Card from '../../../components/Card';
 import styles from './Dashboard.module.scss';
-import { HomeOutlined } from '@ant-design/icons';
-import { HomeActiveIcon } from '../../../components/Icons';
+import { HomeActiveIcon } from '../../../assets/icons';
 
 const cx = classNames.bind(styles);
 

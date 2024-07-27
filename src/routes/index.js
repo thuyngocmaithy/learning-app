@@ -13,15 +13,24 @@ import ThucTap from '../pages/Student/ThucTap';
 import ThongTinThucTap from '../pages/Student/ThongTinThucTap';
 import ChuanDauRa from '../pages/Student/ChuanDauRa';
 import MoHocPhan from '../pages/Department/MoHocPhan';
-import { DepartmentLayout } from '../layouts';
+
+// DEPARTMENT
+import Dashboard_Department from '../pages/Department/Dashboard';
+import KhungCTDT from '../pages/Department/KhungCTDT';
+import DuAnNghienCuu_Department from '../pages/Department/DuAnNghienCuu';
+
+// COMMON
 import LoginForm from '../pages/Shared/Login';
+
+// LAYOUT
+import { DepartmentLayout } from '../layouts';
 
 //Không đăng nhập vẫn vào được
 const publicRoutes = [
     // SHARED
     { path: config.routes.Login, component: LoginForm, layout: null },
     // STUDENT
-    { path: config.routes.Login , component : LoginForm , layout : null} ,
+    { path: config.routes.Login, component: LoginForm, layout: null },
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },
     { path: config.routes.TienDoHocTap, component: TienDoHocTap },
@@ -36,7 +45,11 @@ const publicRoutes = [
     { path: config.routes.ChuanDauRa, component: ChuanDauRa },
 
     // DEPARTMENT
+    { path: config.routes.Dashboard_Department, component: Dashboard_Department, layout: DepartmentLayout },
     { path: config.routes.MoHocPhan, component: MoHocPhan, layout: DepartmentLayout },
+    { path: config.routes.KhungCTDT, component: KhungCTDT, layout: DepartmentLayout },
+    { path: config.routes.DuAnNghienCuu_Department, component: DuAnNghienCuu_Department, layout: DepartmentLayout },
+    { path: config.routes.DuAnThamGia_Department, component: DuAnThamGia, layout: DepartmentLayout },
 ];
 
 //Không đăng nhập => chuyển login

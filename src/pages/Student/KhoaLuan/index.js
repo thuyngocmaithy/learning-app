@@ -1,9 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './KhoaLuan.module.scss';
 import { List, Skeleton, Tabs } from 'antd';
-import { ScheduleActiveIcon } from '../../../components/Icons';
+import { ScheduleActiveIcon } from '../../../assets/icons';
 import { useEffect, useState } from 'react';
-import Button from '../../../components/Button';
+import Button from '../../../components/Core/Button';
 import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
@@ -66,7 +66,7 @@ function KhoaLuan() {
                         <List.Item
                             actions={[
                                 <Button outline verysmall>
-                                    Xem chi tiết
+                                    Chi tiết
                                 </Button>,
                                 <Button primary verysmall>
                                     Đăng ký

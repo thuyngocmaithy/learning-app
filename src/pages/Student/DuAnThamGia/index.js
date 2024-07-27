@@ -3,10 +3,10 @@ import styles from './DuAnThamGia.module.scss';
 import { Tabs } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import ChatBox from '../../../components/ChatBox';
+import ChatBox from '../../../components/Core/ChatBox';
 import ThongTinDuAnThamGia from '../../../components/ThongTinDuAnThamGia';
-import Attach from '../../../components/Attach';
-import System from '../../../components/System';
+import Attach from '../../../components/Core/Attach';
+import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);

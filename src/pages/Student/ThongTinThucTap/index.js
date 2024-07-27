@@ -1,9 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinThucTap.module.scss';
-import images from '../../../assets/images';
+import background_detail_internship from '../../../assets/images/background-DetailInternship.png';
 import { Col, Divider, List, Row, Skeleton, Tag } from 'antd';
-import Button from '../../../components/Button';
-import { LocationIcon, SalaryIcon } from '../../../components/Icons';
+import Button from '../../../components/Core/Button';
+import { LocationIcon, SalaryIcon } from '../../../assets/icons';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
@@ -86,7 +86,7 @@ function ThongTinThucTap() {
     return (
         <div className={cx('wrapper-thontinthuctap')}>
             <div className={cx('container-header')}>
-                <img className={cx('background')} src={images.background_detail_internship} alt="" />
+                <img className={cx('background')} src={background_detail_internship} alt="" />
                 <h2>FLUTTER INTERN</h2>
                 <div className={cx('container-header-info')}>
                     <div>
@@ -164,7 +164,7 @@ function ThongTinThucTap() {
                                         verysmall
                                         onClick={() => openInNewTab(`/TienDoHocTap/ThucTap/${index}`)}
                                     >
-                                        Xem chi tiết
+                                        Chi tiết
                                     </Button>,
                                     <Button primary verysmall>
                                         Đăng ký

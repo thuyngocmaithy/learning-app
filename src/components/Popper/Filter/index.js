@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './Filter.module.scss';
-import { FilterIcon } from '../../Icons';
-import Button from '../../Button';
+import { FilterIcon } from '../../../assets/icons';
+import Button from '../../Core/Button';
 import { Wrapper as PopperWrapper } from '../../Popper';
 import Tippy from '@tippyjs/react/headless';
 import { Tabs } from 'antd';

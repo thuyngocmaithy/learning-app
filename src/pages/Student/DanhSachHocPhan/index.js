@@ -1,20 +1,12 @@
 import classNames from 'classnames/bind';
 import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
-import { ListCourseActiveIcon } from '../../../components/Icons';
-import { InputNumber } from 'antd';
-import Button from '../../../components/Button';
+import { ListCourseActiveIcon } from '../../../assets/icons';
+import Button from '../../../components/Core/Button';
 
 const cx = classNames.bind(styles);
 
 function DanhSachHocPhan() {
-    const onChangeNam = (value) => {
-        // console.log('changed', value);
-    };
-    const onChangeHocKy = (value) => {
-        // console.log('changed', value);
-    };
-
     return (
         <div className={cx('wrapper')}>
             <div className={cx('info')}>

@@ -2,7 +2,7 @@ import classNames from 'classnames/bind';
 import styles from './Support.module.scss';
 import { Wrapper as PopperWrapper } from '..';
 import Tippy from '@tippyjs/react/headless';
-import ChatBox from '../../ChatBox';
+import ChatBox from '../../Core/ChatBox';
 
 const cx = classNames.bind(styles);
 

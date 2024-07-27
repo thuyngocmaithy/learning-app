@@ -28,7 +28,7 @@ const columns = [
     },
     {
         id: 'codeBefore',
-        label: 'Mã học phần trước',
+        label: 'Mã HP trước',
         minWidth: 100,
         align: 'center',
     },
@@ -88,8 +88,49 @@ const columns = [
     },
 ];
 
+const columnsDepartment = [
+    { id: 'id', label: 'TT', minWidth: 50 },
+    { id: 'code', label: 'Mã HP', minWidth: 100 },
+    {
+        id: 'name',
+        label: 'Tên học phần',
+        minWidth: 130,
+        align: 'left',
+    },
+    {
+        id: 'tinchi',
+        label: 'Số tín chỉ',
+        minWidth: 50,
+        align: 'center',
+    },
+    {
+        id: 'codeBefore',
+        label: 'Mã HP trước',
+        minWidth: 100,
+        align: 'center',
+    },
+    {
+        id: 'HK1',
+        label: '1',
+        minWidth: 50,
+        align: 'center',
+    },
+    {
+        id: 'HK2',
+        label: '2',
+        minWidth: 50,
+        align: 'center',
+    },
+    {
+        id: 'HK3',
+        label: '3',
+        minWidth: 50,
+        align: 'center',
+    },
+];
 function ColumnGroupingTable({ department = false }) {
     const [listCourse, setListCourse] = useState([]);
+    const [listColumn, setListColumn] = useState(department ? columnsDepartment : columns);
     // const [listCode, setListCode] = useState([]);
 
     useEffect(() => {
@@ -142,7 +183,7 @@ function ColumnGroupingTable({ department = false }) {
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            {columns.map((column) => (
+                            {listColumn.map((column) => (
                                 <TableCell
                                     className={cx('title')}
                                     key={column.id + '-title'}
@@ -205,7 +246,7 @@ function ColumnGroupingTable({ department = false }) {
                                                                             tabIndex={-1}
                                                                             key={index3 + '-course3'}
                                                                         >
-                                                                            {columns.map((column) => {
+                                                                            {listColumn.map((column) => {
                                                                                 const value = data3[column.id] ? (
                                                                                     data3[column.id]
                                                                                 ) : (
@@ -249,7 +290,7 @@ function ColumnGroupingTable({ department = false }) {
                                                             tabIndex={-1}
                                                             key={index2 + '-course2'}
                                                         >
-                                                            {columns.map((column) => {
+                                                            {listColumn.map((column) => {
                                                                 const value = data2[column.id] ? (
                                                                     data2[column.id]
                                                                 ) : (

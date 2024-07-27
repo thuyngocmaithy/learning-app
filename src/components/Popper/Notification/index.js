@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './Notification.module.scss';
-import Button from '../../Button';
+import Button from '../../Core/Button';
 import { Wrapper as PopperWrapper } from '..';
 import Tippy from '@tippyjs/react/headless';
 import NotificationItem from './NotificationItem';
