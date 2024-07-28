@@ -15,7 +15,7 @@ const LoginForm = () => {
 
     const onFinish = async (values) => {
         try {
-            const response = await login(values.mssv, values.password);
+            const response = await login(values.username, values.password);
             // Lưu token vào localStorage
             if (response.status === 200) {
                 console.log(response.data.data.accessToken);
@@ -49,7 +49,7 @@ const LoginForm = () => {
                                 <div className={cx('input-boxes')}>
                                     <div className={cx('input-box')}>
                                         <Form.Item
-                                            name="mssv"
+                                            name="username"
                                             rules={[{ required: true, message: 'Vui lòng nhập MSSV!' }]}
                                         >
                                             <Input prefix={<UserOutlined />} placeholder="Mã" />
