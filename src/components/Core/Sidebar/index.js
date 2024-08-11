@@ -22,14 +22,24 @@ const items = [
         label: <Link to={config.routes.DanhSachHocPhan}>Danh sách học phần</Link>,
         icon: <OrderedListOutlined />,
     },
+    // {
+    //     key: '/TienDoHocTap',
+    //     label: <Link to={config.routes.TienDoHocTap}>Tiến độ học tập</Link>,
+    //     icon: <ScheduleOutlined />,
+    // },
     {
-        key: '/TienDoHocTap',
-        label: <Link to={config.routes.TienDoHocTap}>Tiến độ học tập</Link>,
-        icon: <ScheduleOutlined />,
+        key: '/ThucTap',
+        label: <Link to={config.routes.ThucTap}>Thực tập tốt nghiệp</Link>,
+        icon: <FormOutlined />,
     },
     {
         key: '/DuAnNghienCuu',
         label: <Link to={config.routes.DuAnNghienCuu}>Dự án nghiên cứu</Link>,
+        icon: <FormOutlined />,
+    },
+    {
+        key: '/KhoaLuan',
+        label: <Link to={config.routes.KhoaLuan}>Khóa luận</Link>,
         icon: <FormOutlined />,
     },
     {

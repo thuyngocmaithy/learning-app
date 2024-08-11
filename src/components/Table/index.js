@@ -8,6 +8,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
+import { getAll } from '../../services/studyFrameService';
+import { listSubjectToFrame } from '../../services/subjectService';
 
 const cx = classNames.bind(styles);
 
@@ -129,11 +131,45 @@ const columnsDepartment = [
     },
 ];
 function ColumnGroupingTable({ department = false }) {
+    const repeatHK = 9;
+    const elementsHK = Array.from({ length: repeatHK });
+
     const [listCourse, setListCourse] = useState([]);
+    const [listFrame, setListFrame] = useState([]);
     const [listColumn, setListColumn] = useState(department ? columnsDepartment : columns);
     // const [listCode, setListCode] = useState([]);
 
+    const getFrame = async () => {
+        try {
+            const response = await listSubjectToFrame();
+            // Lưu token vào localStorage
+            if (response.status === 200) {
+                console.log(response.data[0]);
+                setListFrame(response.data[0]);
+            } else {
+                console.log(response);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getCourse = async () => {
+        try {
+            const response = await getAll();
+            // Lưu token vào localStorage
+            if (response.status === 200) {
+                // console.log(response.data);
+            } else {
+                console.log(response);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
+        getFrame();
         console.log('re-render2');
         let mounted = true;
         fetch('http://localhost:3333/courses')
@@ -147,29 +183,18 @@ function ColumnGroupingTable({ department = false }) {
             .catch(() => {
                 console.log(Error);
             });
+
         return () => (mounted = false);
     }, []);
 
-    // useEffect(() => {
-    //     // console.log('re-render1');
-    //     listCourse.map((list) => {
-    //         list.data.map((data1) => {
-    //             // data1.data.map((data2) => {
-    //             //     data2.code && setListCode((prev) => [...prev, data2.code]);
-    //             //     data2.data &&
-    //             //         data2.data.map((data3) => {
-    //             //             data3.code && setListCode((prev) => [...prev, data3.code]);
-    //             //         });
-    //             // });
-    //         });
-    //     });
-    // }, [listCourse]);
+    // Sử dụng state để lưu giá trị của radio button được chọn
+    const [selectedValue, setSelectedValue] = useState('');
 
-    // useEffect(() => {
-    //     listCode.map(code=>{
-
-    //     })
-    // }, [status]);
+    // Hàm xử lý khi radio button thay đổi
+    const handleChange = (event) => {
+        setSelectedValue(event.target.value);
+        console.log(event.target.value);
+    };
 
     return (
         <div className={cx('container-table')}>
@@ -196,129 +221,331 @@ function ColumnGroupingTable({ department = false }) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {listCourse.map((course, index) => {
+                        {listFrame.map((frame, index) => {
                             return (
                                 <Fragment key={index + '-frag'}>
-                                    <TableRow key={index + '-course'}>
-                                        <TableCell className={cx('title')} align="center" colSpan={3}>
-                                            {course.title}
-                                        </TableCell>
-                                        <TableCell className={cx('title')} align="center">
-                                            {course.tinchi}
-                                        </TableCell>
-                                        <TableCell align="center" colSpan={10}></TableCell>
-                                    </TableRow>
-                                    {course.data.map((data1, index1) => {
-                                        return (
-                                            <Fragment key={index1 + '-frag1'}>
-                                                <TableRow key={index1 + 'data1'}>
-                                                    <TableCell className={cx('title')} align="center" colSpan={3}>
-                                                        {data1.title}
-                                                    </TableCell>
-                                                    <TableCell className={cx('title')} align="center">
-                                                        {data1.tinchi}
-                                                    </TableCell>
-                                                    <TableCell align="center" colSpan={10}></TableCell>
-                                                </TableRow>
-                                                {data1.data.map((data2, index2) => {
-                                                    return course.divide ? (
-                                                        <Fragment key={index2 + '-frag2'}>
-                                                            <TableRow key={index2 + '-course2'}>
+                                    {frame.parentFrameId === null && (
+                                        <>
+                                            <TableRow key={index + '-course'}>
+                                                <TableCell className={cx('title')} align="center" colSpan={3}>
+                                                    {frame.frameName}
+                                                </TableCell>
+                                                <TableCell className={cx('title')} align="center">
+                                                    {frame.creditHour}
+                                                </TableCell>
+                                                <TableCell align="center" colSpan={10}></TableCell>
+                                            </TableRow>
+                                            {/* /* Lặp qua các frame con */}
+                                            {listFrame.map((childFrame1, childIndex1) => {
+                                                if (
+                                                    childFrame1.parentFrameId !== null &&
+                                                    childFrame1.parentFrameId === frame.id
+                                                ) {
+                                                    return (
+                                                        <Fragment key={childIndex1 + '-child1'}>
+                                                            <TableRow>
                                                                 <TableCell
                                                                     className={cx('title')}
                                                                     align="center"
                                                                     colSpan={3}
                                                                 >
-                                                                    {data2.title}
+                                                                    {childFrame1.frameName}
                                                                 </TableCell>
                                                                 <TableCell className={cx('title')} align="center">
-                                                                    {data2.tinchi}
+                                                                    {childFrame1.creditHour}
                                                                 </TableCell>
                                                                 <TableCell align="center" colSpan={10}></TableCell>
                                                             </TableRow>
-
-                                                            {data2.data &&
-                                                                data2.data.map((data3, index3) => {
+                                                            {listFrame.map((childFrame2, childIndex2) => {
+                                                                if (
+                                                                    childFrame2.parentFrameId !== null &&
+                                                                    childFrame2.parentFrameId === childFrame1.id
+                                                                ) {
                                                                     return (
-                                                                        <TableRow
-                                                                            hover
-                                                                            role="checkbox"
-                                                                            tabIndex={-1}
-                                                                            key={index3 + '-course3'}
-                                                                        >
-                                                                            {listColumn.map((column) => {
-                                                                                const value = data3[column.id] ? (
-                                                                                    data3[column.id]
-                                                                                ) : (
-                                                                                    <input
-                                                                                        className={
-                                                                                            department
-                                                                                                ? cx('checkbox-period')
-                                                                                                : cx('radio-period')
-                                                                                        }
-                                                                                        type={
-                                                                                            department
-                                                                                                ? 'checkbox'
-                                                                                                : 'radio'
-                                                                                        }
-                                                                                        value={
-                                                                                            index + '-' + column.label
-                                                                                        }
-                                                                                        name={data3['code']}
-                                                                                    />
-                                                                                );
-                                                                                return (
-                                                                                    <TableCell
-                                                                                        key={column.id}
-                                                                                        align={column.align}
-                                                                                    >
-                                                                                        {column.format &&
-                                                                                        typeof value === 'number'
-                                                                                            ? column.format(value)
-                                                                                            : value}
-                                                                                    </TableCell>
-                                                                                );
-                                                                            })}
-                                                                        </TableRow>
+                                                                        <Fragment key={childIndex2 + '-child2'}>
+                                                                            <TableRow>
+                                                                                <TableCell
+                                                                                    className={cx('title')}
+                                                                                    align="center"
+                                                                                    colSpan={3}
+                                                                                >
+                                                                                    {childFrame2.frameName}
+                                                                                </TableCell>
+                                                                                <TableCell
+                                                                                    className={cx('title')}
+                                                                                    align="center"
+                                                                                >
+                                                                                    {childFrame2.creditHour}
+                                                                                </TableCell>
+                                                                                <TableCell
+                                                                                    align="center"
+                                                                                    colSpan={10}
+                                                                                ></TableCell>
+                                                                            </TableRow>
+                                                                            {listFrame.map(
+                                                                                (childFrame3, childIndex3) => {
+                                                                                    if (
+                                                                                        childFrame3.parentFrameId !==
+                                                                                            null &&
+                                                                                        childFrame3.parentFrameId ===
+                                                                                            childFrame2.id
+                                                                                    ) {
+                                                                                        return (
+                                                                                            <>
+                                                                                                <TableRow
+                                                                                                    key={
+                                                                                                        childIndex3 +
+                                                                                                        '-child3'
+                                                                                                    }
+                                                                                                >
+                                                                                                    <TableCell
+                                                                                                        className={cx(
+                                                                                                            'title',
+                                                                                                        )}
+                                                                                                        align="center"
+                                                                                                        colSpan={3}
+                                                                                                    >
+                                                                                                        {
+                                                                                                            childFrame3.frameName
+                                                                                                        }
+                                                                                                    </TableCell>
+                                                                                                    <TableCell
+                                                                                                        className={cx(
+                                                                                                            'title',
+                                                                                                        )}
+                                                                                                        align="center"
+                                                                                                    >
+                                                                                                        {
+                                                                                                            childFrame3.creditHour
+                                                                                                        }
+                                                                                                    </TableCell>
+                                                                                                    <TableCell
+                                                                                                        align="center"
+                                                                                                        colSpan={10}
+                                                                                                    ></TableCell>
+                                                                                                </TableRow>
+                                                                                                {childFrame3.subjectInfo
+                                                                                                    .length !== 0 &&
+                                                                                                    childFrame3.subjectInfo.map(
+                                                                                                        (
+                                                                                                            childcourse3,
+                                                                                                            courseIndex3,
+                                                                                                        ) => {
+                                                                                                            return (
+                                                                                                                <TableRow
+                                                                                                                    key={
+                                                                                                                        courseIndex3 +
+                                                                                                                        '-childcourse3'
+                                                                                                                    }
+                                                                                                                >
+                                                                                                                    <TableCell align="center">
+                                                                                                                        {
+                                                                                                                            courseIndex3
+                                                                                                                        }
+                                                                                                                    </TableCell>
+                                                                                                                    <TableCell align="center">
+                                                                                                                        {
+                                                                                                                            childcourse3.subjectId
+                                                                                                                        }
+                                                                                                                    </TableCell>
+                                                                                                                    <TableCell align="center">
+                                                                                                                        {
+                                                                                                                            childcourse3.subjectName
+                                                                                                                        }
+                                                                                                                    </TableCell>
+                                                                                                                    <TableCell align="center">
+                                                                                                                        {
+                                                                                                                            childcourse3.creditHour
+                                                                                                                        }
+                                                                                                                    </TableCell>
+                                                                                                                    <TableCell align="center">
+                                                                                                                        {
+                                                                                                                            childcourse3.subjectBeforeId
+                                                                                                                        }
+                                                                                                                    </TableCell>
+                                                                                                                    {elementsHK.map(
+                                                                                                                        (
+                                                                                                                            _,
+                                                                                                                            index,
+                                                                                                                        ) => (
+                                                                                                                            <TableCell>
+                                                                                                                                <input
+                                                                                                                                    className={
+                                                                                                                                        department
+                                                                                                                                            ? cx(
+                                                                                                                                                  'checkbox-period',
+                                                                                                                                              )
+                                                                                                                                            : cx(
+                                                                                                                                                  'radio-period',
+                                                                                                                                              )
+                                                                                                                                    }
+                                                                                                                                    type={
+                                                                                                                                        department
+                                                                                                                                            ? 'checkbox'
+                                                                                                                                            : 'radio'
+                                                                                                                                    }
+                                                                                                                                    value={
+                                                                                                                                        childcourse3.subjectId +
+                                                                                                                                        '-' +
+                                                                                                                                        index
+                                                                                                                                    }
+                                                                                                                                    name={
+                                                                                                                                        childcourse3.subjectId
+                                                                                                                                    }
+                                                                                                                                    onChange={
+                                                                                                                                        handleChange
+                                                                                                                                    }
+                                                                                                                                />
+                                                                                                                            </TableCell>
+                                                                                                                        ),
+                                                                                                                    )}
+                                                                                                                </TableRow>
+                                                                                                            );
+                                                                                                        },
+                                                                                                    )}
+                                                                                            </>
+                                                                                        );
+                                                                                    }
+                                                                                    return null; // Không render gì nếu không phải là frame con
+                                                                                },
+                                                                            )}
+                                                                            {childFrame2.subjectInfo[0] != null &&
+                                                                                childFrame2.subjectInfo.map(
+                                                                                    (childcourse2, courseIndex2) => {
+                                                                                        return (
+                                                                                            <TableRow
+                                                                                                key={
+                                                                                                    courseIndex2 +
+                                                                                                    '-childcourse2'
+                                                                                                }
+                                                                                            >
+                                                                                                <TableCell align="center">
+                                                                                                    {courseIndex2}
+                                                                                                </TableCell>
+                                                                                                <TableCell align="center">
+                                                                                                    {
+                                                                                                        childcourse2.subjectId
+                                                                                                    }
+                                                                                                </TableCell>
+                                                                                                <TableCell align="center">
+                                                                                                    {
+                                                                                                        childcourse2.subjectName
+                                                                                                    }
+                                                                                                </TableCell>
+                                                                                                <TableCell align="center">
+                                                                                                    {
+                                                                                                        childcourse2.creditHour
+                                                                                                    }
+                                                                                                </TableCell>
+                                                                                                <TableCell align="center">
+                                                                                                    {
+                                                                                                        childcourse2.subjectBeforeId
+                                                                                                    }
+                                                                                                </TableCell>
+                                                                                                {elementsHK.map(
+                                                                                                    (_, index) => (
+                                                                                                        <TableCell>
+                                                                                                            <input
+                                                                                                                className={
+                                                                                                                    department
+                                                                                                                        ? cx(
+                                                                                                                              'checkbox-period',
+                                                                                                                          )
+                                                                                                                        : cx(
+                                                                                                                              'radio-period',
+                                                                                                                          )
+                                                                                                                }
+                                                                                                                type={
+                                                                                                                    department
+                                                                                                                        ? 'checkbox'
+                                                                                                                        : 'radio'
+                                                                                                                }
+                                                                                                                value={
+                                                                                                                    childcourse2.subjectId +
+                                                                                                                    '-' +
+                                                                                                                    index
+                                                                                                                }
+                                                                                                                name={
+                                                                                                                    childcourse2.subjectId
+                                                                                                                }
+                                                                                                                onChange={
+                                                                                                                    handleChange
+                                                                                                                }
+                                                                                                            />
+                                                                                                        </TableCell>
+                                                                                                    ),
+                                                                                                )}
+                                                                                            </TableRow>
+                                                                                        );
+                                                                                    },
+                                                                                )}
+                                                                        </Fragment>
                                                                     );
-                                                                })}
-                                                        </Fragment>
-                                                    ) : (
-                                                        <TableRow
-                                                            hover
-                                                            role="checkbox"
-                                                            tabIndex={-1}
-                                                            key={index2 + '-course2'}
-                                                        >
-                                                            {listColumn.map((column) => {
-                                                                const value = data2[column.id] ? (
-                                                                    data2[column.id]
-                                                                ) : (
-                                                                    <input
-                                                                        className={
-                                                                            department
-                                                                                ? cx('checkbox-period')
-                                                                                : cx('radio-period')
-                                                                        }
-                                                                        type={department ? 'checkbox' : 'radio'}
-                                                                        value={index + '-' + column.label}
-                                                                        name={data2['code']}
-                                                                    />
-                                                                );
-                                                                return (
-                                                                    <TableCell key={column.id} align={column.align}>
-                                                                        {column.format && typeof value === 'number'
-                                                                            ? column.format(value)
-                                                                            : value}
-                                                                    </TableCell>
-                                                                );
+                                                                }
+
+                                                                return null; // Không render gì nếu không phải là frame con
                                                             })}
-                                                        </TableRow>
+
+                                                            {childFrame1.subjectInfo[0] != null &&
+                                                                childFrame1.subjectInfo.map(
+                                                                    (childcourse1, courseIndex1) => {
+                                                                        return (
+                                                                            <TableRow
+                                                                                key={courseIndex1 + '-childcourse2'}
+                                                                            >
+                                                                                <TableCell align="center">
+                                                                                    {courseIndex1}
+                                                                                </TableCell>
+                                                                                <TableCell align="center">
+                                                                                    {childcourse1.subjectId}
+                                                                                </TableCell>
+                                                                                <TableCell align="center">
+                                                                                    {childcourse1.subjectName}
+                                                                                </TableCell>
+                                                                                <TableCell align="center">
+                                                                                    {childcourse1.creditHour}
+                                                                                </TableCell>
+                                                                                <TableCell align="center">
+                                                                                    {childcourse1.subjectBeforeId}
+                                                                                </TableCell>
+                                                                                {elementsHK.map((_, index) => (
+                                                                                    <TableCell>
+                                                                                        <input
+                                                                                            className={
+                                                                                                department
+                                                                                                    ? cx(
+                                                                                                          'checkbox-period',
+                                                                                                      )
+                                                                                                    : cx('radio-period')
+                                                                                            }
+                                                                                            type={
+                                                                                                department
+                                                                                                    ? 'checkbox'
+                                                                                                    : 'radio'
+                                                                                            }
+                                                                                            value={
+                                                                                                childcourse1.subjectId +
+                                                                                                '-' +
+                                                                                                index
+                                                                                            }
+                                                                                            name={
+                                                                                                childcourse1.subjectId
+                                                                                            }
+                                                                                            onChange={handleChange}
+                                                                                        />
+                                                                                    </TableCell>
+                                                                                ))}
+                                                                            </TableRow>
+                                                                        );
+                                                                    },
+                                                                )}
+                                                        </Fragment>
                                                     );
-                                                })}
-                                            </Fragment>
-                                        );
-                                    })}
+                                                }
+                                                return null; // Không render gì nếu không phải là frame con
+                                            })}
+                                        </>
+                                    )}
                                 </Fragment>
                             );
                         })}

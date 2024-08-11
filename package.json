@@ -20,6 +20,7 @@
         "apexcharts": "^3.44.2",
         "axios": "^1.7.2",
         "classnames": "^2.3.2",
+        "learning-app": "file:",
         "normalize.css": "^8.0.1",
         "react": "^18.2.0",
         "react-apexcharts": "^1.4.1",
