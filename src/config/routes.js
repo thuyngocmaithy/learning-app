@@ -2,16 +2,15 @@ const routes = {
     // STUDENT
     Dashboard: '/',
     DanhSachHocPhan: '/DanhSachHocPhan',
-    TienDoHocTap: '/TienDoHocTap',
     DiemTotNghiep: '/DiemTotNghiep',
-    TienDoHocPhan: '/TienDoHocTap/TienDoHocPhan',
+    TienDoHocPhan: '/TienDoHocPhan',
     DuAnNghienCuu: '/DuAnNghienCuu',
     DuAnThamGia: '/DuAnNghienCuu/DuAnThamGia',
-    KhoaLuanThamGia: '/TienDoHocTap/KhoaLuan/KhoaLuanThamGia',
+    KhoaLuanThamGia: '/KhoaLuan/KhoaLuanThamGia',
     KhoaLuan: '/KhoaLuan',
     ThucTap: '/ThucTap',
-    ThongTinThucTap: '/TienDoHocTap/ThucTap/:idThucTap',
-    ChuanDauRa: '/TienDoHocTap/ChuanDauRa',
+    ThongTinThucTap: '/ThucTap/:idThucTap',
+    ChuanDauRa: '/ChuanDauRa',
     Login: '/Login',
 
     // DEPARTMENT

@@ -28,6 +28,7 @@ function DepartmentLayout({ children }) {
                     }}
                 />
                 <Content
+                    className={cx('main-content')}
                     style={{
                         margin: '0 16px',
                     }}

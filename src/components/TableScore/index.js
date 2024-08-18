@@ -1,4 +1,3 @@
-/* eslint-disable array-callback-return */
 import { useState, useEffect, Fragment, useRef } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,9 +6,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import classNames from 'classnames/bind';
-import styles from './Table.module.scss';
+import styles from './TableScore.module.scss';
 import { listSubjectToFrame } from '../../services/subjectService';
-import { Spin } from 'antd';
+import { Select, Spin } from 'antd';
 
 const cx = classNames.bind(styles);
 
@@ -35,107 +34,51 @@ const columns = [
         align: 'center',
     },
     {
-        id: 'HK1',
-        label: '1',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK2',
-        label: '2',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK3',
-        label: '3',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK4',
-        label: '4',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK5',
-        label: '5',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK6',
-        label: '6',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK7',
-        label: '7',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK8',
-        label: '8',
-        minWidth: 50,
-        align: 'center',
-    },
-    {
-        id: 'HK9',
-        label: '9',
-        minWidth: 50,
+        id: 'score',
+        label: 'Điểm dự kiến',
+        minWidth: 150,
         align: 'center',
     },
 ];
 
-const columnsDepartment = [
-    { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
-    { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
+const OptionScore = [
     {
-        id: 'name',
-        label: 'Tên học phần',
-        minWidth: 130,
-        align: 'centers',
+        value: 'A',
+        label: 'A',
     },
     {
-        id: 'tinchi',
-        label: 'Số tín chỉ',
-        minWidth: 50,
-        align: 'center',
+        value: 'B',
+        label: 'B',
     },
     {
-        id: 'codeBefore',
-        label: 'Mã HP trước',
-        minWidth: 100,
-        align: 'center',
+        value: 'C',
+        label: 'C',
     },
     {
-        id: 'HK1',
-        label: '1',
-        minWidth: 50,
-        align: 'center',
+        value: 'D',
+        label: 'D',
     },
     {
-        id: 'HK2',
-        label: '2',
-        minWidth: 50,
-        align: 'center',
+        value: 'Cải thiện A',
+        label: 'Cải thiện A',
     },
     {
-        id: 'HK3',
-        label: '3',
-        minWidth: 50,
-        align: 'center',
+        value: 'Cải thiện B',
+        label: 'Cải thiện B',
+    },
+    {
+        value: 'Cải thiện C',
+        label: 'Cải thiện C',
+    },
+    {
+        value: 'Cải thiện D',
+        label: 'Cải thiện D',
     },
 ];
 
-function ColumnGroupingTable({ department = false }) {
-    const repeatHK = department ? 3 : 9;
-    const elementsHK = Array.from({ length: repeatHK });
+function TableScore() {
     const [listFrame, setListFrame] = useState([]);
-    const [listColumn, setListColumn] = useState(department ? columnsDepartment : columns);
+    const [listColumn, setListColumn] = useState(columns);
     const [isLoading, setIsLoading] = useState(false);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     let indexSubject = 1;
@@ -172,9 +115,9 @@ function ColumnGroupingTable({ department = false }) {
     const [selectedValue, setSelectedValue] = useState('');
 
     // Hàm xử lý khi radio button thay đổi
-    const handleChange = (event) => {
-        setSelectedValue(event.target.value);
-        console.log(event.target.value);
+    const handleChange = (value) => {
+        setSelectedValue(value);
+        console.log(value);
     };
 
     return isLoading ? (
@@ -187,19 +130,12 @@ function ColumnGroupingTable({ department = false }) {
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="center" colSpan={5}></TableCell>
-                            <TableCell className={cx('title')} align="center" colSpan={9}>
-                                Học kỳ thực hiện
-                            </TableCell>
-                        </TableRow>
-
-                        <TableRow>
                             {listColumn.map((column) => (
                                 <TableCell
                                     className={cx('title')}
                                     key={column.id + '-title'}
                                     align={column.align}
-                                    style={{ top: 48, minWidth: column.minWidth }}
+                                    style={{ minWidth: column.minWidth }}
                                 >
                                     {column.label}
                                 </TableCell>
@@ -321,7 +257,7 @@ function ColumnGroupingTable({ department = false }) {
                                                                                                                 <TableRow
                                                                                                                     key={
                                                                                                                         courseIndex3 +
-                                                                                                                        '-courseIndex3'
+                                                                                                                        '-childcourse3'
                                                                                                                     }
                                                                                                                 >
                                                                                                                     <TableCell align="center">
@@ -349,47 +285,24 @@ function ColumnGroupingTable({ department = false }) {
                                                                                                                             childcourse3.subjectBeforeId
                                                                                                                         }
                                                                                                                     </TableCell>
-                                                                                                                    {elementsHK.map(
-                                                                                                                        (
-                                                                                                                            _,
-                                                                                                                            index,
-                                                                                                                        ) => (
-                                                                                                                            <TableCell
-                                                                                                                                key={
-                                                                                                                                    index +
-                                                                                                                                    '-elementHK3'
-                                                                                                                                }
-                                                                                                                            >
-                                                                                                                                <input
-                                                                                                                                    className={
-                                                                                                                                        department
-                                                                                                                                            ? cx(
-                                                                                                                                                  'checkbox-period',
-                                                                                                                                              )
-                                                                                                                                            : cx(
-                                                                                                                                                  'radio-period',
-                                                                                                                                              )
-                                                                                                                                    }
-                                                                                                                                    type={
-                                                                                                                                        department
-                                                                                                                                            ? 'checkbox'
-                                                                                                                                            : 'radio'
-                                                                                                                                    }
-                                                                                                                                    value={
-                                                                                                                                        childcourse3.subjectId +
-                                                                                                                                        '-' +
-                                                                                                                                        index
-                                                                                                                                    }
-                                                                                                                                    name={
-                                                                                                                                        childcourse3.subjectId
-                                                                                                                                    }
-                                                                                                                                    onChange={
-                                                                                                                                        handleChange
-                                                                                                                                    }
-                                                                                                                                />
-                                                                                                                            </TableCell>
-                                                                                                                        ),
-                                                                                                                    )}
+                                                                                                                    <TableCell
+                                                                                                                        key={
+                                                                                                                            index +
+                                                                                                                            '-elementHK3'
+                                                                                                                        }
+                                                                                                                    >
+                                                                                                                        <Select
+                                                                                                                            onChange={
+                                                                                                                                handleChange
+                                                                                                                            }
+                                                                                                                            options={
+                                                                                                                                OptionScore
+                                                                                                                            }
+                                                                                                                            style={{
+                                                                                                                                width: '100%',
+                                                                                                                            }}
+                                                                                                                        />
+                                                                                                                    </TableCell>
                                                                                                                 </TableRow>
                                                                                                             );
                                                                                                         },
@@ -433,44 +346,24 @@ function ColumnGroupingTable({ department = false }) {
                                                                                                         childcourse2.subjectBeforeId
                                                                                                     }
                                                                                                 </TableCell>
-                                                                                                {elementsHK.map(
-                                                                                                    (_, index) => (
-                                                                                                        <TableCell
-                                                                                                            key={
-                                                                                                                index +
-                                                                                                                '-elementHK2'
-                                                                                                            }
-                                                                                                        >
-                                                                                                            <input
-                                                                                                                className={
-                                                                                                                    department
-                                                                                                                        ? cx(
-                                                                                                                              'checkbox-period',
-                                                                                                                          )
-                                                                                                                        : cx(
-                                                                                                                              'radio-period',
-                                                                                                                          )
-                                                                                                                }
-                                                                                                                type={
-                                                                                                                    department
-                                                                                                                        ? 'checkbox'
-                                                                                                                        : 'radio'
-                                                                                                                }
-                                                                                                                value={
-                                                                                                                    childcourse2.subjectId +
-                                                                                                                    '-' +
-                                                                                                                    index
-                                                                                                                }
-                                                                                                                name={
-                                                                                                                    childcourse2.subjectId
-                                                                                                                }
-                                                                                                                onChange={
-                                                                                                                    handleChange
-                                                                                                                }
-                                                                                                            />
-                                                                                                        </TableCell>
-                                                                                                    ),
-                                                                                                )}
+                                                                                                <TableCell
+                                                                                                    key={
+                                                                                                        index +
+                                                                                                        '-elementHK2'
+                                                                                                    }
+                                                                                                >
+                                                                                                    <Select
+                                                                                                        onChange={
+                                                                                                            handleChange
+                                                                                                        }
+                                                                                                        options={
+                                                                                                            OptionScore
+                                                                                                        }
+                                                                                                        style={{
+                                                                                                            width: '100%',
+                                                                                                        }}
+                                                                                                    />
+                                                                                                </TableCell>
                                                                                             </TableRow>
                                                                                         );
                                                                                     },
@@ -504,35 +397,17 @@ function ColumnGroupingTable({ department = false }) {
                                                                                 <TableCell align="center">
                                                                                     {childcourse1.subjectBeforeId}
                                                                                 </TableCell>
-                                                                                {elementsHK.map((_, index) => (
-                                                                                    <TableCell
-                                                                                        key={index + 'elelementsHK1'}
-                                                                                    >
-                                                                                        <input
-                                                                                            className={
-                                                                                                department
-                                                                                                    ? cx(
-                                                                                                          'checkbox-period',
-                                                                                                      )
-                                                                                                    : cx('radio-period')
-                                                                                            }
-                                                                                            type={
-                                                                                                department
-                                                                                                    ? 'checkbox'
-                                                                                                    : 'radio'
-                                                                                            }
-                                                                                            value={
-                                                                                                childcourse1.subjectId +
-                                                                                                '-' +
-                                                                                                index
-                                                                                            }
-                                                                                            name={
-                                                                                                childcourse1.subjectId
-                                                                                            }
-                                                                                            onChange={handleChange}
-                                                                                        />
-                                                                                    </TableCell>
-                                                                                ))}
+                                                                                <TableCell
+                                                                                    key={index + 'elelementsHK1'}
+                                                                                >
+                                                                                    <Select
+                                                                                        onChange={handleChange}
+                                                                                        options={OptionScore}
+                                                                                        style={{
+                                                                                            width: '100%',
+                                                                                        }}
+                                                                                    />
+                                                                                </TableCell>
                                                                             </TableRow>
                                                                         );
                                                                     },
@@ -553,4 +428,4 @@ function ColumnGroupingTable({ department = false }) {
         </div>
     );
 }
-export default ColumnGroupingTable;
+export default TableScore;

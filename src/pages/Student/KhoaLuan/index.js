@@ -98,7 +98,7 @@ function KhoaLuan() {
     //Khi chọn tab 2 (Đề tài của bạn) => Điều hướng đến KhoaLuanThamGia
     const handleTabClick = (index) => {
         if (index === 2) {
-            navigate('/TienDoHocTap/KhoaLuan/KhoaLuanThamGia');
+            navigate('/KhoaLuan/KhoaLuanThamGia');
         }
     };
     return (

@@ -139,11 +139,7 @@ function ThucTap() {
                         renderItem={(item, index) => (
                             <List.Item
                                 actions={[
-                                    <Button
-                                        outline
-                                        verysmall
-                                        onClick={() => openInNewTab(`/TienDoHocTap/ThucTap/${index}`)}
-                                    >
+                                    <Button outline verysmall onClick={() => openInNewTab(`/ThucTap/${index}`)}>
                                         Chi tiết
                                     </Button>,
                                     <Button primary verysmall>

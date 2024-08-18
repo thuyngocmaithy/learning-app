@@ -33,6 +33,10 @@
     justify-content: space-between;
 }
 
+.item-edit {
+    padding: 0 10px;
+}
+
 .content-right {
     width: 45%;
     border: 3px solid var(--primary);
@@ -88,4 +92,23 @@
     font-weight: 700;
     color: var(--primary);
 
+}
+
+.title-sapxep-diem {
+    margin: 25px 0;
+    background-color: #f6ffed;
+    padding: 20px 50px;
+    color: #389e0d;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    font-size: 21px;
+    text-align: center;
+    box-shadow: var(--box-shadow-3);
+}
+
+.footer-table {
+    display: flex;
+    justify-content: right;
+    margin-top: 20px;
+    margin-bottom: 50px;
 }

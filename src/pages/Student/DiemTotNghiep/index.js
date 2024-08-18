@@ -3,6 +3,8 @@ import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
 import { InputNumber } from 'antd';
 import { GraduateActiveIcon } from '../../../assets/icons';
+import TableScore from '../../../components/TableScore';
+import ButtonCustom from '../../../components/Core/Button';
 
 const cx = classNames.bind(styles);
 
@@ -65,6 +67,18 @@ function DiemTotNghiep() {
                 </span>
                 <h3 className={cx('title')}>Điểm tốt nghiệp dự kiến</h3>
             </div>
+            <div className={cx('title-sapxep-diem')}>
+                <h3>Sắp xếp điểm dự kiến</h3>
+            </div>
+            <TableScore />
+            <div className={cx('footer-table')}>
+                <ButtonCustom primary small className={cx('btnSave')}>
+                    Lưu
+                </ButtonCustom>
+            </div>
+            <div className={cx('title-sapxep-diem')}>
+                <h3>Điểm tốt nghiệp dự kiến (sau khi sắp xếp)</h3>
+            </div>
             <div className={cx('wrapper')}>
                 <div className={cx('content-left')}>
                     <div className={cx('content-left-item')}>
@@ -76,6 +90,7 @@ function DiemTotNghiep() {
                             step={0.1}
                             value={currentGPA}
                             onChange={(value) => setCurrentGPA(value)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -86,6 +101,7 @@ function DiemTotNghiep() {
                             max={158}
                             value={currentCredits}
                             onChange={(value) => setCurrentCredits(value)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -96,6 +112,7 @@ function DiemTotNghiep() {
                             max={158}
                             value={totalCredits}
                             onChange={(value) => setTotalCredits(value)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -106,8 +123,10 @@ function DiemTotNghiep() {
                             max={158}
                             value={creditsA}
                             onChange={(value) => setCreditsA(value)}
+                            disabled
                         />
                     </div>
+
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ đạt loại B (dự kiến)</label>
                         <InputNumber
@@ -116,6 +135,7 @@ function DiemTotNghiep() {
                             max={158}
                             value={creditsB}
                             onChange={(value) => setCreditsB(value)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -126,6 +146,7 @@ function DiemTotNghiep() {
                             max={150}
                             value={creditsC}
                             onChange={(value) => setCreditsC(value)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -136,6 +157,7 @@ function DiemTotNghiep() {
                             max={150}
                             value={creditsD}
                             onChange={(value) => setCreditsD(value)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -146,6 +168,7 @@ function DiemTotNghiep() {
                             max={150}
                             value={improvedCredits}
                             onChange={(value) => setImprovedCredits(value)}
+                            disabled
                         />
                     </div>
                 </div>

@@ -3,7 +3,6 @@ import config from '../config';
 // Pages
 import Dashboard from '../pages/Student/Dashboard';
 import DanhSachHocPhan from '../pages/Student/DanhSachHocPhan';
-import TienDoHocTap from '../pages/Student/TienDoHocTap';
 import DuAnNghienCuu from '../pages/Student/DuAnNghienCuu';
 import TienDoHocPhan from '../pages/Student/TienDoHocPhan';
 import DiemTotNghiep from '../pages/Student/DiemTotNghiep';
@@ -33,7 +32,6 @@ const publicRoutes = [
     { path: config.routes.Login, component: LoginForm, layout: null },
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },
-    { path: config.routes.TienDoHocTap, component: TienDoHocTap },
     { path: config.routes.DiemTotNghiep, component: DiemTotNghiep },
     { path: config.routes.TienDoHocPhan, component: TienDoHocPhan },
     { path: config.routes.DuAnNghienCuu, component: DuAnNghienCuu },

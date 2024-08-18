@@ -305,6 +305,11 @@ body {
         flex: 1;
     }
 
+    // INPUT
+    :where(.css-dev-only-do-not-override-17seli4).ant-input-number-outlined.ant-input-number-disabled {
+        color: var(--black);
+    }
+
 
 
 }
