@@ -76,11 +76,10 @@ const OptionScore = [
     },
 ];
 
-function TableScore() {
+function TableScore({ height = 490 }) {
     const [listFrame, setListFrame] = useState([]);
     const [listColumn, setListColumn] = useState(columns);
     const [isLoading, setIsLoading] = useState(false);
-    const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     let indexSubject = 1;
 
     const getFrame = async () => {
@@ -103,8 +102,6 @@ function TableScore() {
 
     useEffect(() => {
         if (!didMountRef.current) {
-            const height = document.getElementsByClassName('main-content')[0].clientHeight;
-            setHeightContainerLoading(height);
             getFrame();
             console.log('render');
             didMountRef.current = true;
@@ -121,12 +118,12 @@ function TableScore() {
     };
 
     return isLoading ? (
-        <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
+        <div className={cx('container-loading')} style={{ height: height }}>
             <Spin size="large" />
         </div>
     ) : (
         <div className={cx('container-table')}>
-            <TableContainer sx={{ maxHeight: 490 }}>
+            <TableContainer sx={{ maxHeight: height }}>
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>

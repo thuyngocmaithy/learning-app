@@ -19,11 +19,22 @@ function TableCustomAnt({
     height = '290px',
     columns,
     data,
-    showModalUpdated,
-    handleCustom,
     width = '100%',
     isOutline = false,
+    setSelectedRowKeys,
+    selectedRowKeys,
 }) {
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (newSelectedRowKeys, selectedRows) => {
+            console.log(`selectedRowKeys: ${newSelectedRowKeys}`, 'selectedRows: ', selectedRows);
+            setSelectedRowKeys(newSelectedRowKeys); // Cập nhật selectedRowKeys
+        },
+        getCheckboxProps: (record) => ({
+            disabled: record.name === 'Disabled User',
+            name: record.name,
+        }),
+    };
     return (
         <div
             className={cx('container-crud')}
@@ -39,7 +50,7 @@ function TableCustomAnt({
                     type: 'checkbox',
                     ...rowSelection,
                 }}
-                columns={handleCustom ? columns(showModalUpdated, handleCustom) : columns(showModalUpdated)}
+                columns={columns}
                 dataSource={data}
                 showSorterTooltip={{
                     target: 'sorter-icon',

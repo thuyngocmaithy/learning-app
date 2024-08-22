@@ -1,17 +1,17 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
-import { ListCourseActiveIcon } from '../../../assets/icons';
+import { ListCourseActiveIcon } from '../../../../assets/icons';
 import { Empty, Input, InputNumber, Progress, Segmented } from 'antd';
-import ButtonCustom from '../../../components/Core/Button';
-import TableHP from '../../../components/Table';
+import ButtonCustom from '../../../../components/Core/Button';
+import TableHP from '../../../../components/Table';
 import { useState } from 'react'; //
-import TableCustomAnt from '../../../components/Core/TableCustomAnt';
-import Toolbar from '../../../components/Core/Toolbar';
-import Update from '../../../components/Core/Update';
-import { showDeleteConfirm } from '../../../components/Core/Delete';
+import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
+import Toolbar from '../../../../components/Core/Toolbar';
+import Update from '../../../../components/Core/Update';
+import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import { Tag } from 'antd';
 import { EditOutlined, FormOutlined } from '@ant-design/icons';
-import FormItem from '../../../components/Core/FormItem';
+import FormItem from '../../../../components/Core/FormItem';
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
@@ -141,6 +141,9 @@ function MoHocPhan() {
             setShowModalUpdated(false);
         }
     };
+    const handleChange = (value) => {
+        console.log(`selected ${value}`);
+    };
 
     return (
         <div className={cx('mohocphan-wrapper')}>
@@ -153,10 +156,10 @@ function MoHocPhan() {
                 </div>
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
                 <div className={cx('wrapper')}>
-                    <Toolbar type={'add'} onClick={() => setShowModalAdd(true)} />
-                    <Toolbar type={'delete'} onClick={() => showDeleteConfirm('năm học')} />
-                    <Toolbar type={'import'} />
-                    <Toolbar type={'export'} />
+                    <Toolbar type={'Thêm mới'} onClick={() => setShowModalAdd(true)} />
+                    <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('năm học')} />
+                    <Toolbar type={'Nhập file Excel'} />
+                    <Toolbar type={'Xuất file Excel'} />
                 </div>
             </div>
             <div className={cx('container-manage-NH')}>
@@ -189,13 +192,9 @@ function MoHocPhan() {
                 </div>
                 {/* TABLE MANAGE NĂM HỌC */}
                 <TableCustomAnt
-                    columns={columns}
+                    columns={columns(setShowModalUpdated, setInputValueNH)}
                     data={data}
-                    showModalUpdated={(value) => {
-                        setShowModalUpdated(true);
-                        setNHUpdated(value);
-                    }}
-                    handleCustom={setInputValueNH}
+                    // handleCustom={setInputValueNH}
                     width={'40%'}
                     isOutline={true}
                 />

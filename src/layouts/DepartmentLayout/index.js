@@ -1,5 +1,5 @@
 import classNames from 'classnames/bind';
-// import Content from '../../components/Content';
+// import Content from '../../../components/Content';
 
 import Header from '../../components/Core/Header';
 import Sidebar from '../../components/Core/Sidebar';

@@ -1,4 +1,4 @@
-import CardTienDoHocTap from '../../../components/CardTienDoHocTap';
+import CardTienDoHocTap from '../../../../components/CardTienDoHocTap';
 import timetable from '../../../assets/images/timetable.png';
 import intern from '../../../assets/images/intern.png';
 import thesis from '../../../assets/images/thesis.png';
