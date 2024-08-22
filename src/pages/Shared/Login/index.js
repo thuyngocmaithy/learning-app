@@ -3,6 +3,7 @@ import { Form, Input, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../../services/userService';
+import { loginToSGU } from '../../../services/userService';
 import classNames from 'classnames/bind';
 import styles from './Login.module.scss'; // Đảm bảo import CSS/SASS của bạn
 import sgu from '../../../assets/images/sgu.jpg';

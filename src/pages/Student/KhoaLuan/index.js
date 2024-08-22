@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Button from '../../../components/Core/Button';
 import { useNavigate } from 'react-router-dom';
 
+import { getAllThesis } from '../../../services/thesisService';
 const cx = classNames.bind(styles);
 
 const listProject = [
@@ -47,8 +48,24 @@ function KhoaLuan() {
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     useEffect(() => {
-        setList(listProject);
-        setIsLoading(false);
+        const fetchThesis = async () => {
+            try {
+                const response = await getAllThesis();
+                const thesis = response.data.map(thesis => ({
+                    id: thesis.id,
+                    name: thesis.title,
+                    supervisor: thesis.supervisorId,
+                    khoa: thesis.facultyFacultyId,
+                }));
+                setList(thesis);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                setIsLoading(false);
+            }
+        };
+
+        fetchThesis();
     }, []);
 
     const ITEM_TABS = [
@@ -80,8 +97,8 @@ function KhoaLuan() {
                                     description={'Khoa: ' + item.khoa}
                                 />
                                 <div className={cx('container-count-register')}>
-                                    <p style={{ marginRight: '10px' }}>Lượt đăng ký: </p>
-                                    <p>{item.count}</p>
+                                    <p style={{ marginRight: '10px' }}>Giảng viên hướng dẫn: </p>
+                                    <p>{item.supervisor}</p>
                                 </div>
                             </Skeleton>
                         </List.Item>
