@@ -15,10 +15,15 @@ const routes = {
 
     // DEPARTMENT
     Dashboard_Department: '/Department',
-    MoHocPhan: '/Department/MoHocPhan',
-    KhungCTDT: '/Department/KhungCTDT',
-    DuAnNghienCuu_Department: '/Department/DuAnNghienCuu',
-    DuAnThamGia_Department: '/Department/DuAnNghienCuu/DuAnThamGia',
+    MoHocPhan: '/Department/NghiepVu/MoHocPhan',
+    KhungCTDT: '/Department/NghiepVu/KhungCTDT',
+    DuAnNghienCuu_Department: '/Department/NghiepVu/DuAnNghienCuu',
+    DuAnThamGia_Department: '/Department/NghiepVu/DuAnNghienCuu/DuAnThamGia',
+    KhoaLuanThamGia_Department: '/Department/NghiepVu/KhoaLuan/KhoaLuanThamGia',
+    KhoaLuan_Department: '/Department/NghiepVu/KhoaLuan',
+
+    // THIẾT LẬP
+    PhanQuyenChucNang_Department: '/Department/ThietLap/PhanQuyenChucNang',
 };
 
 export default routes;

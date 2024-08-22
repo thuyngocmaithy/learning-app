@@ -1,17 +1,10 @@
 import classNames from 'classnames/bind';
 import { useState } from 'react';
-import Card from '../../../components/Card';
+import Card from '../../../../components/Card';
 import styles from './Dashboard.module.scss';
-import {
-    CheckListIcon,
-    CompleteIcon,
-    GraduateActiveIcon,
-    GraduateIcon,
-    HomeActiveIcon,
-    UserGroupIcon,
-} from '../../../assets/icons';
+import { CompleteIcon, HomeActiveIcon, UserGroupIcon } from '../../../../assets/icons';
 import ReactApexChart from 'react-apexcharts';
-import { Divider, Progress } from 'antd';
+import { Divider } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 

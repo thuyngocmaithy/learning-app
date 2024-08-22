@@ -3,8 +3,8 @@ import styles from './Sidebar.module.scss';
 import { GraduateIcon } from '../../../assets/icons';
 import config from '../../../config';
 import logo from '../../../assets/images/logo.png';
-import { useEffect, useState } from 'react';
-import { Menu } from 'antd';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Menu, Spin } from 'antd';
 import Sider from 'antd/es/layout/Sider';
 import { FormOutlined, HomeOutlined, OrderedListOutlined, ScheduleOutlined, BlockOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
@@ -51,30 +51,54 @@ const items = [
 
 const itemsDepartment = [
     {
-        key: '/Department',
-        label: <Link to={config.routes.Dashboard_Department}>Dashboard</Link>,
+        key: '/NghiepVu',
+        label: 'Nghiệp vụ',
         icon: <HomeOutlined />,
+        children: [
+            {
+                key: '/Department',
+                label: <Link to={config.routes.Dashboard_Department}>Dashboard</Link>,
+                icon: <HomeOutlined />,
+            },
+            {
+                key: '/Department/NghiepVu/MoHocPhan',
+                label: <Link to={config.routes.MoHocPhan}>Mở học phần</Link>,
+                icon: <OrderedListOutlined />,
+            },
+            {
+                key: '/Department/NghiepVu/DuAnNghienCuu',
+                label: <Link to={config.routes.DuAnNghienCuu_Department}>Dự án nghiên cứu</Link>,
+                icon: <FormOutlined />,
+            },
+            {
+                key: '/Department/NghiepVu/KhoaLuan',
+                label: <Link to={config.routes.KhoaLuan_Department}>Khóa luận</Link>,
+                icon: <FormOutlined />,
+            },
+        ],
     },
     {
-        key: '/Department/KhungCTDT',
-        label: <Link to={config.routes.KhungCTDT}>Khung CT Đào tạo</Link>,
-        icon: <BlockOutlined />,
-    },
-    {
-        key: '/Department/MoHocPhan',
-        label: <Link to={config.routes.MoHocPhan}>Mở học phần</Link>,
-        icon: <OrderedListOutlined />,
-    },
-    {
-        key: '/Department/DuAnNghienCuu',
-        label: <Link to={config.routes.DuAnNghienCuu_Department}>Dự án nghiên cứu</Link>,
-        icon: <FormOutlined />,
+        key: '/ThietLap',
+        label: 'Thiết lập',
+        icon: <HomeOutlined />,
+        children: [
+            {
+                key: '/Department/NghiepVu/KhungCTDT',
+                label: <Link to={config.routes.KhungCTDT}>Khung CT Đào tạo</Link>,
+                icon: <BlockOutlined />,
+            },
+            {
+                key: '/Department/ThietLap/PhanQuyenChucNang',
+                label: <Link to={config.routes.PhanQuyenChucNang_Department}>Phân quyền chức năng</Link>,
+                icon: <BlockOutlined />,
+            },
+        ],
     },
 ];
 
 function Sidebar({ department = false }) {
     const [collapsed, setCollapsed] = useState(false);
-
+    const [openKeys, setOpenKeys] = useState([]);
     let location = useLocation();
     const [current, setCurrent] = useState(
         // sử dụng location.pathname.split('/')[1] để lấy đường dẫn đầu tiên
@@ -85,13 +109,30 @@ function Sidebar({ department = false }) {
 
     useEffect(() => {
         if (location) {
-            if (current !== location.pathname) {
-                if (department) {
-                    setCurrent('/Department/' + location.pathname.split('/')[2]);
-                } else {
-                    setCurrent('/' + location.pathname.split('/')[1]);
+            const pathDepartment = location.pathname.split('/')[2]
+                ? '/Department/' + location.pathname.split('/')[2] + '/' + location.pathname.split('/')[3]
+                : '/Department';
+            const newCurrent = department ? pathDepartment : '/' + location.pathname.split('/')[1];
+
+            setCurrent(newCurrent);
+
+            // Cập nhật openKeys dựa trên current
+            const newOpenKeys = ['/NghiepVu'];
+            const itemsList = department ? itemsDepartment : items;
+
+            const findOpenKeys = (items, path) => {
+                for (const item of items) {
+                    if (item.children) {
+                        if (item.children.some((child) => child.key === path)) {
+                            newOpenKeys.push(item.key);
+                        }
+                        findOpenKeys(item.children, path);
+                    }
                 }
-            }
+            };
+
+            findOpenKeys(itemsList, location.pathname);
+            setOpenKeys(newOpenKeys);
         }
     }, [location, current]);
 
@@ -100,7 +141,7 @@ function Sidebar({ department = false }) {
     }
 
     return (
-        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} width={210}>
             <div className="demo-logo-vertical">
                 <img
                     className={cx('logo', {
@@ -116,6 +157,8 @@ function Sidebar({ department = false }) {
                 mode="inline"
                 onClick={handleClick}
                 selectedKeys={[current]}
+                openKeys={openKeys}
+                onOpenChange={(keys) => setOpenKeys(keys)}
                 items={department ? itemsDepartment : items}
             />
         </Sider>

@@ -7,17 +7,17 @@ const cx = classNames.bind(styles);
 
 function Toolbar({ type, onClick }) {
     let icon = null;
-    if (type === 'delete') {
+    if (type === 'Xóa') {
         icon = <DeleteOutlined />;
-    } else if (type === 'import') {
+    } else if (type === 'Nhập file Excel') {
         icon = <ImportOutlined />;
-    } else if (type === 'export') {
+    } else if (type === 'Xuất file Excel') {
         icon = <ExportOutlined />;
-    } else if (type === 'add') {
+    } else if (type === 'Thêm mới') {
         icon = <PlusOutlined />;
     }
     return (
-        <Tooltip>
+        <Tooltip title={type}>
             <button className={cx('wrapper')} onClick={onClick}>
                 <span className={cx('icon')}>{icon}</span>
             </button>

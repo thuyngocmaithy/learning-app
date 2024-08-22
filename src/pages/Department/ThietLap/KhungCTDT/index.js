@@ -1,10 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './KhungCTDT.module.scss';
-import Table from '../../../components/Table';
-import { ListCourseActiveIcon } from '../../../assets/icons';
-import Button from '../../../components/Core/Button';
+import Table from '../../../../components/Table';
+import { ListCourseActiveIcon } from '../../../../assets/icons';
+import Button from '../../../../components/Core/Button';
 import { Collapse, Divider, Segmented } from 'antd';
-import TransferCustom from '../../../components/Core/TransferCustom';
+import TransferCustom from '../../../../components/Core/TransferCustom';
 
 const cx = classNames.bind(styles);
 const text = `

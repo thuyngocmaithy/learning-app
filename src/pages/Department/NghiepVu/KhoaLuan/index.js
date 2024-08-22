@@ -1,21 +1,19 @@
 import classNames from 'classnames/bind';
-import styles from './DuAnNghienCuu.module.scss';
-import { Card, Input, InputNumber, Select, Tabs, Tag } from 'antd';
-import { ResearchProjectsIcon } from '../../../assets/icons';
-import { useEffect, useState } from 'react';
-import ButtonCustom from '../../../components/Core/Button';
-import config from '../../../config';
-import TableCustomAnt from '../../../components/Core/TableCustomAnt';
+import styles from './KhoaLuan.module.scss';
+import { Card, Input, InputNumber, notification, Select, Tabs, Tag } from 'antd';
+import { ResearchProjectsIcon } from '../../../../assets/icons';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import ButtonCustom from '../../../../components/Core/Button';
+import config from '../../../../config';
+import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
-import Toolbar from '../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../components/Core/Delete';
-import Update from '../../../components/Core/Update';
-import FormItem from '../../../components/Core/FormItem';
-import { Link } from 'react-router-dom';
+import Toolbar from '../../../../components/Core/Toolbar';
+import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import KhoaLuanUpdate from '../../../../components/FormUpdate/KhoaLuanUpdate';
 
 const cx = classNames.bind(styles);
 
-const listProject = [
+const listThesis = [
     { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', count: 4, deadline: '10/05/2024' },
     {
         id: '2',
@@ -43,7 +41,7 @@ const listProject = [
     },
     { id: '6', name: 'Dự đoán ung thư phổi trên ảnh CT bằng phương pháp học sâu', count: 5, deadline: '30/12/2024' },
 ];
-const listProjectJoin = [
+const listThesisJoin = [
     { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
     {
         id: '2',
@@ -52,9 +50,9 @@ const listProjectJoin = [
     },
 ];
 
-const columns = (showModalUpdated) => [
+const columns = (showModal) => [
     {
-        title: 'Mã dự án',
+        title: 'Mã đề tài',
         dataIndex: 'MaDA',
         key: 'MaDA',
     },
@@ -132,7 +130,7 @@ const columns = (showModalUpdated) => [
                     leftIcon={<EditOutlined />}
                     primary
                     verysmall
-                    onClick={() => showModalUpdated(record.NH)}
+                    onClick={() => showModal(record.NH)}
                 >
                     Sửa
                 </ButtonCustom>
@@ -244,46 +242,37 @@ const data = [
     },
 ];
 
-function DuAnNghienCuu() {
-    const [showModalAdd, setShowModalAdd] = useState(false); //hiển thị model add
-    const [showModalUpdated, setShowModalUpdated] = useState(false); // hiển thị model updated
+function KhoaLuan() {
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [showModal, setShowModal] = useState(false); // hiển thị model
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
 
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     useEffect(() => {
-        setList(listProject);
+        setList(listThesis);
         setIsLoading(false);
     }, []);
-
-    // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
-    const handleCloseModal = () => {
-        if (showModalAdd) {
-            setShowModalAdd(false);
-        }
-        if (showModalUpdated) {
-            setShowModalUpdated(false);
-        }
-    };
 
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Danh sách dự án',
+            title: 'Danh sách đề tài',
             children: (
                 <TableCustomAnt
                     height={'350px'}
-                    columns={columns}
+                    columns={columns(setShowModal)}
                     data={data}
-                    showModalUpdated={() => setShowModalUpdated(true)}
+                    setSelectedRowKeys={setSelectedRowKeys}
                 />
             ),
         },
         {
             id: 2,
-            title: 'Dự án tham gia',
+            title: 'Đề tài tham gia',
             children: (
                 <div>
-                    {listProjectJoin.map((item, index) => {
+                    {listThesisJoin.map((item, index) => {
                         let color = item.status === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
@@ -310,7 +299,7 @@ function DuAnNghienCuu() {
     ];
     const [isToolbar, setIsToolbar] = useState(true);
 
-    //Khi chọn tab 2 (Dự án tham gia) => Ẩn toolbar
+    //Khi chọn tab 2 (Đề tài tham gia) => Ẩn toolbar
     const handleTabClick = (index) => {
         if (index === 2) {
             setIsToolbar(false);
@@ -319,32 +308,58 @@ function DuAnNghienCuu() {
         }
     };
 
-    const handleChange = (value) => {
-        console.log(`selected ${value}`);
-    };
+    const [api, contextHolder] = notification.useNotification();
+    const openNotification = useCallback(
+        (type, message, description) => {
+            api[type]({
+                message: message,
+                description: description,
+            });
+        },
+        [api],
+    );
 
+    const khoaLuanUpdateMemoized = useMemo(() => {
+        return (
+            <KhoaLuanUpdate
+                title={'khóa luận'}
+                isUpdate={isUpdate}
+                showModal={showModal}
+                setShowModal={setShowModal}
+                openNotification={openNotification}
+                // reLoad={}
+            />
+        );
+    }, [showModal, isUpdate]);
     return (
         <div className={cx('wrapper')}>
+            {contextHolder}
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
                         <ResearchProjectsIcon />
                     </span>
-                    <h3 className={cx('title')}>Dự án nghiên cứu</h3>
+                    <h3 className={cx('title')}>Khóa luận tốt nghiệp</h3>
                 </div>
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
                 {isToolbar ? (
                     <div className={cx('wrapper')}>
-                        <Toolbar type={'add'} onClick={() => setShowModalAdd(true)} />
-                        <Toolbar type={'delete'} onClick={() => showDeleteConfirm('năm học')} />
-                        <Toolbar type={'import'} />
-                        <Toolbar type={'export'} />
+                        <Toolbar
+                            type={'Thêm mới'}
+                            onClick={() => {
+                                setShowModal(true);
+                                setIsUpdate(false);
+                            }}
+                        />
+                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận')} />
+                        <Toolbar type={'Nhập file Excel'} />
+                        <Toolbar type={'Xuất file Excel'} />
                     </div>
                 ) : null}
             </div>
 
             <Tabs
-                defaultActiveKey={1} //nếu có dự án tham gia => set defaultActiveKey = 2
+                defaultActiveKey={1} //nếu có đề tài tham gia => set defaultActiveKey = 2
                 centered
                 onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => {
@@ -355,43 +370,9 @@ function DuAnNghienCuu() {
                     };
                 })}
             />
-            <Update
-                title={'dự án nghiên cứu'}
-                showModalAdd={showModalAdd}
-                showModalUpdated={showModalUpdated}
-                onClose={handleCloseModal}
-            >
-                <FormItem label={'Tên đề tài'}>
-                    <Input />
-                </FormItem>
-                <FormItem label={'Khoa'}>
-                    <Select
-                        onChange={handleChange}
-                        options={[
-                            {
-                                value: 'CNTT',
-                                label: 'CNTT',
-                            },
-                            {
-                                value: 'Kế toán',
-                                label: 'Kế toán',
-                            },
-                            {
-                                value: 'Tài chính - ngân hàng',
-                                label: 'Tài chính - ngân hàng',
-                            },
-                        ]}
-                    />
-                </FormItem>
-                <FormItem label={'Chủ nhiệm đề tài'}>
-                    <Input />
-                </FormItem>
-                <FormItem label={'Số lượng thành viên'}>
-                    <InputNumber style={{ width: '100%' }} min={1} max={10} step={1} />
-                </FormItem>
-            </Update>
+            {khoaLuanUpdateMemoized}
         </div>
     );
 }
 
-export default DuAnNghienCuu;
+export default KhoaLuan;
