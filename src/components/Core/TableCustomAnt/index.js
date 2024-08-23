@@ -1,6 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
 import { Table } from 'antd';
+import { useState } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -35,6 +36,7 @@ function TableCustomAnt({
             name: record.name,
         }),
     };
+    const [checkStrictly, setCheckStrictly] = useState(false);
     return (
         <div
             className={cx('container-crud')}
@@ -47,8 +49,8 @@ function TableCustomAnt({
             {isOutline ? <h2>Danh sách năm học</h2> : null}
             <Table
                 rowSelection={{
-                    type: 'checkbox',
                     ...rowSelection,
+                    checkStrictly,
                 }}
                 columns={columns}
                 dataSource={data}

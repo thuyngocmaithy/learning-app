@@ -3,6 +3,7 @@ import { Input } from 'antd';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { createFeature, updateFeature } from '../../../services/featureService';
+import UploadCustomAnt from '../../Core/UploadCustomAnt';
 
 const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
     title,
@@ -20,6 +21,7 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
         featureName: null,
         keyRoute: null,
         url: null,
+        icon: null,
     });
 
     const handleChange = (e) => {
@@ -37,6 +39,7 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
             featureName: refs.current.featureName.input.value,
             keyRoute: refs.current.keyRoute.input.value,
             url: refs.current.url.input.value,
+            icon: refs.current.icon.input.value,
         };
 
         // setIsSubmitting(true); // Bắt đầu submit
@@ -70,7 +73,6 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
             onUpdate={handleUpdate}
             // isSubmitting={isSubmittingRef.current}
         >
-            {console.log('showModal showModal: ' + showModal)}
             <FormItem label={'Mã chức năng'}>
                 <Input
                     name="featureId"
@@ -102,6 +104,9 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
                     ref={(el) => (refs.current.url = el)}
                     onChange={handleChange}
                 />
+            </FormItem>
+            <FormItem label={'Icon'}>
+                <UploadCustomAnt />
             </FormItem>
         </Update>
     );

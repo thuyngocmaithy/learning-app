@@ -5,7 +5,7 @@ import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { getAll as getAllPermission } from '../../../../services/permissionService';
-import { getAll as getAllFeature, deleteFeature } from '../../../../services/featureService';
+import { getAll as getAllFeature, deleteFeature, getFeatureByStructure } from '../../../../services/featureService';
 import { EditOutlined } from '@ant-design/icons';
 import { notification, Spin } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
@@ -25,6 +25,12 @@ function PhanQuyenChucNang() {
     const [data, setData] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
+    const [tableParams, setTableParams] = useState({
+        pagination: {
+            current: 1,
+            pageSize: 10,
+        },
+    });
 
     // Hàm xử lý khi radio button thay đổi
     const handleChange = (event) => {
@@ -36,13 +42,18 @@ function PhanQuyenChucNang() {
         (dynamicColumns = []) => [
             {
                 title: 'Mã chức năng',
-                dataIndex: 'MaCN',
-                key: 'MaCN',
+                dataIndex: 'featureId',
+                key: 'featureId',
             },
             {
                 title: 'Tên chức năng',
-                dataIndex: 'TenCN',
-                key: 'TenCN',
+                dataIndex: 'featureName',
+                key: 'featureName',
+            },
+            {
+                title: 'Key Route',
+                dataIndex: 'keyRoute',
+                key: 'keyRoute',
             },
             ...dynamicColumns,
             {
@@ -60,10 +71,10 @@ function PhanQuyenChucNang() {
                             verysmall
                             onClick={() => {
                                 setShowModal({
-                                    featureId: record.MaCN,
-                                    featureName: record.TenCN,
-                                    keyRoute: record.KeyRoute,
-                                    url: record.URL,
+                                    featureId: record.featureId,
+                                    featureName: record.featureName,
+                                    keyRoute: record.keyRoute,
+                                    url: record.url,
                                 });
                                 setIsUpdate(true);
                             }}
@@ -87,14 +98,15 @@ function PhanQuyenChucNang() {
                     title: permission.permissionName,
                     dataIndex: permission.permissionId,
                     key: permission.permissionId,
-                    render: (_, record) => (
-                        <input
-                            type={'checkbox'}
-                            value={record.key}
-                            name={record.permissionId}
-                            onChange={handleChange}
-                        />
-                    ),
+                    render: (_, record) =>
+                        record.keyRoute && (
+                            <input
+                                type={'checkbox'}
+                                value={record.key}
+                                name={record.permissionId}
+                                onChange={handleChange}
+                            />
+                        ),
                     align: 'center',
                 }));
                 setCombinedColumns(() => () => columns(newColumnsPermission));
@@ -110,16 +122,53 @@ function PhanQuyenChucNang() {
 
     const getFeature = useCallback(async () => {
         try {
-            const response = await getAllFeature();
+            const response = await getFeatureByStructure();
             if (response.status === 200) {
-                const data = response.data.data.map((data) => ({
-                    key: data.featureId,
-                    MaCN: data.featureId,
-                    TenCN: data.featureName,
-                    KeyRoute: data.keyRoute,
-                    URL: data.url,
-                }));
+                const data = response.data[0].flatMap((item) => {
+                    if (item.parentFeatureId === null && item.listFeature) {
+                        console.log(item.listFeature);
+                        return item.listFeature
+                            .map((row) => {
+                                return {
+                                    key: row.featureId,
+                                    featureId: row.featureId,
+                                    featureName: row.featureName,
+                                    keyRoute: row.keyRoute,
+                                    url: row.url,
+                                };
+                            })
+                            .filter(Boolean); // Loại bỏ các đối tượng null
+                    } else {
+                        return {
+                            key: item.parentFeatureId.featureId,
+                            featureId: item.parentFeatureId.featureId,
+                            featureName: item.parentFeatureId.featureName,
+                            keyRoute: item.keyRoute,
+                            url: item.parentFeatureId.url,
+                            children: item.listFeature.map((row) => {
+                                return {
+                                    key: row.featureId,
+                                    featureId: row.featureId,
+                                    featureName: row.featureName,
+                                    keyRoute: row.keyRoute,
+                                    url: row.url,
+                                };
+                            }),
+                            // Loại bỏ các đối tượng null
+                        };
+                    }
+                });
+
+                console.log(data); // Kiểm tra kết quả
+
                 setData(data || []);
+                setTableParams({
+                    ...tableParams,
+                    pagination: {
+                        ...tableParams.pagination,
+                        total: 200,
+                    },
+                });
             } else {
                 console.log(response);
             }
@@ -176,6 +225,20 @@ function PhanQuyenChucNang() {
         );
     }, [showModal, isUpdate]);
 
+    const handleTableChange = (pagination, filters, sorter) => {
+        setTableParams({
+            pagination,
+            filters,
+            sortOrder: Array.isArray(sorter) ? undefined : sorter.order,
+            sortField: Array.isArray(sorter) ? undefined : sorter.field,
+        });
+
+        // `dataSource` is useless since `pageSize` changed
+        if (pagination.pageSize !== tableParams.pagination?.pageSize) {
+            setData([]);
+        }
+    };
+
     return isLoadingFeature || isLoadingPermission ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoadingRef.current }}>
             <Spin size="large" />
@@ -207,8 +270,10 @@ function PhanQuyenChucNang() {
             <TableCustomAnt
                 columns={combinedColumns(setShowModal)}
                 data={data}
-                height="350px"
+                height="550px"
                 setSelectedRowKeys={setSelectedRowKeys}
+                pagination={tableParams.pagination}
+                onChange={handleTableChange}
             />
             {phanQuyenChucNangUpdateMemoized}
         </div>
