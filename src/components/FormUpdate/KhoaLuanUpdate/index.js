@@ -7,7 +7,7 @@ import Update from '../../Core/Update';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getUsersByFaculty, getUseridFromLocalStorage } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createThesis } from '../../../services/thesisService';
+import { createThesis, updateThesisById } from '../../../services/thesisService';
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
@@ -22,6 +22,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     setShowModal,
     openNotification,
     reLoad,
+    selectedThesis
 }) {
 
     const [form] = useForm(); // Sử dụng hook useForm
@@ -91,7 +92,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         const fetchStatusByType = async () => {
             try {
                 const response = await getStatusByType(statusType);
-                console.log(response);
                 if (response) {
                     const options = response.map((status) => ({
                         value: status.statusId,
@@ -104,12 +104,34 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     }
                 }
             } catch (error) {
-                console.error('Error fetching statuses by type:', error);
+                console.error(' [ Khoaluanupdate - fetchStatusByType - Error ] :', error);
             }
         };
 
         fetchStatusByType();
     }, [statusType, selectedStatus]);
+
+
+    useEffect(() => {
+        if (selectedThesis && isUpdate) {
+            form.setFieldsValue({
+                title: selectedThesis.title,
+                description: selectedThesis.description,
+                faculty: selectedThesis.faculty.facultyName,
+                supervisor: selectedThesis.supervisor.fullname,
+                status: selectedThesis.status.statusId,
+                memberCount: selectedThesis.registrationCount,
+                thesisTime: [moment(selectedThesis.startDate), moment(selectedThesis.endDate)]
+            });
+            setSelectedFaculty(selectedThesis.facultyId);
+            setSelectedSupervisor(selectedThesis.supervisor.id);
+            setSelectedStatus(selectedThesis.status.statusId);
+            setSelectedMemberCount(selectedThesis.registrationCount);
+        } else {
+            form.resetFields();
+        }
+    }, [selectedThesis, isUpdate, form]);
+
 
     // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
     const handleCloseModal = () => {
@@ -120,12 +142,12 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
 
     const handleChangeSelect = (value) => {
         setSelectedFaculty(value);
-        console.log(`selected ${value}`);
+        console.log(` [ Khoaluanupdate - selected faculty ] : ${value}`);
     };
 
     const handleChangeSupervisor = (value) => {
         setSelectedSupervisor(value);
-        console.log(`selected supervisor ${value}`);
+        console.log(`[ Khoaluanupdate - selected supervisor ]  ${value}`);
     };
 
 
@@ -154,13 +176,20 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     registrationCount: values.memberCount,
                     startDate: startDate.toISOString(),
                     endDate: endDate.toISOString(),
-                    createUserId: userid ?? adminid,
                     lastModifyUserId: userid ?? adminid,
                 };
 
-                const response = await createThesis(thesisData);
+                let response;
+                if (isUpdate) {
+                    thesisData.facultyId = values.faculty.facultyId;
+                    response = await updateThesisById(selectedThesis.id, thesisData);
+                } else {
+                    thesisData.createUserId = userid ?? adminid;
+                    response = await createThesis(thesisData);
+                }
+
                 if (response && response.data) {
-                    message.success('Khóa luận đã được tạo thành công!');
+                    message.success(`Khóa luận đã được ${isUpdate ? 'cập nhật' : 'tạo'} thành công!`);
                     handleCloseModal();
                     if (reLoad) reLoad();
                 }
@@ -168,8 +197,8 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                 message.error('Vui lòng chọn thời gian thực hiện!');
             }
         } catch (error) {
-            console.error('Failed to create thesis:', error);
-            message.error(`Có lỗi xảy ra khi tạo khóa luận: ${error.response?.data?.message || error.message}`);
+            console.error(`[ Khoaluanupdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesis `, error);
+            message.error(`Có lỗi xảy ra khi ${isUpdate ? 'cập nhật' : 'tạo'} khóa luận: ${error.response?.data?.message || error.message}`);
         }
     };
 

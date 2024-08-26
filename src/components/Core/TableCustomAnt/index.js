@@ -1,20 +1,8 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
 import { Table } from 'antd';
-import { useState } from 'react';
 
 const cx = classNames.bind(styles);
-
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    getCheckboxProps: (record) => ({
-        disabled: record.name === 'Disabled User',
-        // Column configuration not to be checked
-        name: record.name,
-    }),
-};
 
 function TableCustomAnt({
     height = '290px',
@@ -24,19 +12,28 @@ function TableCustomAnt({
     isOutline = false,
     setSelectedRowKeys,
     selectedRowKeys,
+    onSelectedIdsChange, // Thêm prop để nhận hàm từ KhoaLuan
 }) {
     const rowSelection = {
         selectedRowKeys,
         onChange: (newSelectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${newSelectedRowKeys}`, 'selectedRows: ', selectedRows);
-            setSelectedRowKeys(newSelectedRowKeys); // Cập nhật selectedRowKeys
+            setSelectedRowKeys(newSelectedRowKeys);
+            // Lấy tất cả id của các hàng được chọn
+            const selectedIds = selectedRows.map(row => row.id);
+            console.log('Selected row keys: ', newSelectedRowKeys);
+            console.log('Selected row ids: ', selectedIds);
+
+            // Gọi hàm từ KhoaLuan để truyền danh sách id đã chọn
+            if (onSelectedIdsChange) {
+                onSelectedIdsChange(selectedIds);
+            }
         },
         getCheckboxProps: (record) => ({
-            disabled: record.name === 'Disabled User',
+            disabled: record.name === 'Disabled User', // Disable row nếu cần thiết
             name: record.name,
         }),
     };
-    const [checkStrictly, setCheckStrictly] = useState(false);
+
     return (
         <div
             className={cx('container-crud')}
@@ -48,12 +45,12 @@ function TableCustomAnt({
         >
             {isOutline ? <h2>Danh sách năm học</h2> : null}
             <Table
-                rowSelection={{
-                    ...rowSelection,
-                    checkStrictly,
-                }}
+                rowSelection={rowSelection}
                 columns={columns}
-                dataSource={data}
+                dataSource={data.map((item, index) => ({
+                    ...item,
+                    key: item.id || index,
+                }))}
                 showSorterTooltip={{
                     target: 'sorter-icon',
                 }}
@@ -66,3 +63,4 @@ function TableCustomAnt({
 }
 
 export default TableCustomAnt;
+

@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './KhoaLuan.module.scss';
-import { Card, Input, InputNumber, notification, Select, Tabs, Tag } from 'antd';
+import { Card, Input, InputNumber, notification, Select, Tabs, Tag, message } from 'antd';
 import { ResearchProjectsIcon } from '../../../../assets/icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -10,38 +10,11 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import KhoaLuanUpdate from '../../../../components/FormUpdate/KhoaLuanUpdate';
-import { getAllThesis } from '../../../../services/thesisService';
+import { getAllThesis, deleteThesis } from '../../../../services/thesisService';
 
 const cx = classNames.bind(styles);
 
-const listThesis = [
-    { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', count: 4, deadline: '10/05/2024' },
-    {
-        id: '2',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        count: 1,
-        deadline: '15/07/2024',
-    },
-    {
-        id: '3',
-        name: 'Ứng dụng công nghệ Blockchain trong kiểm chứng hồ sơ xin việc',
-        count: 2,
-        deadline: '12/06/2024',
-    },
-    {
-        id: '4',
-        name: 'Khảo sát một số thuật toán metaheuristic giải bài toán cây steiner nhỏ nhất trong trường hợp đồ thị thưa',
-        count: 0,
-        deadline: '03/05/2024',
-    },
-    {
-        id: '5',
-        name: 'Mô hình phát hiện tắc nghẽn với các tham số động trên mạng cảm biến không dây',
-        count: 10,
-        deadline: '09/09/2024',
-    },
-    { id: '6', name: 'Dự đoán ung thư phổi trên ảnh CT bằng phương pháp học sâu', count: 5, deadline: '30/12/2024' },
-];
+
 const listThesisJoin = [
     { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
     {
@@ -51,230 +24,135 @@ const listThesisJoin = [
     },
 ];
 
-const columns = (showModal) => [
-    {
-        title: 'Mã dự án',
-        dataIndex: 'id',
-        key: 'id',
-    },
-    {
-        title: 'Tên đề tài',
-        dataIndex: 'title',
-        key: 'title',
-    },
-    {
-        title: 'Khoa',
-        dataIndex: ['faculty', 'facultyName'],
-        key: 'faculty',
-    },
-    {
-        title: 'Chủ nhiệm đề tài',
-        dataIndex: ['supervisor', 'fullname'],
-        key: 'supervisor',
-    },
-    {
-        title: 'SL thành viên',
-        dataIndex: 'registrationCount',
-        key: 'registrationCount',
-    },
-    // {
-    //     title: 'Trạng thái',
-    //     key: 'Status',
-    //     dataIndex: 'Status',
-    //     render: (_, { Status }) => (
-    //         <>
-    //             {Status.map((tag) => {
-    //                 let color = tag === 'Đang thực hiện' ? 'green' : 'red';
-    //                 return (
-    //                     <Tag color={color} key={tag}>
-    //                         {tag.toUpperCase()}
-    //                     </Tag>
-    //                 );
-    //             })}
-    //         </>
-    //     ),
-    //     filters: [
-    //         {
-    //             text: 'Đang thực hiện',
-    //             value: 'Đang thực hiện',
-    //         },
-    //         {
-    //             text: 'Chưa thực hiện',
-    //             value: 'Chưa thực hiện',
-    //         },
-    //     ],
-    //     onFilter: (value, record) => record.Status.indexOf(value) === 0,
-    // },
-    {
-        title: 'Trạng thái',
-        key: 'status',
-        dataIndex: ['status', 'statusName'],
-        render: (statusName) => (
-            <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
-                {statusName.toUpperCase()}
-            </Tag>
-        ),
-    },
-    {
-        title: 'SL đăng ký',
-        dataIndex: 'registrations',
-        key: 'registrations',
-        render: (registrations) =>
-            parseInt(registrations) > 0 ? (
-                <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}>
-                    Danh sách đăng ký: {registrations}
-                </ButtonCustom>
-            ) : (
-                <p style={{ textAlign: 'center' }}>0</p>
-            ),
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: (_, record) => (
-            <div className={cx('action-item-nh')}>
-                <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
-                    Chi tiết
-                </ButtonCustom>
-                <ButtonCustom
-                    className={cx('btnEdit')}
-                    leftIcon={<EditOutlined />}
-                    primary
-                    verysmall
-                    onClick={() => showModal(record.NH)}
-                >
-                    Sửa
-                </ButtonCustom>
-            </div>
-        ),
-    },
-];
 
-// const data = [
-//     {
-//         key: '1',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 0,
-//     },
-//     {
-//         key: '2',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 2,
-//     },
-//     {
-//         key: '3',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Đang thực hiện'],
-//         SLDK: 0,
-//     },
-//     {
-//         key: '4',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 1,
-//     },
-//     {
-//         key: '5',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 3,
-//     },
-//     {
-//         key: '6',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 10,
-//     },
-//     {
-//         key: '7',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 12,
-//     },
-//     {
-//         key: '8',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 3,
-//     },
-//     {
-//         key: '9',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 6,
-//     },
-//     {
-//         key: '10',
-//         MaDA: 'DA001',
-//         TenDeTai: 'Mô hình học máy liên kết',
-//         Khoa: 'CNTT',
-//         CNDeTai: 'Đào Duy Trường',
-//         SL: '5',
-//         Status: ['Chưa thực hiện'],
-//         SLDK: 9,
-//     },
-// ];
+
 
 function KhoaLuan() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
+    const [selectedIds, setSelectedIds] = useState([]); //những id đã lấy được
     const [data, setData] = useState([]);
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
+    const [selectedThesis, setSelectedThesis] = useState(null);
+
+    const columns = (showModal) => [
+        {
+            title: 'Mã dự án',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Tên đề tài',
+            dataIndex: 'title',
+            key: 'title',
+        },
+        {
+            title: 'Khoa',
+            dataIndex: ['faculty', 'facultyName'],
+            key: 'faculty',
+        },
+        {
+            title: 'Chủ nhiệm đề tài',
+            dataIndex: ['supervisor', 'fullname'],
+            key: 'supervisor',
+        },
+        {
+            title: 'SL thành viên',
+            dataIndex: 'registrationCount',
+            key: 'registrationCount',
+        },
+        {
+            title: 'Trạng thái',
+            key: 'status',
+            dataIndex: ['status', 'statusName'],
+            render: (statusName) => (
+                <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
+                    {statusName.toUpperCase()}
+                </Tag>
+            ),
+        },
+        {
+            title: 'SL đăng ký',
+            dataIndex: 'registrations',
+            key: 'registrations',
+            render: (registrations) =>
+                parseInt(registrations) > 0 ? (
+                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}>
+                        Danh sách đăng ký: {registrations}
+                    </ButtonCustom>
+                ) : (
+                    <p style={{ textAlign: 'center' }}>0</p>
+                ),
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (_, record) => (
+                <div className={cx('action-item-nh')}>
+                    <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
+                        Chi tiết
+                    </ButtonCustom>
+                    <ButtonCustom
+                        className={cx('btnEdit')}
+                        leftIcon={<EditOutlined />}
+                        primary
+                        verysmall
+                        onClick={() => {
+                            showModal(record.NH);
+                            setIsUpdate(true);
+                            setSelectedThesis(record);
+                        }
+                        }
+                    >
+                        Sửa
+                    </ButtonCustom>
+                </div>
+            ),
+        },
+    ];
+
+
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const result = await getAllThesis();
-                setData(result.data);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setIsLoading(false);
-            }
-        };
-
         fetchData();
     }, []);
+
+    const fetchData = async () => {
+        try {
+            const result = await getAllThesis();
+            setData(result.data);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('[nghiep vu - khoa luan - fetchData] : Error fetching data:', error);
+            setIsLoading(false);
+        }
+    };
+
+    const handleSelectedIds = (ids) => {
+        setSelectedIds(ids);
+    };
+
+
+    const handleDelete = async (ids) => {
+        try {
+            for (const id of ids) {
+                await deleteThesis(id); // Xóa từng thesis
+            }
+            // Refresh dữ liệu sau khi xóa thành công
+            const result = await getAllThesis();
+            setData(result.data);
+            setSelectedIds([]); // Xóa các ID đã chọn
+
+            message.success('Xoá thành công');
+
+
+        } catch (error) {
+            message.error('Xoá thất bại - đã có lỗi xảy ra ');
+            console.error(' [nghiep vu - khoa luan - deletedThesis] : Error deleting theses:', error);
+        }
+    };
 
     const ITEM_TABS = [
         {
@@ -285,7 +163,9 @@ function KhoaLuan() {
                     height={'350px'}
                     columns={columns(setShowModal)}
                     data={data}
-                    setSelectedRowKeys={setSelectedRowKeys}
+                    setSelectedRowKeys={setSelectedRowKeys} // Đảm bảo setSelectedRowKeys được truyền vào
+                    selectedRowKeys={selectedRowKeys} // Truyền selectedRowKeys để kiểm soát hàng nào được chọn
+                    onSelectedIdsChange={handleSelectedIds}
                 />
             ),
         },
@@ -321,6 +201,7 @@ function KhoaLuan() {
     ];
     const [isToolbar, setIsToolbar] = useState(true);
 
+
     //Khi chọn tab 2 (Đề tài tham gia) => Ẩn toolbar
     const handleTabClick = (index) => {
         if (index === 2) {
@@ -349,10 +230,12 @@ function KhoaLuan() {
                 showModal={showModal}
                 setShowModal={setShowModal}
                 openNotification={openNotification}
+                selectedThesis={selectedThesis}
+                reLoad={fetchData}
             // reLoad={}
             />
         );
-    }, [showModal, isUpdate]);
+    }, [showModal, isUpdate, selectedThesis]);
     return (
         <div className={cx('wrapper')}>
             {contextHolder}
@@ -371,9 +254,10 @@ function KhoaLuan() {
                             onClick={() => {
                                 setShowModal(true);
                                 setIsUpdate(false);
+                                setSelectedThesis(null);
                             }}
                         />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận')} />
+                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận', selectedIds, handleDelete)} />
                         <Toolbar type={'Nhập file Excel'} />
                         <Toolbar type={'Xuất file Excel'} />
                     </div>

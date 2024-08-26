@@ -29,7 +29,7 @@ function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }
             ]
             : [
                 <ButtonCustom key={'saveClose'} outline small onClick={onUpdate}>
-                    Lưu
+                    Tạo mới
                 </ButtonCustom>,
                 <ButtonCustom
                     key={'saveCopy'}

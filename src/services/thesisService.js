@@ -5,6 +5,7 @@ export const getAllThesis = async () => {
         const response = await api.get('/thesis');
         return response.data;
     } catch (error) {
+        console.error('[thesisServive - getAllThesis - error] : ', error)
         throw error;
     }
 };
@@ -14,7 +15,40 @@ export const createThesis = async (thesisData) => {
         const response = await api.post('/thesis', thesisData);
         return response.data;
     } catch (error) {
-        console.error('Error creating thesis:', error);
+        console.error('[thesisServive - createThesis - error] : ', error);
         throw error;
     }
 };
+
+export const deleteThesis = async (id) => {
+    try {
+        const response = await api.delete(`/thesis/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('[thesisServive - deleteThesis - error] : ', error);
+        throw error;
+    }
+};
+
+
+export const getThesisById = async (id) => {
+    try {
+        const response = await api.get(`/thesis/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('[thesisServive - getThesisById - error] : ', error);
+        throw error;
+    }
+};
+
+
+export const updateThesisById = async (thesisId, thesisData) => {
+    try {
+        const response = await api.put(`/thesis/${thesisId}`, thesisData);
+        return response.data;
+    } catch (error) {
+        console.error('[thesisServive - updateThesIsById - error] : ', error);
+        throw error;
+    }
+}
+

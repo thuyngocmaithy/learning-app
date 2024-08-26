@@ -44,7 +44,7 @@ export const getWhere = async (conditions) => {
         const queryParams = new URLSearchParams(conditions).toString();
         const url = `/features/?${queryParams}`;
 
-        const response = await httpRequest.get(url);
+        const response = await api.get(url);
         return response;
     } catch (error) {
         throw error;
@@ -53,7 +53,7 @@ export const getWhere = async (conditions) => {
 
 export const getFeatureByStructure = async () => {
     try {
-        const response = await httpRequest.get('/features/getFeatureByStructure');
+        const response = await api.get('/features/getFeatureByStructure');
         return response;
     } catch (error) {
         throw error;

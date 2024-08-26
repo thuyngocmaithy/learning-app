@@ -3,7 +3,7 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Modal } from 'antd';
 
 const { confirm } = Modal;
-export const showDeleteConfirm = (title, onDelete) => {
+export const showDeleteConfirm = (title, ids, onDelete) => {
     confirm({
         title: `Xóa ${title}`,
         icon: <ExclamationCircleFilled style={{ color: 'red', width: '20px' }} />,
@@ -20,7 +20,7 @@ export const showDeleteConfirm = (title, onDelete) => {
             },
         },
         onOk() {
-            if (onDelete) onDelete();
+            if (onDelete) onDelete(ids);
         },
         onCancel() {
             console.log('Cancel');
