@@ -11,6 +11,8 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import DuAnUpdate from '../../../../components/FormUpdate/DuAnUpdate';
 
+import { getAllProject } from '../../../../services/projectService';
+
 const cx = classNames.bind(styles);
 
 const listProject = [
@@ -53,65 +55,75 @@ const listProjectJoin = [
 const columns = (showModal) => [
     {
         title: 'Mã dự án',
-        dataIndex: 'MaDA',
-        key: 'MaDA',
+        dataIndex: 'projectId',
+        key: 'projectId',
     },
     {
         title: 'Tên đề tài',
-        dataIndex: 'TenDeTai',
-        key: 'TenDeTai',
+        dataIndex: 'projectName',
+        key: 'projectName',
     },
     {
         title: 'Khoa',
-        dataIndex: 'Khoa',
-        key: 'Khoa',
+        dataIndex: ['faculty', 'facultyName'],
+        key: 'faculty',
     },
     {
         title: 'Chủ nhiệm đề tài',
-        dataIndex: 'CNDeTai',
-        key: 'CNDeTai',
+        dataIndex: ['instructor', 'fullname'],
+        key: 'instructor',
     },
     {
         title: 'SL thành viên',
-        dataIndex: 'SL',
-        key: 'SL',
+        dataIndex: 'numberOfMember',
+        key: 'numberOfMember',
     },
+    // {
+    //     title: 'Trạng thái',
+    //     key: 'Status',
+    //     dataIndex: 'Status',
+    //     render: (_, { Status }) => (
+    //         <>
+    //             {Status.map((tag) => {
+    //                 let color = tag === 'Đang thực hiện' ? 'green' : 'red';
+    //                 return (
+    //                     <Tag color={color} key={tag}>
+    //                         {tag.toUpperCase()}
+    //                     </Tag>
+    //                 );
+    //             })}
+    //         </>
+    //     ),
+    //     filters: [
+    //         {
+    //             text: 'Đang thực hiện',
+    //             value: 'Đang thực hiện',
+    //         },
+    //         {
+    //             text: 'Chưa thực hiện',
+    //             value: 'Chưa thực hiện',
+    //         },
+    //     ],
+    //     onFilter: (value, record) => record.Status.indexOf(value) === 0,
+    // },
     {
         title: 'Trạng thái',
-        key: 'Status',
-        dataIndex: 'Status',
-        render: (_, { Status }) => (
-            <>
-                {Status.map((tag) => {
-                    let color = tag === 'Đang thực hiện' ? 'green' : 'red';
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
+        key: 'status',
+        dataIndex: ['status', 'statusName'],
+        render: (statusName) => (
+            <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
+                {statusName.toUpperCase()}
+            </Tag>
         ),
-        filters: [
-            {
-                text: 'Đang thực hiện',
-                value: 'Đang thực hiện',
-            },
-            {
-                text: 'Chưa thực hiện',
-                value: 'Chưa thực hiện',
-            },
-        ],
-        onFilter: (value, record) => record.Status.indexOf(value) === 0,
     },
     {
         title: 'SL đăng ký',
-        dataIndex: 'SLDK',
-        key: 'SLDK',
-        render: (sldk) =>
-            parseInt(sldk) > 0 ? (
+        dataIndex: 'numberOfRegister',
+        key: 'numberOfRegister',
+        render: (numberOfRegister) =>
+            parseInt(numberOfRegister) > 0 ? (
                 <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}>
-                    Danh sách đăng ký: {sldk}
+                    Danh sách đăng ký: {numberOfRegister}
                 </ButtonCustom>
             ) : (
                 <p style={{ textAlign: 'center' }}>0</p>
@@ -130,13 +142,13 @@ const columns = (showModal) => [
                     leftIcon={<EditOutlined />}
                     primary
                     verysmall
-                    onClick={() => showModal(record.MaDA)}
+                    onClick={() => showModal(record.projectId)}
                 >
                     Sửa
                 </ButtonCustom>
             </div>
         ),
-    },
+    }
 ];
 
 const data = [
@@ -245,15 +257,27 @@ const data = [
 function DuAnNghienCuu() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
-
+    const [data, setData] = useState([]);
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
 
     useEffect(() => {
-        setList(listProject);
-        setIsLoading(false);
+        const fetchData = async () => {
+            try {
+                const result = await getAllProject();
+                setData(result.data);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
+
+
     const ITEM_TABS = [
         {
             id: 1,
@@ -264,6 +288,7 @@ function DuAnNghienCuu() {
                     columns={columns(setShowModal)}
                     data={data}
                     setSelectedRowKeys={setSelectedRowKeys}
+                    loading={isLoading}
                 />
             ),
         },
@@ -325,7 +350,7 @@ function DuAnNghienCuu() {
                 showModal={showModal}
                 setShowModal={setShowModal}
                 openNotification={openNotification}
-                // reLoad={}
+            // reLoad={}
             />
         );
     }, [showModal, isUpdate]);

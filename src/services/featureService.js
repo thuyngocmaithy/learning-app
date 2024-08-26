@@ -1,8 +1,8 @@
-import httpRequest from '../utils/apiConfig';
+import { api } from '../utils/apiConfig';
 
 export const getAll = async () => {
     try {
-        const response = await httpRequest.get('/features');
+        const response = await api.get('/features');
         return response;
     } catch (error) {
         throw error;
@@ -11,7 +11,7 @@ export const getAll = async () => {
 
 export const createFeature = async (data) => {
     try {
-        const response = await httpRequest.post('/features', data);
+        const response = await api.post('/features', data);
         return response;
     } catch (error) {
         console.error('Create features error:', error);
@@ -21,7 +21,7 @@ export const createFeature = async (data) => {
 
 export const updateFeature = async (id, data) => {
     try {
-        const response = await httpRequest.put(`/features/${id}`, data);
+        const response = await api.put(`/features/${id}`, data);
         return response;
     } catch (error) {
         console.error('Update feature error:', error);
@@ -31,7 +31,7 @@ export const updateFeature = async (id, data) => {
 
 export const deleteFeature = async (id) => {
     try {
-        const response = await httpRequest.delete(`/features/${id}`);
+        const response = await api.delete(`/features/${id}`);
         return response;
     } catch (error) {
         console.error('Delete feature error:', error);

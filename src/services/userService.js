@@ -1,4 +1,13 @@
-import { api, thongtindaotao } from '../utils/apiConfig';
+import { api } from '../utils/apiConfig';
+
+//hàm lấy accountId của user
+export const getAccountIdFromLocalStorage = () => {
+  return localStorage.getItem('accountId');
+};
+
+export const getUseridFromLocalStorage = () => {
+  return localStorage.getItem('user.id');
+}
 
 export const login = async (username, password) => {
   try {
@@ -10,19 +19,23 @@ export const login = async (username, password) => {
   }
 };
 
-// export const loginToSGU = async (username, password) => {
-//   try {
-//     const payload = { username: username, password, grant_type: "password" };
-//     const response = await thongtindaotao.post('/auth/login', payload, {
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//         origin: "https://thongtindaotao.sgu.edu.vn",
-//         referer: "https://thongtindaotao.sgu.edu.vn/",
-//       },
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.log('[userService - loginToSGU - error]:', error);
-//     throw error;
-//   }
-// };
+// Hàm đăng nhập sử dụng SGU
+export const loginToSgu = async (username, password) => {
+  try {
+    const response = await api.post('/authSGU/login-sgu', { username, password });
+    return response.data;
+  } catch (error) {
+    console.log('[userService - loginToSgu - error] : ', error);
+    throw error;
+  }
+};
+
+export const getUsersByFaculty = async (facultyId) => {
+  try {
+    const response = await api.get(`/users/users-by-faculty/${facultyId}`);
+    return response.data;
+  } catch (error) {
+    console.error('[userService - getUsersByFaculty - error] : ', error);
+    throw error;
+  }
+};  

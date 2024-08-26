@@ -54,8 +54,8 @@ function KhoaLuan() {
                 const thesis = response.data.map(thesis => ({
                     id: thesis.id,
                     name: thesis.title,
-                    supervisor: thesis.supervisorId,
-                    khoa: thesis.facultyFacultyId,
+                    supervisor: thesis.supervisor.fullname,
+                    khoa: thesis.faculty.facultyName,
                 }));
                 setList(thesis);
                 setIsLoading(false);

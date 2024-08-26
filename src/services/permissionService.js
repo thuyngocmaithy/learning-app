@@ -1,8 +1,9 @@
-import httpRequest from '../utils/apiConfig';
+import { api } from '../utils/apiConfig';
+
 
 export const getAll = async () => {
     try {
-        const response = await httpRequest.get('/permissions');
+        const response = await api.get('/permissions');
         return response;
     } catch (error) {
         throw error;

@@ -8,3 +8,13 @@ export const getAllThesis = async () => {
         throw error;
     }
 };
+
+export const createThesis = async (thesisData) => {
+    try {
+        const response = await api.post('/thesis', thesisData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating thesis:', error);
+        throw error;
+    }
+};

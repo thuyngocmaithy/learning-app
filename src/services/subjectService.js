@@ -1,4 +1,4 @@
-import { api, thongtindaotao } from '../utils/apiConfig';
+import { api } from '../utils/apiConfig';
 
 export const getAll = async () => {
   try {

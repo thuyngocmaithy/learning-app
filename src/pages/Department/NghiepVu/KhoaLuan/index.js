@@ -10,6 +10,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import KhoaLuanUpdate from '../../../../components/FormUpdate/KhoaLuanUpdate';
+import { getAllThesis } from '../../../../services/thesisService';
 
 const cx = classNames.bind(styles);
 
@@ -52,66 +53,76 @@ const listThesisJoin = [
 
 const columns = (showModal) => [
     {
-        title: 'Mã đề tài',
-        dataIndex: 'MaDA',
-        key: 'MaDA',
+        title: 'Mã dự án',
+        dataIndex: 'id',
+        key: 'id',
     },
     {
         title: 'Tên đề tài',
-        dataIndex: 'TenDeTai',
-        key: 'TenDeTai',
+        dataIndex: 'title',
+        key: 'title',
     },
     {
         title: 'Khoa',
-        dataIndex: 'Khoa',
-        key: 'Khoa',
+        dataIndex: ['faculty', 'facultyName'],
+        key: 'faculty',
     },
     {
         title: 'Chủ nhiệm đề tài',
-        dataIndex: 'CNDeTai',
-        key: 'CNDeTai',
+        dataIndex: ['supervisor', 'fullname'],
+        key: 'supervisor',
     },
     {
         title: 'SL thành viên',
-        dataIndex: 'SL',
-        key: 'SL',
+        dataIndex: 'registrationCount',
+        key: 'registrationCount',
     },
+    // {
+    //     title: 'Trạng thái',
+    //     key: 'Status',
+    //     dataIndex: 'Status',
+    //     render: (_, { Status }) => (
+    //         <>
+    //             {Status.map((tag) => {
+    //                 let color = tag === 'Đang thực hiện' ? 'green' : 'red';
+    //                 return (
+    //                     <Tag color={color} key={tag}>
+    //                         {tag.toUpperCase()}
+    //                     </Tag>
+    //                 );
+    //             })}
+    //         </>
+    //     ),
+    //     filters: [
+    //         {
+    //             text: 'Đang thực hiện',
+    //             value: 'Đang thực hiện',
+    //         },
+    //         {
+    //             text: 'Chưa thực hiện',
+    //             value: 'Chưa thực hiện',
+    //         },
+    //     ],
+    //     onFilter: (value, record) => record.Status.indexOf(value) === 0,
+    // },
     {
         title: 'Trạng thái',
-        key: 'Status',
-        dataIndex: 'Status',
-        render: (_, { Status }) => (
-            <>
-                {Status.map((tag) => {
-                    let color = tag === 'Đang thực hiện' ? 'green' : 'red';
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
+        key: 'status',
+        dataIndex: ['status', 'statusName'],
+        render: (statusName) => (
+            <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
+                {statusName.toUpperCase()}
+            </Tag>
         ),
-        filters: [
-            {
-                text: 'Đang thực hiện',
-                value: 'Đang thực hiện',
-            },
-            {
-                text: 'Chưa thực hiện',
-                value: 'Chưa thực hiện',
-            },
-        ],
-        onFilter: (value, record) => record.Status.indexOf(value) === 0,
     },
     {
         title: 'SL đăng ký',
-        dataIndex: 'SLDK',
-        key: 'SLDK',
-        render: (sldk) =>
-            parseInt(sldk) > 0 ? (
+        dataIndex: 'registrations',
+        key: 'registrations',
+        render: (registrations) =>
+            parseInt(registrations) > 0 ? (
                 <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}>
-                    Danh sách đăng ký: {sldk}
+                    Danh sách đăng ký: {registrations}
                 </ButtonCustom>
             ) : (
                 <p style={{ textAlign: 'center' }}>0</p>
@@ -139,119 +150,130 @@ const columns = (showModal) => [
     },
 ];
 
-const data = [
-    {
-        key: '1',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 0,
-    },
-    {
-        key: '2',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 2,
-    },
-    {
-        key: '3',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Đang thực hiện'],
-        SLDK: 0,
-    },
-    {
-        key: '4',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 1,
-    },
-    {
-        key: '5',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 3,
-    },
-    {
-        key: '6',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 10,
-    },
-    {
-        key: '7',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 12,
-    },
-    {
-        key: '8',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 3,
-    },
-    {
-        key: '9',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 6,
-    },
-    {
-        key: '10',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 9,
-    },
-];
+// const data = [
+//     {
+//         key: '1',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 0,
+//     },
+//     {
+//         key: '2',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 2,
+//     },
+//     {
+//         key: '3',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Đang thực hiện'],
+//         SLDK: 0,
+//     },
+//     {
+//         key: '4',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 1,
+//     },
+//     {
+//         key: '5',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 3,
+//     },
+//     {
+//         key: '6',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 10,
+//     },
+//     {
+//         key: '7',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 12,
+//     },
+//     {
+//         key: '8',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 3,
+//     },
+//     {
+//         key: '9',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 6,
+//     },
+//     {
+//         key: '10',
+//         MaDA: 'DA001',
+//         TenDeTai: 'Mô hình học máy liên kết',
+//         Khoa: 'CNTT',
+//         CNDeTai: 'Đào Duy Trường',
+//         SL: '5',
+//         Status: ['Chưa thực hiện'],
+//         SLDK: 9,
+//     },
+// ];
 
 function KhoaLuan() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-
+    const [data, setData] = useState([]);
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
+
     useEffect(() => {
-        setList(listThesis);
-        setIsLoading(false);
+        const fetchData = async () => {
+            try {
+                const result = await getAllThesis();
+                setData(result.data);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
     }, []);
 
     const ITEM_TABS = [
@@ -327,7 +349,7 @@ function KhoaLuan() {
                 showModal={showModal}
                 setShowModal={setShowModal}
                 openNotification={openNotification}
-                // reLoad={}
+            // reLoad={}
             />
         );
     }, [showModal, isUpdate]);
