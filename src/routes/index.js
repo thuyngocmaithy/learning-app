@@ -57,7 +57,7 @@ const publicRoutes = [
 
     // THIẾT LẬP
     {
-        path: config.routes.PhanQuyenChucNang_Department,
+        path: config.routes.PhanQuyenChucNang,
         component: PhanQuyenChucNang_Department,
         layout: DepartmentLayout,
     },

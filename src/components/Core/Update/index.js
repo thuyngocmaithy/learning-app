@@ -53,7 +53,7 @@ function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }
             onCancel={handleCancel}
             footer={footer}
         >
-            <Form>{children}</Form>
+            {children}
         </Modal>
     );
 }

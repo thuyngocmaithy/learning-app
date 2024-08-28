@@ -307,33 +307,13 @@ function KhoaLuan() {
             setIsToolbar(true);
         }
     };
-
-    const [api, contextHolder] = notification.useNotification();
-    const openNotification = useCallback(
-        (type, message, description) => {
-            api[type]({
-                message: message,
-                description: description,
-            });
-        },
-        [api],
-    );
-
     const khoaLuanUpdateMemoized = useMemo(() => {
         return (
-            <KhoaLuanUpdate
-                title={'khóa luận'}
-                isUpdate={isUpdate}
-                showModal={showModal}
-                setShowModal={setShowModal}
-                openNotification={openNotification}
-                // reLoad={}
-            />
+            <KhoaLuanUpdate title={'khóa luận'} isUpdate={isUpdate} showModal={showModal} setShowModal={setShowModal} />
         );
     }, [showModal, isUpdate]);
     return (
         <div className={cx('wrapper')}>
-            {contextHolder}
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>

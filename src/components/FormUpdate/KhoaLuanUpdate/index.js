@@ -1,16 +1,9 @@
-import React, { useRef, useState, memo, useMemo, useEffect, useCallback } from 'react';
+import React, { memo } from 'react';
 import { Input, InputNumber, Select } from 'antd';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 
-const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
-    title,
-    isUpdate,
-    showModal,
-    setShowModal,
-    openNotification,
-    reLoad,
-}) {
+const KhoaLuanUpdate = memo(function KhoaLuanUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
     const handleCloseModal = () => {
         if (showModal !== false) {

@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
 import { Table } from 'antd';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const cx = classNames.bind(styles);
 

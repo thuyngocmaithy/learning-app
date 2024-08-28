@@ -6,8 +6,23 @@ import logo from '../../../assets/images/logo.png';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Menu, Spin } from 'antd';
 import Sider from 'antd/es/layout/Sider';
-import { FormOutlined, HomeOutlined, OrderedListOutlined, ScheduleOutlined, BlockOutlined } from '@ant-design/icons';
+import {
+    FormOutlined,
+    HomeOutlined,
+    OrderedListOutlined,
+    ScheduleOutlined,
+    BlockOutlined,
+    MenuOutlined,
+    SettingFilled,
+} from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
+import {
+    getAll as getAllFeature,
+    getFeatureByPermission,
+    getWhere as getFeatureWhere,
+} from '../../../services/featureService';
+import { getWhere as getPermisisonFeatureWhere } from '../../../services/permissionFeatureService';
+import listIcon from '../../../assets/icons/listIconAnt';
 
 const cx = classNames.bind(styles);
 
@@ -97,6 +112,7 @@ const itemsDepartment = [
 ];
 
 function Sidebar({ department = false }) {
+    const [menu, setMenu] = useState([]);
     const [collapsed, setCollapsed] = useState(false);
     const [openKeys, setOpenKeys] = useState([]);
     let location = useLocation();
@@ -106,19 +122,64 @@ function Sidebar({ department = false }) {
         // ví dụ: /TienDoHocTap/schoolschedule vẫn active được /TienDoHocTap
         location.pathname === '/' || location.pathname === '' ? '/' : '/' + location.pathname.split('/')[1],
     );
+    const getMenu = async (permissionId) => {
+        try {
+            let data;
+            const response = await getFeatureByPermission({ permission: permissionId });
+            if (response.status === 200) {
+                if (department) {
+                    data = response.data[0].flatMap((item) => {
+                        return {
+                            key: item.parentFeatureId.url,
+                            label: item.parentFeatureId.featureName,
+                            icon: <MenuOutlined />,
 
+                            children: item.listFeature.map((row) => {
+                                const IconComponent = row.icon ? listIcon[row.icon] : null;
+                                return {
+                                    key: row.url,
+                                    label: <Link to={config.routes[row.keyRoute]}>{row.featureName}</Link>,
+                                    icon: row.icon ? <IconComponent /> : <MenuOutlined />,
+                                };
+                            }),
+                        };
+                    });
+                } else {
+                    data = response.data[0].map((feature) => {
+                        const IconComponent = feature.icon ? listIcon[feature.icon] : null;
+                        return {
+                            key: feature.url,
+                            label: <Link to={config.routes[feature.keyRoute]}>{feature.featureName}</Link>,
+                            icon: feature.icon ? <IconComponent /> : <MenuOutlined />,
+                        };
+                    });
+                }
+                setMenu(data);
+            } else {
+                console.log(response);
+            }
+            handleActiveMenu(data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+        }
+    };
     useEffect(() => {
+        getMenu(department ? 'faculty' : 'student');
+    }, []);
+
+    const handleActiveMenu = (data) => {
         if (location) {
             const pathDepartment = location.pathname.split('/')[2]
                 ? '/Department/' + location.pathname.split('/')[2] + '/' + location.pathname.split('/')[3]
                 : '/Department';
-            const newCurrent = department ? pathDepartment : '/' + location.pathname.split('/')[1];
 
+            const newCurrent = department ? pathDepartment : '/' + location.pathname.split('/')[1];
             setCurrent(newCurrent);
 
             // Cập nhật openKeys dựa trên current
             const newOpenKeys = ['/NghiepVu'];
-            const itemsList = department ? itemsDepartment : items;
+            const itemsList = data;
 
             const findOpenKeys = (items, path) => {
                 for (const item of items) {
@@ -134,6 +195,9 @@ function Sidebar({ department = false }) {
             findOpenKeys(itemsList, location.pathname);
             setOpenKeys(newOpenKeys);
         }
+    };
+    useEffect(() => {
+        // Xử lý active menu
     }, [location, current]);
 
     function handleClick(e) {
@@ -159,7 +223,13 @@ function Sidebar({ department = false }) {
                 selectedKeys={[current]}
                 openKeys={openKeys}
                 onOpenChange={(keys) => setOpenKeys(keys)}
-                items={department ? itemsDepartment : items}
+                items={menu}
+            />
+            <Menu
+                theme="dark"
+                mode="inline"
+                items={[{ key: 'sapxep', label: 'Sắp xếp menu', icon: <SettingFilled /> }]}
+                style={{ position: 'fixed', bottom: '48px', width: '210px' }}
             />
         </Sider>
     );

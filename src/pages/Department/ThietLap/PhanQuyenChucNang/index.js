@@ -4,10 +4,16 @@ import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { getAll as getAllPermission } from '../../../../services/permissionService';
-import { getAll as getAllFeature, deleteFeature, getFeatureByStructure } from '../../../../services/featureService';
+import { getAll as getAllPermission, getById as getByIdPermission } from '../../../../services/permissionService';
+import { deleteFeature, getFeatureByStructure, getById as getByIdFeature } from '../../../../services/featureService';
+import {
+    createPermissionFeature,
+    deletePermissionFeature,
+    getAll as getAllPermissionFeature,
+    getWhere as getWherePermissionFeature,
+} from '../../../../services/permissionFeatureService';
 import { EditOutlined } from '@ant-design/icons';
-import { notification, Spin } from 'antd';
+import { message, notification, Spin } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import PhanQuyenChucNangUpdate from '../../../../components/FormUpdate/PhanQuyenChucNangUpdate';
@@ -35,7 +41,6 @@ function PhanQuyenChucNang() {
     // Hàm xử lý khi radio button thay đổi
     const handleChange = (event) => {
         setSelectedValue(event.target.value);
-        console.log(event.target.value);
     };
 
     const columns = useCallback(
@@ -75,6 +80,8 @@ function PhanQuyenChucNang() {
                                     featureName: record.featureName,
                                     keyRoute: record.keyRoute,
                                     url: record.url,
+                                    icon: record.icon,
+                                    parentFeatureId: record.parentFeatureId,
                                 });
                                 setIsUpdate(true);
                             }}
@@ -91,24 +98,33 @@ function PhanQuyenChucNang() {
     );
 
     const getPermission = async () => {
+        const dataPermissionFeature = await getPermissionFeature();
         try {
             const response = await getAllPermission();
             if (response.status === 200) {
-                const newColumnsPermission = response.data.data.map((permission) => ({
-                    title: permission.permissionName,
-                    dataIndex: permission.permissionId,
-                    key: permission.permissionId,
-                    render: (_, record) =>
-                        record.keyRoute && (
-                            <input
-                                type={'checkbox'}
-                                value={record.key}
-                                name={record.permissionId}
-                                onChange={handleChange}
-                            />
-                        ),
-                    align: 'center',
-                }));
+                const newColumnsPermission = response.data.data.map((permission) => {
+                    return {
+                        title: permission.permissionName,
+                        dataIndex: permission.permissionId,
+                        key: permission.permissionId,
+                        render: (_, record) =>
+                            record.keyRoute && (
+                                <input
+                                    type={'checkbox'}
+                                    value={permission.permissionId + '_' + record.featureId}
+                                    name={permission.permissionId + '_' + record.featureId}
+                                    className="checkbox-permission-feature"
+                                    onChange={handleChange}
+                                    defaultChecked={dataPermissionFeature.some(
+                                        (data) =>
+                                            data.permission.permissionId === permission.permissionId &&
+                                            data.feature.featureId === record.featureId,
+                                    )}
+                                />
+                            ),
+                        align: 'center',
+                    };
+                });
                 setCombinedColumns(() => () => columns(newColumnsPermission));
             } else {
                 console.log(response);
@@ -120,13 +136,12 @@ function PhanQuyenChucNang() {
         }
     };
 
-    const getFeature = useCallback(async () => {
+    const getFeature = async () => {
         try {
             const response = await getFeatureByStructure();
             if (response.status === 200) {
                 const data = response.data[0].flatMap((item) => {
                     if (item.parentFeatureId === null && item.listFeature) {
-                        console.log(item.listFeature);
                         return item.listFeature
                             .map((row) => {
                                 return {
@@ -135,6 +150,7 @@ function PhanQuyenChucNang() {
                                     featureName: row.featureName,
                                     keyRoute: row.keyRoute,
                                     url: row.url,
+                                    icon: row.icon,
                                 };
                             })
                             .filter(Boolean); // Loại bỏ các đối tượng null
@@ -152,15 +168,13 @@ function PhanQuyenChucNang() {
                                     featureName: row.featureName,
                                     keyRoute: row.keyRoute,
                                     url: row.url,
+                                    icon: row.icon,
+                                    parentFeatureId: row.parentFeature,
                                 };
                             }),
-                            // Loại bỏ các đối tượng null
                         };
                     }
                 });
-
-                console.log(data); // Kiểm tra kết quả
-
                 setData(data || []);
                 setTableParams({
                     ...tableParams,
@@ -177,10 +191,27 @@ function PhanQuyenChucNang() {
         } finally {
             setIsLoadingFeature(false);
         }
-    }, []);
+    };
+
+    const getPermissionFeature = async () => {
+        try {
+            const response = await getAllPermissionFeature();
+            if (response.status === 200) {
+                return response.data.data;
+            } else {
+                console.log(response);
+                return [];
+            }
+        } catch (error) {
+            console.log(error);
+            return [];
+        } finally {
+        }
+    };
 
     useEffect(() => {
         if (!didMountRef.current) {
+            // getPermissionFeature();
             heightContainerLoadingRef.current = document.getElementsByClassName('main-content')[0]?.clientHeight || 0;
             getPermission();
             getFeature();
@@ -188,30 +219,36 @@ function PhanQuyenChucNang() {
         }
     }, []);
 
-    const [api, contextHolder] = notification.useNotification();
-    const openNotification = useCallback(
-        (type, message, description) => {
-            api[type]({
-                message: message,
-                description: description,
-            });
-        },
-        [api],
-    );
-
     // Hàm xử lý xóa các hàng đã chọn
     const handleDeleteSelected = async () => {
         try {
             for (const id of selectedRowKeys) {
                 await deleteFeature(id); // Xóa từng item một
             } // Gọi API để xóa các hàng đã chọn
-            openNotification('success', 'Xóa thành công', '');
+            message.success('Xóa thành công');
             setSelectedRowKeys([]); // Xóa các hàng đã chọn sau khi xóa thành công
             getFeature(); // Tải lại dữ liệu
         } catch (error) {
-            openNotification('error', 'Xóa thất bại', '');
+            message.error('Xóa thất bại');
         }
     };
+    // Hàm xử lý xóa các permisison_feature tồn tại mà có thay đổi
+    const handleDeletePermissionFeatureExist = async (id) => {
+        try {
+            await deletePermissionFeature(id);
+        } catch (error) {
+            console.log('Lỗi xóa các permisison_feature tồn tại mà có thay đổi: ' + error);
+        }
+    };
+    // Hàm xử lý lưu phân quyền
+    const handleSavePhanQuyen = async (data) => {
+        try {
+            await createPermissionFeature(data);
+        } catch (error) {
+            message.error('Lưu phân quyền thất bại:' + error);
+        }
+    };
+
     const phanQuyenChucNangUpdateMemoized = useMemo(() => {
         return (
             <PhanQuyenChucNangUpdate
@@ -219,7 +256,6 @@ function PhanQuyenChucNang() {
                 isUpdate={isUpdate}
                 showModal={showModal}
                 setShowModal={setShowModal}
-                openNotification={openNotification}
                 reLoad={getFeature}
             />
         );
@@ -239,13 +275,54 @@ function PhanQuyenChucNang() {
         }
     };
 
+    const handlePhanQuyen = () => {
+        // Lấy tất cả các ô trong bảng
+        const checkbox = document.querySelectorAll('.ant-table-cell .checkbox-permission-feature');
+
+        Array.from(checkbox).map(async (checkbox) => {
+            var value = checkbox.value.split('_');
+            var permissionId = value[0];
+            var featureId = value[1];
+            const conditions = { permission: permissionId, feature: featureId };
+            if (!checkbox.checked) {
+                try {
+                    const response = await getWherePermissionFeature(conditions);
+                    if (response.status === 200) {
+                        handleDeletePermissionFeatureExist(response.data.data[0].id);
+                    }
+                } catch (error) {
+                    message.error('Lưu phân quyền thất bại:' + error);
+                }
+            } else {
+                try {
+                    const response = await getWherePermissionFeature(conditions);
+                    if (response.status === 204) {
+                        console.log(value);
+                        var permissionRs = await getByIdPermission(permissionId);
+                        var featureRs = await getByIdFeature(featureId);
+                        //Không tồn tại
+                        const data = {
+                            orderNo: 1,
+                            permission: permissionRs.data.data,
+                            feature: featureRs.data.data,
+                        };
+                        console.log(data);
+                        handleSavePhanQuyen(data);
+                    }
+                } catch (error) {
+                    message.error('Lưu phân quyền thất bại:' + error);
+                }
+            }
+        });
+        message.success('Lưu phân quyền thành công');
+    };
+
     return isLoadingFeature || isLoadingPermission ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoadingRef.current }}>
             <Spin size="large" />
         </div>
     ) : (
         <div className={cx('wrapper')}>
-            {contextHolder}
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
                     <div className={cx('title')}>
@@ -265,6 +342,7 @@ function PhanQuyenChucNang() {
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('chức năng', handleDeleteSelected)} />
+                    <Toolbar type={'Lưu phân quyền'} backgroundCustom="#FF9F9F" onClick={handlePhanQuyen} />
                 </div>
             </div>
             <TableCustomAnt

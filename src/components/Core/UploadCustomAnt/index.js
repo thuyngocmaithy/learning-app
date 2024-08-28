@@ -13,10 +13,13 @@ const getBase64 = (file) =>
         reader.onload = () => resolve(reader.result);
         reader.onerror = (error) => reject(error);
     });
-function UploadCustomAnt() {
+
+const UploadCustomAnt = ({ onFileChange }) => {
+    // Thêm prop onFileChange để truyền dữ liệu ra ngoài
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [fileList, setFileList] = useState([]);
+
     const handlePreview = async (file) => {
         if (!file.url && !file.preview) {
             file.preview = await getBase64(file.originFileObj);
@@ -24,7 +27,19 @@ function UploadCustomAnt() {
         setPreviewImage(file.url || file.preview);
         setPreviewOpen(true);
     };
-    const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+
+    const handleChange = ({ fileList: newFileList }) => {
+        // Giới hạn số lượng file chỉ còn 1
+        if (newFileList.length > 1) {
+            newFileList = [newFileList[newFileList.length - 1]];
+        }
+        setFileList(newFileList);
+        // Truyền dữ liệu file ra ngoài component cha
+        if (onFileChange) {
+            onFileChange(newFileList);
+        }
+    };
+
     const uploadButton = (
         <button
             style={{
@@ -43,16 +58,25 @@ function UploadCustomAnt() {
             </div>
         </button>
     );
+
+    const customRequest = ({ onSuccess }) => {
+        // Không thực hiện upload, chỉ cần gọi onSuccess để thông báo rằng upload thành công.
+        onSuccess(null);
+    };
+
     return (
         <>
             <Upload
-                action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+                style={{ width: '20px' }}
+                progress={'line'}
+                customRequest={customRequest} // Không thực hiện upload ngay lập tức
                 listType="picture-circle"
                 fileList={fileList}
                 onPreview={handlePreview}
                 onChange={handleChange}
+                maxCount={1} // Giới hạn số lượng file tải lên
             >
-                {fileList.length >= 8 ? null : uploadButton}
+                {fileList.length === 0 && uploadButton}
             </Upload>
             {previewImage && (
                 <Image
@@ -69,6 +93,6 @@ function UploadCustomAnt() {
             )}
         </>
     );
-}
+};
 
 export default UploadCustomAnt;
