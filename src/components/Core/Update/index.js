@@ -23,25 +23,25 @@ function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }
     const footer = useMemo(() => {
         return isUpdate
             ? [
-                  <ButtonCustom key={'save'} primary small onClick={onUpdate}>
-                      Lưu
-                  </ButtonCustom>,
-              ]
+                <ButtonCustom key={'save'} primary small onClick={onUpdate}>
+                    Lưu
+                </ButtonCustom>,
+            ]
             : [
-                  <ButtonCustom key={'saveClose'} outline small onClick={onUpdate}>
-                      Lưu & nhập tiếp
-                  </ButtonCustom>,
-                  <ButtonCustom
-                      key={'saveCopy'}
-                      className={cx('btnSaveCopy')}
-                      primary
-                      small
-                      onClick={onUpdate}
-                      //   disabled={isSubmitting};
-                  >
-                      Lưu & sao chép
-                  </ButtonCustom>,
-              ];
+                <ButtonCustom key={'saveClose'} outline small onClick={onUpdate}>
+                    Tạo mới
+                </ButtonCustom>,
+                <ButtonCustom
+                    key={'saveCopy'}
+                    className={cx('btnSaveCopy')}
+                    primary
+                    small
+                    onClick={onUpdate}
+                //   disabled={isSubmitting};
+                >
+                    Lưu & sao chép
+                </ButtonCustom>,
+            ];
     }, [isUpdate, onUpdate]);
 
     return (

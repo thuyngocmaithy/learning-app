@@ -6,78 +6,38 @@ import { useEffect, useState } from 'react';
 import Button from '../../../components/Core/Button';
 import Filter from '../../../components/Popper/Filter';
 
+import { getAllIntern } from '../../../services/internService';
+
 const cx = classNames.bind(styles);
 
-const listProject = [
-    {
-        id: '1',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        area: 'Hồ Chí Minh',
-        salary: '1tr ~ 2tr VNĐ',
-        countReceived: '0',
-        countSubmitted: '155',
-        date: '01/01/2025',
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '2',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        area: 'Hồ Chí Minh',
-        salary: '1tr ~ 2tr VNĐ',
-        countReceived: '0',
-        countSubmitted: '155',
-        date: '01/01/2025',
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '3',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        area: 'Hồ Chí Minh',
-        salary: '1tr ~ 2tr VNĐ',
-        countReceived: '0',
-        countSubmitted: '155',
-        date: '01/01/2025',
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '4',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        area: 'Hồ Chí Minh',
-        salary: '1tr ~ 2tr VNĐ',
-        countReceived: '0',
-        countSubmitted: '155',
-        date: '01/01/2025',
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '5',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        area: 'Hồ Chí Minh',
-        salary: '1tr ~ 2tr VNĐ',
-        countReceived: '0',
-        countSubmitted: '155',
-        date: '01/01/2025',
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '6',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        area: 'Hồ Chí Minh',
-        salary: '1tr ~ 2tr VNĐ',
-        countReceived: '0',
-        countSubmitted: '155',
-        date: '01/01/2025',
-        khoa: 'Công nghệ thông tin',
-    },
-];
 
 function ThucTap() {
-    const [list, setList] = useState([]);
-    const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
+    const [listIntern, setListIntern] = useState([]); // State cho danh sách thực tập
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
-        setList(listProject);
-        setIsLoading(false);
+        const fetchInterns = async () => {
+            try {
+                const response = await getAllIntern(); // Gọi API
+                const interns = response.data.map((intern) => ({
+                    id: intern.id,
+                    name: intern.title,
+                    area: intern.location,
+                    salary: `${intern.salary} USD`, // format lại lương nếu cần
+                    countReceived: '0', // Bạn có thể điều chỉnh giá trị này tùy theo nhu cầu
+                    countSubmitted: intern.internNumber,
+                    date: new Date(intern.createDate).toLocaleDateString('vi-VN'), // format lại ngày tháng
+                }));
+                setListIntern(interns);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu thực tập:', error);
+            }
+        };
+
+        fetchInterns();
     }, []);
+
 
     const openInNewTab = (url) => {
         window.open(url, '_blank', 'noopener,noreferrer');
@@ -135,7 +95,7 @@ function ThucTap() {
                             position: 'bottom',
                             align: 'end',
                         }}
-                        dataSource={list}
+                        dataSource={listIntern}
                         renderItem={(item, index) => (
                             <List.Item
                                 actions={[
@@ -221,7 +181,7 @@ function ThucTap() {
                             position: 'bottom',
                             align: 'end',
                         }}
-                        dataSource={list}
+                        dataSource={listIntern}
                         renderItem={(item, index) => (
                             <List.Item
                                 actions={[

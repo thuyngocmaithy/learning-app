@@ -5,7 +5,7 @@ import { createContext, useContext } from 'react';
 
 const cx = classNames.bind(styles);
 
-function FormItem({ name, label, children }) {
+function FormItem({ name, label, children, ...props }) {
     const MyFormItemContext = createContext([]);
 
     function toArr(str) {
@@ -19,9 +19,9 @@ function FormItem({ name, label, children }) {
     };
 
     return (
-        <FormItem name={name} label={label} className={cx('form-item')}>
+        <Form.Item name={name} label={label} {...props} className={cx('form-item')}>
             {children}
-        </FormItem>
+        </Form.Item>
     );
 }
 

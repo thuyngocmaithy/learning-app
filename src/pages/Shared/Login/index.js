@@ -1,10 +1,10 @@
-import React from 'react';
-import { Form, Input, message } from 'antd';
+import React, { useState } from 'react';
+import { Form, Input, message, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../../../services/userService';
+import { login } from '../../../services/userService'; // Chỉ cần import hàm login
 import classNames from 'classnames/bind';
-import styles from './Login.module.scss'; // Đảm bảo import CSS/SASS của bạn
+import styles from './Login.module.scss';
 import sgu from '../../../assets/images/sgu.jpg';
 import Button from '../../../components/Core/Button';
 
@@ -16,11 +16,12 @@ const LoginForm = () => {
     const onFinish = async (values) => {
         try {
             const response = await login(values.username, values.password);
-            // Lưu token vào localStorage
-            if (response.status === 200) {
-                console.log(response.data.data.accessToken);
+
+            if (response.status === "200" || response.status === 200) {
                 message.success('Đăng nhập thành công');
-                localStorage.setItem('token', response.data.data.accessToken);
+                localStorage.setItem('accountId', response.accountId);
+                localStorage.setItem('user.id', response.userId);
+                localStorage.setItem('token', response.accessToken);
                 navigate('/'); // Chuyển hướng về trang chủ
             } else {
                 message.error(response.message || 'Đăng nhập thất bại');
