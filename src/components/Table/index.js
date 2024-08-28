@@ -144,9 +144,9 @@ function ColumnGroupingTable({ department = false }) {
         setIsLoading(true);
         try {
             const response = await listSubjectToFrame();
-            // Lưu token vào localStorage
-            if (response.status === 200) {
-                setListFrame(response.data[0]);
+
+            if (response) {
+                setListFrame(response[0]);
             } else {
                 console.log(response);
             }
@@ -163,7 +163,6 @@ function ColumnGroupingTable({ department = false }) {
             const height = document.getElementsByClassName('main-content')[0].clientHeight;
             setHeightContainerLoading(height);
             getFrame();
-            console.log('render');
             didMountRef.current = true;
         }
     }, []);
@@ -272,9 +271,9 @@ function ColumnGroupingTable({ department = false }) {
                                                                                 (childFrame3, childIndex3) => {
                                                                                     if (
                                                                                         childFrame3.parentFrameId !==
-                                                                                            null &&
+                                                                                        null &&
                                                                                         childFrame3.parentFrameId ===
-                                                                                            childFrame2.id
+                                                                                        childFrame2.id
                                                                                     ) {
                                                                                         return (
                                                                                             <Fragment
@@ -364,11 +363,11 @@ function ColumnGroupingTable({ department = false }) {
                                                                                                                                     className={
                                                                                                                                         department
                                                                                                                                             ? cx(
-                                                                                                                                                  'checkbox-period',
-                                                                                                                                              )
+                                                                                                                                                'checkbox-period',
+                                                                                                                                            )
                                                                                                                                             : cx(
-                                                                                                                                                  'radio-period',
-                                                                                                                                              )
+                                                                                                                                                'radio-period',
+                                                                                                                                            )
                                                                                                                                     }
                                                                                                                                     type={
                                                                                                                                         department
@@ -445,11 +444,11 @@ function ColumnGroupingTable({ department = false }) {
                                                                                                                 className={
                                                                                                                     department
                                                                                                                         ? cx(
-                                                                                                                              'checkbox-period',
-                                                                                                                          )
+                                                                                                                            'checkbox-period',
+                                                                                                                        )
                                                                                                                         : cx(
-                                                                                                                              'radio-period',
-                                                                                                                          )
+                                                                                                                            'radio-period',
+                                                                                                                        )
                                                                                                                 }
                                                                                                                 type={
                                                                                                                     department
@@ -512,8 +511,8 @@ function ColumnGroupingTable({ department = false }) {
                                                                                             className={
                                                                                                 department
                                                                                                     ? cx(
-                                                                                                          'checkbox-period',
-                                                                                                      )
+                                                                                                        'checkbox-period',
+                                                                                                    )
                                                                                                     : cx('radio-period')
                                                                                             }
                                                                                             type={

@@ -12,7 +12,7 @@ export const getAll = async () => {
 
 export const getById = async (id) => {
     try {
-        const response = await httpRequest.get(`/permissions/${id}`);
+        const response = await api.get(`/permissions/${id}`);
         return response;
     } catch (error) {
         throw error;

@@ -11,7 +11,7 @@ export const getAll = async () => {
 
 export const getById = async (id) => {
     try {
-        const response = await httpRequest.get(`/features/${id}`);
+        const response = await api.get(`/features/${id}`);
         return response;
     } catch (error) {
         throw error;
@@ -74,7 +74,7 @@ export const getFeatureByPermission = async (permisisonId) => {
         const queryParams = new URLSearchParams(permisisonId).toString();
         const url = `/features/getFeatureByPermission?${queryParams}`;
 
-        const response = await httpRequest.get(url);
+        const response = await api.get(url);
         return response;
     } catch (error) {
         throw error;

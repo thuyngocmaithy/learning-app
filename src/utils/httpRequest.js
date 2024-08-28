@@ -1,5 +1,5 @@
 // httpRequest.js
-import api from './apiConfig';
+import { api } from './apiConfig';
 
 const httpRequest = {
     get: async (path, options = {}) => {

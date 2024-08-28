@@ -1,4 +1,4 @@
-import httpRequest from '../utils/apiConfig';
+import httpRequest from '../utils/httpRequest';
 
 export const getAll = async () => {
     try {

@@ -217,10 +217,8 @@ function KhoaLuan() {
                 isUpdate={isUpdate}
                 showModal={showModal}
                 setShowModal={setShowModal}
-                openNotification={openNotification}
                 selectedThesis={selectedThesis}
                 reLoad={fetchData}
-            // reLoad={}
             />
         );
     }, [showModal, isUpdate, selectedThesis]);
