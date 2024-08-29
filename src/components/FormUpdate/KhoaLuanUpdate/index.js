@@ -16,6 +16,7 @@ const { RangePicker } = DatePicker;
 const userid = getUseridFromLocalStorage();
 const adminid = '0ad0941f-579e-11ef-aca7-1aa268f50191';
 
+
 const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     title,
     isUpdate,
@@ -178,7 +179,8 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     registrationCount: values.memberCount,
                     startDate: startDate.toISOString(),
                     endDate: endDate.toISOString(),
-                    lastModifyUserId: userid ?? adminid,
+                    lastModifyUserId: userid || adminid,
+                    createUserId: userid || adminid,
                 };
 
                 let response;
@@ -186,7 +188,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     thesisData.facultyId = values.faculty.facultyId;
                     response = await updateThesisById(selectedThesis.id, thesisData);
                 } else {
-                    thesisData.createUserId = userid ?? adminid;
+                    // thesisData.createUserId = userid ?? adminid;
                     response = await createThesis(thesisData);
                 }
 
