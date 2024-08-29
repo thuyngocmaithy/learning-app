@@ -87,8 +87,8 @@ function TableScore({ height = 490 }) {
         try {
             const response = await listSubjectToFrame();
             // Lưu token vào localStorage
-            if (response.status === 200) {
-                setListFrame(response.data[0]);
+            if (response) {
+                setListFrame(response[0]);
             } else {
                 console.log(response);
             }
@@ -205,9 +205,9 @@ function TableScore({ height = 490 }) {
                                                                                 (childFrame3, childIndex3) => {
                                                                                     if (
                                                                                         childFrame3.parentFrameId !==
-                                                                                            null &&
+                                                                                        null &&
                                                                                         childFrame3.parentFrameId ===
-                                                                                            childFrame2.id
+                                                                                        childFrame2.id
                                                                                     ) {
                                                                                         return (
                                                                                             <Fragment

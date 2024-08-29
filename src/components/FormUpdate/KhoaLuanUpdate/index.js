@@ -1,4 +1,4 @@
-import React, { useRef, useState, memo, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, memo, useEffect } from 'react';
 import { Input, InputNumber, Select, DatePicker, message, Form } from 'antd';
 import moment from 'moment';
 import { useForm } from 'antd/es/form/Form';
@@ -21,7 +21,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     isUpdate,
     showModal,
     setShowModal,
-    openNotification,
     reLoad,
     selectedThesis
 }) {

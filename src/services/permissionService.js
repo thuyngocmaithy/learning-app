@@ -9,3 +9,12 @@ export const getAll = async () => {
         throw error;
     }
 };
+
+export const getById = async (id) => {
+    try {
+        const response = await api.get(`/permissions/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

@@ -1,11 +1,18 @@
 import { Tooltip } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Toolbar.module.scss';
-import { DeleteOutlined, ExportOutlined, ImportOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    DeleteOutlined,
+    ExportOutlined,
+    ImportOutlined,
+    PlusOutlined,
+    SaveFilled,
+    SaveOutlined,
+} from '@ant-design/icons';
 
 const cx = classNames.bind(styles);
 
-function Toolbar({ type, onClick }) {
+function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3' }) {
     let icon = null;
     if (type === 'Xóa') {
         icon = <DeleteOutlined />;
@@ -15,10 +22,12 @@ function Toolbar({ type, onClick }) {
         icon = <ExportOutlined />;
     } else if (type === 'Thêm mới') {
         icon = <PlusOutlined />;
+    } else if (type === 'Lưu phân quyền') {
+        icon = <SaveOutlined />;
     }
     return (
         <Tooltip title={type}>
-            <button className={cx('wrapper')} onClick={onClick}>
+            <button className={cx('wrapper')} onClick={onClick} style={{ backgroundColor: backgroundCustom }}>
                 <span className={cx('icon')}>{icon}</span>
             </button>
         </Tooltip>

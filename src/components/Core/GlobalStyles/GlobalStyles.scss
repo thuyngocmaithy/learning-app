@@ -310,6 +310,10 @@ body {
         color: var(--black);
     }
 
+    .ant-select-selection-item span {
+        display: flex;
+    }
+
 
 
 }

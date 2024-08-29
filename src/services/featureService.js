@@ -9,6 +9,15 @@ export const getAll = async () => {
     }
 };
 
+export const getById = async (id) => {
+    try {
+        const response = await api.get(`/features/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const createFeature = async (data) => {
     try {
         const response = await api.post('/features', data);
@@ -42,7 +51,7 @@ export const deleteFeature = async (id) => {
 export const getWhere = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
-        const url = `/features/?${queryParams}`;
+        const url = `/features/getFeatureWhereParentAndKeyRoute?${queryParams}`;
 
         const response = await api.get(url);
         return response;
@@ -54,6 +63,18 @@ export const getWhere = async (conditions) => {
 export const getFeatureByStructure = async () => {
     try {
         const response = await api.get('/features/getFeatureByStructure');
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getFeatureByPermission = async (permisisonId) => {
+    try {
+        const queryParams = new URLSearchParams(permisisonId).toString();
+        const url = `/features/getFeatureByPermission?${queryParams}`;
+
+        const response = await api.get(url);
         return response;
     } catch (error) {
         throw error;
