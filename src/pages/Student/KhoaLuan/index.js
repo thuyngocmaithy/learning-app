@@ -9,39 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { getAllThesis } from '../../../services/thesisService';
 const cx = classNames.bind(styles);
 
-const listProject = [
-    { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', count: 4, khoa: 'Công nghệ thông tin' },
-    {
-        id: '2',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        count: 1,
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '3',
-        name: 'Ứng dụng công nghệ Blockchain trong kiểm chứng hồ sơ xin việc',
-        count: 2,
-        khoa: 'Tài chính - kế toán',
-    },
-    {
-        id: '4',
-        name: 'Khảo sát một số thuật toán metaheuristic giải bài toán cây steiner nhỏ nhất trong trường hợp đồ thị thưa',
-        count: 0,
-        khoa: 'Công nghệ thông tin',
-    },
-    {
-        id: '5',
-        name: 'Mô hình phát hiện tắc nghẽn với các tham số động trên mạng cảm biến không dây',
-        count: 10,
-        khoa: 'Thương mại điện tử',
-    },
-    {
-        id: '6',
-        name: 'Dự đoán ung thư phổi trên ảnh CT bằng phương pháp học sâu',
-        count: 5,
-        khoa: 'Công nghệ thông tin',
-    },
-];
 
 function KhoaLuan() {
     const navigate = useNavigate();

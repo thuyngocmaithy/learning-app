@@ -15,34 +15,6 @@ import { getAllProject } from '../../../../services/projectService';
 
 const cx = classNames.bind(styles);
 
-const listProject = [
-    { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', count: 4, deadline: '10/05/2024' },
-    {
-        id: '2',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        count: 1,
-        deadline: '15/07/2024',
-    },
-    {
-        id: '3',
-        name: 'Ứng dụng công nghệ Blockchain trong kiểm chứng hồ sơ xin việc',
-        count: 2,
-        deadline: '12/06/2024',
-    },
-    {
-        id: '4',
-        name: 'Khảo sát một số thuật toán metaheuristic giải bài toán cây steiner nhỏ nhất trong trường hợp đồ thị thưa',
-        count: 0,
-        deadline: '03/05/2024',
-    },
-    {
-        id: '5',
-        name: 'Mô hình phát hiện tắc nghẽn với các tham số động trên mạng cảm biến không dây',
-        count: 10,
-        deadline: '09/09/2024',
-    },
-    { id: '6', name: 'Dự đoán ung thư phổi trên ảnh CT bằng phương pháp học sâu', count: 5, deadline: '30/12/2024' },
-];
 const listProjectJoin = [
     { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
     {
@@ -78,34 +50,6 @@ const columns = (showModal) => [
         dataIndex: 'numberOfMember',
         key: 'numberOfMember',
     },
-    // {
-    //     title: 'Trạng thái',
-    //     key: 'Status',
-    //     dataIndex: 'Status',
-    //     render: (_, { Status }) => (
-    //         <>
-    //             {Status.map((tag) => {
-    //                 let color = tag === 'Đang thực hiện' ? 'green' : 'red';
-    //                 return (
-    //                     <Tag color={color} key={tag}>
-    //                         {tag.toUpperCase()}
-    //                     </Tag>
-    //                 );
-    //             })}
-    //         </>
-    //     ),
-    //     filters: [
-    //         {
-    //             text: 'Đang thực hiện',
-    //             value: 'Đang thực hiện',
-    //         },
-    //         {
-    //             text: 'Chưa thực hiện',
-    //             value: 'Chưa thực hiện',
-    //         },
-    //     ],
-    //     onFilter: (value, record) => record.Status.indexOf(value) === 0,
-    // },
     {
         title: 'Trạng thái',
         key: 'status',

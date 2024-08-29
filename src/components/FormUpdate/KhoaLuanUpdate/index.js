@@ -4,6 +4,7 @@ import moment from 'moment';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
+
 import { getAllFaculty } from '../../../services/facultyService';
 import { getUsersByFaculty, getUseridFromLocalStorage } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
@@ -27,15 +28,17 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
 
     const [form] = useForm(); // Sử dụng hook useForm
     const [facultyOptions, setFacultyOptions] = useState([]);
+    const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [supervisorOptions, setSupervisorOptions] = useState([]);
     const [selectedSupervisor, setSelectedSupervisor] = useState(null);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [statusOptions, setStatusOptions] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedMemberCount, setSelectedMemberCount] = useState(null);
 
+    const statusType = 'Tiến độ khóa luận';
+
     // Fetch data khi component được mount
-    //lấy danh sách các  khoa ra ngoài thẻ select
+    //lấy danh sách các khoa ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             const response = await getAllFaculty();
@@ -86,7 +89,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     }, [selectedFaculty, selectedSupervisor]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ khóa luận"
-    const statusType = 'Tiến độ khóa luận';
+
 
     useEffect(() => {
         const fetchStatusByType = async () => {
@@ -140,7 +143,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         }
     };
 
-    const handleChangeSelect = (value) => {
+    const handleFacultySelect = (value) => {
         setSelectedFaculty(value);
         console.log(` [ Khoaluanupdate - selected faculty ] : ${value}`);
     };
@@ -248,7 +251,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                         showSearch
                         placeholder="Chọn khoa"
                         optionFilterProp="children"
-                        onChange={handleChangeSelect}
+                        onChange={handleFacultySelect}
                         value={selectedFaculty}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
