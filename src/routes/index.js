@@ -28,12 +28,9 @@ import LoginForm from '../pages/Shared/Login';
 // LAYOUT
 import { DepartmentLayout } from '../layouts';
 
-//Không đăng nhập vẫn vào được
-const publicRoutes = [
-    // SHARED
-    { path: config.routes.Login, component: LoginForm, layout: null },
+//Không đăng nhập => chuyển login
+const privateRoutes = [
     // STUDENT
-    { path: config.routes.Login, component: LoginForm, layout: null },
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },
     { path: config.routes.DiemTotNghiep, component: DiemTotNghiep },
@@ -43,7 +40,7 @@ const publicRoutes = [
     { path: config.routes.KhoaLuanThamGia, component: DuAnThamGia, thesis: true },
     { path: config.routes.KhoaLuan, component: KhoaLuan },
     { path: config.routes.ThucTap, component: ThucTap },
-    { path: config.routes.ThongTinThucTap, component: ThongTinThucTap, layout: null },
+    { path: config.routes.ThongTinThucTap, component: ThongTinThucTap, layout: null, urlDepend: "ThucTap" },
     { path: config.routes.ChuanDauRa, component: ChuanDauRa },
 
     // DEPARTMENT
@@ -63,7 +60,10 @@ const publicRoutes = [
     },
 ];
 
-//Không đăng nhập => chuyển login
-const privateRoutes = [];
+//Không đăng nhập vẫn vào được
+const publicRoutes = [
+    // SHARED
+    { path: config.routes.Login, component: LoginForm, layout: null },
+];
 
 export { publicRoutes, privateRoutes };

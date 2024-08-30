@@ -27,7 +27,7 @@ function PhanQuyenChucNang() {
     const [showModal, setShowModal] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const didMountRef = useRef(false);
-    const [combinedColumns, setCombinedColumns] = useState(() => () => {});
+    const [combinedColumns, setCombinedColumns] = useState(() => () => { });
     const [data, setData] = useState([]);
     const [selectedValue, setSelectedValue] = useState('');
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
@@ -103,6 +103,7 @@ function PhanQuyenChucNang() {
             const response = await getAllPermission();
             if (response.status === 200) {
                 const newColumnsPermission = response.data.data.map((permission) => {
+                    console.log(permission)
                     return {
                         title: permission.permissionName,
                         dataIndex: permission.permissionId,
@@ -196,8 +197,8 @@ function PhanQuyenChucNang() {
     const getPermissionFeature = async () => {
         try {
             const response = await getAllPermissionFeature();
-            if (response.status === 200) {
-                return response.data.data;
+            if (response.status === 'success') {
+                return response.data;
             } else {
                 console.log(response);
                 return [];
@@ -235,7 +236,7 @@ function PhanQuyenChucNang() {
     // Hàm xử lý xóa các permisison_feature tồn tại mà có thay đổi
     const handleDeletePermissionFeatureExist = async (id) => {
         try {
-            await deletePermissionFeature(id);
+            return await deletePermissionFeature(id);
         } catch (error) {
             console.log('Lỗi xóa các permisison_feature tồn tại mà có thay đổi: ' + error);
         }
@@ -243,7 +244,7 @@ function PhanQuyenChucNang() {
     // Hàm xử lý lưu phân quyền
     const handleSavePhanQuyen = async (data) => {
         try {
-            await createPermissionFeature(data);
+            return await createPermissionFeature(data);
         } catch (error) {
             message.error('Lưu phân quyền thất bại:' + error);
         }
@@ -287,8 +288,9 @@ function PhanQuyenChucNang() {
             if (!checkbox.checked) {
                 try {
                     const response = await getWherePermissionFeature(conditions);
-                    if (response.status === 200) {
-                        handleDeletePermissionFeatureExist(response.data.data[0].id);
+                    console.log(response)
+                    if (response.status === "success") {
+                        handleDeletePermissionFeatureExist(response.data[0].id);
                     }
                 } catch (error) {
                     message.error('Lưu phân quyền thất bại:' + error);
@@ -296,8 +298,7 @@ function PhanQuyenChucNang() {
             } else {
                 try {
                     const response = await getWherePermissionFeature(conditions);
-                    if (response.status === 204) {
-                        console.log(value);
+                    if (response.status === "NoContent") {
                         var permissionRs = await getByIdPermission(permissionId);
                         var featureRs = await getByIdFeature(featureId);
                         //Không tồn tại

@@ -31,8 +31,7 @@ export const updatePermissionFeature = async (id, data) => {
 
 export const deletePermissionFeature = async (id) => {
     try {
-        const response = await httpRequest.delete(`/permission-features/${id}`);
-        return response;
+        return await httpRequest.delete(`/permission-features/${id}`);
     } catch (error) {
         console.error('Delete feature error:', error);
         throw error;

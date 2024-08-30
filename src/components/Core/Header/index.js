@@ -6,10 +6,18 @@ import Menu from '../../Popper/Menu';
 import { BellIcon, SupportIcon, UserIcon } from '../../../assets/icons';
 import Notification from '../../Popper/Notification';
 import Support from '../../Popper/Support';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const navigate = useNavigate();
+    // LOGOUT
+    function logout() {
+        localStorage.removeItem('userLogin');
+        navigate('/Login');
+    }
+
     const MENU_ITEMS = [
         {
             icon: <FontAwesomeIcon icon={faCircleInfo} />,
@@ -22,7 +30,7 @@ function Header() {
         {
             icon: <FontAwesomeIcon icon={faArrowRightFromBracket} />,
             title: 'Log out',
-            to: '/Login',
+            onClick: logout,
             separate: true,
         },
     ];

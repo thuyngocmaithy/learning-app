@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Form, Input, message, Checkbox } from 'antd';
+import { Form, Input, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { login, loginToSgu } from '../../../services/userService'; // Chỉ cần import hàm login
+import { loginToSgu } from '../../../services/userService'; // Chỉ cần import hàm login
 import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 import sgu from '../../../assets/images/sgu.jpg';
@@ -12,16 +12,15 @@ const cx = classNames.bind(styles);
 
 const LoginForm = () => {
     const navigate = useNavigate();
-
     const onFinish = async (values) => {
         try {
             const response = await loginToSgu(values.username, values.password);
 
-            if (response.status === "200" || response.status === 200 || response.status === 'success') {
+            if (response.status === 'success') {
                 message.success('Đăng nhập thành công');
-                localStorage.setItem('accountId', response.accountId);
-                localStorage.setItem('user.id', response.userId);
-                localStorage.setItem('token', response.accessToken);
+                console.log(response)
+
+                localStorage.setItem('userLogin', JSON.stringify({ userId: response.data.user.userId, token: response.data.accessToken, permission: response.data.user.roles }));
                 navigate('/'); // Chuyển hướng về trang chủ
             } else {
                 message.error(response.message || 'Đăng nhập thất bại');

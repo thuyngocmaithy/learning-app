@@ -1,4 +1,7 @@
 const routes = {
+    // SHARED
+    Login: '/Login',
+
     // STUDENT
     Dashboard: '/',
     DanhSachHocPhan: '/DanhSachHocPhan',
@@ -11,7 +14,6 @@ const routes = {
     ThucTap: '/ThucTap',
     ThongTinThucTap: '/ThucTap/:idThucTap',
     ChuanDauRa: '/ChuanDauRa',
-    Login: '/Login',
 
     // DEPARTMENT
     Dashboard_Department: '/Department',

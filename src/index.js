@@ -4,13 +4,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import GlobalStyles from './components/Core/GlobalStyles';
 import { ThemeProvider } from './context/ThemeContext';
+import { AccountLoginProvider } from './context/AccountLoginContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>
     <ThemeProvider>
         <GlobalStyles>
-            <App />
+            <AccountLoginProvider>
+                <App />
+            </AccountLoginProvider>
         </GlobalStyles>
     </ThemeProvider>,
     // </React.StrictMode>,

@@ -12,6 +12,10 @@ const httpRequest = {
         return response.data;
     },
 
+    delete: async (path, options = {}) => {
+        const response = await api.delete(path, options);
+        return response.data;
+    },
     // Thêm các phương thức khác (put, delete, etc.) nếu cần
 };
 
