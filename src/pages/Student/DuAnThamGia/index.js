@@ -127,7 +127,7 @@ function DuAnThamGia({ thesis = false }) {
         { title: 'Người tạo', description: project ? project.project.createUser.fullname : '' },
         { title: 'Ngày tạo', description: project ? format(project.project.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
         { title: 'Người chỉnh sửa', description: project ? project.project.lastModifyUser.fullname : '' },
-        { title: 'Ngày chỉnh sửa', description: format(project.project.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') },
+        { title: 'Ngày chỉnh sửa', description: project ? format(project.project.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
     ];
 
     const dataFollower = [
