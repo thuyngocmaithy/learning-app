@@ -185,7 +185,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
 
                 let response;
                 if (isUpdate) {
-                    thesisData.facultyId = values.faculty.facultyId;
                     response = await updateThesisById(selectedThesis.id, thesisData);
                 } else {
                     // thesisData.createUserId = userid ?? adminid;

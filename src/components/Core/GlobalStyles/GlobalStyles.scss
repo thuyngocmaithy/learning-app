@@ -13,6 +13,8 @@
     --text-gray-color: #e9e9e9;
     --text-gray-dark-color: #778aa2;
     --text-black-color: #000;
+    --red-100: #fceeee;
+    --red-200: #fee2e2;
 
     // BOX-SHADOW
     --box-shadow-1: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
@@ -210,7 +212,7 @@ body {
     :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal {
         background-color: var(--blue-50);
         border-radius: 4px;
-        padding: 7px 0;
+        padding: 5px 0;
     }
 
     .ant-divider-inner-text {
@@ -224,7 +226,7 @@ body {
         padding-bottom: 8px;
 
         .ant-divider-horizontal {
-            margin: 12px 0;
+            margin: 2px 0;
         }
     }
 
@@ -297,8 +299,16 @@ body {
         text-align: center;
     }
 
-    .modal-add .ant-modal-body {
-        margin: 50px;
+    .modal-add .ant-modal-body,
+    .modal-register .ant-modal-body {
+        margin: 50px 50px 0 50px;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-modal-root .ant-modal-centered .ant-modal {}
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-modal .ant-modal-body {
+        max-height: 500px;
+        overflow-y: scroll;
     }
 
     // FORM ITEM
@@ -321,6 +331,6 @@ body {
         display: flex;
     }
 
-
+    // FORM DETAIL
 
 }

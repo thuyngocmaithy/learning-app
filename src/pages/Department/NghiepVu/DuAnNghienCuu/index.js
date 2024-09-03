@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DuAnNghienCuu.module.scss';
-import { Card, notification, Tabs, Tag } from 'antd';
+import { Card, message, notification, Tabs, Tag } from 'antd';
 import { ResearchProjectsIcon } from '../../../../assets/icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -11,7 +11,10 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import DuAnUpdate from '../../../../components/FormUpdate/DuAnUpdate';
 
-import { getAllProject } from '../../../../services/projectService';
+import { deleteProject, getAllProject } from '../../../../services/projectService';
+import { checkUsernameExist, login } from '../../../../services/userService';
+import { getProjectUserByProjectId } from '../../../../services/projectUserService';
+import DuAnListRegister from '../../../../components/FormListRegister/DuAnListRegister';
 
 const cx = classNames.bind(styles);
 
@@ -24,203 +27,127 @@ const listProjectJoin = [
     },
 ];
 
-const columns = (showModal) => [
-    {
-        title: 'Mã dự án',
-        dataIndex: 'projectId',
-        key: 'projectId',
-    },
-    {
-        title: 'Tên đề tài',
-        dataIndex: 'projectName',
-        key: 'projectName',
-    },
-    {
-        title: 'Khoa',
-        dataIndex: ['faculty', 'facultyName'],
-        key: 'faculty',
-    },
-    {
-        title: 'Chủ nhiệm đề tài',
-        dataIndex: ['instructor', 'fullname'],
-        key: 'instructor',
-    },
-    {
-        title: 'SL thành viên',
-        dataIndex: 'numberOfMember',
-        key: 'numberOfMember',
-    },
-    {
-        title: 'Trạng thái',
-        key: 'status',
-        dataIndex: ['status', 'statusName'],
-        render: (statusName) => (
-            <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
-                {statusName.toUpperCase()}
-            </Tag>
-        ),
-    },
-    {
-        title: 'SL đăng ký',
-        dataIndex: 'numberOfRegister',
-        key: 'numberOfRegister',
-        render: (numberOfRegister) =>
-            parseInt(numberOfRegister) > 0 ? (
-                <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}>
-                    Danh sách đăng ký: {numberOfRegister}
-                </ButtonCustom>
-            ) : (
-                <p style={{ textAlign: 'center' }}>0</p>
-            ),
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: (_, record) => (
-            <div className={cx('action-item-nh')}>
-                <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
-                    Chi tiết
-                </ButtonCustom>
-                <ButtonCustom
-                    className={cx('btnEdit')}
-                    leftIcon={<EditOutlined />}
-                    primary
-                    verysmall
-                    onClick={() => showModal(record.projectId)}
-                >
-                    Sửa
-                </ButtonCustom>
-            </div>
-        ),
-    }
-];
-
-const data = [
-    {
-        key: '1',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 0,
-    },
-    {
-        key: '2',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 2,
-    },
-    {
-        key: '3',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Đang thực hiện'],
-        SLDK: 0,
-    },
-    {
-        key: '4',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 1,
-    },
-    {
-        key: '5',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 3,
-    },
-    {
-        key: '6',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 10,
-    },
-    {
-        key: '7',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 12,
-    },
-    {
-        key: '8',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 3,
-    },
-    {
-        key: '9',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 6,
-    },
-    {
-        key: '10',
-        MaDA: 'DA001',
-        TenDeTai: 'Mô hình học máy liên kết',
-        Khoa: 'CNTT',
-        CNDeTai: 'Đào Duy Trường',
-        SL: '5',
-        Status: ['Chưa thực hiện'],
-        SLDK: 9,
-    },
-];
 
 function DuAnNghienCuu() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
-    const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
+    const [showModalListRegister, setShowModalListRegister] = useState(false)
+    const [isChangeStatus, setIsChangeStatus] = useState(false);
+
+    const columns = (showModal) => [
+        {
+            title: 'Mã dự án',
+            dataIndex: 'projectId',
+            key: 'projectId',
+        },
+        {
+            title: 'Tên đề tài',
+            dataIndex: 'projectName',
+            key: 'projectName',
+        },
+        {
+            title: 'Khoa',
+            dataIndex: ['faculty', 'facultyName'],
+            key: 'faculty',
+        },
+        {
+            title: 'Chủ nhiệm đề tài',
+            dataIndex: ['instructor', 'fullname'],
+            key: 'instructor',
+        },
+        {
+            title: 'SL thành viên',
+            dataIndex: 'numberOfMember',
+            key: 'numberOfMember',
+        },
+        {
+            title: 'Trạng thái',
+            key: 'status',
+            dataIndex: ['status', 'statusName'],
+            align: 'center',
+            render: (statusName) => (
+                <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
+                    {statusName.toUpperCase()}
+                </Tag>
+            ),
+        },
+        {
+            title: 'SL đăng ký',
+            dataIndex: 'numberOfRegister',
+            key: 'numberOfRegister',
+            align: 'center',
+            render: (numberOfRegister, record) =>
+                numberOfRegister.length > 0 ? (
+                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
+                        onClick={() => setShowModalListRegister({
+                            ...record,
+                            numberOfRegister,
+                        })} >
+                        Danh sách đăng ký: {numberOfRegister.length}
+                    </ButtonCustom >
+                ) : (
+                    <p style={{ textAlign: 'center' }}>0</p>
+                ),
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            align: 'center',
+            render: (_, record) => (
+                <div className={cx('action-item-nh')}>
+                    <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
+                        Chi tiết
+                    </ButtonCustom>
+                    <ButtonCustom
+                        className={cx('btnEdit')}
+                        leftIcon={<EditOutlined />}
+                        primary
+                        verysmall
+                        onClick={() => {
+                            showModal(record);
+                            setIsUpdate(true);
+                        }}
+                    >
+                        Sửa
+                    </ButtonCustom>
+                </div>
+            ),
+        }
+    ];
+
+    const fetchData = async () => {
+        try {
+            const result = await getAllProject();
+            const projects = await Promise.all(result.data.map(async (data) => {
+                // lấy số sinh viên đăng ký
+                const numberOfRegister = await getProjectUserByProjectId({ project: data.projectId });
+                return {
+                    ...data,
+                    numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
+                };
+            }));
+
+            setData(projects);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const result = await getAllProject();
-                setData(result.data);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setIsLoading(false);
-            }
-        };
-
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (isChangeStatus) {
+            fetchData();
+            setIsChangeStatus(false);
+        }
+    }, [isChangeStatus]);
 
     const ITEM_TABS = [
         {
@@ -232,6 +159,7 @@ function DuAnNghienCuu() {
                     columns={columns(setShowModal)}
                     data={data}
                     setSelectedRowKeys={setSelectedRowKeys}
+                    keyIdChange='projectId'
                     loading={isLoading}
                 />
             ),
@@ -276,16 +204,25 @@ function DuAnNghienCuu() {
             setIsToolbar(true);
         }
     };
-    const [api, contextHolder] = notification.useNotification();
-    const openNotification = useCallback(
-        (type, message, description) => {
-            api[type]({
-                message: message,
-                description: description,
-            });
-        },
-        [api],
-    );
+
+
+    const handleDelete = async () => {
+        try {
+            for (const id of selectedRowKeys) {
+                await deleteProject(id); // Xóa từng thesis
+            }
+            // Refresh dữ liệu sau khi xóa thành công
+            fetchData();
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+
+            message.success('Xoá thành công');
+        } catch (error) {
+            message.error('Xoá thất bại');
+            console.error(' [Nghiep vu - khoa luan - deletedThesis] : Error deleting theses:', error);
+        }
+    };
+
+
     const duAnUpdateMemoized = useMemo(() => {
         return (
             <DuAnUpdate
@@ -293,14 +230,24 @@ function DuAnNghienCuu() {
                 isUpdate={isUpdate}
                 showModal={showModal}
                 setShowModal={setShowModal}
-                openNotification={openNotification}
-            // reLoad={}
+                reLoad={fetchData}
             />
         );
     }, [showModal, isUpdate]);
+
+    const duAnListRegisterMemoized = useMemo(() => {
+        return (
+            <DuAnListRegister
+                title={'Danh sách sinh viên đăng ký dự án'}
+                showModal={showModalListRegister}
+                setShowModal={setShowModalListRegister}
+                changeStatus={setIsChangeStatus}
+            />
+        );
+    }, [showModalListRegister]);
+
     return (
         <div className={cx('wrapper')}>
-            {contextHolder}
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
@@ -318,7 +265,7 @@ function DuAnNghienCuu() {
                                 setIsUpdate(false);
                             }}
                         />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('dự án nghiên cứu')} />
+                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('dự án nghiên cứu', handleDelete)} />
                         <Toolbar type={'Nhập file Excel'} />
                         <Toolbar type={'Xuất file Excel'} />
                     </div>
@@ -338,6 +285,7 @@ function DuAnNghienCuu() {
                 })}
             />
             {duAnUpdateMemoized}
+            {duAnListRegisterMemoized}
         </div>
     );
 }

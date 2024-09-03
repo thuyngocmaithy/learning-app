@@ -5,6 +5,8 @@ import reportWebVitals from './reportWebVitals';
 import GlobalStyles from './components/Core/GlobalStyles';
 import { ThemeProvider } from './context/ThemeContext';
 import { AccountLoginProvider } from './context/AccountLoginContext';
+import { SocketNotificationProvider } from './context/SocketNotificationContext';
+import { SocketMessagesProvider } from './context/SocketMessagesContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -12,7 +14,11 @@ root.render(
     <ThemeProvider>
         <GlobalStyles>
             <AccountLoginProvider>
-                <App />
+                <SocketNotificationProvider>
+                    <SocketMessagesProvider>
+                        <App />
+                    </SocketMessagesProvider>
+                </SocketNotificationProvider>
             </AccountLoginProvider>
         </GlobalStyles>
     </ThemeProvider>,

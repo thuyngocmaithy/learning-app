@@ -22,6 +22,7 @@ const routes = {
     DuAnThamGia_Department: '/Department/NghiepVu/DuAnNghienCuu/DuAnThamGia',
     KhoaLuanThamGia_Department: '/Department/NghiepVu/KhoaLuan/KhoaLuanThamGia',
     KhoaLuan_Department: '/Department/NghiepVu/KhoaLuan',
+    ThucTap_Department: '/Department/NghiepVu/ThucTap',
 
     // THIẾT LẬP
     KhungCTDT: '/Department/ThietLap/KhungCTDT',

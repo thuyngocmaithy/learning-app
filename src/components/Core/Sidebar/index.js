@@ -37,25 +37,37 @@ function Sidebar({ department = false }) {
         try {
             let data;
             const response = await getFeatureByPermission({ permission: permission });
+
             if (response.status === 200) {
-                if (department) {
+                if (response.data[0][0].listFeature) {
                     data = response.data[0].flatMap((item) => {
-                        console.log(item);
+                        if (item.parentFeatureId) {
+                            return {
+                                key: item.parentFeatureId.url,
+                                label: item.parentFeatureId.featureName,
+                                icon: <MenuOutlined />,
 
-                        return {
-                            key: item.parentFeatureId.url,
-                            label: item.parentFeatureId.featureName,
-                            icon: <MenuOutlined />,
-
-                            children: item.listFeature.map((row) => {
+                                children: item.listFeature.map((row) => {
+                                    const IconComponent = row.icon ? listIcon[row.icon] : null;
+                                    return {
+                                        key: row.url,
+                                        label: <Link to={config.routes[row.keyRoute]}>{row.featureName}</Link>,
+                                        icon: row.icon ? <IconComponent /> : <MenuOutlined />,
+                                    };
+                                }),
+                            };
+                        }
+                        else {
+                            return item.listFeature.map((row) => {
                                 const IconComponent = row.icon ? listIcon[row.icon] : null;
                                 return {
                                     key: row.url,
                                     label: <Link to={config.routes[row.keyRoute]}>{row.featureName}</Link>,
                                     icon: row.icon ? <IconComponent /> : <MenuOutlined />,
                                 };
-                            }),
-                        };
+                            });
+                        }
+
                     });
                 } else {
                     data = response.data[0].map((feature) => {
@@ -67,6 +79,7 @@ function Sidebar({ department = false }) {
                         };
                     });
                 }
+
                 setMenu(data);
             } else {
                 console.log(response);

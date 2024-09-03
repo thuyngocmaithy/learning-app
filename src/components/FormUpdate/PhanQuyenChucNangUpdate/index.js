@@ -11,7 +11,6 @@ import {
 import classNames from 'classnames/bind';
 import styles from './PhanQuyenChucNangUpdate.module.scss';
 import IconPicker from '../../Core/IconPicker';
-import SelectCustomAnt from '../../Core/SelectCustomAnt';
 
 const cx = classNames.bind(styles);
 
@@ -71,7 +70,6 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
         if (refs.current.parentFeatureId) {
             parentFeature = await getFeatureById(refs.current.parentFeatureId);
         }
-        console.log(parentFeature);
         const data = {
             featureId: refs.current.featureId.input.value,
             featureName: refs.current.featureName.input.value,
@@ -80,7 +78,6 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
             icon: refs.current.icon,
             parent: parentFeature ? parentFeature.data.data : null,
         };
-        console.log(data);
         // // setIsSubmitting(true); // Bắt đầu submit
         try {
             if (isUpdate) {
@@ -165,8 +162,8 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
                     defaultChecked={
                         showModal
                             ? showModal.featureId !== undefined &&
-                              showModal.parentFeatureId === undefined &&
-                              showModal.keyRoute === undefined
+                            showModal.parentFeatureId === undefined &&
+                            showModal.keyRoute === undefined
                             : false
                     }
                     ref={(el) => (refs.current.isParent = el)}
@@ -175,12 +172,6 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
                 />
             </FormItem>
             <FormItem label={'Thuộc menu'}>
-                {/* <SelectCustomAnt
-                    defaultValue={showModal ? showModal.parentFeatureId : ''}
-                    onChange={handleChangeSelect}
-                    options={listFeatureParent}
-                    disabled={refs.current.isParent?.checked}
-                /> */}
                 <Select
                     name="parentFeatureId"
                     value={showModal ? showModal.parentFeatureId : ''}
@@ -189,8 +180,8 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
                     disabled={
                         showModal
                             ? showModal.featureId !== undefined &&
-                              showModal.parentFeatureId === undefined &&
-                              showModal.keyRoute === undefined
+                            showModal.parentFeatureId === undefined &&
+                            showModal.keyRoute === undefined
                             : false
                     }
                 ></Select>
@@ -204,8 +195,8 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
                     disabled={
                         showModal
                             ? showModal.featureId !== undefined &&
-                              showModal.parentFeatureId === undefined &&
-                              showModal.keyRoute === undefined
+                            showModal.parentFeatureId === undefined &&
+                            showModal.keyRoute === undefined
                             : false
                     }
                 />

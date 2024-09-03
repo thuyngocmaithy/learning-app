@@ -1,10 +1,49 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinDuAnThamGia.module.scss';
-import { Descriptions, Tag } from 'antd';
+import { Descriptions, Spin, Tag } from 'antd';
+import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { getProjectUserById } from '../../services/projectUserService';
 
 const cx = classNames.bind(styles);
 
-function ThongTinDuAnThamGia({ item, thesis = false }) {
+function ThongTinDuAnThamGia({ project, thesis = false }) {
+
+
+
+    const DISCRIPTION_ITEMS = [
+        {
+            key: '1-info',
+            label: 'Khoa',
+            children: project ? project.project.faculty.facultyName : '',
+        },
+        {
+            key: '2-info',
+            label: 'Thời gian thực hiện',
+            children: project ? project.project.executionTime : '',
+        },
+        {
+            key: '3-info',
+            label: 'Thời điểm bắt đầu',
+            children: '10/03/2024 08:00:00',
+        },
+        {
+            key: '4-info',
+            label: 'Hạn hoàn thành',
+            children: '10/09/2024 17:00:00',
+        },
+        {
+            key: '5-info',
+            label: 'Giảng viên hướng dẫn',
+            children: project ? project.project.instructor.fullname : '',
+        },
+        {
+            key: '6-info',
+            label: 'Sinh viên thực hiện',
+            children: project ? project.user.fullname : '',
+        },
+    ];
+
     return (
         <div className={cx('wrapper-info-detail')}>
             <div className={cx('container-info')}>
@@ -13,25 +52,18 @@ function ThongTinDuAnThamGia({ item, thesis = false }) {
                         title={
                             <div className={cx('container-title')}>
                                 <h2>Đề tài:</h2>
-                                <h2> Ứng dụng công nghệ Blockchain trong bài toán vé điện tử</h2>
+                                <h2>{project.project.projectName}</h2>
                                 <Tag color="green">Xác định vấn đề cần nghiên cứu</Tag>
                             </div>
                         }
-                        items={item}
+                        items={DISCRIPTION_ITEMS}
                     />
                 </div>
             </div>
             <div className={cx('container-description')}>
                 <h4>Thông tin mô tả</h4>
                 <div>
-                    1. Về ngôn ngữ chính: sử dụng tiếng Anh trong các bài báo cáo khoa học, báo cáo tổng kết đề tài,
-                    poster và phần thuyết trình đề tài trong hội nghị “Khoa học và Công nghệ sinh viên OISP”, dự kiến tổ
-                    chức vào tháng 07 năm 2020. 2. Về số lượng thành viên: Ưu tiên cho các SV Chương trình Đào tạo Quốc
-                    tế đự kiến làm LVTN trong học kỳ 2, năm học 2019 — 2020. 3. Về yêu cầu thực hiện đề tài: kết quả sản
-                    phẩm đề tài NCKH bao gồm: e_ Báo cáo tông kết kết quả thực hiện đề tài: 01 quyền; e_ Tham gia báo
-                    cáo đề tài NCKH tại hội nghị “Khoa học và Công nghệ sinh viên OISP” do VP ĐTQT tổ chức. 4. Về quy
-                    trình đăng ký, xét chọn, ký hợp đồng, nghiệm thu và thanh lý đề tài: tuân theo quy trình của Quy chế
-                    hoạt động Khoa học và Công nghệ trường ĐH Bách Khoa TP.HCM
+                    {project.project.description}
                 </div>
             </div>
         </div>

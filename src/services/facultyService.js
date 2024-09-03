@@ -8,3 +8,12 @@ export const getAllFaculty = async () => {
         throw error;
     }
 };
+
+export const getFacultyById = async (id) => {
+    try {
+        const response = await api.get(`/faculties/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

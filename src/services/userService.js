@@ -38,4 +38,38 @@ export const getUsersByFaculty = async (facultyId) => {
     console.error('[userService - getUsersByFaculty - error] : ', error);
     throw error;
   }
-};  
+};
+
+export const getUserById = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('[userService - getUsersById - error] : ', error);
+    throw error;
+  }
+};
+
+
+
+// Hàm lấy avt từ API SGU
+export const getImageAccount = async (access_token, username) => {
+  try {
+    const response = await api.post('/authSGU/getImageAccount', { access_token, username });
+    return response.data;
+  } catch (error) {
+    console.log('[userService - getImageAccount - error] : ', error);
+    throw error;
+  }
+};
+
+// Hàm lấy điểm từ API SGU
+export const getScore = async (access_token, username) => {
+  try {
+    const response = await api.post('/authSGU/getScore', { access_token, username });
+    return response.data;
+  } catch (error) {
+    console.log('[userService - getScore - error] : ', error);
+    throw error;
+  }
+};

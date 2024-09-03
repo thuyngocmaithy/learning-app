@@ -130,19 +130,15 @@ function KhoaLuan() {
         }
     };
 
-    const handleSelectedIds = (ids) => {
-        setSelectedIds(ids);
-    };
 
-
-    const handleDelete = async (ids) => {
+    const handleDelete = async () => {
         try {
-            for (const id of ids) {
+
+            for (const id of selectedRowKeys) {
                 await deleteThesis(id); // Xóa từng thesis
             }
             // Refresh dữ liệu sau khi xóa thành công
-            const result = await getAllThesis();
-            setData(result.data);
+            fetchData();
             setSelectedIds([]); // Xóa các ID đã chọn
 
             message.success('Xoá thành công');
@@ -163,9 +159,7 @@ function KhoaLuan() {
                     height={'350px'}
                     columns={columns(setShowModal)}
                     data={data}
-                    setSelectedRowKeys={setSelectedRowKeys} // Đảm bảo setSelectedRowKeys được truyền vào
-                    selectedRowKeys={selectedRowKeys} // Truyền selectedRowKeys để kiểm soát hàng nào được chọn
-                    onSelectedIdsChange={handleSelectedIds}
+                    setSelectedRowKeys={setSelectedRowKeys}
                 />
             ),
         },
@@ -242,7 +236,7 @@ function KhoaLuan() {
                                 setSelectedThesis(null);
                             }}
                         />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận', selectedIds, handleDelete)} />
+                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận', handleDelete)} />
                         <Toolbar type={'Nhập file Excel'} />
                         <Toolbar type={'Xuất file Excel'} />
                     </div>

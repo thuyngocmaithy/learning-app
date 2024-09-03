@@ -1,29 +1,25 @@
-import React, { useRef, useState, memo, useMemo, useEffect, useCallback } from 'react';
-import { Input, InputNumber, Select, DatePicker, message, Form } from 'antd';
+import React, { useState, memo, useEffect, useContext } from 'react';
+import { Input, InputNumber, Select, DatePicker, Form, message } from 'antd';
 import moment from 'moment';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 
 import { getAllFaculty } from '../../../services/facultyService';
-import { getUsersByFaculty, getUseridFromLocalStorage } from '../../../services/userService';
+import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createProject, updateProjectById } from '../../../services/projectService';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
-
-const userid = getUseridFromLocalStorage();
-const adminid = '0ad0941f-579e-11ef-aca7-1aa268f50191';
 
 const DuAnUpdate = memo(function DuAnUpdate({
     title,
     isUpdate,
     showModal,
     setShowModal,
-    openNotification,
-    reLoad,
-    selectedProject
+    reLoad
 }) {
 
     const [form] = useForm(); // Sử dụng hook useForm
@@ -34,6 +30,8 @@ const DuAnUpdate = memo(function DuAnUpdate({
     const [statusOptions, setStatusOptions] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedMemberCount, setSelectedMemberCount] = useState(null);
+    const [selectedLevel, setSelectedLevel] = useState(null);
+    const { userId } = useContext(AccountLoginContext);
 
     const statusType = 'Tiến độ dự án nghiên cứu';
 
@@ -70,7 +68,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
                 const response = await getUsersByFaculty(selectedFaculty);
                 if (response && response.data) {
                     const options = response.data.map((user) => ({
-                        value: user.id,
+                        value: user.userId,
                         label: `${user.fullname}`,
                     }));
                     setInstructorOptions(options);
@@ -91,8 +89,6 @@ const DuAnUpdate = memo(function DuAnUpdate({
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ dự án nghiên cứu"
-
-
     useEffect(() => {
         const fetchStatusByType = async () => {
             try {
@@ -116,27 +112,33 @@ const DuAnUpdate = memo(function DuAnUpdate({
         fetchStatusByType();
     }, [statusType, selectedStatus]);
 
+    const levelsOptions = [
+        { value: 'Cơ sở', label: 'Cơ sở' },
+        { value: 'Thành phố', label: 'Thành phố' },
+        { value: 'Bộ', label: 'Bộ' },
+        { value: 'Quốc gia', label: 'Quốc gia' },
+        { value: 'Quốc tế', label: 'Quốc tế' },
+    ]
 
-    // useEffect(() => {
-    //     if (selectedProject && isUpdate) {
-    //         form.setFieldsValue({
-    //             title: selectedProject.title,
-    //             description: selectedProject.description,
-    //             faculty: selectedProject.faculty.facultyName,
-    //             supervisor: selectedProject.supervisor.fullname,
-    //             status: selectedProject.status.statusId,
-    //             memberCount: selectedProject.registrationCount,
-    //             thesisTime: [moment(selectedProject.startDate), moment(selectedProject.endDate)]
-    //         });
-    //         setSelectedFaculty(selectedProject.facultyId);
-    //         setSelectedInstructor(selectedProject.supervisor.id);
-    //         setSelectedStatus(selectedProject.status.statusId);
-    //         setSelectedMemberCount(selectedProject.registrationCount);
-    //     } else {
-    //         form.resetFields();
-    //     }
-    // }, [selectedProject, isUpdate, form]);
-
+    useEffect(() => {
+        if (showModal && isUpdate) {
+            form.setFieldsValue({
+                projectName: showModal.projectName,
+                description: showModal.description,
+                faculty: showModal.faculty.facultyName,
+                instructor: showModal.instructor.fullname,
+                status: showModal.status.statusId,
+                numberOfMember: showModal.numberOfMember,
+                level: showModal.level,
+            });
+            setSelectedFaculty(showModal.faculty.facultyId);
+            setSelectedInstructor(showModal.instructor.userId);
+            setSelectedStatus(showModal.status.statusId);
+            setSelectedMemberCount(showModal.numberOfMember);
+        } else {
+            form.resetFields();
+        }
+    }, [showModal, isUpdate, form]);
 
     // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
     const handleCloseModal = () => {
@@ -164,48 +166,40 @@ const DuAnUpdate = memo(function DuAnUpdate({
 
 
 
-    // const handleSubmit = async () => {
-    //     try {
-    //         const values = await form.validateFields();
-    //         const thesisTime = values.thesisTime;
+    const handleSubmit = async () => {
+        try {
+            const values = await form.validateFields();
+            let projectData = {
+                projectName: values.projectName,
+                description: values.description,
+                facultyId: selectedFaculty,
+                instructorId: selectedInstructor,
+                statusId: selectedStatus,
+                numberOfMember: values.numberOfMember,
+                level: values.level,
+            };
 
-    //         if (thesisTime && Array.isArray(thesisTime) && thesisTime.length === 2) {
-    //             const [startDate, endDate] = thesisTime;
+            let response;
+            if (isUpdate) {
+                response = await updateProjectById(showModal.projectId, projectData);
+            } else {
+                const createUserResponse = await getUserById(userId);
+                const createUserId = createUserResponse.data;
+                projectData = { ...projectData, createUserId: createUserId, lastModifyUserId: createUserId }
 
-    //             const thesisData = {
-    //                 title: values.title,
-    //                 description: values.description,
-    //                 facultyId: values.faculty,
-    //                 supervisor: values.supervisor,
-    //                 statusId: values.status,
-    //                 registrationCount: values.memberCount,
-    //                 startDate: startDate.toISOString(),
-    //                 endDate: endDate.toISOString(),
-    //                 lastModifyUserId: userid ?? adminid,
-    //             };
+                response = await createProject(projectData);
+            }
 
-    //             let response;
-    //             if (isUpdate) {
-    //                 thesisData.facultyId = values.faculty.facultyId;
-    //                 response = await updateThesisById(selectedThesis.id, thesisData);
-    //             } else {
-    //                 thesisData.createUserId = userid ?? adminid;
-    //                 response = await createThesis(thesisData);
-    //             }
+            if (response && response.data) {
+                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} dự án thành công!`);
+                handleCloseModal();
+                if (reLoad) reLoad();
+            }
 
-    //             if (response && response.data) {
-    //                 message.success(`Khóa luận đã được ${isUpdate ? 'cập nhật' : 'tạo'} thành công!`);
-    //                 handleCloseModal();
-    //                 if (reLoad) reLoad();
-    //             }
-    //         } else {
-    //             message.error('Vui lòng chọn thời gian thực hiện!');
-    //         }
-    //     } catch (error) {
-    //         console.error(`[ Khoaluanupdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesis `, error);
-    //         message.error(`Có lỗi xảy ra khi ${isUpdate ? 'cập nhật' : 'tạo'} khóa luận: ${error.response?.data?.message || error.message}`);
-    //     }
-    // };
+        } catch (error) {
+            console.error(`[ DuAn - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} project `, error);
+        }
+    };
 
     return (
         <Update
@@ -213,12 +207,10 @@ const DuAnUpdate = memo(function DuAnUpdate({
             isUpdate={isUpdate}
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
-        // onUpdate={handleSubmit}
+            onUpdate={handleSubmit}
 
         >
             <Form form={form}>
-
-
                 <FormItem
                     name="projectName"
                     label="Tên đề tài"
@@ -226,22 +218,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
                 >
                     <Input />
                 </FormItem>
-                <FormItem
-                    name="description"
-                    label="Mô tả đề tài"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả đề tài!' }]}
-                >
-                    <TextArea
-                        showCount
-                        maxLength={1000}
-                        // onChange={' '}
-                        placeholder="Mô tả đề tài"
-                        style={{
-                            height: 120,
-                            resize: 'none',
-                        }}
-                    />
-                </FormItem>
+
                 <FormItem
                     name="faculty"
                     label="Khoa"
@@ -280,6 +257,39 @@ const DuAnUpdate = memo(function DuAnUpdate({
                     />
                 </FormItem>
                 <FormItem
+                    name="level"
+                    label="Cấp"
+                    rules={[{ required: true, message: 'Vui lòng cấp dự án!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn cấp"
+                        optionFilterProp="children"
+                        value={selectedLevel}
+                        onChange={(value) => setSelectedLevel(value)}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={levelsOptions}
+                    />
+                </FormItem>
+                <FormItem
+                    name="numberOfMember"
+                    label="Số lượng thành viên"
+                    rules={[{ required: true, message: 'Vui lòng nhập số lượng thành viên!' }]}
+                >
+                    <InputNumber
+                        style={{ width: '100%' }}
+                        min={1}
+                        max={10}
+                        step={1}
+                        value={selectedMemberCount}
+                        onChange={(value) => setSelectedMemberCount(value)}
+                        parser={formatValue}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    />
+                </FormItem>
+                <FormItem
                     name="status"
                     label="Trạng thái"
                     rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
@@ -296,23 +306,8 @@ const DuAnUpdate = memo(function DuAnUpdate({
                         options={statusOptions}
                     />
                 </FormItem>
-                <FormItem
-                    name="memberCount"
-                    label="Số lượng thành viên"
-                    rules={[{ required: true, message: 'Vui lòng nhập số lượng thành viên!' }]}
-                >
-                    <InputNumber
-                        style={{ width: '100%' }}
-                        min={1}
-                        max={10}
-                        step={1}
-                        value={selectedMemberCount}
-                        onChange={(value) => setSelectedMemberCount(value)}
-                        parser={formatValue}
-                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                    />
-                </FormItem>
-                <FormItem
+
+                {/* <FormItem
                     name="projectTime"
                     label="Thời gian thực hiện"
                     rules={[{ required: true, message: 'Vui lòng chọn thời gian thực hiện!' }]}
@@ -324,7 +319,24 @@ const DuAnUpdate = memo(function DuAnUpdate({
                         // placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
                         format="YYYY-MM-DD HH:mm"
                     />
+                </FormItem> */}
+
+                <FormItem
+                    name="description"
+                    label="Mô tả đề tài"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả đề tài!' }]}
+                >
+                    <TextArea
+                        showCount
+                        maxLength={1000}
+                        placeholder="Mô tả đề tài"
+                        style={{
+                            height: 120,
+                            resize: 'none',
+                        }}
+                    />
                 </FormItem>
+
             </Form>
         </Update>
     );

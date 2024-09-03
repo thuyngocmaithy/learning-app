@@ -3,12 +3,12 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Modal } from 'antd';
 
 const { confirm } = Modal;
-export const showDeleteConfirm = (title, ids, onDelete) => {
+export const showDeleteConfirm = (title, onDelete, isCancelRegister = false, isCancelApprove = false) => {
     confirm({
-        title: `Xóa ${title}`,
+        title: isCancelApprove ? `Hủy duyệt ${title}` : isCancelRegister ? `Hủy đăng ký ${title}` : `Xóa ${title}`,
         icon: <ExclamationCircleFilled style={{ color: 'red', width: '20px' }} />,
-        content: `Tất cả ${title} đã chọn sẽ được xóa khỏi hệ thống.`,
-        okText: 'Xóa',
+        content: isCancelApprove ? `Xác nhận hủy duyệt ${title}` : isCancelRegister ? `Xác nhận hủy đăng ký ${title}` : `Tất cả ${title} đã chọn sẽ được xóa khỏi hệ thống.`,
+        okText: isCancelApprove ? `Hủy duyệt` : isCancelRegister ? 'Hủy đăng ký' : 'Xóa',
         cancelText: 'Hủy',
         centered: true,
         okButtonProps: {
@@ -20,10 +20,7 @@ export const showDeleteConfirm = (title, ids, onDelete) => {
             },
         },
         onOk() {
-            if (onDelete) onDelete(ids);
-        },
-        onCancel() {
-            console.log('Cancel');
+            if (onDelete) onDelete();
         },
     });
 };
