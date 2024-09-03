@@ -9,6 +9,16 @@ export const getAllStatus = async () => {
     }
 };
 
+export const getStatusById = async (id) => {
+    try {
+        const response = await api.get(`/statuses/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
 export const getStatusByType = async (type) => {
     try {
         const response = await api.get(`statuses/type`, { params: { type } });

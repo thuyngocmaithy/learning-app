@@ -1,13 +1,17 @@
 import classNames from 'classnames/bind';
 import styles from './DuAnThamGia.module.scss';
-import { Tabs } from 'antd';
+import { Spin, Tabs } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import ChatBox from '../../../components/Core/ChatBox';
 import ThongTinDuAnThamGia from '../../../components/ThongTinDuAnThamGia';
 import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { getProjectUserById } from '../../../services/projectUserService';
+import moment from 'moment';
+import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
 
@@ -74,82 +78,8 @@ const data = [
     },
 ];
 
-const DISCRIPTION_ITEMS = [
-    {
-        key: '1-info',
-        label: 'Khoa',
-        children: 'Công nghệ thông tin',
-    },
-    {
-        key: '2-info',
-        label: 'Thời gian thực hiện',
-        children: '6 tháng',
-    },
-    {
-        key: '3-info',
-        label: 'Thời điểm bắt đầu',
-        children: '10/03/2024 08:00:00',
-    },
-    {
-        key: '4-info',
-        label: 'Hạn hoàn thành',
-        children: '10/09/2024 17:00:00',
-    },
-    {
-        key: '5-info',
-        label: 'Giảng viên hướng dẫn',
-        children: 'Nguyễn Văn A',
-    },
-    {
-        key: '6-info',
-        label: 'Sinh viên thực hiện',
-        children: 'Phạm Thanh B',
-    },
-];
 
-const dataFollower = [
-    {
-        title: 'Nguyễn Văn A',
-    },
-    {
-        title: 'Nguyễn Văn A',
-    },
-    {
-        title: 'Nguyễn Văn A',
-    },
-    {
-        title: 'Phạm Thanh B',
-    },
-];
-const dataInfoSystem = [
-    { title: 'Người tạo', description: 'Nguyễn Văn A' },
-    { title: 'Ngày tạo', description: '10/03/2024 08:00:00' },
-    { title: 'Người chỉnh sửa', description: 'Nguyễn Văn B' },
-    { title: 'Ngày chỉnh sửa', description: '15/03/2024 08:00:00' },
-];
 
-const ITEM_TABS = [
-    {
-        id: 1,
-        title: 'Chi tiết',
-        children: <ThongTinDuAnThamGia item={DISCRIPTION_ITEMS} thesis={true} />,
-    },
-    {
-        id: 2,
-        title: 'Ghi chú',
-        children: <ChatBox />,
-    },
-    {
-        id: 3,
-        title: 'Đính kèm',
-        children: <Attach columns={columns} data={data} />,
-    },
-    {
-        id: 4,
-        title: 'Hệ thống',
-        children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
-    },
-];
 function DuAnThamGia({ thesis = false }) {
     const navigate = useNavigate();
 
@@ -157,8 +87,95 @@ function DuAnThamGia({ thesis = false }) {
         navigate(-1);
     };
 
-    return (
-        <div className={cx('wrapper-DuAnThamGia')}>
+    // Xử lý lấy thông tin project tham gia
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const projectFromUrl = queryParams.get('project');
+    const [isLoading, setIsLoading] = useState(true);
+    const [project, setProject] = useState(null);
+    const [heightContainerLoading, setHeightContainerLoading] = useState(0);
+
+
+    useEffect(() => {
+        const height = document.getElementsByClassName('main-content')[0].clientHeight;
+        setHeightContainerLoading(height);
+
+    }, []);
+
+    useEffect(() => {
+        const getInfoProject = async () => {
+            try {
+                if (projectFromUrl) {
+                    const response = await getProjectUserById(projectFromUrl);
+                    console.log(response.data);
+                    setProject(response.data)
+                }
+            } catch (error) {
+                console.error("Lỗi lấy thông tin dự án" + error);
+            }
+            finally {
+                setIsLoading(false);
+            }
+
+        }
+        getInfoProject();
+    }, [projectFromUrl]);
+    console.log(project);
+
+
+    const dataInfoSystem = [
+        { title: 'Người tạo', description: project ? project.project.createUser.fullname : '' },
+        { title: 'Ngày tạo', description: project ? format(project.project.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
+        { title: 'Người chỉnh sửa', description: project ? project.project.lastModifyUser.fullname : '' },
+        { title: 'Ngày chỉnh sửa', description: project ? format(project.project.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
+    ];
+
+    const dataFollower = [
+        {
+            title: project ? project.project.createUser.fullname : '',
+        },
+        {
+            title: 'Nguyễn Văn A',
+        },
+        {
+            title: 'Nguyễn Văn A',
+        },
+        {
+            title: 'Phạm Thanh B',
+        },
+    ];
+
+
+
+    const ITEM_TABS = [
+        {
+            id: 1,
+            title: 'Chi tiết',
+            children: <ThongTinDuAnThamGia project={project} thesis={true} />,
+        },
+        {
+            id: 2,
+            title: 'Ghi chú',
+            children: <ChatBox />,
+        },
+        {
+            id: 3,
+            title: 'Đính kèm',
+            children: <Attach columns={columns} data={data} />,
+        },
+        {
+            id: 4,
+            title: 'Hệ thống',
+            children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
+        },
+    ];
+
+    return isLoading ? (
+        <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
+            <Spin size="large" />
+        </div>
+    ) : (
+        < div className={cx('wrapper-DuAnThamGia')} >
             <div className={cx('container-header')}>
                 <span onClick={handleGoBack} className={cx('container-icon-back')}>
                     <LeftOutlined className={cx('icon-back')} />
@@ -178,7 +195,7 @@ function DuAnThamGia({ thesis = false }) {
                     };
                 })}
             />
-        </div>
+        </div >
     );
 }
 

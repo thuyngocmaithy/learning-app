@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Form, Input, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -7,10 +7,13 @@ import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 import sgu from '../../../assets/images/sgu.jpg';
 import Button from '../../../components/Core/Button';
+import config from '../../../config';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
+    const { updateUserInfo } = useContext(AccountLoginContext)
     const navigate = useNavigate();
     const onFinish = async (values) => {
         try {
@@ -20,7 +23,16 @@ const LoginForm = () => {
                 message.success('Đăng nhập thành công');
                 console.log(response)
                 localStorage.setItem('userLogin', JSON.stringify({ userId: response.data.user.userId, token: response.data.accessToken, permission: response.data.user.roles }));
-                navigate('/'); // Chuyển hướng về trang chủ
+                updateUserInfo();
+                if (response.data.user.roles === "SINHVIEN") {
+                    navigate('/', { replace: true }); // Chuyển hướng về trang chủ
+                }
+                console.log(response.data.user.roles)
+                if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {
+                    console.log(config.routes.Dashboard_Department);
+                    navigate('/Department', { replace: true });// Chuyển hướng về department
+                }
+
             } else {
                 message.error(response.message || 'Đăng nhập thất bại');
             }
@@ -61,11 +73,6 @@ const LoginForm = () => {
                                         >
                                             <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
                                         </Form.Item>
-                                    </div>
-                                    <div className={cx('text')}>
-                                        <Button verysmall text>
-                                            Quên mật khẩu?
-                                        </Button>
                                     </div>
                                     <div className={cx('btnLogin')}>
                                         <Button primary>Đăng nhập</Button>

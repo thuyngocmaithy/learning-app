@@ -19,7 +19,7 @@ function FormItem({ name, label, children, ...props }) {
     };
 
     return (
-        <Form.Item name={name} label={label} {...props} className={cx('form-item')}>
+        <Form.Item name={name} label={<span className={cx('form-item-label')}>{label}</span>} {...props} className={cx('form-item')}>
             {children}
         </Form.Item>
     );

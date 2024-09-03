@@ -1,14 +1,23 @@
+a,
+a:hover {
+    color: black;
+}
+
 // POPPER
 
 .container-popper {
-    padding: 20px;
     overflow-y: auto;
+
+    .body {
+        padding: 20px 20px 0 20px;
+    }
 }
 
 // FILTER 
 .container-title {
     display: flex;
     align-items: center;
+    margin-bottom: 12px;
 
     h4 {
         color: var(--text-gray-dark-color);
@@ -20,9 +29,15 @@
 .option {
     display: flex;
     justify-content: center;
-    margin-top: 25px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 10;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 
-
+    .btn-readAll {
+        margin: 15px;
+    }
 }
 
 // ITEM
@@ -30,6 +45,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 12px;
+    border-radius: 4px;
+    transition: background-color ease 500ms;
 
     .container-info {
         margin-right: 20px;
@@ -45,4 +63,24 @@
         }
     }
 
+}
+
+
+
+.notRead {
+    background-color: var(--red-100);
+}
+
+.no-noti {
+    text-align: center;
+    margin: 12px;
+    font-style: italic;
+}
+
+.isRead:hover {
+    background: aliceblue;
+}
+
+.notRead:hover {
+    background: var(--red-200);
 }

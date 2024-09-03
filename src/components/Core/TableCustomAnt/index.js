@@ -13,21 +13,19 @@ function TableCustomAnt({
     isOutline = false,
     setSelectedRowKeys,
     selectedRowKeys,
-    onSelectedIdsChange, // Thêm prop để nhận hàm từ KhoaLuan
+    keyIdChange
 }) {
     const rowSelection = {
         selectedRowKeys,
         onChange: (newSelectedRowKeys, selectedRows) => {
             setSelectedRowKeys(newSelectedRowKeys);
-            // Lấy tất cả id của các hàng được chọn
-            const selectedIds = selectedRows.map(row => row.id);
-            console.log('Selected row keys: ', newSelectedRowKeys);
-            console.log('Selected row ids: ', selectedIds);
 
-            // Gọi hàm từ KhoaLuan để truyền danh sách id đã chọn
-            if (onSelectedIdsChange) {
-                onSelectedIdsChange(selectedIds);
+            // Nếu key để xóa không phải id => VD: projectId - Truyền key để xóa vào keyIdChange
+            if (keyIdChange) {
+                const selectedIds = selectedRows.map(row => row[keyIdChange]);
+                setSelectedRowKeys(selectedIds);
             }
+
         },
         getCheckboxProps: (record) => ({
             disabled: record.name === 'Disabled User', // Disable row nếu cần thiết

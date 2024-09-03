@@ -29,7 +29,7 @@ function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }
             ]
             : [
                 <ButtonCustom key={'saveClose'} outline small onClick={onUpdate}>
-                    Tạo mới
+                    Lưu & Nhập tiếp
                 </ButtonCustom>,
                 <ButtonCustom
                     key={'saveCopy'}
@@ -39,7 +39,7 @@ function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }
                     onClick={onUpdate}
                 //   disabled={isSubmitting};
                 >
-                    Lưu & sao chép
+                    Lưu & Sao chép
                 </ButtonCustom>,
             ];
     }, [isUpdate, onUpdate]);

@@ -4,58 +4,83 @@ import Button from '../../Core/Button';
 import { Wrapper as PopperWrapper } from '..';
 import Tippy from '@tippyjs/react/headless';
 import NotificationItem from './NotificationItem';
-import { Fragment } from 'react';
+import { Fragment, useCallback } from 'react';
 import { Divider } from 'antd';
+import { useSocketNotification } from '../../../context/SocketNotificationContext';
+import { updateNotification } from '../../../services/notificationService';
 
 const cx = classNames.bind(styles);
 
-const listNoti = [
-    { title: 'Bạn đã được duyệt tham gia dự án ...', date: '16/06/2024', status: 'success' },
-    { title: 'Sinh viên bị cảnh cáo lần 1 do điểm rèn luyện không đạt 50', date: '10/06/2024', status: 'error' },
-    { title: 'Sinh viên bị cảnh cáo ....', date: '16/06/2024', status: 'error' },
-    { title: 'Nguyễn Văn A vừa ghi chú cho dự án ...', date: '16/06/2024', status: 'warning' },
-    { title: 'Phạm Thanh B vừa ghi chú cho khóa luận ...', date: '16/06/2024', status: 'warning' },
-];
 function Notification({ children }) {
+    const { notifications, getNotifications } = useSocketNotification();
+
+    // Hàm xử lý khi nhấn nút Đánh dấu đã đọc tất cả
+    const handleReadAll = () => {
+        notifications.map(async (noti) => {
+            if (!noti.isRead) {
+                const data = {
+                    isRead: true,
+                };
+                try {
+                    await updateNotification(noti.id, data);
+                    await getNotifications(null);
+                } catch (error) {
+                    console.error('Lỗi handleReadAll: ' + error);
+                }
+            }
+
+        })
+    };
+
     const renderResult = (attr) => (
         <div className={cx('wrapper-notification')} {...attr}>
             <PopperWrapper className={cx('container-popper')}>
-                <div className={cx('body')}>
-                    <div className={cx('container-title')}>
-                        <h4>Thông báo</h4>
-                    </div>
-                    <Divider />
-                    {listNoti.map((item, index) => {
-                        return (
-                            <Fragment key={index}>
-                                <NotificationItem title={item.title} date={item.date} status={item.status} />
-                                <Divider />
-                            </Fragment>
-                        );
-                    })}
+                <div>
+                    <div className={cx('body')}>
+                        <div className={cx('container-title')}>
+                            <h4>Thông báo</h4>
+                        </div>
+                        <Divider />
+                        {notifications.length > 0 ? (
+                            <>
+                                {notifications.map((item, index) => (
+                                    <Fragment key={index}>
+                                        <NotificationItem data={item} />
+                                        <Divider />
+                                    </Fragment>
+                                ))
 
+                                }
+
+                            </>
+                        ) : (
+                            <div className={cx('no-noti')}>Không có thông báo</div>
+                        )}
+                    </div>
                     <div className={cx('option')}>
-                        <Button outline verysmall>
+                        <Button outline verysmall onClick={handleReadAll} className={cx('btn-readAll')}>
                             Đánh dấu đã đọc tất cả
                         </Button>
                     </div>
                 </div>
-            </PopperWrapper>
-        </div>
+            </PopperWrapper >
+        </div >
     );
 
     return (
-        <Tippy
-            interactive
-            trigger="click"
-            delay={[0, 0]} //Khi show không bị delay
-            offset={[12, 8]}
-            placement="bottom-end"
-            hideOnClick={true}
-            render={renderResult}
-        >
-            {children}
-        </Tippy>
+        <>
+            <Tippy
+                interactive
+                trigger="click"
+                delay={[0, 0]} //Khi show không bị delay
+                offset={[12, 8]}
+                placement="bottom-end"
+                hideOnClick={true}
+                render={renderResult}
+            >
+                {children}
+            </Tippy>
+        </>
     );
 }
 

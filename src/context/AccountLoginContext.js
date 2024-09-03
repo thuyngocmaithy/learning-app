@@ -3,7 +3,6 @@ import { createContext, useEffect, useState } from 'react';
 const AccountLoginContext = createContext();
 
 function AccountLoginProvider({ children }) {
-    // Hàm để lấy giá trị từ localStorage
     const getLocalStorageWithExpiration = (key) => {
         const data = localStorage.getItem(key);
         if (!data) {
@@ -18,22 +17,28 @@ function AccountLoginProvider({ children }) {
         const initialData = getLocalStorageWithExpiration('userLogin');
         return initialData ? initialData.userId : 0;
     });
+
     const [permission, setPermission] = useState(() => {
         const initialData = getLocalStorageWithExpiration('userLogin');
         return initialData ? initialData.permission : null;
     });
 
+    // Hàm để cập nhật userId và permission sau khi login hoặc logout
+    const updateUserInfo = () => {
+        const userlogin = getLocalStorageWithExpiration('userLogin');
+        setUserId(userlogin ? userlogin.userId : 0);
+        setPermission(userlogin ? userlogin.permission : null);
+    };
+
     useEffect(() => {
-        const getUserLogin = async () => {
-            const userlogin = await getLocalStorageWithExpiration('userLogin');
+        updateUserInfo(); // Cập nhật thông tin ngay khi component được mount
+    }, []);
 
-            setUserId(userlogin ? userlogin.userId : 0);
-            setPermission(userlogin && userlogin.permission);
-        };
-        getUserLogin();
-    }, [userId]);
-
-    return <AccountLoginContext.Provider value={{ userId, permission }}> {children} </AccountLoginContext.Provider>;
+    return (
+        <AccountLoginContext.Provider value={{ userId, permission, updateUserInfo }}>
+            {children}
+        </AccountLoginContext.Provider>
+    );
 }
 
 export { AccountLoginContext, AccountLoginProvider };
