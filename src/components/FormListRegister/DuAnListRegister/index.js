@@ -26,8 +26,6 @@ const DuAnListRegister = memo(function DuAnListRegister({
     const projectCancelApproveRef = useRef(null);
 
     useEffect(() => {
-        console.log('showmodal : ', showModal);
-
         const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
         const fetchDataImageAndScore = async () => {
             try {
@@ -171,7 +169,7 @@ const DuAnListRegister = memo(function DuAnListRegister({
     const handleCancelApprove = async () => {
         const projectCancel = projectCancelApproveRef.current;
         try {
-            if (typeApprove === "personal") { // Duyệt đăng ký cá nhân
+            if (typeApprove === "personal") { // Hủy duyệt Đăng ký cá nhân
                 const appoveData =
                 {
                     isApprove: false,

@@ -185,7 +185,11 @@ const DuAnUpdate = memo(function DuAnUpdate({
             } else {
                 const createUserResponse = await getUserById(userId);
                 const createUserId = createUserResponse.data;
-                projectData = { ...projectData, createUserId: createUserId, lastModifyUserId: createUserId }
+                projectData = {
+                    ...projectData,
+                    createUserId: createUserId,
+                    lastModifyUserId: createUserId
+                }
 
                 response = await createProject(projectData);
             }

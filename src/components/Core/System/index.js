@@ -1,14 +1,52 @@
 import classNames from 'classnames/bind';
 import styles from './System.module.scss';
 import { Avatar, List } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { getImageAccount } from '../../../services/userService';
+import Toolbar from '../Toolbar';
+import FollowerUpdate from '../../FormUpdate/FollowerUpdate';
 
 const cx = classNames.bind(styles);
 
 function System({ dataInfoSystem, dataFollower }) {
+    const [processedFollower, setProcessedFollower] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        const handleListFollower = async () => {
+            const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
+
+            const promises = dataFollower.map(async (item) => {
+                const responseImage = await getImageAccount(accessToken, item.user.userId);
+                const image = responseImage.data.data.thong_tin_sinh_vien.image;
+                return { title: item.user.fullname, image: image };
+            });
+
+            const processed = await Promise.all(promises);
+            setProcessedFollower(processed)
+        }
+
+        handleListFollower();
+    }, [dataFollower])
+
+    const followerUpdateMemoized = useMemo(() => {
+        return (
+            <FollowerUpdate
+                title={'người theo dõi'}
+                isUpdate={false}
+                showModal={showModal}
+                setShowModal={setShowModal}
+            />
+        );
+    }, [showModal]);
+
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-system')}>
-                <h3>Thông tin hệ thống:</h3>
+                <div className={cx('container-title')}>
+                    <h3>Thông tin hệ thống:</h3>
+                </div>
                 <div className={cx('container-system-detail')}>
                     <List
                         itemLayout="horizontal"
@@ -22,15 +60,18 @@ function System({ dataInfoSystem, dataFollower }) {
                 </div>
             </div>
             <div className={cx('container-follower')}>
-                <h3>Danh sách người theo dõi:</h3>
+                <div className={cx('container-title')}>
+                    <h3>Danh sách người theo dõi:</h3>
+                    <Toolbar type={'Thêm mới'} onClick={() => setShowModal(true)}></Toolbar>
+                </div>
                 <div className={cx('container-follower-detail')}>
                     <List
                         itemLayout="horizontal"
-                        dataSource={dataFollower}
+                        dataSource={processedFollower}
                         renderItem={(item, index) => (
                             <List.Item>
                                 <List.Item.Meta
-                                    avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
+                                    avatar={<Avatar src={`data:image/jpeg;base64,${item.image}`} size={'large'} />}
                                     title={item.title}
                                 />
                             </List.Item>
@@ -38,6 +79,7 @@ function System({ dataInfoSystem, dataFollower }) {
                     />
                 </div>
             </div>
+            {followerUpdateMemoized}
         </div>
     );
 }
