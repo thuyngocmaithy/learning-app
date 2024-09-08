@@ -50,8 +50,9 @@ function App() {
         }
     };
     useEffect(() => {
+        setIsLoading(true);
         getListFeature();
-    }, []);
+    }, [permission]);
 
     return isLoading ? (
         <div className={('container-loading')}>

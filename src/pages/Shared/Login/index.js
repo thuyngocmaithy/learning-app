@@ -22,7 +22,7 @@ const LoginForm = () => {
             if (response.status === 'success') {
                 message.success('Đăng nhập thành công');
                 console.log(response)
-                localStorage.setItem('userLogin', JSON.stringify({ userId: response.data.user.userId, token: response.data.accessToken, permission: response.data.user.roles }));
+                localStorage.setItem('userLogin', JSON.stringify({ id: response.data.user.id, userId: response.data.user.userId, accessToken: response.data.accessToken, permission: response.data.user.roles }));
                 updateUserInfo();
                 if (response.data.user.roles === "SINHVIEN") {
                     navigate('/', { replace: true }); // Chuyển hướng về trang chủ

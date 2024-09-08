@@ -26,7 +26,7 @@ const DuAnListRegister = memo(function DuAnListRegister({
     const projectCancelApproveRef = useRef(null);
 
     useEffect(() => {
-        console.log(showModal);
+        console.log('showmodal : ', showModal);
 
         const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
         const fetchDataImageAndScore = async () => {

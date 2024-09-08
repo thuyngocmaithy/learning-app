@@ -9,6 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
 import { listSubjectToFrame } from '../../services/subjectService';
+import { getScore, getUserTokenFromLocalStorage } from '../../services/userService';
 import { Spin } from 'antd';
 
 const cx = classNames.bind(styles);
@@ -139,6 +140,9 @@ function ColumnGroupingTable({ department = false }) {
     const [isLoading, setIsLoading] = useState(false);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     let indexSubject = 1;
+    let access_token = getUserTokenFromLocalStorage();
+
+    console.log('accesstoken :', access_token);
 
     const getFrame = async () => {
         setIsLoading(true);
@@ -156,6 +160,23 @@ function ColumnGroupingTable({ department = false }) {
         setIsLoading(false);
     };
 
+    const getSubject = async () => {
+        setIsLoading(true);
+        try {
+            const response = await getScore(access_token);
+            console.log(response.data)
+            // if (response) {
+            //     setListFrame(response[0]);
+            // } else {
+            //     console.log(response);
+            // }
+        } catch (error) {
+            console.log(error);
+        }
+        setIsLoading(false);
+
+    };
+
     const didMountRef = useRef(false);
 
     useEffect(() => {
@@ -163,6 +184,7 @@ function ColumnGroupingTable({ department = false }) {
             const height = document.getElementsByClassName('main-content')[0].clientHeight;
             setHeightContainerLoading(height);
             getFrame();
+            getSubject();
             didMountRef.current = true;
         }
     }, []);
@@ -182,7 +204,7 @@ function ColumnGroupingTable({ department = false }) {
         </div>
     ) : (
         <div className={cx('container-table')}>
-            <TableContainer sx={{ maxHeight: 490 }}>
+            <TableContainer sx={{ maxHeight: 880 }}>
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
@@ -205,6 +227,8 @@ function ColumnGroupingTable({ department = false }) {
                             ))}
                         </TableRow>
                     </TableHead>
+
+
                     <TableBody>
                         {listFrame.map((frame, index) => {
                             return (
@@ -547,6 +571,7 @@ function ColumnGroupingTable({ department = false }) {
                             );
                         })}
                     </TableBody>
+
                 </Table>
             </TableContainer>
         </div>
