@@ -21,7 +21,6 @@ const LoginForm = () => {
 
             if (response.status === 'success') {
                 message.success('Đăng nhập thành công');
-                console.log(response)
 
                 localStorage.setItem('userLogin', JSON.stringify({ userId: response.data.user.userId, token: response.data.accessToken, permission: response.data.user.roles }));
                 updateUserInfo();
@@ -30,7 +29,6 @@ const LoginForm = () => {
                 }
                 console.log(response.data.user.roles)
                 if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {
-                    console.log(config.routes.Dashboard_Department);
                     navigate('/Department', { replace: true });// Chuyển hướng về department
                 }
 

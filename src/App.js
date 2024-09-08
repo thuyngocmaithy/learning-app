@@ -22,6 +22,8 @@ function App() {
 
     const getListFeature = async () => {
         try {
+            console.log(permission);
+
             const response = await getFeatureByPermission({ permission: permission });
 
             if (response.status === 200) {
@@ -35,7 +37,6 @@ function App() {
                         ]);
                     })
                 }
-
                 else {
                     setListFeature(response.data[0])
                 }
@@ -50,8 +51,9 @@ function App() {
         }
     };
     useEffect(() => {
+        setIsLoading(true);
         getListFeature();
-    }, []);
+    }, [permission]);
 
     return isLoading ? (
         <div className={('container-loading')}>
@@ -79,6 +81,7 @@ function App() {
                             />
                         );
                     })}
+
                     {/* Duyệt qua danh sách các route riêng tư và tạo Route component */}
                     {privateRoutes.map((route, index) => {
                         // Xác định layout cho route

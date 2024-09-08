@@ -8,9 +8,8 @@ import ThongTinDuAnThamGia from '../../../components/ThongTinDuAnThamGia';
 import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getProjectUserById } from '../../../services/projectUserService';
-import moment from 'moment';
 import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
@@ -87,67 +86,50 @@ function DuAnThamGia({ thesis = false }) {
         navigate(-1);
     };
 
-    // Xử lý lấy thông tin project tham gia
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const projectFromUrl = queryParams.get('project');
     const [isLoading, setIsLoading] = useState(true);
     const [project, setProject] = useState(null);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
+    const [dataFollower, setDataFollower] = useState([])
 
 
     useEffect(() => {
         const height = document.getElementsByClassName('main-content')[0].clientHeight;
         setHeightContainerLoading(height);
-
     }, []);
 
-    useEffect(() => {
-        const getInfoProject = async () => {
-            try {
-                if (projectFromUrl) {
-                    const response = await getProjectUserById(projectFromUrl);
-                    console.log(response.data);
-                    setProject(response.data)
-                }
-            } catch (error) {
-                console.error("Lỗi lấy thông tin dự án" + error);
-            }
-            finally {
-                setIsLoading(false);
-            }
+    const getInfoProject = async () => {
+        try {
+            if (projectFromUrl) {
+                const responseProjectUser = await getProjectUserById(projectFromUrl);
 
+                setProject(responseProjectUser.data)
+                setDataFollower(responseProjectUser.data.project.follower[0].followerDetails)
+            }
+        } catch (error) {
+            console.error("Lỗi lấy thông tin dự án" + error);
         }
+        finally {
+            setIsLoading(false);
+        }
+    }
+
+
+    useEffect(() => {
         getInfoProject();
     }, [projectFromUrl]);
-    console.log(project);
 
 
-    const dataInfoSystem = [
+    const dataInfoSystem = useMemo(() => [
         { title: 'Người tạo', description: project ? project.project.createUser.fullname : '' },
         { title: 'Ngày tạo', description: project ? format(project.project.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
         { title: 'Người chỉnh sửa', description: project ? project.project.lastModifyUser.fullname : '' },
         { title: 'Ngày chỉnh sửa', description: project ? format(project.project.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
-    ];
+    ], [project]);
 
-    const dataFollower = [
-        {
-            title: project ? project.project.createUser.fullname : '',
-        },
-        {
-            title: 'Nguyễn Văn A',
-        },
-        {
-            title: 'Nguyễn Văn A',
-        },
-        {
-            title: 'Phạm Thanh B',
-        },
-    ];
-
-
-
-    const ITEM_TABS = [
+    const ITEM_TABS = useMemo(() => [
         {
             id: 1,
             title: 'Chi tiết',
@@ -168,7 +150,7 @@ function DuAnThamGia({ thesis = false }) {
             title: 'Hệ thống',
             children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
         },
-    ];
+    ], [project, dataInfoSystem, dataFollower]);
 
     return isLoading ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>

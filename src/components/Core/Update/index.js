@@ -6,7 +6,7 @@ import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }) {
+function Update({ title = '', children, isUpdate, hideFooter = false, showModal, onClose, onUpdate }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -51,7 +51,7 @@ function Update({ title = '', children, isUpdate, showModal, onClose, onUpdate }
             open={open}
             title={isUpdate ? `Cập nhật ${title}` : `Tạo mới ${title}`}
             onCancel={handleCancel}
-            footer={footer}
+            footer={hideFooter ? null : footer}
         >
             {children}
         </Modal>

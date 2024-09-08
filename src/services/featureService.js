@@ -73,7 +73,6 @@ export const getFeatureByPermission = async (permisisonId) => {
     try {
         const queryParams = new URLSearchParams(permisisonId).toString();
         const url = `/features/getFeatureByPermission?${queryParams}`;
-
         const response = await api.get(url);
         return response;
     } catch (error) {
