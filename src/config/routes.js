@@ -27,6 +27,7 @@ const routes = {
     // THIẾT LẬP
     KhungCTDT: '/Department/ThietLap/KhungCTDT',
     PhanQuyenChucNang: '/Department/ThietLap/PhanQuyenChucNang',
+    TaiKhoan: '/Department/ThietLap/TaiKhoan',
 };
 
 export default routes;

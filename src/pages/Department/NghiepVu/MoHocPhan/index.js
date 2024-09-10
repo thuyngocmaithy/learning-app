@@ -72,7 +72,7 @@ const columns = (showModalUpdated, handleArrange) => [
         title: 'Action',
         key: 'action',
         render: (_, record) => (
-            <div className={cx('action-item-nh')}>
+            <div className={cx('action-item')}>
                 <ButtonCustom
                     className={cx('btnEdit')}
                     leftIcon={<EditOutlined />}

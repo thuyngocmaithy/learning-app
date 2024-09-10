@@ -4,8 +4,8 @@ import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { getAll as getAllPermission, getById as getByIdPermission } from '../../../../services/permissionService';
-import { deleteFeature, getFeatureByStructure, getById as getByIdFeature } from '../../../../services/featureService';
+import { deletePermission, getAll as getAllPermission, getById as getByIdPermission } from '../../../../services/permissionService';
+import { deleteFeature, getFeatureByStructure, getById as getByIdFeature, getAll } from '../../../../services/featureService';
 import {
     createPermissionFeature,
     deletePermissionFeature,
@@ -13,10 +13,12 @@ import {
     getWhere as getWherePermissionFeature,
 } from '../../../../services/permissionFeatureService';
 import { EditOutlined } from '@ant-design/icons';
-import { message, notification, Spin } from 'antd';
+import { message, Spin, Tabs } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import PhanQuyenChucNangUpdate from '../../../../components/FormUpdate/PhanQuyenChucNangUpdate';
+import QuyenUpdate from '../../../../components/FormUpdate/QuyenUpdate';
+import TreeFeature from '../../../../components/TreeFeature';
 
 const cx = classNames.bind(styles);
 
@@ -24,24 +26,30 @@ function PhanQuyenChucNang() {
     const [isLoadingPermission, setIsLoadingPermission] = useState(true);
     const [isLoadingFeature, setIsLoadingFeature] = useState(true);
     const heightContainerLoadingRef = useRef(0);
-    const [showModal, setShowModal] = useState(false);
-    const [isUpdate, setIsUpdate] = useState(false);
+    const [showModalFeature, setShowModalFeature] = useState(false);
+    const [showModalPermission, setShowModalPermission] = useState(false);
+    const [isUpdateFeature, setIsUpdateFeature] = useState(false);
+    const [isUpdatePermission, setIsUpdatePermission] = useState(false);
     const didMountRef = useRef(false);
+    const [featureTree, setfeatureTree] = useState([]);
     const [combinedColumns, setCombinedColumns] = useState(() => () => { });
-    const [data, setData] = useState([]);
-    const [selectedValue, setSelectedValue] = useState('');
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-    const [tableParams, setTableParams] = useState({
+    const [dataFeature, setDataFeature] = useState([]);
+    const [dataPermission, setDataPermission] = useState([]);
+    const [selectedFeature, setSelectedFeature] = useState([]);
+    const [selectedPermission, setSelectedPermission] = useState([]);
+    const [tableParamsFeature, setTableParamsFeature] = useState({
         pagination: {
             current: 1,
             pageSize: 10,
         },
     });
-
-    // Hàm xử lý khi radio button thay đổi
-    const handleChange = (event) => {
-        setSelectedValue(event.target.value);
-    };
+    const [tableParamsPermission, setTableParamsPermission] = useState({
+        pagination: {
+            current: 1,
+            pageSize: 10,
+        },
+    });
+    const [tabActive, setTabActive] = useState(1);
 
     const columns = useCallback(
         (dynamicColumns = []) => [
@@ -75,7 +83,7 @@ function PhanQuyenChucNang() {
                             primary
                             verysmall
                             onClick={() => {
-                                setShowModal({
+                                setShowModalFeature({
                                     featureId: record.featureId,
                                     featureName: record.featureName,
                                     keyRoute: record.keyRoute,
@@ -83,7 +91,7 @@ function PhanQuyenChucNang() {
                                     icon: record.icon,
                                     parentFeatureId: record.parentFeatureId,
                                 });
-                                setIsUpdate(true);
+                                setIsUpdateFeature(true);
                             }}
                         >
                             Sửa
@@ -97,39 +105,41 @@ function PhanQuyenChucNang() {
         [],
     );
 
-    const getPermission = async () => {
+    const getPermission = async (onlyPermission = false) => {
         const dataPermissionFeature = await getPermissionFeature();
         try {
             const response = await getAllPermission();
-            if (response.status === 200) {
-                const newColumnsPermission = response.data.data.map((permission) => {
-                    console.log(permission)
-                    return {
-                        title: permission.permissionName,
-                        dataIndex: permission.permissionId,
-                        key: permission.permissionId,
-                        render: (_, record) =>
-                            record.keyRoute && (
-                                <input
-                                    type={'checkbox'}
-                                    value={permission.permissionId + '_' + record.featureId}
-                                    name={permission.permissionId + '_' + record.featureId}
-                                    className="checkbox-permission-feature"
-                                    onChange={handleChange}
-                                    defaultChecked={dataPermissionFeature.some(
-                                        (data) =>
-                                            data.permission.permissionId === permission.permissionId &&
-                                            data.feature.featureId === record.featureId,
-                                    )}
-                                />
-                            ),
-                        align: 'center',
-                    };
-                });
-                setCombinedColumns(() => () => columns(newColumnsPermission));
-            } else {
-                console.log(response);
+            setDataPermission(response.data.data);
+            if (!onlyPermission) {
+                if (response.status === 200) {
+                    const newColumnsPermission = response.data.data.map((permission) => {
+                        return {
+                            title: permission.permissionName,
+                            dataIndex: permission.permissionId,
+                            key: permission.permissionId,
+                            render: (_, record) =>
+                                record.keyRoute && (
+                                    <input
+                                        type={'checkbox'}
+                                        value={permission.permissionId + '_' + record.featureId}
+                                        name={permission.permissionId + '_' + record.featureId}
+                                        className="checkbox-permission-feature"
+                                        defaultChecked={dataPermissionFeature.some(
+                                            (data) =>
+                                                data.permission.permissionId === permission.permissionId &&
+                                                data.feature.featureId === record.featureId,
+                                        )}
+                                    />
+                                ),
+                            align: 'center',
+                        };
+                    });
+                    setCombinedColumns(() => () => columns(newColumnsPermission));
+                } else {
+                    console.log(response);
+                }
             }
+
         } catch (error) {
             console.log(error);
         } finally {
@@ -137,62 +147,40 @@ function PhanQuyenChucNang() {
         }
     };
 
+    const buildTree = (list, parentId = null) => {
+        const children = list.filter(item => {
+            if (item.parent !== null) {
+                return item.parent.featureId === parentId;
+            }
+            return item.parent === parentId;
+        });
+
+        return children.map(item => ({
+            ...item,
+            // Đệ quy để tìm các phần tử con
+            children: buildTree(list, item.featureId)
+        }));
+    };
+
+
     const getFeature = async () => {
         try {
-            const response = await getFeatureByStructure();
+            const response = await getAll()
+            console.log(response);
+
             if (response.status === 200) {
-                const data = response.data[0].flatMap((item) => {
-                    if (item.parentFeatureId === null && item.listFeature) {
-                        return item.listFeature
-                            .map((row) => {
-                                return {
-                                    key: row.featureId,
-                                    featureId: row.featureId,
-                                    featureName: row.featureName,
-                                    keyRoute: row.keyRoute,
-                                    url: row.url,
-                                    icon: row.icon,
-                                };
-                            })
-                            .filter(Boolean); // Loại bỏ các đối tượng null
-                    } else {
-                        return {
-                            key: item.parentFeatureId.featureId,
-                            featureId: item.parentFeatureId.featureId,
-                            featureName: item.parentFeatureId.featureName,
-                            keyRoute: item.keyRoute,
-                            url: item.parentFeatureId.url,
-                            children: item.listFeature.map((row) => {
-                                return {
-                                    key: row.featureId,
-                                    featureId: row.featureId,
-                                    featureName: row.featureName,
-                                    keyRoute: row.keyRoute,
-                                    url: row.url,
-                                    icon: row.icon,
-                                    parentFeatureId: row.parentFeature,
-                                };
-                            }),
-                        };
-                    }
-                });
-                setData(data || []);
-                setTableParams({
-                    ...tableParams,
-                    pagination: {
-                        ...tableParams.pagination,
-                        total: 200,
-                    },
-                });
-            } else {
-                console.log(response);
+                const featureTree = buildTree(response.data.data);
+                setDataFeature(response.data.data)
+                console.log(featureTree);
+                setfeatureTree(featureTree)
             }
         } catch (error) {
             console.log(error);
         } finally {
             setIsLoadingFeature(false);
         }
-    };
+
+    }
 
     const getPermissionFeature = async () => {
         try {
@@ -212,22 +200,21 @@ function PhanQuyenChucNang() {
 
     useEffect(() => {
         if (!didMountRef.current) {
-            // getPermissionFeature();
             heightContainerLoadingRef.current = document.getElementsByClassName('main-content')[0]?.clientHeight || 0;
-            getPermission();
+            getPermission(false);
             getFeature();
             didMountRef.current = true;
         }
     }, []);
 
-    // Hàm xử lý xóa các hàng đã chọn
-    const handleDeleteSelected = async () => {
+    // Hàm xử lý xóa các chức năng đã chọn
+    const handleDeleteFeature = async () => {
         try {
-            for (const id of selectedRowKeys) {
+            for (const id of selectedFeature) {
                 await deleteFeature(id); // Xóa từng item một
             } // Gọi API để xóa các hàng đã chọn
             message.success('Xóa thành công');
-            setSelectedRowKeys([]); // Xóa các hàng đã chọn sau khi xóa thành công
+            setSelectedFeature([]); // Xóa các hàng đã chọn sau khi xóa thành công
             getFeature(); // Tải lại dữ liệu
         } catch (error) {
             message.error('Xóa thất bại');
@@ -254,16 +241,16 @@ function PhanQuyenChucNang() {
         return (
             <PhanQuyenChucNangUpdate
                 title={'chức năng'}
-                isUpdate={isUpdate}
-                showModal={showModal}
-                setShowModal={setShowModal}
+                isUpdate={isUpdateFeature}
+                showModal={showModalFeature}
+                setShowModal={setShowModalFeature}
                 reLoad={getFeature}
             />
         );
-    }, [showModal, isUpdate]);
+    }, [showModalFeature, isUpdateFeature]);
 
     const handleTableChange = (pagination, filters, sorter) => {
-        setTableParams({
+        setTableParamsFeature({
             pagination,
             filters,
             sortOrder: Array.isArray(sorter) ? undefined : sorter.order,
@@ -271,8 +258,8 @@ function PhanQuyenChucNang() {
         });
 
         // `dataSource` is useless since `pageSize` changed
-        if (pagination.pageSize !== tableParams.pagination?.pageSize) {
-            setData([]);
+        if (pagination.pageSize !== tableParamsFeature.pagination?.pageSize) {
+            setDataFeature([]);
         }
     };
 
@@ -288,7 +275,6 @@ function PhanQuyenChucNang() {
             if (!checkbox.checked) {
                 try {
                     const response = await getWherePermissionFeature(conditions);
-                    console.log(response)
                     if (response.status === "success") {
                         handleDeletePermissionFeatureExist(response.data[0].id);
                     }
@@ -318,6 +304,125 @@ function PhanQuyenChucNang() {
         message.success('Lưu phân quyền thành công');
     };
 
+    // Set tab được chọn vào state => để check đang duyệt nhóm hay cá nhân
+    const handleTabClick = (index) => {
+        setTabActive(index)
+    };
+
+    // =======================================QUẢN LÝ QUYỀN================================================
+    const columnsPermisison = useCallback(
+        () => [
+            {
+                title: 'Mã quyền',
+                dataIndex: 'permissionId',
+                key: 'permissionId',
+            },
+            {
+                title: 'Tên quyền',
+                dataIndex: 'permissionName',
+                key: 'permissionName',
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                render: (_, record) => (
+                    <div className={cx('action-item')}>
+                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
+                            Chi tiết
+                        </Button>
+                        <Button
+                            className={cx('btnEdit')}
+                            leftIcon={<EditOutlined />}
+                            primary
+                            verysmall
+                            onClick={() => {
+                                setShowModalPermission({
+                                    permissionId: record.permissionId,
+                                    permissionName: record.permissionName,
+                                });
+                                setIsUpdatePermission(true);
+                            }}
+                        >
+                            Sửa
+                        </Button>
+                    </div>
+                ),
+                width: '12%',
+                align: 'center',
+            },
+        ],
+        [],
+    );
+
+    // Hàm xử lý xóa các quyền đã chọn
+    const handleDeletePermission = async () => {
+        try {
+            for (const id of selectedPermission) {
+                await deletePermission(id);
+            }
+            message.success('Xóa thành công');
+            setSelectedPermission([])
+            // Load lại data permission
+            const response = await getAllPermission();
+            setDataPermission(response.data.data);
+        } catch (error) {
+            message.error('Xóa thất bại');
+        }
+    };
+    const quyenUpdateMemoized = useMemo(() => {
+        return (
+            <QuyenUpdate
+                title={'quyền'}
+                isUpdate={isUpdatePermission}
+                showModal={showModalPermission}
+                setShowModal={setShowModalPermission}
+                reLoad={getPermission(true)}
+            />
+        );
+    }, [showModalPermission, isUpdatePermission]);
+
+    // ============================================UI======================================================
+
+    const ITEM_TABS = [
+        {
+            id: 1,
+            title: 'Phân quyền chức năng',
+            children: (
+                // <TableCustomAnt
+                //     columns={combinedColumns(setShowModalFeature)}
+                //     data={dataFeature}
+                //     height="550px"
+                //     setSelectedRowKeys={setSelectedFeature}
+                //     pagination={tableParamsFeature.pagination}
+                //     onChange={handleTableChange}
+                // />
+                // <FeatureTree tree={featureTree} />
+                // <TableCustomAnt
+                //     columns={combinedColumns(setShowModalFeature)}
+                //     data={featureTree}
+                //     height="550px"
+                // />
+                <TreeFeature />
+            ),
+        },
+        {
+            id: 2,
+            title: 'Quản lý quyền hệ thống',
+            children: (
+                <TableCustomAnt
+                    columns={columnsPermisison(setShowModalPermission)}
+                    data={dataPermission}
+                    height="550px"
+                    setSelectedRowKeys={setSelectedPermission}
+                    pagination={tableParamsPermission.pagination}
+                    onChange={handleTableChange}
+                    keyIdChange={"permissionId"}
+                />
+            ),
+        },
+    ];
+
+
     return isLoadingFeature || isLoadingPermission ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoadingRef.current }}>
             <Spin size="large" />
@@ -331,30 +436,50 @@ function PhanQuyenChucNang() {
                             <ListCourseActiveIcon />
                         </span>
 
-                        <h3 className={cx('title')}>Phân quyền chức năng</h3>
+                        <h3 className={cx('title')}>Quản lý và phân quyền hệ thống</h3>
                     </div>
                 </div>
-                <div className={cx('wrapper')}>
+                <div className={cx('wrapper-toolbar')}>
                     <Toolbar
                         type={'Thêm mới'}
                         onClick={() => {
-                            setShowModal(true);
-                            setIsUpdate(false);
+                            if (tabActive === 1) {
+                                setShowModalFeature(true);
+                                setIsUpdateFeature(false);
+                            }
+                            else {
+                                setShowModalPermission(true);
+                                setIsUpdatePermission(false);
+                            }
                         }}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('chức năng', handleDeleteSelected)} />
-                    <Toolbar type={'Lưu phân quyền'} backgroundCustom="#FF9F9F" onClick={handlePhanQuyen} />
+                    <Toolbar type={'Xóa'} onClick={() => {
+                        if (tabActive === 1) {
+                            showDeleteConfirm('chức năng', handleDeleteFeature)
+                        }
+                        else {
+                            showDeleteConfirm('quyền', handleDeletePermission)
+                        }
+                    }
+                    } />
+                    {tabActive === 1 && <Toolbar type={'Lưu phân quyền'} backgroundCustom="#FF9F9F" onClick={handlePhanQuyen} />}
                 </div>
             </div>
-            <TableCustomAnt
-                columns={combinedColumns(setShowModal)}
-                data={data}
-                height="550px"
-                setSelectedRowKeys={setSelectedRowKeys}
-                pagination={tableParams.pagination}
-                onChange={handleTableChange}
+            <Tabs
+                defaultActiveKey="1"
+                centered
+                onTabClick={(index) => handleTabClick(index)}
+                items={ITEM_TABS.map((item, index) => {
+                    return {
+                        label: item.title,
+                        key: index + 1,
+                        children: item.children,
+                    };
+                })}
             />
+
             {phanQuyenChucNangUpdateMemoized}
+            {quyenUpdateMemoized}
         </div>
     );
 }

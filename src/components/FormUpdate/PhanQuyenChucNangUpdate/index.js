@@ -1,5 +1,5 @@
-import React, { useRef, memo, useCallback, useState, useEffect } from 'react';
-import { Input, message, Select } from 'antd';
+import React, { useEffect, useRef, memo } from 'react';
+import { Input, message, Select, Form, Checkbox } from 'antd';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import {
@@ -21,80 +21,49 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
     setShowModal,
     reLoad,
 }) {
-    const [listFeatureParent, setListFeatureParent] = useState([]);
+    const [form] = Form.useForm();
+    const [listFeatureParent, setListFeatureParent] = React.useState([]);
+    const [isParent, setIsParent] = React.useState(false);
 
-    // Tạo một đối tượng chứa các ref
-    const refs = useRef({
-        featureId: null,
-        featureName: null,
-        keyRoute: null,
-        url: null,
-        icon: null,
-        isParent: null,
-        parentFeatureId: null,
-    });
-
-    const handleChange = (e) => {
-        if (e.target) {
-            const { name, value } = e.target;
-            if (refs.current[name]) {
-                refs.current[name].value = value;
-            }
-        } else {
-            refs.current['parentFeatureId'] = e;
-        }
-    };
     const handleChangeIsParent = (e) => {
-        var elementParent = document.getElementsByName('parentFeatureId')[0];
-        if (e.target.checked) {
-            refs.current['keyRoute'].input.disabled = true;
-
-            if (elementParent) {
-                elementParent.classList.add('ant-select-disabled');
-                elementParent.querySelector('.ant-select-selection-search-input').disabled = true;
-            }
-        } else {
-            refs.current['keyRoute'].input.disabled = false;
-
-            if (elementParent) {
-                elementParent.classList.remove('ant-select-disabled');
-                elementParent.querySelector('.ant-select-selection-search-input').disabled = false;
-            }
-        }
+        setIsParent(e.target.checked);
+        // form.setFieldsValue({
+        //     keyRoute: e.target.checked ? '' : form.getFieldValue('keyRoute'),
+        //     parentFeatureId: e.target.checked ? undefined : form.getFieldValue('parentFeatureId'),
+        // });
     };
 
-    // Hàm xử lý khi nhấn nút cập nhật
-    const handleUpdate = useCallback(async () => {
-        console.log(refs.current.parentFeatureId);
+    const handleUpdate = async () => {
+        const values = form.getFieldsValue();
         let parentFeature = null;
-        if (refs.current.parentFeatureId) {
-            parentFeature = await getFeatureById(refs.current.parentFeatureId);
+
+        if (values.parentFeatureId) {
+            parentFeature = await getFeatureById(values.parentFeatureId);
         }
+
         const data = {
-            featureId: refs.current.featureId.input.value,
-            featureName: refs.current.featureName.input.value,
-            keyRoute: refs.current.keyRoute.input.value,
-            url: refs.current.url.input.value,
-            icon: refs.current.icon,
+            featureId: values.featureId,
+            featureName: values.featureName,
+            keyRoute: values.keyRoute,
+            url: values.url,
+            icon: values.icon,
             parent: parentFeature ? parentFeature.data.data : null,
         };
-        // // setIsSubmitting(true); // Bắt đầu submit
+
         try {
             if (isUpdate) {
-                await updateFeature(refs.current.featureId.input.value, data); // Gọi API để cập nhật dữ liệu
+                await updateFeature(values.featureId, data);
                 setShowModal(false);
             } else {
-                await createFeature(data); // Gọi API để tạo dữ liệu mới
+                await createFeature(data);
             }
             message.success('Cập nhật thành công');
             reLoad();
         } catch (error) {
             message.error('Cập nhật thất bại');
-        } finally {
         }
-    }, [isUpdate, reLoad, setShowModal]);
+    };
 
-    // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
     const handleCloseModal = () => {
         if (showModal !== false) {
             setShowModal(false);
@@ -102,21 +71,16 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
     };
 
     const handleChangeIcon = (icon) => {
-        refs.current.icon = icon;
-    };
-    const handleChangeSelect = (parentFeatureId) => {
-        refs.current.parentFeatureId = parentFeatureId;
+        form.setFieldsValue({ icon });
     };
 
     const getFeatureParent = async () => {
         try {
             const response = await getFeatureWhere({ parentFeatureId: null, keyRoute: null });
-            const listParent = response.data.data.map((data) => {
-                return {
-                    value: data.featureId,
-                    label: data.featureName,
-                };
-            });
+            const listParent = response.data.data.map((data) => ({
+                value: data.featureId,
+                label: data.featureName,
+            }));
             setListFeatureParent(listParent);
         } catch (error) {
             message.error('Lấy feature parent thất bại');
@@ -126,8 +90,16 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
     useEffect(() => {
         getFeatureParent();
         if (showModal) {
-            handleChangeSelect(showModal.parentFeatureId);
-            handleChangeIcon(showModal.icon);
+            form.setFieldsValue({
+                featureId: showModal.featureId,
+                featureName: showModal.featureName,
+                keyRoute: showModal.keyRoute,
+                url: showModal.url,
+                icon: showModal.icon,
+                parentFeatureId: showModal.parentFeatureId,
+                isParent: showModal.featureId !== undefined && showModal.parentFeatureId === undefined && showModal.keyRoute === undefined,
+            });
+            setIsParent(showModal.featureId !== undefined && showModal.parentFeatureId === undefined && showModal.keyRoute === undefined);
         }
     }, [showModal]);
 
@@ -139,79 +111,34 @@ const PhanQuyenChucNangUpdate = memo(function PhanQuyenChucNangUpdate({
             onClose={handleCloseModal}
             onUpdate={handleUpdate}
         >
-            <FormItem label={'Mã chức năng'}>
-                <Input
-                    name="featureId"
-                    defaultValue={showModal ? showModal.featureId : ''}
-                    ref={(el) => (refs.current.featureId = el)}
-                    onChange={handleChange}
-                />
-            </FormItem>
-            <FormItem label={'Tên chức năng'}>
-                <Input
-                    name="featureName"
-                    defaultValue={showModal ? showModal.featureName : ''}
-                    ref={(el) => (refs.current.featureName = el)}
-                    onChange={handleChange}
-                />
-            </FormItem>
-            <FormItem label={'Menu cấp cha'}>
-                <Input
-                    type="checkbox"
-                    name="isParent"
-                    defaultChecked={
-                        showModal
-                            ? showModal.featureId !== undefined &&
-                            showModal.parentFeatureId === undefined &&
-                            showModal.keyRoute === undefined
-                            : false
-                    }
-                    ref={(el) => (refs.current.isParent = el)}
-                    onChange={handleChangeIsParent}
-                    style={{ width: 'auto' }}
-                />
-            </FormItem>
-            <FormItem label={'Thuộc menu'}>
-                <Select
-                    name="parentFeatureId"
-                    value={showModal ? showModal.parentFeatureId : ''}
-                    onChange={handleChangeSelect}
-                    options={listFeatureParent}
-                    disabled={
-                        showModal
-                            ? showModal.featureId !== undefined &&
-                            showModal.parentFeatureId === undefined &&
-                            showModal.keyRoute === undefined
-                            : false
-                    }
-                ></Select>
-            </FormItem>
-            <FormItem label={'Mã cấu hình route'}>
-                <Input
-                    name="keyRoute"
-                    defaultValue={showModal ? showModal.keyRoute : ''}
-                    ref={(el) => (refs.current.keyRoute = el)}
-                    onChange={handleChange}
-                    disabled={
-                        showModal
-                            ? showModal.featureId !== undefined &&
-                            showModal.parentFeatureId === undefined &&
-                            showModal.keyRoute === undefined
-                            : false
-                    }
-                />
-            </FormItem>
-            <FormItem label={'Đường dẫn'}>
-                <Input
-                    name="url"
-                    defaultValue={showModal ? showModal.url : ''}
-                    ref={(el) => (refs.current.url = el)}
-                    onChange={handleChange}
-                />
-            </FormItem>
-            <FormItem label={'Biểu tượng'}>
-                <IconPicker defaultIcon={showModal ? showModal.icon : ''} onChange={handleChangeIcon} />
-            </FormItem>
+            <Form form={form}>
+                <FormItem label={'Mã chức năng'} name="featureId">
+                    <Input />
+                </FormItem>
+                <FormItem label={'Tên chức năng'} name="featureName">
+                    <Input />
+                </FormItem>
+                <FormItem label={'Menu cấp cha'}>
+                    <Form.Item name="isParent" valuePropName="checked">
+                        <Checkbox onChange={handleChangeIsParent} />
+                    </Form.Item>
+                </FormItem>
+                <FormItem label={'Thuộc menu'} name="parentFeatureId">
+                    <Select
+                        options={listFeatureParent}
+                        disabled={isParent}
+                    />
+                </FormItem>
+                <FormItem label={'Mã cấu hình route'} name="keyRoute">
+                    <Input disabled={isParent} />
+                </FormItem>
+                <FormItem label={'Đường dẫn'} name="url">
+                    <Input />
+                </FormItem>
+                <FormItem label={'Biểu tượng'} name="icon">
+                    <IconPicker defaultIcon={form.getFieldValue('icon')} onChange={handleChangeIcon} />
+                </FormItem>
+            </Form>
         </Update>
     );
 });

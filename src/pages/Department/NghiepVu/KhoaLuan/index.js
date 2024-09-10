@@ -90,7 +90,7 @@ function KhoaLuan() {
             title: 'Action',
             key: 'action',
             render: (_, record) => (
-                <div className={cx('action-item-nh')}>
+                <div className={cx('action-item')}>
                     <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
                         Chi tiết
                     </ButtonCustom>

@@ -279,7 +279,7 @@ body {
     }
 
     .ant-tree-list {
-        background-color: var(--blue-50);
+        // background-color: var(--blue-50);
         border-radius: 16px;
     }
 
@@ -304,11 +304,13 @@ body {
         margin: 50px 50px 0 50px;
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-modal-root .ant-modal-centered .ant-modal {}
-
     :where(.css-dev-only-do-not-override-17seli4).ant-modal .ant-modal-body {
         max-height: 500px;
         overflow-y: scroll;
+    }
+
+    .ant-modal-footer {
+        margin-top: 15px;
     }
 
     // FORM ITEM
