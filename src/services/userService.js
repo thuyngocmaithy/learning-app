@@ -31,7 +31,7 @@ export const getUserTokenFromLocalStorage = () => {
     try {
       const user = JSON.parse(userLogin);
       console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
-      return user.accessToken;
+      return user.token;
     } catch (error) {
       console.error('[userService - getUserTokenFromLocalStorage - error]', error);
       return null;
