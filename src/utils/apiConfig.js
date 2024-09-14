@@ -5,11 +5,18 @@ const api = axios.create({
 });
 
 
+const handleLogout = () => {
+  localStorage.removeItem('userLogin');
+  localStorage.removeItem('token');
+  // Redirect to login page
+  window.location.href = 'http://localhost:3000/Login';
+};
+
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const userLogin = JSON.parse(localStorage.getItem('userLogin'));
+    if (userLogin && userLogin.token) {
+      config.headers['Authorization'] = `Bearer ${userLogin.token}`;
     }
     return config;
   },
@@ -18,6 +25,15 @@ api.interceptors.request.use(
   }
 );
 
-
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.error('Token expired or invalid. Logging out.');
+      handleLogout();
+    }
+    return Promise.reject(error);
+  }
+);
 
 export { api };

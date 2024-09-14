@@ -6,8 +6,39 @@ export const getAccountIdFromLocalStorage = () => {
 };
 
 export const getUseridFromLocalStorage = () => {
-  return localStorage.getItem('user.id');
-}
+  const userLogin = localStorage.getItem('userLogin');
+  console.log('[userService - getUseridFromLocalStorage - userLogin]', userLogin); // Kiểm tra dữ liệu từ localStorage
+
+  if (userLogin) {
+    try {
+      const user = JSON.parse(userLogin);
+      // console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
+      return user.id;
+    } catch (error) {
+      console.error('[userService - getUseridFromLocalStorage - error]', error);
+      return null;
+    }
+  }
+  return null;
+};
+
+
+export const getUserTokenFromLocalStorage = () => {
+  const userLogin = localStorage.getItem('userLogin');
+  console.log('[userService - getUserTokenFromLocalStorage - userLogin]', userLogin); // Kiểm tra dữ liệu từ localStorage
+
+  if (userLogin) {
+    try {
+      const user = JSON.parse(userLogin);
+      console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
+      return user.token;
+    } catch (error) {
+      console.error('[userService - getUserTokenFromLocalStorage - error]', error);
+      return null;
+    }
+  }
+  return null;
+};
 
 export const login = async (username, password) => {
   try {
@@ -64,9 +95,9 @@ export const getImageAccount = async (access_token, username) => {
 };
 
 // Hàm lấy điểm từ API SGU
-export const getScore = async (access_token, username) => {
+export const getScore = async (access_token) => {
   try {
-    const response = await api.post('/authSGU/getScore', { access_token, username });
+    const response = await api.post('/authSGU/getScore', { access_token });
     return response.data;
   } catch (error) {
     console.log('[userService - getScore - error] : ', error);
