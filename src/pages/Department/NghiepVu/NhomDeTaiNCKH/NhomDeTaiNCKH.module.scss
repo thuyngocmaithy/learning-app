@@ -1,0 +1,56 @@
+.conatainer-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+
+}
+
+// list project
+.stt {
+    color: var(--primary);
+}
+
+.name {
+    font-weight: 400;
+    font-size: 17px;
+}
+
+.container-deadline-register {
+    font-style: italic;
+    display: flex;
+}
+
+.card-duanthamgia {
+    margin-bottom: 30px;
+}
+
+.tag-status {
+    margin-left: 10px;
+}
+
+.action-item {
+    display: grid;
+
+    .btnDetail {
+        margin-bottom: 5px;
+
+    }
+}

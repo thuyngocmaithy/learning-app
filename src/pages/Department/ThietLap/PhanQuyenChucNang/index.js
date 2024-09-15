@@ -433,10 +433,10 @@ function PhanQuyenChucNang() {
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {
-                                    if (tabActive === 1) {
+                                    if (tabActive === 2) {
                                         setShowModalFeature(true);
                                     }
-                                    else {
+                                    if (tabActive === 1) {
                                         setShowModalPermission(true);
                                         setIsUpdatePermission(false);
                                     }
