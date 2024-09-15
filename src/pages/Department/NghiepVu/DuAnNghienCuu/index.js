@@ -259,7 +259,7 @@ function DuAnNghienCuu() {
                 {isToolbar ? (
                     <div className={cx('wrapper')}>
                         <Toolbar
-                            type={'Thêm mới'}
+                            type={'Tạo mới'}
                             onClick={() => {
                                 setShowModal(true);
                                 setIsUpdate(false);

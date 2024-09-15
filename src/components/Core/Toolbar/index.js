@@ -20,9 +20,11 @@ function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3' }) {
         icon = <ImportOutlined />;
     } else if (type === 'Xuất file Excel') {
         icon = <ExportOutlined />;
-    } else if (type === 'Thêm mới') {
+    } else if (type === 'Tạo mới') {
         icon = <PlusOutlined />;
     } else if (type === 'Lưu phân quyền') {
+        icon = <SaveOutlined />;
+    } else if (type === 'Lưu cấu trúc') {
         icon = <SaveOutlined />;
     }
     return (

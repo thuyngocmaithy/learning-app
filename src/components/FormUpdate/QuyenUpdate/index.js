@@ -85,7 +85,7 @@ const QuyenUpdate = memo(function QuyenUpdate({
                     label="Mã quyền"
                     rules={[{ required: true, message: 'Vui lòng nhập mã quyền' }]}
                 >
-                    <Input />
+                    <Input disabled={isUpdate ? true : false} />
                 </FormItem>
                 <FormItem
                     name="permissionName"

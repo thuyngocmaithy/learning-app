@@ -62,7 +62,7 @@ function System({ dataInfoSystem, dataFollower }) {
             <div className={cx('container-follower')}>
                 <div className={cx('container-title')}>
                     <h3>Danh sách người theo dõi:</h3>
-                    <Toolbar type={'Thêm mới'} onClick={() => setShowModal(true)}></Toolbar>
+                    <Toolbar type={'Tạo mới'} onClick={() => setShowModal(true)}></Toolbar>
                 </div>
                 <div className={cx('container-follower-detail')}>
                     <List

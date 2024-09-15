@@ -60,20 +60,21 @@ export const getWhere = async (conditions) => {
     }
 };
 
-export const getFeatureByStructure = async () => {
+export const getFeatureByPermission = async (permisisonId) => {
     try {
-        const response = await api.get('/features/getFeatureByStructure');
+        const queryParams = new URLSearchParams(permisisonId).toString();
+        const url = `/features/getFeatureByPermission?${queryParams}`;
+        const response = await api.get(url);
         return response;
     } catch (error) {
         throw error;
     }
 };
 
-export const getFeatureByPermission = async (permisisonId) => {
+export const saveTreeFeature = async (treeData) => {
     try {
-        const queryParams = new URLSearchParams(permisisonId).toString();
-        const url = `/features/getFeatureByPermission?${queryParams}`;
-        const response = await api.get(url);
+        const url = `/features/saveTreeFeature`;
+        const response = await api.post(url, treeData);
         return response;
     } catch (error) {
         throw error;

@@ -15,7 +15,9 @@ const routes = {
     ThongTinThucTap: '/ThucTap/:idThucTap',
     ChuanDauRa: '/ChuanDauRa',
 
-    // DEPARTMENT
+    // NGHIỆP VỤ
+    ThietLap: '/ThietLap',
+    NghiepVu: '/NghiepVu',
     Dashboard_Department: '/Department',
     MoHocPhan: '/Department/NghiepVu/MoHocPhan',
     DuAnNghienCuu_Department: '/Department/NghiepVu/DuAnNghienCuu',

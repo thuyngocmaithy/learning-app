@@ -2,6 +2,15 @@
     width: 20%;
     background-color: #272746;
     min-height: 563px;
+
+    a {
+        color: inherit;
+    }
+
+    a:hover,
+    a:selected {
+        color: #fff;
+    }
 }
 
 .logo {

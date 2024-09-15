@@ -9,6 +9,7 @@ import {
 } from '../src/services/featureService';
 import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
+import { getWhere } from './services/permissionFeatureService';
 
 function App() {
     const { userId, permission } = useContext(AccountLoginContext);
@@ -24,23 +25,13 @@ function App() {
         try {
             console.log(permission);
 
-            const response = await getFeatureByPermission({ permission: permission });
+            const response = await getWhere({ permission: permission });
+            if (response.status === 'success') {
+                setListFeature((prevListFeature) => [
+                    ...prevListFeature,
+                    ...response.data.map((item) => item.feature),
+                ]);
 
-            if (response.status === 200) {
-                //Nếu response.data[0].length > 1 => trả về list feature theo 2 cấp
-                // lặp qua mỗi danh sách feature trong response.data[0] để setListFeature
-
-                if (response.data[0][0].listFeature) {
-                    response.data[0].map((data) => {
-                        setListFeature(prevFeatures => [
-                            ...prevFeatures,
-                            ...data.listFeature
-                        ]);
-                    })
-                }
-                else {
-                    setListFeature(response.data[0])
-                }
             }
 
 

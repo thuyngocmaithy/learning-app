@@ -260,8 +260,7 @@ body {
 
     // TREE
     .ant-tree-title {
-        font-size: 16px;
-        line-height: 4rem;
+        line-height: 5rem;
     }
 
     :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-switcher {
@@ -281,6 +280,10 @@ body {
     .ant-tree-list {
         // background-color: var(--blue-50);
         border-radius: 16px;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-checkbox {
+        align-self: center;
     }
 
     // BUTTON
@@ -307,6 +310,11 @@ body {
     :where(.css-dev-only-do-not-override-17seli4).ant-modal .ant-modal-body {
         max-height: 500px;
         overflow-y: scroll;
+
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-modal .ant-modal-content {
+        max-width: 1000px;
     }
 
     .ant-modal-footer {
@@ -333,6 +341,13 @@ body {
         display: flex;
     }
 
-    // FORM DETAIL
+    // TREE
+    .ant-tree-draggable-icon {
+        opacity: 1 !important;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-treenode {
+        align-items: center;
+    }
 
 }

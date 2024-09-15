@@ -5,7 +5,7 @@ import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { deletePermission, getAll as getAllPermission, getById as getByIdPermission } from '../../../../services/permissionService';
-import { deleteFeature, getFeatureByStructure, getById as getByIdFeature, getAll } from '../../../../services/featureService';
+import { deleteFeature, getFeatureByStructure, getById as getByIdFeature, getAll, saveTreeFeature } from '../../../../services/featureService';
 import {
     createPermissionFeature,
     deletePermissionFeature,
@@ -16,9 +16,10 @@ import { EditOutlined } from '@ant-design/icons';
 import { message, Spin, Tabs } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
-import PhanQuyenChucNangUpdate from '../../../../components/FormUpdate/PhanQuyenChucNangUpdate';
+import ChucNangUpdate from '../../../../components/FormUpdate/ChucNangUpdate';
 import QuyenUpdate from '../../../../components/FormUpdate/QuyenUpdate';
 import TreeFeature from '../../../../components/TreeFeature';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -28,15 +29,15 @@ function PhanQuyenChucNang() {
     const heightContainerLoadingRef = useRef(0);
     const [showModalFeature, setShowModalFeature] = useState(false);
     const [showModalPermission, setShowModalPermission] = useState(false);
-    const [isUpdateFeature, setIsUpdateFeature] = useState(false);
     const [isUpdatePermission, setIsUpdatePermission] = useState(false);
     const didMountRef = useRef(false);
-    const [featureTree, setfeatureTree] = useState([]);
     const [combinedColumns, setCombinedColumns] = useState(() => () => { });
     const [dataFeature, setDataFeature] = useState([]);
     const [dataPermission, setDataPermission] = useState([]);
     const [selectedFeature, setSelectedFeature] = useState([]);
     const [selectedPermission, setSelectedPermission] = useState([]);
+    const [treeData, setTreeData] = useState([]);
+    const [reLoadStructureFeature, setReLoadStructureFeature] = useState(false);
     const [tableParamsFeature, setTableParamsFeature] = useState({
         pagination: {
             current: 1,
@@ -49,7 +50,22 @@ function PhanQuyenChucNang() {
             pageSize: 10,
         },
     });
-    const [tabActive, setTabActive] = useState(1);
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [tabActive, setTabActive] = useState(getInitialTabIndex());
+
+    // Lấy tabIndex từ URL nếu có
+    function getInitialTabIndex() {
+        const params = new URLSearchParams(location.search);
+        return Number(params.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+    }
+
+    // Cập nhật URL khi tab thay đổi
+    const handleTabChange = (tabId) => {
+        setTabActive(tabId);
+        navigate(`?tabIndex=${tabId}`); // Cập nhật URL
+    };
 
     const columns = useCallback(
         (dynamicColumns = []) => [
@@ -69,38 +85,6 @@ function PhanQuyenChucNang() {
                 key: 'keyRoute',
             },
             ...dynamicColumns,
-            {
-                title: 'Action',
-                key: 'action',
-                render: (_, record) => (
-                    <div className={cx('action-item')}>
-                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
-                            Chi tiết
-                        </Button>
-                        <Button
-                            className={cx('btnEdit')}
-                            leftIcon={<EditOutlined />}
-                            primary
-                            verysmall
-                            onClick={() => {
-                                setShowModalFeature({
-                                    featureId: record.featureId,
-                                    featureName: record.featureName,
-                                    keyRoute: record.keyRoute,
-                                    url: record.url,
-                                    icon: record.icon,
-                                    parentFeatureId: record.parentFeatureId,
-                                });
-                                setIsUpdateFeature(true);
-                            }}
-                        >
-                            Sửa
-                        </Button>
-                    </div>
-                ),
-                width: '12%',
-                align: 'center',
-            },
         ],
         [],
     );
@@ -147,32 +131,13 @@ function PhanQuyenChucNang() {
         }
     };
 
-    const buildTree = (list, parentId = null) => {
-        const children = list.filter(item => {
-            if (item.parent !== null) {
-                return item.parent.featureId === parentId;
-            }
-            return item.parent === parentId;
-        });
-
-        return children.map(item => ({
-            ...item,
-            // Đệ quy để tìm các phần tử con
-            children: buildTree(list, item.featureId)
-        }));
-    };
-
-
     const getFeature = async () => {
         try {
             const response = await getAll()
             console.log(response);
 
             if (response.status === 200) {
-                const featureTree = buildTree(response.data.data);
                 setDataFeature(response.data.data)
-                console.log(featureTree);
-                setfeatureTree(featureTree)
             }
         } catch (error) {
             console.log(error);
@@ -209,13 +174,15 @@ function PhanQuyenChucNang() {
 
     // Hàm xử lý xóa các chức năng đã chọn
     const handleDeleteFeature = async () => {
+        console.log(selectedFeature);
+
         try {
             for (const id of selectedFeature) {
                 await deleteFeature(id); // Xóa từng item một
             } // Gọi API để xóa các hàng đã chọn
             message.success('Xóa thành công');
             setSelectedFeature([]); // Xóa các hàng đã chọn sau khi xóa thành công
-            getFeature(); // Tải lại dữ liệu
+            setReLoadStructureFeature(true); // Tải lại dữ liệu
         } catch (error) {
             message.error('Xóa thất bại');
         }
@@ -237,17 +204,17 @@ function PhanQuyenChucNang() {
         }
     };
 
-    const phanQuyenChucNangUpdateMemoized = useMemo(() => {
+    const chucNangUpdateMemoized = useMemo(() => {
         return (
-            <PhanQuyenChucNangUpdate
+            <ChucNangUpdate
                 title={'chức năng'}
-                isUpdate={isUpdateFeature}
+                isUpdate={false}
                 showModal={showModalFeature}
                 setShowModal={setShowModalFeature}
                 reLoad={getFeature}
             />
         );
-    }, [showModalFeature, isUpdateFeature]);
+    }, [showModalFeature]);
 
     const handleTableChange = (pagination, filters, sorter) => {
         setTableParamsFeature({
@@ -262,6 +229,19 @@ function PhanQuyenChucNang() {
             setDataFeature([]);
         }
     };
+
+    const handleSaveFeature = async () => {
+        try {
+            const response = await saveTreeFeature(treeData)
+
+            if (response.status === 200) {
+                message.success('Lưu cấu trúc chức năng thành công');
+            }
+        } catch (error) {
+            message.error('Lưu cấu trúc chức năng thất bại:' + error);
+        }
+
+    }
 
     const handlePhanQuyen = () => {
         // Lấy tất cả các ô trong bảng
@@ -284,6 +264,8 @@ function PhanQuyenChucNang() {
             } else {
                 try {
                     const response = await getWherePermissionFeature(conditions);
+                    console.log(response);
+
                     if (response.status === "NoContent") {
                         var permissionRs = await getByIdPermission(permissionId);
                         var featureRs = await getByIdFeature(featureId);
@@ -304,10 +286,12 @@ function PhanQuyenChucNang() {
         message.success('Lưu phân quyền thành công');
     };
 
+
     // Set tab được chọn vào state => để check đang duyệt nhóm hay cá nhân
     const handleTabClick = (index) => {
         setTabActive(index)
     };
+
 
     // =======================================QUẢN LÝ QUYỀN================================================
     const columnsPermisison = useCallback(
@@ -386,27 +370,6 @@ function PhanQuyenChucNang() {
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Phân quyền chức năng',
-            children: (
-                // <TableCustomAnt
-                //     columns={combinedColumns(setShowModalFeature)}
-                //     data={dataFeature}
-                //     height="550px"
-                //     setSelectedRowKeys={setSelectedFeature}
-                //     pagination={tableParamsFeature.pagination}
-                //     onChange={handleTableChange}
-                // />
-                // <FeatureTree tree={featureTree} />
-                // <TableCustomAnt
-                //     columns={combinedColumns(setShowModalFeature)}
-                //     data={featureTree}
-                //     height="550px"
-                // />
-                <TreeFeature />
-            ),
-        },
-        {
-            id: 2,
             title: 'Quản lý quyền hệ thống',
             children: (
                 <TableCustomAnt
@@ -417,6 +380,31 @@ function PhanQuyenChucNang() {
                     pagination={tableParamsPermission.pagination}
                     onChange={handleTableChange}
                     keyIdChange={"permissionId"}
+                />
+            ),
+        },
+        {
+            id: 2,
+            title: 'Quản lý chức năng',
+            children: (
+                <TreeFeature
+                    treeData={treeData}
+                    setTreeData={setTreeData}
+                    setSelectedFeature={setSelectedFeature}
+                    reLoad={reLoadStructureFeature}
+                />
+            ),
+        },
+        {
+            id: 1,
+            title: 'Phân quyền chức năng',
+            children: (
+                <TableCustomAnt
+                    columns={combinedColumns(setShowModalFeature)}
+                    data={dataFeature}
+                    height="550px"
+                    pagination={tableParamsFeature.pagination}
+                    onChange={handleTableChange}
                 />
             ),
         },
@@ -440,33 +428,39 @@ function PhanQuyenChucNang() {
                     </div>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
-                    <Toolbar
-                        type={'Thêm mới'}
-                        onClick={() => {
-                            if (tabActive === 1) {
-                                setShowModalFeature(true);
-                                setIsUpdateFeature(false);
+                    {tabActive !== 3
+                        && <>
+                            <Toolbar
+                                type={'Tạo mới'}
+                                onClick={() => {
+                                    if (tabActive === 1) {
+                                        setShowModalFeature(true);
+                                    }
+                                    else {
+                                        setShowModalPermission(true);
+                                        setIsUpdatePermission(false);
+                                    }
+                                }}
+                            />
+                            <Toolbar type={'Xóa'} onClick={() => {
+                                if (tabActive === 2) {
+                                    showDeleteConfirm('chức năng', handleDeleteFeature)
+                                }
+                                if (tabActive === 1) {
+                                    showDeleteConfirm('quyền', handleDeletePermission)
+                                }
                             }
-                            else {
-                                setShowModalPermission(true);
-                                setIsUpdatePermission(false);
-                            }
-                        }}
-                    />
-                    <Toolbar type={'Xóa'} onClick={() => {
-                        if (tabActive === 1) {
-                            showDeleteConfirm('chức năng', handleDeleteFeature)
-                        }
-                        else {
-                            showDeleteConfirm('quyền', handleDeletePermission)
-                        }
+                            } />
+                        </>
                     }
-                    } />
-                    {tabActive === 1 && <Toolbar type={'Lưu phân quyền'} backgroundCustom="#FF9F9F" onClick={handlePhanQuyen} />}
+
+                    {tabActive === 2 && <Toolbar type={'Lưu cấu trúc'} backgroundCustom="#FF9F9F" onClick={handleSaveFeature} />}
+                    {tabActive === 3 && <Toolbar type={'Lưu phân quyền'} backgroundCustom="#FF9F9F" onClick={handlePhanQuyen} />}
                 </div>
             </div>
             <Tabs
-                defaultActiveKey="1"
+                activeKey={tabActive}
+                onChange={handleTabChange}
                 centered
                 onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => {
@@ -478,7 +472,7 @@ function PhanQuyenChucNang() {
                 })}
             />
 
-            {phanQuyenChucNangUpdateMemoized}
+            {chucNangUpdateMemoized}
             {quyenUpdateMemoized}
         </div>
     );

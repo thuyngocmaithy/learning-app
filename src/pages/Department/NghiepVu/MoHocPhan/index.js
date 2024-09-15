@@ -156,7 +156,7 @@ function MoHocPhan() {
                 </div>
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
                 <div className={cx('wrapper')}>
-                    <Toolbar type={'Thêm mới'} onClick={() => setShowModalAdd(true)} />
+                    <Toolbar type={'Tạo mới'} onClick={() => setShowModalAdd(true)} />
                     <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('năm học')} />
                     <Toolbar type={'Nhập file Excel'} />
                     <Toolbar type={'Xuất file Excel'} />
