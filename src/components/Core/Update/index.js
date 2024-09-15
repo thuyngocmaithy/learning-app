@@ -1,12 +1,12 @@
 import classNames from 'classnames/bind';
 import styles from './Update.module.scss';
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Form, Modal } from 'antd';
+import { Modal } from 'antd';
 import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Update({ title = '', children, isUpdate, hideFooter = false, showModal, onClose, onUpdate }) {
+function Update({ form, title = '', children, isUpdate, hideFooter = false, showModal, onClose, onUpdate }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -28,7 +28,13 @@ function Update({ title = '', children, isUpdate, hideFooter = false, showModal,
                 </ButtonCustom>,
             ]
             : [
-                <ButtonCustom key={'saveClose'} outline small onClick={onUpdate}>
+                <ButtonCustom key={'saveClose'} outline small onClick={() => {
+                    onUpdate();
+                    console.log(form);
+
+                    if (form)
+                        form.resetFields();
+                }}>
                     Lưu & Nhập tiếp
                 </ButtonCustom>,
                 <ButtonCustom

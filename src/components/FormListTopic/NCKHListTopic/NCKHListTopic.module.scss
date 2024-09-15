@@ -1,7 +1,7 @@
 .conatainer-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin: 30px 15px 10px 0;
 
     .info {
         display: flex;
@@ -23,7 +23,16 @@
 
 }
 
-// list project
+.action-item {
+    display: grid;
+
+    .btnDetail {
+        margin-bottom: 5px;
+
+    }
+}
+
+
 .stt {
     color: var(--primary);
 }
@@ -38,7 +47,7 @@
     display: flex;
 }
 
-.card-duanthamgia {
+.card-DeTaiNCKHThamGia {
     margin-bottom: 30px;
 }
 
@@ -46,11 +55,10 @@
     margin-left: 10px;
 }
 
-.action-item {
-    display: grid;
+.title-model-register {
+    margin-top: 10px;
+}
 
-    .btnDetail {
-        margin-bottom: 5px;
-
-    }
+.btn-cancel {
+    color: red;
 }

@@ -1,24 +1,24 @@
 import classNames from 'classnames/bind';
-import styles from './DuAnNghienCuu.module.scss';
-import { Card, message, notification, Tabs, Tag } from 'antd';
-import { ResearchProjectsIcon } from '../../../../assets/icons';
+import styles from './NCKHListTopic.module.scss';
+import { Card, message, Modal, notification, Tabs, Tag } from 'antd';
+import { ProjectIcon } from '../../../assets/icons';
+import config from "../../../config"
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import ButtonCustom from '../../../../components/Core/Button';
-import config from '../../../../config';
-import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
+import ButtonCustom from '../../../components/Core/Button';
+import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
-import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
-import DuAnUpdate from '../../../../components/FormUpdate/DuAnUpdate';
+import Toolbar from '../../../components/Core/Toolbar';
+import { showDeleteConfirm } from '../../../components/Core/Delete';
+import DeTaiNCKHUpdate from '../../../components/FormUpdate/DeTaiNCKHUpdate';
 
-import { deleteProject, getAllProject } from '../../../../services/projectService';
-import { checkUsernameExist, login } from '../../../../services/userService';
-import { getProjectUserByProjectId } from '../../../../services/projectUserService';
-import DuAnListRegister from '../../../../components/FormListRegister/DuAnListRegister';
+import { deletescientificResearch, getAllscientificResearch } from '../../../services/scientificResearchService';
+import { checkUsernameExist, login } from '../../../services/userService';
+import { getscientificResearchUserById, getscientificResearchUserByscientificResearchId } from '../../../services/scientificResearchUserService';
+import DeTaiNCKHListRegister from '../../../components/FormListRegister/DeTaiNCKHListRegister';
 
 const cx = classNames.bind(styles);
 
-const listProjectJoin = [
+const listscientificResearchJoin = [
     { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
     {
         id: '2',
@@ -28,25 +28,34 @@ const listProjectJoin = [
 ];
 
 
-function DuAnNghienCuu() {
+function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     const [isUpdate, setIsUpdate] = useState(false);
-    const [showModal, setShowModal] = useState(false); // hiển thị model updated
+    const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [showModalListRegister, setShowModalListRegister] = useState(false)
     const [isChangeStatus, setIsChangeStatus] = useState(false);
 
-    const columns = (showModal) => [
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (showModalListTopic !== open) {
+            setOpen(showModalListTopic);
+        }
+    }, [showModalListTopic]);
+
+
+    const columns = (showModalUpdate) => [
         {
-            title: 'Mã dự án',
-            dataIndex: 'projectId',
-            key: 'projectId',
+            title: 'Mã đề tài',
+            dataIndex: 'scientificResearchId',
+            key: 'scientificResearchId',
         },
         {
             title: 'Tên đề tài',
-            dataIndex: 'projectName',
-            key: 'projectName',
+            dataIndex: 'scientificResearchName',
+            key: 'scientificResearchName',
         },
         {
             title: 'Khoa',
@@ -107,7 +116,7 @@ function DuAnNghienCuu() {
                         primary
                         verysmall
                         onClick={() => {
-                            showModal(record);
+                            showModalUpdate(record);
                             setIsUpdate(true);
                         }}
                     >
@@ -120,17 +129,17 @@ function DuAnNghienCuu() {
 
     const fetchData = async () => {
         try {
-            const result = await getAllProject();
-            const projects = await Promise.all(result.data.map(async (data) => {
+            const result = await getAllscientificResearch();
+            const scientificResearchs = await Promise.all(result.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
-                const numberOfRegister = await getProjectUserByProjectId({ project: data.projectId });
+                const numberOfRegister = await getscientificResearchUserByscientificResearchId({ scientificResearch: data.scientificResearchId });
                 return {
                     ...data,
                     numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
                 };
             }));
 
-            setData(projects);
+            setData(scientificResearchs);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -140,7 +149,7 @@ function DuAnNghienCuu() {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [showModalListTopic]);
 
     useEffect(() => {
         if (isChangeStatus) {
@@ -152,33 +161,33 @@ function DuAnNghienCuu() {
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Danh sách dự án',
+            title: 'Danh sách đề tài',
             children: (
                 <TableCustomAnt
                     height={'350px'}
-                    columns={columns(setShowModal)}
+                    columns={columns(setShowModalUpdate)}
                     data={data}
                     setSelectedRowKeys={setSelectedRowKeys}
-                    keyIdChange='projectId'
+                    keyIdChange='scientificResearchId'
                     loading={isLoading}
                 />
             ),
         },
         {
             id: 2,
-            title: 'Dự án tham gia',
+            title: 'Đề tài tham gia',
             children: (
                 <div>
-                    {listProjectJoin.map((item, index) => {
+                    {listscientificResearchJoin.map((item, index) => {
                         let color = item.status === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
-                                className={cx('card-duanthamgia')}
+                                className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
                                 title={item.name}
                                 extra={
-                                    <ButtonCustom primary verysmall to={config.routes.DuAnThamGia_Department}>
+                                    <ButtonCustom primary verysmall to={config.routes.DeTaiNCKHThamGia_Department}>
                                         Chi tiết
                                     </ButtonCustom>
                                 }
@@ -196,7 +205,7 @@ function DuAnNghienCuu() {
     ];
     const [isToolbar, setIsToolbar] = useState(true);
 
-    //Khi chọn tab 2 (Dự án tham gia) => Ẩn toolbar
+    //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
     const handleTabClick = (index) => {
         if (index === 2) {
             setIsToolbar(false);
@@ -209,7 +218,7 @@ function DuAnNghienCuu() {
     const handleDelete = async () => {
         try {
             for (const id of selectedRowKeys) {
-                await deleteProject(id); // Xóa từng thesis
+                await deletescientificResearch(id); // Xóa từng thesis
             }
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
@@ -222,23 +231,29 @@ function DuAnNghienCuu() {
         }
     };
 
+    // Hàm để đóng modal
+    const handleCloseModalListTopic = () => {
+        if (showModalListTopic !== false) {
+            setShowModalListTopic(false);
+        }
+    };
 
-    const duAnUpdateMemoized = useMemo(() => {
+    const DeTaiNCKHUpdateMemoized = useMemo(() => {
         return (
-            <DuAnUpdate
-                title={'dự án nghiên cứu'}
+            <DeTaiNCKHUpdate
+                title={'đề tài nghiên cứu'}
                 isUpdate={isUpdate}
-                showModal={showModal}
-                setShowModal={setShowModal}
+                showModal={showModalUpdate}
+                setShowModal={setShowModalUpdate}
                 reLoad={fetchData}
             />
         );
-    }, [showModal, isUpdate]);
+    }, [showModalUpdate, isUpdate]);
 
-    const duAnListRegisterMemoized = useMemo(() => {
+    const DeTaiNCKHListRegisterMemoized = useMemo(() => {
         return (
-            <DuAnListRegister
-                title={'Danh sách sinh viên đăng ký dự án'}
+            <DeTaiNCKHListRegister
+                title={'Danh sách sinh viên đăng ký đề tài'}
                 showModal={showModalListRegister}
                 setShowModal={setShowModalListRegister}
                 changeStatus={setIsChangeStatus}
@@ -247,47 +262,58 @@ function DuAnNghienCuu() {
     }, [showModalListRegister]);
 
     return (
-        <div className={cx('wrapper')}>
-            <div className={cx('conatainer-header')}>
-                <div className={cx('info')}>
-                    <span className={cx('icon')}>
-                        <ResearchProjectsIcon />
-                    </span>
-                    <h3 className={cx('title')}>Dự án nghiên cứu</h3>
-                </div>
-                {/* Truyền hàm setShowModalAdd vào Toolbar */}
-                {isToolbar ? (
-                    <div className={cx('wrapper')}>
-                        <Toolbar
-                            type={'Tạo mới'}
-                            onClick={() => {
-                                setShowModal(true);
-                                setIsUpdate(false);
-                            }}
-                        />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('dự án nghiên cứu', handleDelete)} />
-                        <Toolbar type={'Nhập file Excel'} />
-                        <Toolbar type={'Xuất file Excel'} />
-                    </div>
-                ) : null}
-            </div>
-
-            <Tabs
-                defaultActiveKey={1} //nếu có dự án tham gia => set defaultActiveKey = 2
+        <>
+            <Modal
+                className={cx('modal-list-topic')}
                 centered
-                onTabClick={(index) => handleTabClick(index)}
-                items={ITEM_TABS.map((item, index) => {
-                    return {
-                        label: item.title,
-                        key: index + 1,
-                        children: item.children,
-                    };
-                })}
-            />
-            {duAnUpdateMemoized}
-            {duAnListRegisterMemoized}
-        </div>
+                open={open}
+                footer={null}
+                onCancel={handleCloseModalListTopic}
+                width={"90vw"}
+                height={"90vh"}
+            >
+                <div className={cx('wrapper')}>
+                    <div className={cx('conatainer-header')}>
+                        <div className={cx('info')}>
+                            <span className={cx('icon')}>
+                                <ProjectIcon />
+                            </span>
+                            <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
+                        </div>
+                        {isToolbar ? (
+                            <div className={cx('wrapper')}>
+                                <Toolbar
+                                    type={'Tạo mới'}
+                                    onClick={() => {
+                                        setShowModalUpdate(true);
+                                        setIsUpdate(false);
+                                    }}
+                                />
+                                <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('đề tài nghiên cứu', handleDelete)} />
+                                <Toolbar type={'Nhập file Excel'} />
+                                <Toolbar type={'Xuất file Excel'} />
+                            </div>
+                        ) : null}
+                    </div>
+
+                    <Tabs
+                        defaultActiveKey={1} //nếu có đề tài tham gia => set defaultActiveKey = 2
+                        centered
+                        onTabClick={(index) => handleTabClick(index)}
+                        items={ITEM_TABS.map((item, index) => {
+                            return {
+                                label: item.title,
+                                key: index + 1,
+                                children: item.children,
+                            };
+                        })}
+                    />
+                </div>
+            </Modal>
+            {DeTaiNCKHUpdateMemoized}
+            {DeTaiNCKHListRegisterMemoized}
+        </>
     );
 }
 
-export default DuAnNghienCuu;
+export default NCKHListTopic;

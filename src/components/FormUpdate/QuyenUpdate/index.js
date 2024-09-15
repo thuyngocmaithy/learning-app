@@ -65,7 +65,7 @@ const QuyenUpdate = memo(function QuyenUpdate({
             }
 
         } catch (error) {
-            console.error(`[ Quyen - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} project `, error);
+            console.error(`[ Quyen - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
         }
     };
 

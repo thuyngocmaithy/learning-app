@@ -1,15 +1,15 @@
 import classNames from 'classnames/bind';
-import styles from './DuAnThamGia.module.scss';
+import styles from './DeTaiNCKHThamGia.module.scss';
 import { Spin, Tabs } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 import ChatBox from '../../../components/Core/ChatBox';
-import ThongTinDuAnThamGia from '../../../components/ThongTinDuAnThamGia';
+import ThongTinDeTaiNCKHThamGia from '../../../components/ThongTinDeTaiNCKHThamGia';
 import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { getProjectUserById } from '../../../services/projectUserService';
+import { getscientificResearchUserById } from '../../../services/scientificResearchUserService';
 import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
@@ -79,7 +79,7 @@ const data = [
 
 
 
-function DuAnThamGia({ thesis = false }) {
+function DeTaiNCKHThamGia({ thesis = false }) {
     const navigate = useNavigate();
 
     const handleGoBack = () => {
@@ -88,9 +88,9 @@ function DuAnThamGia({ thesis = false }) {
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const projectFromUrl = queryParams.get('project');
+    const scientificResearchFromUrl = queryParams.get('scientificResearch');
     const [isLoading, setIsLoading] = useState(true);
-    const [project, setProject] = useState(null);
+    const [scientificResearch, setscientificResearch] = useState(null);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     const [dataFollower, setDataFollower] = useState([])
 
@@ -100,16 +100,16 @@ function DuAnThamGia({ thesis = false }) {
         setHeightContainerLoading(height);
     }, []);
 
-    const getInfoProject = async () => {
+    const getInfoscientificResearch = async () => {
         try {
-            if (projectFromUrl) {
-                const responseProjectUser = await getProjectUserById(projectFromUrl);
+            if (scientificResearchFromUrl) {
+                const responsescientificResearchUser = await getscientificResearchUserById(scientificResearchFromUrl);
 
-                setProject(responseProjectUser.data)
-                setDataFollower(responseProjectUser.data.project.follower[0].followerDetails)
+                setscientificResearch(responsescientificResearchUser.data)
+                setDataFollower(responsescientificResearchUser.data.scientificResearch.follower[0].followerDetails)
             }
         } catch (error) {
-            console.error("Lỗi lấy thông tin dự án" + error);
+            console.error("Lỗi lấy thông tin đề tài" + error);
         }
         finally {
             setIsLoading(false);
@@ -118,22 +118,22 @@ function DuAnThamGia({ thesis = false }) {
 
 
     useEffect(() => {
-        getInfoProject();
-    }, [projectFromUrl]);
+        getInfoscientificResearch();
+    }, [scientificResearchFromUrl]);
 
 
     const dataInfoSystem = useMemo(() => [
-        { title: 'Người tạo', description: project ? project.project.createUser.fullname : '' },
-        { title: 'Ngày tạo', description: project ? format(project.project.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
-        { title: 'Người chỉnh sửa', description: project ? project.project.lastModifyUser.fullname : '' },
-        { title: 'Ngày chỉnh sửa', description: project ? format(project.project.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
-    ], [project]);
+        { title: 'Người tạo', description: scientificResearch ? scientificResearch.scientificResearch.createUser.fullname : '' },
+        { title: 'Ngày tạo', description: scientificResearch ? format(scientificResearch.scientificResearch.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
+        { title: 'Người chỉnh sửa', description: scientificResearch ? scientificResearch.scientificResearch.lastModifyUser.fullname : '' },
+        { title: 'Ngày chỉnh sửa', description: scientificResearch ? format(scientificResearch.scientificResearch.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
+    ], [scientificResearch]);
 
     const ITEM_TABS = useMemo(() => [
         {
             id: 1,
             title: 'Chi tiết',
-            children: <ThongTinDuAnThamGia project={project} thesis={true} />,
+            children: <ThongTinDeTaiNCKHThamGia scientificResearch={scientificResearch} thesis={true} />,
         },
         {
             id: 2,
@@ -150,20 +150,20 @@ function DuAnThamGia({ thesis = false }) {
             title: 'Hệ thống',
             children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
         },
-    ], [project, dataInfoSystem, dataFollower]);
+    ], [scientificResearch, dataInfoSystem, dataFollower]);
 
     return isLoading ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
             <Spin size="large" />
         </div>
     ) : (
-        < div className={cx('wrapper-DuAnThamGia')} >
+        < div className={cx('wrapper-DeTaiNCKHThamGia')} >
             <div className={cx('container-header')}>
                 <span onClick={handleGoBack} className={cx('container-icon-back')}>
                     <LeftOutlined className={cx('icon-back')} />
                 </span>
                 <h3 className={cx('title')}>
-                    {thesis ? 'Thông tin khóa luận tốt nghiệp' : 'Thông tin dự án nghiên cứu khoa học'}
+                    {thesis ? 'Thông tin khóa luận tốt nghiệp' : 'Thông tin đề tài nghiên cứu khoa học'}
                 </h3>
             </div>
             <Tabs
@@ -181,4 +181,4 @@ function DuAnThamGia({ thesis = false }) {
     );
 }
 
-export default DuAnThamGia;
+export default DeTaiNCKHThamGia;

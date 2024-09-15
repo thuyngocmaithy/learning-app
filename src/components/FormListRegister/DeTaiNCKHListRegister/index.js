@@ -1,11 +1,11 @@
 import React, { memo, useContext, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
-import styles from './DuAnListRegister.module.scss';
+import styles from './DeTaiNCKHListRegister.module.scss';
 import ListRegister from '../../Core/ListRegister';
 import { Avatar, List, message, Skeleton, Tabs } from 'antd';
 import Button from '../../Core/Button';
 import { fetchDataImageAndScoreAccount, getImageAccount, getScore, getUserById } from '../../../services/userService';
-import { updateProjectUserById } from '../../../services/projectUserService';
+import { updatescientificResearchUserById } from '../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import config from '../../../config';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
@@ -13,7 +13,7 @@ import { showDeleteConfirm } from '../../Core/Delete';
 
 const cx = classNames.bind(styles);
 
-const DuAnListRegister = memo(function DuAnListRegister({
+const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
     title,
     showModal,
     setShowModal,
@@ -23,42 +23,42 @@ const DuAnListRegister = memo(function DuAnListRegister({
     const [typeApprove, setTypeApprove] = useState('personal');
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification, deleteNotification } = useSocketNotification();
-    const projectCancelApproveRef = useRef(null);
+    const scientificResearchCancelApproveRef = useRef(null);
 
     useEffect(() => {
-        const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
-        const fetchDataImageAndScore = async () => {
-            try {
-                // Tạo một mảng các Promise để xử lý tất cả cùng lúc
-                const promises = showModal.numberOfRegister.map(async (item) => {
-                    const responseImage = await getImageAccount(accessToken, item.user.userId);
-                    const image = responseImage.data.data.thong_tin_sinh_vien.image;
+        if (showModal) {
+            const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
+            const fetchDataImageAndScore = async () => {
+                try {
+                    // Tạo một mảng các Promise để xử lý tất cả cùng lúc
+                    const promises = showModal.numberOfRegister.map(async (item) => {
+                        const responseImage = await getImageAccount(accessToken, item.user.userId);
+                        const image = responseImage.data.data.thong_tin_sinh_vien.image;
 
-                    const responseDiem = await getScore(accessToken, item.user.userId);
-                    const diemResult = responseDiem.data.data.ds_diem_hocky.find((item) => item.loai_nganh)
-                    const diem = diemResult.dtb_tich_luy_he_4;
+                        const responseDiem = await getScore(accessToken, item.user.userId);
+                        const diemResult = responseDiem.data.data.ds_diem_hocky.find((item) => item.loai_nganh)
+                        const diem = diemResult.dtb_tich_luy_he_4;
 
-                    return { ...item, image, diem };
-                });
+                        return { ...item, image, diem };
+                    });
 
-                // Đợi tất cả các Promise hoàn thành
-                const updatedList = await Promise.all(promises);
+                    // Đợi tất cả các Promise hoàn thành
+                    const updatedList = await Promise.all(promises);
 
-                // Cập nhật trạng thái một lần
-                setList(updatedList);
+                    // Cập nhật trạng thái một lần
+                    setList(updatedList);
 
-            } catch (error) {
-                // Xử lý cho trường hợp không lấy được token từ SGU cho tài khoản admin            
-                const promises = showModal.numberOfRegister.map(async (item) => {
-                    return { ...item, image: "", diem: "" };
-                });
-                const updatedList = await Promise.all(promises);
-                setList(updatedList);
+                } catch (error) {
+                    // Xử lý cho trường hợp không lấy được token từ SGU cho tài khoản admin            
+                    const promises = showModal.numberOfRegister.map(async (item) => {
+                        return { ...item, image: "", diem: "" };
+                    });
+                    const updatedList = await Promise.all(promises);
+                    setList(updatedList);
+                }
             }
+            if (showModal?.numberOfRegister) fetchDataImageAndScore();
         }
-        if (showModal.numberOfRegister) fetchDataImageAndScore();
-
-
     }, [showModal]);
 
 
@@ -70,7 +70,7 @@ const DuAnListRegister = memo(function DuAnListRegister({
                     isApprove: true,
                 }
 
-                const responseApprove = await updateProjectUserById(item.id, appoveData);
+                const responseApprove = await updatescientificResearchUserById(item.id, appoveData);
                 if (responseApprove) {
                     message.success('Duyệt thành công');
 
@@ -92,7 +92,7 @@ const DuAnListRegister = memo(function DuAnListRegister({
                 message.warning("Chưa xử lý")
             }
         } catch (error) {
-            console.error("Lỗi duyệt đăng ký dự án: " + error);
+            console.error("Lỗi duyệt đăng ký đề tài: " + error);
         }
     };
 
@@ -101,55 +101,55 @@ const DuAnListRegister = memo(function DuAnListRegister({
             const user = await getUserById(userId)
             const ListNotification = [
                 // Gửi thông báo cho sinh viên được duyệt
-                // [Bạn được duyệt tham gia dự án - Phát triển website...]
+                // [Bạn được duyệt tham gia đề tài - Phát triển website...]
                 {
-                    content: `Bạn được duyệt tham gia dự án - ${showModal.projectName}`,
-                    url: `${config.routes.DuAnNghienCuu}?tabIndex=2`,
+                    content: `Bạn được duyệt tham gia đề tài - ${showModal.scientificResearchName}`,
+                    url: `${config.routes.NghienCuuKhoaHoc}?tabIndex=2`,
                     toUser: item.user,
                     createUser: user.data,
                     type: 'success',
                 },
             ];
-            // Nếu người tạo dự án khác với tài khoản user đang duyệt
-            // => Gửi thông báo cho người tạo dự án
-            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia dự án - Phát triển website...]
+            // Nếu người tạo đề tài khác với tài khoản user đang duyệt
+            // => Gửi thông báo cho người tạo đề tài
+            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia đề tài - Phát triển website...]
             if (showModal.createUser &&
                 showModal.createUser.userId !== userId) {
                 ListNotification.push({
-                    content: `${user.data.fullname} duyệt Sinh viên ${item.user.fullname} tham gia dự án - ${showModal.projectName}`,
-                    url: config.routes.DuAnNghienCuu_Department,
+                    content: `${user.data.fullname} duyệt Sinh viên ${item.user.fullname} tham gia đề tài - ${showModal.scientificResearchName}`,
+                    url: config.routes.NghienCuuKhoaHoc_Department,
                     toUser: showModal.createUser,
                     createUser: user.data,
                     type: 'success',
                 });
             }
-            // Nếu người chỉnh sửa dự án khác với tài khoản user đang duyệt
-            // Khác người tạo dự án            
-            // => Gửi thông báo cho người chỉnh sửa dự án
-            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia dự án - Phát triển website...]
+            // Nếu người chỉnh sửa đề tài khác với tài khoản user đang duyệt
+            // Khác người tạo đề tài            
+            // => Gửi thông báo cho người chỉnh sửa đề tài
+            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia đề tài - Phát triển website...]
             if (showModal.lastModifyUser &&
                 showModal.lastModifyUser.userId !== userId &&
                 showModal.lastModifyUser.id !== showModal.createUser.id) {
                 ListNotification.push({
-                    content: `${user.data.fullname} duyệt Sinh viên ${item.user.fullname} tham gia dự án - ${showModal.projectName}`,
-                    url: config.routes.DuAnNghienCuu_Department,
+                    content: `${user.data.fullname} duyệt Sinh viên ${item.user.fullname} tham gia đề tài - ${showModal.scientificResearchName}`,
+                    url: config.routes.NghienCuuKhoaHoc_Department,
                     toUser: showModal.createUser,
                     createUser: user.data,
                     type: 'success',
                 });
             }
             // Nếu giảng viên hướng dẫn khác với tài khoản user đang duyệt
-            // Khác người tạo dự án            
-            // Khác người chỉnh sửa dự án
+            // Khác người tạo đề tài            
+            // Khác người chỉnh sửa đề tài
             // => Gửi thông báo cho giảng viên hướng dẫn
-            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia dự án - Phát triển website...]
+            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia đề tài - Phát triển website...]
             if (showModal.instructor &&
                 showModal.instructor.userId !== userId &&
                 showModal.instructor.id !== showModal.createUser.id &&
                 showModal.instructor.id !== showModal.lastModifyUser.id) {
                 ListNotification.push({
-                    content: `${user.data.fullname} duyệt Sinh viên ${item.user.fullname} tham gia dự án - ${showModal.projectName}`,
-                    url: config.routes.DuAnNghienCuu_Department,
+                    content: `${user.data.fullname} duyệt Sinh viên ${item.user.fullname} tham gia đề tài - ${showModal.scientificResearchName}`,
+                    url: config.routes.NghienCuuKhoaHoc_Department,
                     toUser: showModal.instructor,
                     createUser: user.data,
                     type: 'success',
@@ -167,7 +167,7 @@ const DuAnListRegister = memo(function DuAnListRegister({
 
 
     const handleCancelApprove = async () => {
-        const projectCancel = projectCancelApproveRef.current;
+        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
         try {
             if (typeApprove === "personal") { // Hủy duyệt Đăng ký cá nhân
                 const appoveData =
@@ -175,20 +175,20 @@ const DuAnListRegister = memo(function DuAnListRegister({
                     isApprove: false,
                 }
 
-                const responseApprove = await updateProjectUserById(projectCancel.id, appoveData);
+                const responseApprove = await updatescientificResearchUserById(scientificResearchCancel.id, appoveData);
                 if (responseApprove) {
                     message.success('Hủy duyệt thành công');
 
                     // Cập nhật trạng thái isApprove của item trong danh sách
                     setList((prevList) =>
                         prevList.map((listItem) =>
-                            listItem.id === projectCancel.id
+                            listItem.id === scientificResearchCancel.id
                                 ? { ...listItem, isApprove: false }
                                 : listItem
                         )
                     );
                     // Hủy thông báo
-                    handleCancelNotification(projectCancel);
+                    handleCancelNotification(scientificResearchCancel);
                     changeStatus(true);
                 }
 
@@ -197,60 +197,60 @@ const DuAnListRegister = memo(function DuAnListRegister({
                 message.warning("Chưa xử lý")
             }
         } catch (error) {
-            console.error("Lỗi duyệt đăng ký dự án: " + error);
+            console.error("Lỗi duyệt đăng ký đề tài: " + error);
         }
     };
 
 
     const handleCancelNotification = async () => {
-        const projectCancel = projectCancelApproveRef.current;
+        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
         try {
             const user = await getUserById(userId)
 
             const ListNotification = [
                 // Hủy thông báo cho sinh viên được duyệt
-                // [Bạn được duyệt tham gia dự án - Phát triển website...]
+                // [Bạn được duyệt tham gia đề tài - Phát triển website...]
                 {
-                    content: `Bạn được duyệt tham gia dự án - ${showModal.projectName}`,
-                    toUser: projectCancel.user,
+                    content: `Bạn được duyệt tham gia đề tài - ${showModal.scientificResearchName}`,
+                    toUser: scientificResearchCancel.user,
                     createUser: user.data,
                 },
             ];
-            // Nếu người tạo dự án khác với tài khoản user đang duyệt
-            // => Hủy thông báo cho người tạo dự án
-            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia dự án - Phát triển website...]
+            // Nếu người tạo đề tài khác với tài khoản user đang duyệt
+            // => Hủy thông báo cho người tạo đề tài
+            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia đề tài - Phát triển website...]
             if (showModal.createUser &&
                 showModal.createUser.userId !== userId) {
                 ListNotification.push({
-                    content: `${user.data.fullname} duyệt Sinh viên ${projectCancel.user.fullname} tham gia dự án - ${showModal.projectName}`,
+                    content: `${user.data.fullname} duyệt Sinh viên ${scientificResearchCancel.user.fullname} tham gia đề tài - ${showModal.scientificResearchName}`,
                     toUser: showModal.createUser,
                     createUser: user.data,
                 });
             }
-            // Nếu người chỉnh sửa dự án khác với tài khoản user đang duyệt
-            // Khác người tạo dự án            
-            // => Gửi thông báo cho người chỉnh sửa dự án
-            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia dự án - Phát triển website...]
+            // Nếu người chỉnh sửa đề tài khác với tài khoản user đang duyệt
+            // Khác người tạo đề tài            
+            // => Gửi thông báo cho người chỉnh sửa đề tài
+            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia đề tài - Phát triển website...]
             if (showModal.lastModifyUser &&
                 showModal.lastModifyUser.userId !== userId &&
                 showModal.lastModifyUser.id !== showModal.createUser.id) {
                 ListNotification.push({
-                    content: `${user.data.fullname} duyệt Sinh viên ${projectCancel.user.fullname} tham gia dự án - ${showModal.projectName}`,
+                    content: `${user.data.fullname} duyệt Sinh viên ${scientificResearchCancel.user.fullname} tham gia đề tài - ${showModal.scientificResearchName}`,
                     toUser: showModal.createUser,
                     createUser: user.data,
                 });
             }
             // Nếu giảng viên hướng dẫn khác với tài khoản user đang duyệt
-            // Khác người tạo dự án            
-            // Khác người chỉnh sửa dự án
+            // Khác người tạo đề tài            
+            // Khác người chỉnh sửa đề tài
             // => Gửi thông báo cho giảng viên hướng dẫn
-            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia dự án - Phát triển website...]
+            // [Admin duyệt Sinh viên Nguyễn Văn A tham gia đề tài - Phát triển website...]
             if (showModal.instructor &&
                 showModal.instructor.userId !== userId &&
                 showModal.instructor.id !== showModal.createUser.id &&
                 showModal.instructor.id !== showModal.lastModifyUser.id) {
                 ListNotification.push({
-                    content: `${user.data.fullname} duyệt Sinh viên ${projectCancel.user.fullname} tham gia dự án - ${showModal.projectName}`,
+                    content: `${user.data.fullname} duyệt Sinh viên ${scientificResearchCancel.user.fullname} tham gia đề tài - ${showModal.scientificResearchName}`,
                     toUser: showModal.instructor,
                     createUser: user.data,
                 });
@@ -289,8 +289,8 @@ const DuAnListRegister = memo(function DuAnListRegister({
                                 <Button verysmall outline key="list-loadmore-edit">Thông tin sinh viên</Button>,
                                 item.isApprove ?
                                     <Button className={cx("btn-cancel")} verysmall outline key="list-loadmore-more" onClick={() => {
-                                        projectCancelApproveRef.current = item;
-                                        setTimeout(() => showDeleteConfirm('dự án nghiên cứu', handleCancelApprove, false, true), 0);
+                                        scientificResearchCancelApproveRef.current = item;
+                                        setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelApprove, false, true), 0);
                                     }}>Hủy duyệt</Button> :
                                     <Button verysmall primary key="list-loadmore-more" onClick={() => handleApprove(item)}>Duyệt</Button>
                             ]}
@@ -329,7 +329,7 @@ const DuAnListRegister = memo(function DuAnListRegister({
     return (
         <ListRegister
             title={title}
-            showModal={showModal !== false ? true : false}
+            showModal={(showModal !== false && showModal) ? true : false}
             onClose={handleCloseModal}
         >
             <Tabs
@@ -348,4 +348,4 @@ const DuAnListRegister = memo(function DuAnListRegister({
     );
 });
 
-export default DuAnListRegister;
+export default DeTaiNCKHListRegister;

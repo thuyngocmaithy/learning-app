@@ -9,6 +9,7 @@ import {
 import classNames from 'classnames/bind';
 import styles from './ChucNangUpdate.module.scss';
 import IconPicker from '../../Core/IconPicker';
+import { login } from '../../../services/userService';
 
 const cx = classNames.bind(styles);
 
@@ -32,17 +33,23 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
             keyRoute: values.keyRoute,
             icon: values.icon,
         };
-
+        let response;
         try {
             if (isUpdate) {
-                await updateFeature(values.featureId, data);
+                response = await updateFeature(values.featureId, data);
                 setShowModal(false);
             } else {
-                await createFeature(data);
+                response = await createFeature(data);
+            }
+            console.log(response);
+            if (response.status === 200) {
+                reLoad()
             }
             message.success('Cập nhật thành công');
-            reLoad();
+            reLoad()
         } catch (error) {
+            console.error(error);
+
             message.error('Cập nhật thất bại');
         }
     };

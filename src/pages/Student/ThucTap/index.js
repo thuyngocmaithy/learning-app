@@ -241,7 +241,7 @@ function ThucTap() {
                 <h3 className={cx('title')}>Thực tập tốt nghiệp</h3>
             </div>
             <Tabs
-                defaultActiveKey={1} //nếu có dự án tham gia => set defaultActiveKey = 2
+                defaultActiveKey={1} //nếu có đề tài tham gia => set defaultActiveKey = 2
                 centered
                 items={ITEM_TABS.map((item, index) => {
                     return {

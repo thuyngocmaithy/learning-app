@@ -2,11 +2,11 @@ import React, { memo, useState, useEffect } from 'react';
 import FormItem from '../../Core/FormItem';
 import Detail from '../../Core/Detail';
 import classNames from 'classnames/bind';
-import styles from './DuAnDetail.module.scss';
+import styles from './DeTaiNCKHDetail.module.scss';
 
 const cx = classNames.bind(styles);
 
-const DuAnDetail = memo(function DuAnDetail({
+const DeTaiNCKHDetail = memo(function DeTaiNCKHDetail({
     title,
     showModal,
     setShowModal,
@@ -35,14 +35,15 @@ const DuAnDetail = memo(function DuAnDetail({
             title={title}
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
+            className={cx('wrapper-modal-detail')}
         >
             <div className={cx('container-detail')}>
                 <div>
-                    <FormItem label={'Mã dự án'} className={cx("form-item")}>
-                        <p>{showModal.projectId}</p>
+                    <FormItem label={'Mã đề tài'} className={cx("form-item")}>
+                        <p>{showModal.scientificResearchId}</p>
                     </FormItem>
-                    <FormItem label={'Tên dự án'}>
-                        <p>{showModal.projectName}</p>
+                    <FormItem label={'Tên đề tài'}>
+                        <p>{showModal.scientificResearchName}</p>
                     </FormItem>
                     {console.log(showModal)
                     }
@@ -76,4 +77,4 @@ const DuAnDetail = memo(function DuAnDetail({
     );
 });
 
-export default DuAnDetail;
+export default DeTaiNCKHDetail;

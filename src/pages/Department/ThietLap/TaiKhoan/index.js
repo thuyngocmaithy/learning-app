@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './TaiKhoan.module.scss';
 import { message, Tag } from 'antd';
-import { ResearchProjectsIcon } from '../../../../assets/icons';
+import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
@@ -131,7 +131,7 @@ function TaiKhoan() {
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
-                        <ResearchProjectsIcon />
+                        <ProjectIcon />
                     </span>
                     <h3 className={cx('title')}>Tài khoản</h3>
                 </div>

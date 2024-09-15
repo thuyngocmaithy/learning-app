@@ -211,7 +211,7 @@ function PhanQuyenChucNang() {
                 isUpdate={false}
                 showModal={showModalFeature}
                 setShowModal={setShowModalFeature}
-                reLoad={getFeature}
+                reLoad={setReLoadStructureFeature}
             />
         );
     }, [showModalFeature]);

@@ -20,7 +20,7 @@ function TableCustomAnt({
         onChange: (newSelectedRowKeys, selectedRows) => {
             setSelectedRowKeys(newSelectedRowKeys);
 
-            // Nếu key để xóa không phải id => VD: projectId - Truyền key để xóa vào keyIdChange
+            // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
             if (keyIdChange) {
                 const selectedIds = selectedRows.map(row => row[keyIdChange]);
                 setSelectedRowKeys(selectedIds);

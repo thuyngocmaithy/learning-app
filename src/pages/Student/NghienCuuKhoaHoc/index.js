@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState, useContext, useRef } from 'react';
 import classNames from 'classnames/bind';
-import styles from './DuAnNghienCuu.module.scss';
+import styles from './NghienCuuKhoaHoc.module.scss';
 import { Card, List, message, Skeleton, Tabs, Tag } from 'antd';
-import { ResearchProjectsIcon } from '../../../assets/icons';
+import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getAllProject } from '../../../services/projectService';
-import { getProjectUserByUserId, deleteProjectUserByUserIdAndProjectId, getProjectUserByProjectId } from '../../../services/projectUserService';
-import DuAnDetail from '../../../components/FormDetail/DuAnDetail';
-import DuAnRegister from '../../../components/FormRegister/DuAnRegister';
+import { getAllscientificResearch } from '../../../services/scientificResearchService';
+import { getscientificResearchUserByUserId, deletescientificResearchUserByUserIdAndscientificResearchId, getscientificResearchUserByscientificResearchId } from '../../../services/scientificResearchUserService';
+import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
+import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { showDeleteConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
@@ -17,14 +17,14 @@ import { useLocation } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
-function DuAnNghienCuu() {
+function NghienCuuKhoaHoc() {
     const [list, setList] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
-    const [listProjectRegister, setListProjectRegister] = useState([]);
-    const projectCancelRef = useRef(null);
+    const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
+    const scientificResearchCancelRef = useRef(null);
     const { deleteNotification } = useSocketNotification();
 
     // Xử lý active tab từ url
@@ -39,27 +39,27 @@ function DuAnNghienCuu() {
         }
     }, [tabIndexFromUrl]);
 
-    const fetchProjects = async () => {
+    const fetchscientificResearchs = async () => {
         try {
-            const response = await getAllProject();
+            const response = await getAllscientificResearch();
 
-            let projects = response.data.map(project => ({
-                projectId: project.projectId,
-                projectName: project.projectName,
-                executionTime: project.executionTime,
-                instructorName: project.instructor.fullname,
-                level: project.level,
-                budget: project.budget,
-                description: project.description,
-                createUser: project.createUser,
-                instructor: project.instructor,
-                lastModifyUser: project.lastModifyUser
+            let scientificResearchs = response.data.map(scientificResearch => ({
+                scientificResearchId: scientificResearch.scientificResearchId,
+                scientificResearchName: scientificResearch.scientificResearchName,
+                executionTime: scientificResearch.executionTime,
+                instructorName: scientificResearch.instructor.fullname,
+                level: scientificResearch.level,
+                budget: scientificResearch.budget,
+                description: scientificResearch.description,
+                createUser: scientificResearch.createUser,
+                instructor: scientificResearch.instructor,
+                lastModifyUser: scientificResearch.lastModifyUser
             }));
-            const promises = projects.map(async (project) => {
-                const responseCountRegister = await getProjectUserByProjectId({ project: project.projectId });
+            const promises = scientificResearchs.map(async (scientificResearch) => {
+                const responseCountRegister = await getscientificResearchUserByscientificResearchId({ scientificResearch: scientificResearch.scientificResearchId });
                 const count = responseCountRegister.data.data.length;
 
-                return { ...project, count };
+                return { ...scientificResearch, count };
             });
 
             // Đợi tất cả các Promise hoàn thành
@@ -70,35 +70,35 @@ function DuAnNghienCuu() {
 
             setIsLoading(false);
         } catch (error) {
-            console.error('Error fetching projects:', error);
+            console.error('Error fetching scientificResearchs:', error);
             setIsLoading(false);
         }
     };
 
-    const checkRegisterProject = async () => {
+    const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getProjectUserByUserId({ user: userId });
+            const response = await getscientificResearchUserByUserId({ user: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
-            // const registeredProjects = response.data.data.map(data => data.project.projectId);
-            setListProjectRegister(response.data.data);
+            // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
+            setListscientificResearchRegister(response.data.data);
 
 
 
         } catch (error) {
-            console.error('Error fetching registered projects:', error);
+            console.error('Error fetching registered scientificResearchs:', error);
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchProjects();
-        checkRegisterProject();
+        fetchscientificResearchs();
+        checkRegisterscientificResearch();
     }, [showModalRegister]);
 
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Danh sách dự án',
+            title: 'Danh sách đề tài',
             children: (
                 <List
                     pagination={{
@@ -112,10 +112,10 @@ function DuAnNghienCuu() {
                                 <Button outline verysmall onClick={() => setShowModalDetail(item)}>
                                     Chi tiết
                                 </Button>,
-                                listProjectRegister.some(projectRegister => projectRegister.project.projectId === item.projectId) ?
+                                listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
                                     <Button className={cx('btn-cancel')} outline verysmall onClick={() => {
-                                        projectCancelRef.current = item;
-                                        setTimeout(() => showDeleteConfirm('dự án nghiên cứu', handleCancelWithConfirm, true), 0);
+                                        scientificResearchCancelRef.current = item;
+                                        setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelWithConfirm, true), 0);
 
                                     }} >
                                         Hủy đăng ký
@@ -130,7 +130,7 @@ function DuAnNghienCuu() {
                                 }
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.projectName}</div>}
+                                    title={<div className={cx('name')}>{item.scientificResearchName}</div>}
                                     description={<div>
                                         <p>Lượt đăng ký: {item.count} </p>
                                         <p>Giảng viên hướng dẫn: {item.instructorName}</p>
@@ -149,25 +149,25 @@ function DuAnNghienCuu() {
         },
         {
             id: 2,
-            title: 'Dự án tham gia',
+            title: 'đề tài tham gia',
             children: (
                 <div>
-                    {listProjectRegister.map((item, index) => {
+                    {listscientificResearchRegister.map((item, index) => {
                         let color = item.isApprove ? 'green' : 'red';
                         return (
                             <Card
-                                className={cx('card-duanthamgia')}
+                                className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.project.projectName}
+                                title={item.scientificResearch.scientificResearchName}
                                 extra={
                                     <Button primary verysmall
                                         onClick={() => {
                                             if (!item.isApprove) {
-                                                setShowModalDetail(item.project);
+                                                setShowModalDetail(item.scientificResearch);
                                             }
                                         }}
-                                        to={item.isApprove ? `${config.routes.DuAnThamGia}?project=${item.id}` : null}>
+                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.id}` : null}>
                                         Chi tiết
                                     </Button>
                                 }
@@ -185,28 +185,28 @@ function DuAnNghienCuu() {
     ];
 
     const handleCancelNotification = async () => {
-        const projectCancel = projectCancelRef.current;
+        const scientificResearchCancel = scientificResearchCancelRef.current;
         try {
             const user = await getUserById(userId)
             const ListNotification = [
                 {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia dự án ${projectCancel.name}`,
-                    toUser: projectCancel.createUser,
+                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.name}`,
+                    toUser: scientificResearchCancel.createUser,
                     createUser: user.data,
                 },
                 {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia dự án ${projectCancel.name}`,
-                    toUser: projectCancel.instructor,
+                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.name}`,
+                    toUser: scientificResearchCancel.instructor,
                     createUser: user.data,
                 }
             ];
 
-            if (projectCancel.lastModifyUser &&
-                projectCancel.lastModifyUser.id !== projectCancel.createUser.id &&
-                projectCancel.lastModifyUser.id !== projectCancel.instructor.id) {
+            if (scientificResearchCancel.lastModifyUser &&
+                scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.createUser.id &&
+                scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.instructor.id) {
                 ListNotification.push({
-                    content: `Sinh viên ${userId} đăng ký tham gia dự án ${projectCancel.name}`,
-                    toUser: projectCancel.lastModifyUser,
+                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${scientificResearchCancel.name}`,
+                    toUser: scientificResearchCancel.lastModifyUser,
                     createUser: user.data,
                 });
             }
@@ -221,17 +221,17 @@ function DuAnNghienCuu() {
     };
 
 
-    // Hàm xử lý hủy đăng ký dự án với xác nhận
+    // Hàm xử lý hủy đăng ký đề tài với xác nhận
     const handleCancelWithConfirm = async () => {
-        if (projectCancelRef.current) {
-            console.log(projectCancelRef.current)
+        if (scientificResearchCancelRef.current) {
+            console.log(scientificResearchCancelRef.current)
             try {
-                const responseCancel = await deleteProjectUserByUserIdAndProjectId({ project: projectCancelRef.current.projectId, user: userId });
+                const responseCancel = await deletescientificResearchUserByUserIdAndscientificResearchId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
                 if (responseCancel) {
                     message.success('Hủy đăng ký thành công');
-                    // Cập nhật danh sách dự án đã đăng ký
-                    await checkRegisterProject();
-                    await fetchProjects(); // Cập nhật danh sách dự án
+                    // Cập nhật danh sách đề tài đã đăng ký
+                    await checkRegisterscientificResearch();
+                    await fetchscientificResearchs(); // Cập nhật danh sách đề tài
 
                     //xóa thông báo
                     handleCancelNotification();
@@ -241,27 +241,27 @@ function DuAnNghienCuu() {
             } catch (error) {
                 message.error('Hủy đăng ký thất bại');
             } finally {
-                projectCancelRef.current = null // Reset projectCancel sau khi xử lý
+                scientificResearchCancelRef.current = null // Reset scientificResearchCancel sau khi xử lý
             }
         } else {
-            message.error('Dự án không hợp lệ');
+            message.error('đề tài không hợp lệ');
         }
     };
 
-    const duAnDetailMemoized = useMemo(() => (
-        <DuAnDetail
-            title={'dự án nghiên cứu'}
+    const DeTaiNCKHDetailMemoized = useMemo(() => (
+        <DeTaiNCKHDetail
+            title={'đề tài nghiên cứu'}
             showModal={showModalDetail}
             setShowModal={setShowModalDetail}
         />
     ), [showModalDetail]);
 
-    const duAnRegisterMemoized = useMemo(() => (
-        <DuAnRegister
+    const DeTaiNCKHRegisterMemoized = useMemo(() => (
+        <DeTaiNCKHRegister
             title={
                 <>
-                    <p>Đăng ký dự án nghiên cứu</p>
-                    <p className={cx("title-model-register")}>{showModalRegister.projectName}</p>
+                    <p>Đăng ký đề tài nghiên cứu</p>
+                    <p className={cx("title-model-register")}>{showModalRegister.scientificResearchName}</p>
                 </>
             }
             showModal={showModalRegister}
@@ -273,10 +273,10 @@ function DuAnNghienCuu() {
         <div className={cx('wrapper')}>
             <div className={cx('info')}>
                 <span className={cx('icon')}>
-                    <ResearchProjectsIcon />
+                    <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>Dự án nghiên cứu khoa học</h3>
+                <h3 className={cx('title')}>đề tài nghiên cứu khoa học</h3>
             </div>
             <Tabs
                 defaultActiveKey={activeTab}
@@ -287,10 +287,10 @@ function DuAnNghienCuu() {
                     children: item.children,
                 }))}
             />
-            {duAnDetailMemoized}
-            {duAnRegisterMemoized}
+            {DeTaiNCKHDetailMemoized}
+            {DeTaiNCKHRegisterMemoized}
         </div>
     );
 }
 
-export default DuAnNghienCuu;
+export default NghienCuuKhoaHoc;

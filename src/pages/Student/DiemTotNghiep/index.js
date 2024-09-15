@@ -20,7 +20,7 @@ function DiemTotNghiep() {
     const [improvedCredits, setImprovedCredits] = useState(4);
     const [calculatedGPA, setCalculatedGPA] = useState(currentGPA);
     const [remainingCredits, setRemainingCredits] = useState(0);
-    const [totalProjectedCredits, setTotalProjectedCredits] = useState(0);
+    const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
     const [graduationType, setGraduationType] = useState('');
 
     // Handle input changes
@@ -36,14 +36,14 @@ function DiemTotNghiep() {
         const gradePointsD = creditsD * 1.0;
 
         const totalGradePoints = gradePointsA + gradePointsB + gradePointsC + gradePointsD;
-        const totalProjectedCredits = creditsA + creditsB + creditsC + creditsD + improvedCredits;
+        const totalscientificResearchedCredits = creditsA + creditsB + creditsC + creditsD + improvedCredits;
 
-        const newGPA = parseFloat((totalGradePoints / totalProjectedCredits).toFixed(2));
+        const newGPA = parseFloat((totalGradePoints / totalscientificResearchedCredits).toFixed(2));
         const remainingCredits = totalCredits - (currentCredits - improvedCredits);
 
         setCalculatedGPA(newGPA);
         setRemainingCredits(remainingCredits);
-        setTotalProjectedCredits(totalProjectedCredits);
+        setTotalscientificResearchedCredits(totalscientificResearchedCredits);
 
         // Determine graduation type based on the new GPA
         if (newGPA >= 3.6) {
@@ -180,11 +180,11 @@ function DiemTotNghiep() {
                         </div>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Tổng số tín chỉ dự kiến đang nhập:</span>
-                            <span className={cx('value-info')}>{totalProjectedCredits}</span>
+                            <span className={cx('value-info')}>{totalscientificResearchedCredits}</span>
                         </div>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Số tín chỉ cần nhập lại:</span>
-                            <span className={cx('value-info')}>{remainingCredits - totalProjectedCredits}</span>
+                            <span className={cx('value-info')}>{remainingCredits - totalscientificResearchedCredits}</span>
                         </div>
                     </div>
                     <div className={cx('result-right')}>

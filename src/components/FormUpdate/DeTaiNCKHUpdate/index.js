@@ -8,20 +8,19 @@ import Update from '../../Core/Update';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createProject, updateProjectById } from '../../../services/projectService';
+import { createscientificResearch, updatescientificResearchById } from '../../../services/scientificResearchService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
-const DuAnUpdate = memo(function DuAnUpdate({
+const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     title,
     isUpdate,
     showModal,
     setShowModal,
     reLoad
 }) {
-
     const [form] = useForm(); // Sử dụng hook useForm
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -33,7 +32,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
     const [selectedLevel, setSelectedLevel] = useState(null);
     const { userId } = useContext(AccountLoginContext);
 
-    const statusType = 'Tiến độ dự án nghiên cứu';
+    const statusType = 'Tiến độ đề tài NCKH';
 
     // Fetch data khi component được mount
     //lấy danh sách các khoa ra ngoài thẻ select
@@ -88,7 +87,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
     }, [selectedFaculty, selectedInstructor]);
 
 
-    // Fetch danh sách trạng thái theo loại "Tiến độ dự án nghiên cứu"
+    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
     useEffect(() => {
         const fetchStatusByType = async () => {
             try {
@@ -123,7 +122,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
     useEffect(() => {
         if (showModal && isUpdate) {
             form.setFieldsValue({
-                projectName: showModal.projectName,
+                scientificResearchName: showModal.scientificResearchName,
                 description: showModal.description,
                 faculty: showModal.faculty.facultyName,
                 instructor: showModal.instructor.fullname,
@@ -149,12 +148,12 @@ const DuAnUpdate = memo(function DuAnUpdate({
 
     const handleFacultySelect = (value) => {
         setSelectedFaculty(value);
-        console.log(` [ DuAnUpdate - selected faculty ] : ${value}`);
+        console.log(` [ DeTaiNCKHUpdate - selected faculty ] : ${value}`);
     };
 
     const handleChangeInstructor = (value) => {
         setSelectedInstructor(value);
-        console.log(`[ DuAnUpdate - selected instructor ]  ${value}`);
+        console.log(`[ DeTaiNCKHUpdate - selected instructor ]  ${value}`);
     };
 
 
@@ -169,8 +168,8 @@ const DuAnUpdate = memo(function DuAnUpdate({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            let projectData = {
-                projectName: values.projectName,
+            let scientificResearchData = {
+                scientificResearchName: values.scientificResearchName,
                 description: values.description,
                 facultyId: selectedFaculty,
                 instructorId: selectedInstructor,
@@ -181,27 +180,27 @@ const DuAnUpdate = memo(function DuAnUpdate({
 
             let response;
             if (isUpdate) {
-                response = await updateProjectById(showModal.projectId, projectData);
+                response = await updatescientificResearchById(showModal.scientificResearchId, scientificResearchData);
             } else {
                 const createUserResponse = await getUserById(userId);
                 const createUserId = createUserResponse.data;
-                projectData = {
-                    ...projectData,
+                scientificResearchData = {
+                    ...scientificResearchData,
                     createUserId: createUserId,
                     lastModifyUserId: createUserId
                 }
 
-                response = await createProject(projectData);
+                response = await createscientificResearch(scientificResearchData);
             }
 
             if (response && response.data) {
-                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} dự án thành công!`);
+                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} đề tài thành công!`);
                 handleCloseModal();
                 if (reLoad) reLoad();
             }
 
         } catch (error) {
-            console.error(`[ DuAn - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} project `, error);
+            console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
         }
     };
 
@@ -209,14 +208,14 @@ const DuAnUpdate = memo(function DuAnUpdate({
         <Update
             title={title}
             isUpdate={isUpdate}
-            showModal={showModal !== false ? true : false}
+            showModal={(showModal && showModal !== false) ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
 
         >
             <Form form={form}>
                 <FormItem
-                    name="projectName"
+                    name="scientificResearchName"
                     label="Tên đề tài"
                     rules={[{ required: true, message: 'Vui lòng nhập tên đề tài!' }]}
                 >
@@ -263,7 +262,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
                 <FormItem
                     name="level"
                     label="Cấp"
-                    rules={[{ required: true, message: 'Vui lòng cấp dự án!' }]}
+                    rules={[{ required: true, message: 'Vui lòng cấp đề tài!' }]}
                 >
                     <Select
                         showSearch
@@ -312,7 +311,7 @@ const DuAnUpdate = memo(function DuAnUpdate({
                 </FormItem>
 
                 {/* <FormItem
-                    name="projectTime"
+                    name="scientificResearchTime"
                     label="Thời gian thực hiện"
                     rules={[{ required: true, message: 'Vui lòng chọn thời gian thực hiện!' }]}
                 >
@@ -346,4 +345,4 @@ const DuAnUpdate = memo(function DuAnUpdate({
     );
 });
 
-export default DuAnUpdate;
+export default DeTaiNCKHUpdate;

@@ -2,10 +2,10 @@ import React, { memo, useContext, useState } from 'react';
 import FormItem from '../../Core/FormItem';
 import Register from '../../Core/Register';
 import classNames from 'classnames/bind';
-import styles from './DuAnRegister.module.scss';
+import styles from './DeTaiNCKHRegister.module.scss';
 import { Form, message, Radio } from 'antd';
-import { createProjectUser, gethighestGroup } from '../../../services/projectUserService';
-import { getProjectById } from '../../../services/projectService';
+import { createscientificResearchUser, gethighestGroup } from '../../../services/scientificResearchUserService';
+import { getscientificResearchById } from '../../../services/scientificResearchService';
 import { getUserById } from '../../../services/userService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
@@ -13,7 +13,7 @@ import config from '../../../config';
 
 const cx = classNames.bind(styles);
 
-const DuAnRegister = memo(function DuAnRegister({
+const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
     title,
     showModal,
     setShowModal,
@@ -40,15 +40,15 @@ const DuAnRegister = memo(function DuAnRegister({
             const user = await getUserById(userId)
             const ListNotification = [
                 {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia dự án ${showModal.projectName}`,
-                    url: config.routes.DuAnNghienCuu_Department,
+                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
+                    url: config.routes.NghienCuuKhoaHoc_Department,
                     toUser: showModal.createUser,
                     createUser: user.data,
                     type: 'warning',
                 },
                 {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia dự án ${showModal.projectName}`,
-                    url: config.routes.DuAnNghienCuu_Department,
+                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
+                    url: config.routes.NghienCuuKhoaHoc_Department,
                     toUser: showModal.instructor,
                     createUser: user.data,
                     type: 'warning',
@@ -59,8 +59,8 @@ const DuAnRegister = memo(function DuAnRegister({
                 showModal.lastModifyUser.id !== showModal.createUser.id &&
                 showModal.lastModifyUser.id !== showModal.instructor.id) {
                 ListNotification.push({
-                    content: `Sinh viên ${userId} đăng ký tham gia dự án ${showModal.projectName}`,
-                    url: config.routes.DuAnNghienCuu_Department,
+                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
+                    url: config.routes.NghienCuuKhoaHoc_Department,
                     toUser: showModal.lastModifyUser,
                     createUser: user.data,
                     type: 'warning',
@@ -85,18 +85,18 @@ const DuAnRegister = memo(function DuAnRegister({
                 if (response.message === "success") {
                     // Đăng ký với số nhóm = nhóm cao nhất hiện tại + 1 
                     const group = response.data + 1;
-                    const project = await getProjectById(showModal.projectId)
+                    const scientificResearch = await getscientificResearchById(showModal.scientificResearchId)
                     const user = await getUserById(userId)
 
                     const registerData =
                     {
-                        project: project.data,
+                        scientificResearch: scientificResearch.data,
                         user: user.data,
                         group: group,
                         isLeader: 1, // Đăng ký cá nhân => Người đăng ký là leader
                     }
 
-                    const responseAdd = await createProjectUser(registerData);
+                    const responseAdd = await createscientificResearchUser(registerData);
                     if (responseAdd) {
                         message.success(`Đăng ký thành công`);
                         handleSendNotification();
@@ -109,7 +109,7 @@ const DuAnRegister = memo(function DuAnRegister({
                 message.info("Chưa xử lý")
             }
         } catch (error) {
-            console.error("Lỗi đăng ký dự án: " + error);
+            console.error("Lỗi đăng ký đề tài: " + error);
         }
     };
 
@@ -146,4 +146,4 @@ const DuAnRegister = memo(function DuAnRegister({
     );
 });
 
-export default DuAnRegister;
+export default DeTaiNCKHRegister;

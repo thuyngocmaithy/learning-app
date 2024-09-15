@@ -1,13 +1,13 @@
 import classNames from 'classnames/bind';
-import styles from './ThongTinDuAnThamGia.module.scss';
+import styles from './ThongTinDeTaiNCKHThamGia.module.scss';
 import { Descriptions, Spin, Tag } from 'antd';
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getProjectUserById } from '../../services/projectUserService';
+import { getscientificResearchUserById } from '../../services/scientificResearchUserService';
 
 const cx = classNames.bind(styles);
 
-function ThongTinDuAnThamGia({ project, thesis = false }) {
+function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
 
 
 
@@ -15,12 +15,12 @@ function ThongTinDuAnThamGia({ project, thesis = false }) {
         {
             key: '1-info',
             label: 'Khoa',
-            children: project ? project.project.faculty.facultyName : '',
+            children: scientificResearch ? scientificResearch.scientificResearch.faculty.facultyName : '',
         },
         {
             key: '2-info',
             label: 'Thời gian thực hiện',
-            children: project ? project.project.executionTime : '',
+            children: scientificResearch ? scientificResearch.scientificResearch.executionTime : '',
         },
         {
             key: '3-info',
@@ -35,12 +35,12 @@ function ThongTinDuAnThamGia({ project, thesis = false }) {
         {
             key: '5-info',
             label: 'Giảng viên hướng dẫn',
-            children: project ? project.project.instructor.fullname : '',
+            children: scientificResearch ? scientificResearch.scientificResearch.instructor.fullname : '',
         },
         {
             key: '6-info',
             label: 'Sinh viên thực hiện',
-            children: project ? project.user.fullname : '',
+            children: scientificResearch ? scientificResearch.user.fullname : '',
         },
     ];
 
@@ -52,7 +52,7 @@ function ThongTinDuAnThamGia({ project, thesis = false }) {
                         title={
                             <div className={cx('container-title')}>
                                 <h2>Đề tài:</h2>
-                                <h2>{project.project.projectName}</h2>
+                                <h2>{scientificResearch.scientificResearch.scientificResearchName}</h2>
                                 <Tag color="green">Xác định vấn đề cần nghiên cứu</Tag>
                             </div>
                         }
@@ -63,11 +63,11 @@ function ThongTinDuAnThamGia({ project, thesis = false }) {
             <div className={cx('container-description')}>
                 <h4>Thông tin mô tả</h4>
                 <div>
-                    {project.project.description}
+                    {scientificResearch.scientificResearch.description}
                 </div>
             </div>
         </div>
     );
 }
 
-export default ThongTinDuAnThamGia;
+export default ThongTinDeTaiNCKHThamGia;

@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
-import styles from './KhoaLuan.module.scss';
-import { Card, Input, InputNumber, notification, Select, Tabs, Tag, message } from 'antd';
+import styles from './NghienCuuKhoaHoc.module.scss';
+import { Card, message, notification, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -9,13 +9,16 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
-import KhoaLuanUpdate from '../../../../components/FormUpdate/KhoaLuanUpdate';
-import { getAllThesis, deleteThesis } from '../../../../services/thesisService';
+import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
+
+import { deletescientificResearch, getAllscientificResearch } from '../../../../services/scientificResearchService';
+import { checkUsernameExist, login } from '../../../../services/userService';
+import { getscientificResearchUserById, getscientificResearchUserByscientificResearchId } from '../../../../services/scientificResearchUserService';
+import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 
 const cx = classNames.bind(styles);
 
-
-const listThesisJoin = [
+const listscientificResearchJoin = [
     { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
     {
         id: '2',
@@ -25,28 +28,25 @@ const listThesisJoin = [
 ];
 
 
-
-
-function KhoaLuan() {
+function NghienCuuKhoaHoc() {
     const [isUpdate, setIsUpdate] = useState(false);
-    const [showModal, setShowModal] = useState(false); // hiển thị model
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-    const [selectedIds, setSelectedIds] = useState([]); //những id đã lấy được
+    const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
-    const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
-    const [selectedThesis, setSelectedThesis] = useState(null);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
+    const [showModalListRegister, setShowModalListRegister] = useState(false)
+    const [isChangeStatus, setIsChangeStatus] = useState(false);
 
     const columns = (showModal) => [
         {
             title: 'Mã đề tài',
-            dataIndex: 'id',
-            key: 'id',
+            dataIndex: 'scientificResearchId',
+            key: 'scientificResearchId',
         },
         {
             title: 'Tên đề tài',
-            dataIndex: 'title',
-            key: 'title',
+            dataIndex: 'scientificResearchName',
+            key: 'scientificResearchName',
         },
         {
             title: 'Khoa',
@@ -55,18 +55,19 @@ function KhoaLuan() {
         },
         {
             title: 'Chủ nhiệm đề tài',
-            dataIndex: ['supervisor', 'fullname'],
-            key: 'supervisor',
+            dataIndex: ['instructor', 'fullname'],
+            key: 'instructor',
         },
         {
             title: 'SL thành viên',
-            dataIndex: 'registrationCount',
-            key: 'registrationCount',
+            dataIndex: 'numberOfMember',
+            key: 'numberOfMember',
         },
         {
             title: 'Trạng thái',
             key: 'status',
             dataIndex: ['status', 'statusName'],
+            align: 'center',
             render: (statusName) => (
                 <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
                     {statusName.toUpperCase()}
@@ -75,13 +76,18 @@ function KhoaLuan() {
         },
         {
             title: 'SL đăng ký',
-            dataIndex: 'registrations',
-            key: 'registrations',
-            render: (registrations) =>
-                parseInt(registrations) > 0 ? (
-                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}>
-                        Danh sách đăng ký: {registrations}
-                    </ButtonCustom>
+            dataIndex: 'numberOfRegister',
+            key: 'numberOfRegister',
+            align: 'center',
+            render: (numberOfRegister, record) =>
+                numberOfRegister.length > 0 ? (
+                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
+                        onClick={() => setShowModalListRegister({
+                            ...record,
+                            numberOfRegister,
+                        })} >
+                        Danh sách đăng ký: {numberOfRegister.length}
+                    </ButtonCustom >
                 ) : (
                     <p style={{ textAlign: 'center' }}>0</p>
                 ),
@@ -89,6 +95,7 @@ function KhoaLuan() {
         {
             title: 'Action',
             key: 'action',
+            align: 'center',
             render: (_, record) => (
                 <div className={cx('action-item')}>
                     <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
@@ -100,55 +107,48 @@ function KhoaLuan() {
                         primary
                         verysmall
                         onClick={() => {
-                            showModal(record.NH);
+                            showModal(record);
                             setIsUpdate(true);
-                            setSelectedThesis(record);
-                        }
-                        }
+                        }}
                     >
                         Sửa
                     </ButtonCustom>
                 </div>
             ),
-        },
+        }
     ];
 
+    const fetchData = async () => {
+        try {
+            const result = await getAllscientificResearch();
+            const scientificResearchs = await Promise.all(result.data.map(async (data) => {
+                // lấy số sinh viên đăng ký
+                const numberOfRegister = await getscientificResearchUserByscientificResearchId({ scientificResearch: data.scientificResearchId });
+                return {
+                    ...data,
+                    numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
+                };
+            }));
+            console.log(scientificResearchs);
 
+            setData(scientificResearchs);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
-        try {
-            const result = await getAllThesis();
-            setData(result.data);
-            setIsLoading(false);
-        } catch (error) {
-            console.error('[nghiep vu - khoa luan - fetchData] : Error fetching data:', error);
-            setIsLoading(false);
-        }
-    };
-
-
-    const handleDelete = async () => {
-        try {
-
-            for (const id of selectedRowKeys) {
-                await deleteThesis(id); // Xóa từng thesis
-            }
-            // Refresh dữ liệu sau khi xóa thành công
+    useEffect(() => {
+        if (isChangeStatus) {
             fetchData();
-            setSelectedIds([]); // Xóa các ID đã chọn
-
-            message.success('Xoá thành công');
-
-
-        } catch (error) {
-            message.error('Xoá thất bại - đã có lỗi xảy ra ');
-            console.error(' [nghiep vu - khoa luan - deletedThesis] : Error deleting theses:', error);
+            setIsChangeStatus(false);
         }
-    };
+    }, [isChangeStatus]);
 
     const ITEM_TABS = [
         {
@@ -160,15 +160,17 @@ function KhoaLuan() {
                     columns={columns(setShowModal)}
                     data={data}
                     setSelectedRowKeys={setSelectedRowKeys}
+                    keyIdChange='scientificResearchId'
+                    loading={isLoading}
                 />
             ),
         },
         {
             id: 2,
-            title: 'Đề tài tham gia',
+            title: 'đề tài tham gia',
             children: (
                 <div>
-                    {listThesisJoin.map((item, index) => {
+                    {listscientificResearchJoin.map((item, index) => {
                         let color = item.status === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
@@ -195,8 +197,7 @@ function KhoaLuan() {
     ];
     const [isToolbar, setIsToolbar] = useState(true);
 
-
-    //Khi chọn tab 2 (Đề tài tham gia) => Ẩn toolbar
+    //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
     const handleTabClick = (index) => {
         if (index === 2) {
             setIsToolbar(false);
@@ -204,18 +205,48 @@ function KhoaLuan() {
             setIsToolbar(true);
         }
     };
-    const khoaLuanUpdateMemoized = useMemo(() => {
+
+
+    const handleDelete = async () => {
+        try {
+            for (const id of selectedRowKeys) {
+                await deletescientificResearch(id); // Xóa từng thesis
+            }
+            // Refresh dữ liệu sau khi xóa thành công
+            fetchData();
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+
+            message.success('Xoá thành công');
+        } catch (error) {
+            message.error('Xoá thất bại');
+            console.error(' [Nghiep vu - khoa luan - deletedThesis] : Error deleting theses:', error);
+        }
+    };
+
+
+    const DeTaiNCKHUpdateMemoized = useMemo(() => {
         return (
-            <KhoaLuanUpdate
-                title={'khóa luận'}
+            <DeTaiNCKHUpdate
+                title={'đề tài nghiên cứu'}
                 isUpdate={isUpdate}
                 showModal={showModal}
                 setShowModal={setShowModal}
-                selectedThesis={selectedThesis}
                 reLoad={fetchData}
             />
         );
-    }, [showModal, isUpdate, selectedThesis]);
+    }, [showModal, isUpdate]);
+
+    const DeTaiNCKHListRegisterMemoized = useMemo(() => {
+        return (
+            <DeTaiNCKHListRegister
+                title={'Danh sách sinh viên đăng ký đề tài'}
+                showModal={showModalListRegister}
+                setShowModal={setShowModalListRegister}
+                changeStatus={setIsChangeStatus}
+            />
+        );
+    }, [showModalListRegister]);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('conatainer-header')}>
@@ -223,7 +254,7 @@ function KhoaLuan() {
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
-                    <h3 className={cx('title')}>Khóa luận tốt nghiệp</h3>
+                    <h3 className={cx('title')}>đề tài nghiên cứu</h3>
                 </div>
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
                 {isToolbar ? (
@@ -233,10 +264,9 @@ function KhoaLuan() {
                             onClick={() => {
                                 setShowModal(true);
                                 setIsUpdate(false);
-                                setSelectedThesis(null);
                             }}
                         />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận', handleDelete)} />
+                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('đề tài nghiên cứu', handleDelete)} />
                         <Toolbar type={'Nhập file Excel'} />
                         <Toolbar type={'Xuất file Excel'} />
                     </div>
@@ -255,9 +285,10 @@ function KhoaLuan() {
                     };
                 })}
             />
-            {khoaLuanUpdateMemoized}
+            {DeTaiNCKHUpdateMemoized}
+            {DeTaiNCKHListRegisterMemoized}
         </div>
     );
 }
 
-export default KhoaLuan;
+export default NghienCuuKhoaHoc;

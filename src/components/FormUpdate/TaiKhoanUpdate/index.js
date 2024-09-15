@@ -94,7 +94,7 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
             }
 
         } catch (error) {
-            console.error(`[ TaiKhoan - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} project `, error);
+            console.error(`[ TaiKhoan - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
         }
     };
 

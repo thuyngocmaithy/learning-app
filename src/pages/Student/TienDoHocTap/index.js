@@ -22,7 +22,7 @@ function TienDoHocTap() {
                 to={config.routes.ThucTap}
             />
             <CardTienDoHocTap
-                title="Dự án khóa luận tốt nghiệp"
+                title="đề tài khóa luận tốt nghiệp"
                 image={thesis}
                 contentButton="Sắp xếp"
                 to={config.routes.KhoaLuan}

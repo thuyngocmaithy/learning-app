@@ -27,7 +27,7 @@ function KhoaLuan() {
                 setList(thesis);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Error fetching projects:', error);
+                console.error('Error fetching scientificResearchs:', error);
                 setIsLoading(false);
             }
         };
@@ -95,7 +95,7 @@ function KhoaLuan() {
                 <h3 className={cx('title')}>Khóa luận tốt nghiệp</h3>
             </div>
             <Tabs
-                defaultActiveKey={1} //nếu có dự án tham gia => set defaultActiveKey = 2
+                defaultActiveKey={1} //nếu có đề tài tham gia => set defaultActiveKey = 2
                 centered
                 onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => {

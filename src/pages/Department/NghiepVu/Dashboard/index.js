@@ -12,7 +12,7 @@ const cx = classNames.bind(styles);
 
 function Home() {
     // eslint-disable-next-line no-unused-vars
-    const [stateProject, setStateProject] = useState({
+    const [statescientificResearch, setStatescientificResearch] = useState({
         series: [76, 67],
         options: {
             chart: {
@@ -20,7 +20,7 @@ function Home() {
                 type: 'radialBar',
             },
             title: {
-                text: 'Dự án nghiên cứu/ đề tài khóa luận được thực hiện',
+                text: 'đề tài nghiên cứu/ đề tài khóa luận được thực hiện',
                 align: 'center',
             },
             plotOptions: {
@@ -54,7 +54,7 @@ function Home() {
                 },
             },
             colors: ['#28DF99', '#27AA80'],
-            labels: ['Dự án nghiên cứu', 'Khóa luận tốt nghiệp'],
+            labels: ['đề tài nghiên cứu', 'Khóa luận tốt nghiệp'],
             responsive: [
                 {
                     breakpoint: 480,
@@ -199,8 +199,8 @@ function Home() {
                 <div className={cx('container-chart')}>
                     <div className={cx('chart')}>
                         <ReactApexChart
-                            options={stateProject.options}
-                            series={stateProject.series}
+                            options={statescientificResearch.options}
+                            series={statescientificResearch.series}
                             type="radialBar"
                             height={390}
                             width={400}

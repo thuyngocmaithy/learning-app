@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
 
-const listProject = [
+const listscientificResearch = [
     {
         id: '1',
         name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
@@ -75,7 +75,7 @@ function ThongTinThucTap() {
     const [list, setList] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     useEffect(() => {
-        setList(listProject);
+        setList(listscientificResearch);
         setIsLoading(false);
     }, []);
 
