@@ -11,10 +11,11 @@ import Toolbar from '../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../components/FormUpdate/DeTaiNCKHUpdate';
 
-import { deletescientificResearch, getAllscientificResearch } from '../../../services/scientificResearchService';
+import { deletescientificResearch, getAllscientificResearch, getByScientificResearchsGroupId } from '../../../services/scientificResearchService';
 import { checkUsernameExist, login } from '../../../services/userService';
 import { getscientificResearchUserById, getscientificResearchUserByscientificResearchId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../components/FormListRegister/DeTaiNCKHListRegister';
+import DeTaiNCKHDetail from '../../FormDetail/DeTaiNCKHDetail';
 
 const cx = classNames.bind(styles);
 
@@ -36,6 +37,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [showModalListRegister, setShowModalListRegister] = useState(false)
     const [isChangeStatus, setIsChangeStatus] = useState(false);
+    const [showModalDetail, setShowModalDetail] = useState(false);
 
     const [open, setOpen] = useState(false);
 
@@ -56,11 +58,6 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
             title: 'Tên đề tài',
             dataIndex: 'scientificResearchName',
             key: 'scientificResearchName',
-        },
-        {
-            title: 'Khoa',
-            dataIndex: ['faculty', 'facultyName'],
-            key: 'faculty',
         },
         {
             title: 'Chủ nhiệm đề tài',
@@ -107,7 +104,12 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
             align: 'center',
             render: (_, record) => (
                 <div className={cx('action-item')}>
-                    <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
+                    <ButtonCustom
+                        className={cx('btnDetail')}
+                        leftIcon={<EditOutlined />}
+                        outline
+                        verysmall
+                        onClick={() => setShowModalDetail(record)}>
                         Chi tiết
                     </ButtonCustom>
                     <ButtonCustom
@@ -129,8 +131,10 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
 
     const fetchData = async () => {
         try {
-            const result = await getAllscientificResearch();
-            const scientificResearchs = await Promise.all(result.data.map(async (data) => {
+            const result = await getByScientificResearchsGroupId({ scientificResearchGroupId: showModalListTopic.scientificResearchGroupId });
+            console.log(result);
+
+            const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
                 const numberOfRegister = await getscientificResearchUserByscientificResearchId({ scientificResearch: data.scientificResearchId });
                 return {
@@ -148,7 +152,9 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     };
 
     useEffect(() => {
-        fetchData();
+        if (showModalListTopic !== false) {
+            fetchData();
+        }
     }, [showModalListTopic]);
 
     useEffect(() => {
@@ -241,11 +247,12 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     const DeTaiNCKHUpdateMemoized = useMemo(() => {
         return (
             <DeTaiNCKHUpdate
-                title={'đề tài nghiên cứu'}
+                title={'đề tài nghiên cứu khoa học'}
                 isUpdate={isUpdate}
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
                 reLoad={fetchData}
+                groupTopic={showModalListTopic}
             />
         );
     }, [showModalUpdate, isUpdate]);
@@ -260,6 +267,14 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
             />
         );
     }, [showModalListRegister]);
+
+    const DeTaiNCKHDetailMemoized = useMemo(() => (
+        <DeTaiNCKHDetail
+            title={'Đề tài nghiên cứu khoa học'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
 
     return (
         <>
@@ -278,7 +293,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
                             <span className={cx('icon')}>
                                 <ProjectIcon />
                             </span>
-                            <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
+                            <h3 className={cx('title')}>Đề tài nghiên cứu khoa học: {showModalListTopic.scientificResearchGroupName}</h3>
                         </div>
                         {isToolbar ? (
                             <div className={cx('wrapper')}>
@@ -312,6 +327,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
             </Modal>
             {DeTaiNCKHUpdateMemoized}
             {DeTaiNCKHListRegisterMemoized}
+            {DeTaiNCKHDetailMemoized}
         </>
     );
 }

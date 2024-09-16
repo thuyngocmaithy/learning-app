@@ -1,11 +1,8 @@
 import React, { useState, memo, useEffect, useContext } from 'react';
 import { Input, InputNumber, Select, DatePicker, Form, message } from 'antd';
-import moment from 'moment';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-
-import { getAllFaculty } from '../../../services/facultyService';
 import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createscientificResearch, updatescientificResearchById } from '../../../services/scientificResearchService';
@@ -19,11 +16,10 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     isUpdate,
     showModal,
     setShowModal,
-    reLoad
+    reLoad,
+    groupTopic
 }) {
-    const [form] = useForm(); // Sử dụng hook useForm
-    const [facultyOptions, setFacultyOptions] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
+    const [form] = useForm(); // Sử dụng hook useForm    
     const [instructorOptions, setInstructorOptions] = useState([]);
     const [selectedInstructor, setSelectedInstructor] = useState(null);
     const [statusOptions, setStatusOptions] = useState([]);
@@ -34,37 +30,13 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     const statusType = 'Tiến độ đề tài NCKH';
 
-    // Fetch data khi component được mount
-    //lấy danh sách các khoa ra ngoài thẻ select
-    useEffect(() => {
-        const fetchFaculties = async () => {
-            const response = await getAllFaculty();
-            if (response && response.data) {
-                const options = response.data.map((faculty) => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyName,
-                }));
-                setFacultyOptions(options);
-
-                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
-                if (selectedFaculty) {
-                    const selectedOption = options.find((option) => option.value === selectedFaculty);
-                    if (selectedOption) {
-                        setSelectedFaculty(selectedOption.value);
-                    }
-                }
-            }
-        };
-
-        fetchFaculties();
-    }, [selectedFaculty]);
-
 
     //lấy danh sách giảng viên theo khoa
     useEffect(() => {
         const fetchInstructors = async () => {
-            if (selectedFaculty) {
-                const response = await getUsersByFaculty(selectedFaculty);
+
+            if (groupTopic) {
+                const response = await getUsersByFaculty(groupTopic.faculty.facultyId);
                 if (response && response.data) {
                     const options = response.data.map((user) => ({
                         value: user.userId,
@@ -84,7 +56,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         };
 
         fetchInstructors();
-    }, [selectedFaculty, selectedInstructor]);
+    }, [groupTopic, selectedInstructor]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -124,13 +96,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             form.setFieldsValue({
                 scientificResearchName: showModal.scientificResearchName,
                 description: showModal.description,
-                faculty: showModal.faculty.facultyName,
                 instructor: showModal.instructor.fullname,
                 status: showModal.status.statusId,
                 numberOfMember: showModal.numberOfMember,
                 level: showModal.level,
             });
-            setSelectedFaculty(showModal.faculty.facultyId);
             setSelectedInstructor(showModal.instructor.userId);
             setSelectedStatus(showModal.status.statusId);
             setSelectedMemberCount(showModal.numberOfMember);
@@ -146,10 +116,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-        console.log(` [ DeTaiNCKHUpdate - selected faculty ] : ${value}`);
-    };
 
     const handleChangeInstructor = (value) => {
         setSelectedInstructor(value);
@@ -171,11 +137,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             let scientificResearchData = {
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
-                facultyId: selectedFaculty,
                 instructorId: selectedInstructor,
                 statusId: selectedStatus,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
+                scientificResearchGroup: groupTopic.scientificResearchGroupId,
+                facultyId: groupTopic.faculty.facultyId
             };
 
             let response;
@@ -220,24 +187,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     rules={[{ required: true, message: 'Vui lòng nhập tên đề tài!' }]}
                 >
                     <Input />
-                </FormItem>
-
-                <FormItem
-                    name="faculty"
-                    label="Khoa"
-                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn khoa"
-                        optionFilterProp="children"
-                        onChange={handleFacultySelect}
-                        value={selectedFaculty}
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={facultyOptions}
-                    />
                 </FormItem>
                 <FormItem
                     name="instructor"

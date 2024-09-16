@@ -78,7 +78,7 @@ export const getscientificResearchUserByUserId = async (userId) => {
 export const getscientificResearchUserByscientificResearchId = async (scientificResearchId) => {
     try {
         const queryParams = new URLSearchParams(scientificResearchId).toString();
-        const url = `/scientificResearch-user/getByscientificResearchId?${queryParams}`;
+        const url = `/scientificResearch-user/getByScientificResearchId?${queryParams}`;
 
         const response = await api.get(url);
         return response;

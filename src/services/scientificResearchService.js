@@ -52,3 +52,16 @@ export const updatescientificResearchById = async (scientificResearchId, scienti
         throw error;
     }
 }
+
+
+export const getByScientificResearchsGroupId = async (scientificResearchGroupId) => {
+    try {
+        const queryParams = new URLSearchParams(scientificResearchGroupId).toString();
+        const url = `/scientificResearchs/getByScientificResearchGroupId?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
