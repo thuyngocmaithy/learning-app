@@ -13,7 +13,7 @@ export const getUseridFromLocalStorage = () => {
     try {
       const user = JSON.parse(userLogin);
       // console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
-      return user.id;
+      return user.userId;
     } catch (error) {
       console.error('[userService - getUseridFromLocalStorage - error]', error);
       return null;
