@@ -104,3 +104,19 @@ export const getScore = async (access_token) => {
     throw error;
   }
 };
+
+
+export const registerSubject = async (userId, subjectId, frameId, semesterId) => {
+  try {
+    const response = await api.post('/user-register-subject/register', {
+      userId,
+      subjectId,
+      frameId,
+      semesterId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('[userService - registerSubject - error] ', error);
+    throw error;
+  }
+};

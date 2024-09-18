@@ -13,9 +13,9 @@ const userid = getUseridFromLocalStorage();
 const columns = [
     { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
     { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
-    { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
+    { id: 'name', label: 'Tên học phần', minWidth: 80, align: 'center' },
     { id: 'tinchi', label: 'Số tín chỉ', minWidth: 50, align: 'center' },
-    { id: 'score', label: 'Điểm dự kiến', minWidth: 150, align: 'center' },
+    { id: 'score', label: 'Điểm dự kiến', minWidth: 100, align: 'center' },
 ];
 
 const OptionScore = [
@@ -138,7 +138,7 @@ const TableScore = ({ height = 490 }) => {
                                 onChange={handleChange}
                                 value={row.finalScoreLetter || 'N/A'}
                                 options={OptionScore}
-                                style={{ width: '100%' }}
+                                style={{ width: '60%' }}
                             />
                         )}
                     </TableCell>
