@@ -7,3 +7,15 @@
 //       throw error;
 //     }
 //   };
+
+
+import { api } from '../utils/apiConfig';
+export const getScoreByStudentId = async (studentId) => {
+    try {
+        const response = await api.get(`/scores/student/${studentId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching student scores:', error);
+        throw error;
+    }
+};

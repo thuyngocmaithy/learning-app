@@ -13,7 +13,7 @@ export const getUseridFromLocalStorage = () => {
     try {
       const user = JSON.parse(userLogin);
       // console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
-      return user.id;
+      return user.userId;
     } catch (error) {
       console.error('[userService - getUseridFromLocalStorage - error]', error);
       return null;
@@ -101,6 +101,33 @@ export const getScore = async (access_token) => {
     return response.data;
   } catch (error) {
     console.log('[userService - getScore - error] : ', error);
+    throw error;
+  }
+};
+
+
+export const registerSubject = async (userId, subjectId, frameId, semesterId) => {
+  try {
+    const response = await api.post('/user-register-subject/register', {
+      userId,
+      subjectId,
+      frameId,
+      semesterId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('[userService - registerSubject - error] ', error);
+    throw error;
+  }
+};
+
+
+export const getUserRegisteredSubjects = async (userId) => {
+  try {
+    const response = await api.get(`/user-register-subject/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user registered subjects:', error);
     throw error;
   }
 };

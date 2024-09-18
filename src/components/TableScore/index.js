@@ -3,18 +3,19 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from
 import { Select, Spin } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableScore.module.scss';
+import { getScoreByStudentId } from '../../services/scoreService';
 import { listSubjectToFrame } from '../../services/subjectService';
+import { getUseridFromLocalStorage } from '../../services/userService';
 
 const cx = classNames.bind(styles);
+const userid = getUseridFromLocalStorage();
 
 const columns = [
     { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
     { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
-    { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
+    { id: 'name', label: 'Tên học phần', minWidth: 80, align: 'center' },
     { id: 'tinchi', label: 'Số tín chỉ', minWidth: 50, align: 'center' },
-    { id: 'codeBefore', label: 'Mã HP trước', minWidth: 100, align: 'center' },
-    { id: 'score', label: 'Điểm dự kiến', minWidth: 150, align: 'center' },
-    { id: 'real_score', label: 'Điểm', minWidth: 150, align: 'center' },
+    { id: 'score', label: 'Điểm dự kiến', minWidth: 100, align: 'center' },
 ];
 
 const OptionScore = [
@@ -29,91 +30,122 @@ const OptionScore = [
 ];
 
 const TableScore = ({ height = 490 }) => {
-    const [listFrame, setListFrame] = useState([]);
+    const [frames, setFrames] = useState([]);
+    const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        const getFrame = async () => {
+        const fetchData = async () => {
             setIsLoading(true);
             try {
-                const response = await listSubjectToFrame();
-                if (response && Array.isArray(response) && response.length > 0) {
-                    setListFrame(response[0]);
-                } else {
-                    console.log('Invalid response format:', response);
+                const framesResponse = await listSubjectToFrame();
+                const scoresResponse = await getScoreByStudentId(userid);
+
+                if (framesResponse && Array.isArray(framesResponse)) {
+                    setFrames(framesResponse[0]);
+                }
+                if (scoresResponse && Array.isArray(scoresResponse)) {
+                    setScores(scoresResponse);
                 }
             } catch (error) {
-                console.error('Error fetching frame data:', error);
+                console.error('Error fetching data:', error);
             }
             setIsLoading(false);
         };
 
-        getFrame();
-    }, []);
+        fetchData();
+    }, [userid]);
 
     const handleChange = useCallback((value) => {
         console.log(value);
     }, []);
 
-    const renderFrameRows = useCallback((frame, level = 0) => {
-        const rows = [];
-        let indexSubject = 1;
+    const combinedData = useMemo(() => {
+        if (!frames || !Array.isArray(frames)) return [];
 
-        const renderSubjects = (subjects) => {
-            return subjects.filter(subject => subject != null).map((subject, index) => (
-                <TableRow key={`subject-${index}`}>
-                    <TableCell align="center">{indexSubject++}</TableCell>
-                    <TableCell align="center">{subject.subjectId || 'N/A'}</TableCell>
-                    <TableCell align="center">{subject.subjectName || 'N/A'}</TableCell>
-                    <TableCell align="center">{subject.creditHour || 'N/A'}</TableCell>
-                    <TableCell align="center">{subject.subjectBeforeId || ''}</TableCell>
-                    <TableCell>
-                        <Select
-                            onChange={handleChange}
-                            options={OptionScore}
-                            style={{ width: '100%' }}
-                        />
-                    </TableCell>
-                    <TableCell align="center">{subject.creditHour || 'N/A'}</TableCell>
+        const scoreMap = new Map(scores.map(score => [score.subject?.subjectId, score]));
 
-                </TableRow>
-            ));
-        };
+        return frames.flatMap(frame => {
+            const frameRows = [];
 
-        if (frame) {
-            rows.push(
-                <TableRow key={`frame-${frame.id}`}>
-                    <TableCell className={cx('title')} align="center" colSpan={3}>
-                        {frame.frameName || 'Unnamed Frame'}
-                    </TableCell>
-                    <TableCell className={cx('title')} align="center">
-                        {frame.creditHour || ''}
-                    </TableCell>
-                    <TableCell align="center" colSpan={10}></TableCell>
-                </TableRow>
-            );
+            // Add frame header
+            frameRows.push({
+                id: `frame-${frame.id}`,
+                isHeader: true,
+                name: frame.frameName,
+                creditHour: frame.creditHour
+            });
 
-            if (frame.subjectInfo && Array.isArray(frame.subjectInfo) && frame.subjectInfo.length > 0) {
-                rows.push(...renderSubjects(frame.subjectInfo));
+            // Add subframes if any
+            const subframes = frames.filter(subframe => subframe.parentFrameId === frame.id);
+            subframes.forEach(subframe => {
+                frameRows.push({
+                    id: `subframe-${subframe.id}`,
+                    isSubHeader: true,
+                    name: subframe.frameName,
+                    creditHour: subframe.creditHour
+                });
+            });
+
+            // Add subjects
+            if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
+                frame.subjectInfo.forEach(subject => {
+                    if (subject) {
+                        frameRows.push({
+                            ...subject,
+                            finalScoreLetter: scoreMap.get(subject.subjectId)?.finalScoreLetter || 'N/A',
+                            frameName: frame.frameName
+                        });
+                    }
+                });
             }
 
-            const childFrames = listFrame.filter(
-                (childFrame) => childFrame && childFrame.parentFrameId === frame.id
+            return frameRows;
+        });
+    }, [frames, scores]);
+
+    const renderScoreRows = useMemo(() => {
+        return combinedData.map((row, index) => {
+            if (row.isHeader) {
+                return (
+                    <TableRow key={`header-${row.id}`}>
+                        <TableCell colSpan={6} className={cx('frame-header')}>
+                            {row.name} ({row.creditHour})
+                        </TableCell>
+                    </TableRow>
+                );
+            }
+            if (row.isSubHeader) {
+                return (
+                    <TableRow key={`subheader-${row.id}`}>
+                        <TableCell colSpan={6} className={cx('subframe-header')}>
+                            {row.name} ({row.creditHour})
+                        </TableCell>
+                    </TableRow>
+                );
+            }
+            return (
+                <TableRow key={`score-${index}`}>
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{row.subjectId || 'N/A'}</TableCell>
+                    <TableCell align="center">{row.subjectName || 'N/A'}</TableCell>
+                    <TableCell align="center">{row.creditHour || 'N/A'}</TableCell>
+                    <TableCell>
+                        {row.finalScoreLetter !== 'N/A' ? (
+                            row.finalScoreLetter
+                        ) : (
+                            <Select
+                                onChange={handleChange}
+                                value={row.finalScoreLetter || 'N/A'}
+                                options={OptionScore}
+                                style={{ width: '60%' }}
+                            />
+                        )}
+                    </TableCell>
+                </TableRow>
             );
-
-            childFrames.forEach((childFrame) => {
-                rows.push(...renderFrameRows(childFrame, level + 1));
-            });
-        }
-
-        return rows;
-    }, [listFrame, handleChange]);
-
-    const tableRows = useMemo(() => {
-        return listFrame
-            .filter((frame) => frame && frame.parentFrameId === null)
-            .flatMap((frame) => renderFrameRows(frame));
-    }, [listFrame, renderFrameRows]);
+        });
+    }, [combinedData, handleChange]);
 
     if (isLoading) {
         return (
@@ -141,7 +173,7 @@ const TableScore = ({ height = 490 }) => {
                             ))}
                         </TableRow>
                     </TableHead>
-                    <TableBody>{tableRows}</TableBody>
+                    <TableBody>{renderScoreRows}</TableBody>
                 </Table>
             </TableContainer>
         </div>

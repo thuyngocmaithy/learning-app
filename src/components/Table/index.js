@@ -1,12 +1,14 @@
-import { useState, useEffect, useRef, Fragment } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Checkbox, Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
-import { listSubjectToFrame, getAll } from '../../services/subjectService';
-import { getUserTokenFromLocalStorage, getScore } from '../../services/userService';
-import { Spin } from 'antd';
+import { listSubjectToFrame } from '../../services/subjectService';
+import { getScoreByStudentId } from '../../services/scoreService';
+import { getUseridFromLocalStorage, registerSubject, getUserRegisteredSubjects } from '../../services/userService';
 
 const cx = classNames.bind(styles);
+const userid = getUseridFromLocalStorage();
 
 const columns = [
     { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
@@ -14,7 +16,7 @@ const columns = [
     { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
     { id: 'tinchi', label: 'Số tín chỉ', minWidth: 50, align: 'center' },
     { id: 'codeBefore', label: 'Mã HP trước', minWidth: 100, align: 'center' },
-    ...Array.from({ length: 9 }).map((_, index) => ({
+    ...Array.from({ length: 12 }).map((_, index) => ({
         id: `HK${index + 1}`,
         label: `${index + 1}`,
         minWidth: 50,
@@ -23,57 +25,135 @@ const columns = [
 ];
 
 const ColumnGroupingTable = ({ department = false }) => {
-    const repeatHK = department ? 3 : 9;
-    const [listFrame, setListFrame] = useState([]);
+    const [frames, setFrames] = useState([]);
+    const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [heightContainerLoading, setHeightContainerLoading] = useState(0);
-    let indexSubject = 1;
-    let access_token = getUserTokenFromLocalStorage();
-
-    const getFrame = async () => {
-        setIsLoading(true);
-        try {
-            const response = await listSubjectToFrame();
-            setListFrame(response[0]);
-        } catch (error) {
-            console.log(error);
-        }
-        setIsLoading(false);
-    };
-
-    const getSubject = async () => {
-        setIsLoading(true);
-        try {
-            await getScore(access_token);
-        } catch (error) {
-            console.log(error);
-        }
-        setIsLoading(false);
-    };
+    const [registeredSubjects, setRegisteredSubjects] = useState({});
 
     useEffect(() => {
-        const height = document.getElementsByClassName('main-content')[0].clientHeight;
-        setHeightContainerLoading(height);
-        getFrame();
-        getSubject();
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const [framesResponse, scoresResponse] = await Promise.all([
+                    listSubjectToFrame(),
+                    getScoreByStudentId(userid)
+                ]);
+
+                if (framesResponse && Array.isArray(framesResponse)) {
+                    setFrames(framesResponse[0]);
+                }
+                if (scoresResponse && Array.isArray(scoresResponse)) {
+                    setScores(scoresResponse);
+                    const registeredMap = {};
+                    scoresResponse.forEach(score => {
+                        registeredMap[score.subject.subjectId] = score.semester.semesterName;
+                    });
+                    setRegisteredSubjects(registeredMap);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                message.error('Failed to load data');
+            }
+            setIsLoading(false);
+        };
+
+        fetchData();
     }, []);
 
-    const handleChange = (event) => {
-        console.log(event.target.value);
-    };
+    const handleRegisterSubject = useCallback(async (subjectId, frameId, semesterIndex) => {
+        try {
+            const semesterId = `SEMESTER_ID_${semesterIndex + 1}`;
+            console.log('Registering subject with params:', { userId: userid, subjectId, frameId, semesterId });
+            const response = await registerSubject(userid, subjectId, frameId, semesterId);
+            console.log('Registration response:', response);
 
-    return isLoading ? (
-        <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
-            <Spin size="large" />
-        </div>
-    ) : (
+            if (response && response.success) {
+                setRegisteredSubjects(prev => ({ ...prev, [subjectId]: semesterIndex + 1 }));
+                message.success('Subject registered successfully');
+            } else {
+                throw new Error(response.error || 'Unknown error occurred');
+            }
+        } catch (error) {
+            console.error('Error registering subject:', error);
+            message.error(`Failed to register subject: ${error.message}`);
+        }
+    }, []);
+
+    const renderTableRows = useCallback(() => {
+        let index = 1;
+        return frames.flatMap(frame => {
+            const frameRows = [];
+
+            // Add frame header
+            frameRows.push(
+                <TableRow key={`frame-${frame.id}`}>
+                    <TableCell className={cx('title')} align="center" colSpan={5}>
+                        {frame.frameName} ({frame.creditHour})
+                    </TableCell>
+                    <TableCell align="center" colSpan={12}></TableCell>
+                </TableRow>
+            );
+
+            // Add subframes if any
+            frames
+                .filter(subframe => subframe.parentFrameId === frame.id)
+                .forEach(subframe => {
+                    frameRows.push(
+                        <TableRow key={`subframe-${subframe.id}`}>
+                            <TableCell className={cx('title')} align="center" colSpan={5}>
+                                {subframe.frameName} ({subframe.creditHour})
+                            </TableCell>
+                            <TableCell align="center" colSpan={12}></TableCell>
+                        </TableRow>
+                    );
+                });
+
+            // Add subjects
+            if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
+                frame.subjectInfo.forEach(subject => {
+                    if (subject) {
+                        frameRows.push(
+                            <TableRow key={`subject-${subject.subjectId}`}>
+                                <TableCell align="center">{index++}</TableCell>
+                                <TableCell align="center">{subject.subjectId}</TableCell>
+                                <TableCell align="center">{subject.subjectName}</TableCell>
+                                <TableCell align="center">{subject.creditHour}</TableCell>
+                                <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
+                                {Array.from({ length: 12 }).map((_, i) => (
+                                    <TableCell key={`semester-${i}`} align="center">
+                                        <Checkbox
+                                            checked={registeredSubjects[subject.subjectId] === i + 1}
+                                            onChange={() => handleRegisterSubject(subject.subjectId, frame.id, i)}
+                                            disabled={registeredSubjects[subject.subjectId] !== undefined}
+                                        />
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        );
+                    }
+                });
+            }
+
+            return frameRows;
+        });
+    }, [frames, registeredSubjects, handleRegisterSubject]);
+
+    if (isLoading) {
+        return (
+            <div className={cx('container-loading')} style={{ height: 880 }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    return (
         <div className={cx('container-table')}>
             <TableContainer sx={{ maxHeight: 880 }}>
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
                             <TableCell align="center" colSpan={5}></TableCell>
-                            <TableCell className={cx('title')} align="center" colSpan={9}>
+                            <TableCell className={cx('title')} align="center" colSpan={12}>
                                 Học kỳ thực hiện
                             </TableCell>
                         </TableRow>
@@ -90,58 +170,7 @@ const ColumnGroupingTable = ({ department = false }) => {
                             ))}
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                        {listFrame.map((frame, index) => (
-                            <Fragment key={index + '-frag'}>
-                                {frame.parentFrameId === null && (
-                                    <>
-                                        <TableRow key={index + '-course'}>
-                                            <TableCell className={cx('title')} align="center" colSpan={3}>
-                                                {frame.frameName}
-                                            </TableCell>
-                                            <TableCell className={cx('title')} align="center">
-                                                {frame.creditHour}
-                                            </TableCell>
-                                            <TableCell align="center" colSpan={10}></TableCell>
-                                        </TableRow>
-                                        {listFrame
-                                            .filter((childFrame) => childFrame.parentFrameId === frame.id)
-                                            .map((childFrame, childIndex) => (
-                                                <TableRow key={childIndex + '-child'}>
-                                                    <TableCell className={cx('title')} align="center" colSpan={3}>
-                                                        {childFrame.frameName}
-                                                    </TableCell>
-                                                    <TableCell className={cx('title')} align="center">
-                                                        {childFrame.creditHour}
-                                                    </TableCell>
-                                                    <TableCell align="center" colSpan={10}></TableCell>
-                                                </TableRow>
-                                            ))}
-                                        {frame.subjectInfo?.map((subject, subjectIndex) => (
-                                            <TableRow key={subjectIndex + '-subject'}>
-                                                <TableCell align="center">{indexSubject++}</TableCell>
-                                                <TableCell align="center">{subject?.subjectId || '-'}</TableCell>
-                                                <TableCell align="center">{subject?.subjectName || '-'}</TableCell>
-                                                <TableCell align="center">{subject?.creditHour || '-'}</TableCell>
-                                                <TableCell align="center">{subject?.subjectBeforeId || '-'}</TableCell>
-                                                {Array.from({ length: repeatHK }).map((_, index) => (
-                                                    <TableCell key={index + '-period'}>
-                                                        <input
-                                                            className={department ? cx('checkbox-period') : cx('radio-period')}
-                                                            type={department ? 'checkbox' : 'radio'}
-                                                            value={`${subject?.subjectId || ''}-${index}`}
-                                                            name={subject?.subjectId || ''}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </TableCell>
-                                                ))}
-                                            </TableRow>
-                                        ))}
-                                    </>
-                                )}
-                            </Fragment>
-                        ))}
-                    </TableBody>
+                    <TableBody>{renderTableRows()}</TableBody>
                 </Table>
             </TableContainer>
         </div>

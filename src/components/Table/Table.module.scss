@@ -12,3 +12,28 @@
 .radio-period {
     cursor: pointer;
 }
+
+/* New styles for the checkbox */
+.ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #1890ff;
+    border-color: #1890ff;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+    border-color: #000000;
+}
+
+/* Hover effect for the checkbox */
+.ant-checkbox:hover .ant-checkbox-inner {
+    border-color: #40a9ff;
+}
+
+/* Disabled state for the checkbox */
+.ant-checkbox-disabled .ant-checkbox-inner {
+    background-color: #9b4f4f;
+    border-color: #d9d9d9 !important;
+}
+
+.ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after {
+    border-color: rgb(0, 0, 0);
+}
