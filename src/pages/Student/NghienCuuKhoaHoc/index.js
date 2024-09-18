@@ -6,14 +6,14 @@ import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
 import { getAllscientificResearch } from '../../../services/scientificResearchService';
-import { getscientificResearchUserByUserId, deletescientificResearchUserByUserIdAndscientificResearchId, getscientificResearchUserByscientificResearchId } from '../../../services/scientificResearchUserService';
+import { getscientificResearchUserByUserId, deletescientificResearchUserByUserIdAndscientificResearchId, getByscientificResearchId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { showDeleteConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { getUserById } from '../../../services/userService';
-import { useLocation } from 'react-router-dom';
+import { getUserById, login } from '../../../services/userService';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -28,16 +28,23 @@ function NghienCuuKhoaHoc() {
     const { deleteNotification } = useSocketNotification();
 
     // Xử lý active tab từ url
+    const navigate = useNavigate();
     const location = useLocation();
-    const queryParams = new URLSearchParams(location.search);
-    const tabIndexFromUrl = queryParams.get('tabIndex');
-    const [activeTab, setActiveTab] = useState(parseInt(tabIndexFromUrl) || 1);
+    const [tabActive, setTabActive] = useState(getInitialTabIndex());
 
-    useEffect(() => {
-        if (tabIndexFromUrl) {
-            setActiveTab(parseInt(tabIndexFromUrl));
-        }
-    }, [tabIndexFromUrl]);
+    // Lấy tabIndex từ URL nếu có
+    function getInitialTabIndex() {
+        const params = new URLSearchParams(location.search);
+        return Number(params.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+    }
+
+
+    // Cập nhật URL khi tab thay đổi
+    const handleTabChange = (tabId) => {
+        setTabActive(tabId);
+        navigate(`?tabIndex=${tabId}`); // Cập nhật URL
+    };
+
 
     const fetchscientificResearchs = async () => {
         try {
@@ -56,7 +63,7 @@ function NghienCuuKhoaHoc() {
                 lastModifyUser: scientificResearch.lastModifyUser
             }));
             const promises = scientificResearchs.map(async (scientificResearch) => {
-                const responseCountRegister = await getscientificResearchUserByscientificResearchId({ scientificResearch: scientificResearch.scientificResearchId });
+                const responseCountRegister = await getByscientificResearchId({ scientificResearch: scientificResearch.scientificResearchId });
                 const count = responseCountRegister.data.data.length;
 
                 return { ...scientificResearch, count };
@@ -81,9 +88,6 @@ function NghienCuuKhoaHoc() {
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
-
-
-
         } catch (error) {
             console.error('Error fetching registered scientificResearchs:', error);
             setIsLoading(false);
@@ -149,7 +153,7 @@ function NghienCuuKhoaHoc() {
         },
         {
             id: 2,
-            title: 'đề tài tham gia',
+            title: 'Đề tài tham gia',
             children: (
                 <div>
                     {listscientificResearchRegister.map((item, index) => {
@@ -269,6 +273,12 @@ function NghienCuuKhoaHoc() {
         />
     ), [showModalRegister]);
 
+    // Set tab được chọn vào state 
+    const handleTabClick = (index) => {
+        setTabActive(index)
+    };
+
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('info')}>
@@ -276,11 +286,13 @@ function NghienCuuKhoaHoc() {
                     <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>đề tài nghiên cứu khoa học</h3>
+                <h3 className={cx('title')}>Đề tài nghiên cứu khoa học</h3>
             </div>
             <Tabs
-                defaultActiveKey={activeTab}
+                activeKey={tabActive}
+                onChange={handleTabChange}
                 centered
+                onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => ({
                     label: item.title,
                     key: index + 1,

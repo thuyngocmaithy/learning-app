@@ -13,7 +13,8 @@ function TableCustomAnt({
     isOutline = false,
     setSelectedRowKeys,
     selectedRowKeys,
-    keyIdChange
+    keyIdChange,
+    loading
 }) {
     const rowSelection = {
         selectedRowKeys,
@@ -56,6 +57,7 @@ function TableCustomAnt({
                 scroll={{
                     y: height,
                 }}
+                loading={loading}
             />
         </div>
     );

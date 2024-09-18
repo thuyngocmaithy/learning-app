@@ -20,7 +20,7 @@ function Home() {
                 type: 'radialBar',
             },
             title: {
-                text: 'đề tài nghiên cứu/ đề tài khóa luận được thực hiện',
+                text: 'Đề tài nghiên cứu/ Đề tài khóa luận được thực hiện',
                 align: 'center',
             },
             plotOptions: {
@@ -54,7 +54,7 @@ function Home() {
                 },
             },
             colors: ['#28DF99', '#27AA80'],
-            labels: ['đề tài nghiên cứu', 'Khóa luận tốt nghiệp'],
+            labels: ['Đề tài nghiên cứu', 'Khóa luận tốt nghiệp'],
             responsive: [
                 {
                     breakpoint: 480,

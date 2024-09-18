@@ -1,9 +1,16 @@
 .container-title {
     display: flex;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 
     h2 {
         margin-right: 20px;
+
+    }
+
+    .title-SR {
+        flex: 1 1 500px;
+        text-wrap: pretty;
     }
 }
 

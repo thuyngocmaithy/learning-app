@@ -9,7 +9,7 @@ import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { getscientificResearchUserById } from '../../../services/scientificResearchUserService';
+import { getByscientificResearchId } from '../../../services/scientificResearchUserService';
 import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
@@ -90,7 +90,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const queryParams = new URLSearchParams(location.search);
     const scientificResearchFromUrl = queryParams.get('scientificResearch');
     const [isLoading, setIsLoading] = useState(true);
-    const [scientificResearch, setscientificResearch] = useState(null);
+    const [scientificResearch, setScientificResearch] = useState(null);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     const [dataFollower, setDataFollower] = useState([])
 
@@ -103,10 +103,11 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const getInfoscientificResearch = async () => {
         try {
             if (scientificResearchFromUrl) {
-                const responsescientificResearchUser = await getscientificResearchUserById(scientificResearchFromUrl);
+                const responsescientificResearchUser = await getByscientificResearchId({ scientificResearch: scientificResearchFromUrl });
+                console.log(responsescientificResearchUser.data.data);
 
-                setscientificResearch(responsescientificResearchUser.data)
-                setDataFollower(responsescientificResearchUser.data.scientificResearch.follower[0].followerDetails)
+                setScientificResearch(responsescientificResearchUser.data.data)
+                setDataFollower(responsescientificResearchUser.data.data.scientificResearch.follower[0].followerDetails)
             }
         } catch (error) {
             console.error("Lỗi lấy thông tin đề tài" + error);
@@ -125,7 +126,13 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const dataInfoSystem = useMemo(() => [
         { title: 'Người tạo', description: scientificResearch ? scientificResearch.scientificResearch.createUser.fullname : '' },
         { title: 'Ngày tạo', description: scientificResearch ? format(scientificResearch.scientificResearch.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
-        { title: 'Người chỉnh sửa', description: scientificResearch ? scientificResearch.scientificResearch.lastModifyUser.fullname : '' },
+        {
+            title: 'Người chỉnh sửa', description: scientificResearch ?
+                scientificResearch.scientificResearch.lastModifyUser ?
+                    scientificResearch.scientificResearch.lastModifyUser.fullname :
+                    scientificResearch.scientificResearch.createUser.fullname
+                : ''
+        },
         { title: 'Ngày chỉnh sửa', description: scientificResearch ? format(scientificResearch.scientificResearch.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
     ], [scientificResearch]);
 

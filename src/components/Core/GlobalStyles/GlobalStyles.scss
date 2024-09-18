@@ -185,6 +185,8 @@ body {
             line-height: 20px;
             align-items: center;
             display: flex;
+            height: max-content;
+            padding: 10px;
         }
 
     }
@@ -350,4 +352,10 @@ body {
         align-items: center;
     }
 
+    // DROPDOWN
+    :where(.css-dev-only-do-not-override-17seli4).ant-dropdown .ant-dropdown-menu,
+    :where(.css-dev-only-do-not-override-17seli4).ant-dropdown-menu-submenu .ant-dropdown-menu {
+        max-height: 350px;
+        overflow-y: auto;
+    }
 }

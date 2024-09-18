@@ -4,9 +4,6 @@ import { privateRoutes, publicRoutes } from './routes';
 import MainLayout from './layouts';
 import { AccountLoginContext } from './context/AccountLoginContext';
 import config from './config';
-import {
-    getFeatureByPermission,
-} from '../src/services/featureService';
 import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';

@@ -154,7 +154,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 scientificResearchData = {
                     ...scientificResearchData,
                     createUserId: createUserId,
-                    lastModifyUserId: createUserId
+                    lastModifyUserId: null
                 }
 
                 response = await createscientificResearch(scientificResearchData);

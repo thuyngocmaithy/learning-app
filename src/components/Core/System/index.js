@@ -1,31 +1,40 @@
 import classNames from 'classnames/bind';
 import styles from './System.module.scss';
 import { Avatar, List } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { getImageAccount } from '../../../services/userService';
 import Toolbar from '../Toolbar';
 import FollowerUpdate from '../../FormUpdate/FollowerUpdate';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
 function System({ dataInfoSystem, dataFollower }) {
     const [processedFollower, setProcessedFollower] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const { userId } = useContext(AccountLoginContext)
 
     useEffect(() => {
-        const handleListFollower = async () => {
-            const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
+        // const handleListFollower = async () => {
+        //     const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
 
+        //     const promises = dataFollower.map(async (item) => {
+        //         const responseImage = await getImageAccount(accessToken, item.user?.userId);
+        //         const image = responseImage.data.data.thong_tin_sinh_vien.image;
+        //         return { title: item.user.fullname, image: image };
+        //     });
+
+        //     const processed = await Promise.all(promises);
+        //     setProcessedFollower(processed)
+        // }
+        const handleListFollower = async () => {
             const promises = dataFollower.map(async (item) => {
-                const responseImage = await getImageAccount(accessToken, item.user.userId);
-                const image = responseImage.data.data.thong_tin_sinh_vien.image;
-                return { title: item.user.fullname, image: image };
+                return { title: item.user.fullname, image: item.user.avatar };
             });
 
             const processed = await Promise.all(promises);
             setProcessedFollower(processed)
         }
-
         handleListFollower();
     }, [dataFollower])
 

@@ -3,7 +3,7 @@ import styles from './NCKHListTopic.module.scss';
 import { Card, message, Modal, notification, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import config from "../../../config"
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../components/Core/Button';
 import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
@@ -11,22 +11,14 @@ import Toolbar from '../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../components/FormUpdate/DeTaiNCKHUpdate';
 
-import { deletescientificResearch, getAllscientificResearch, getByScientificResearchsGroupId } from '../../../services/scientificResearchService';
-import { checkUsernameExist, login } from '../../../services/userService';
-import { getscientificResearchUserById, getscientificResearchUserByscientificResearchId } from '../../../services/scientificResearchUserService';
+import { deletescientificResearch, getByScientificResearchsGroupId } from '../../../services/scientificResearchService';
+import { getListFollowerByUserId, getByscientificResearchId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../FormDetail/DeTaiNCKHDetail';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
-const listscientificResearchJoin = [
-    { id: '1', name: 'Ứng dụng công nghệ Blockchain trong bài toán vé điện tử', status: 'Xác định vấn đề nghiên cứu' },
-    {
-        id: '2',
-        name: 'Tìm hiểu các ứng dụng dự đoán những sự cố của trạm biến áp bằng mạng Neural.',
-        status: 'Chờ duyệt',
-    },
-];
 
 
 function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
@@ -38,6 +30,8 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     const [showModalListRegister, setShowModalListRegister] = useState(false)
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
+    const { userId } = useContext(AccountLoginContext);
+    const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
 
     const [open, setOpen] = useState(false);
 
@@ -128,6 +122,21 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
             ),
         }
     ];
+    const listRegisterscientificResearchJoined = async () => {
+        try {
+            const response = await getListFollowerByUserId({ userId: userId, srgroupId: showModalListTopic.scientificResearchGroupId });
+
+            if (response.status === 200) {
+                setListscientificResearchJoined(response.data.data);
+                console.log(response.data.data);
+
+            }
+
+        } catch (error) {
+            console.error('Error fetching registered scientificResearchs:', error);
+            setIsLoading(false);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -136,7 +145,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
 
             const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
-                const numberOfRegister = await getscientificResearchUserByscientificResearchId({ scientificResearch: data.scientificResearchId });
+                const numberOfRegister = await getByscientificResearchId({ scientificResearch: data.scientificResearchId });
                 return {
                     ...data,
                     numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
@@ -154,6 +163,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     useEffect(() => {
         if (showModalListTopic !== false) {
             fetchData();
+            listRegisterscientificResearchJoined();
         }
     }, [showModalListTopic]);
 
@@ -184,23 +194,23 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
             title: 'Đề tài tham gia',
             children: (
                 <div>
-                    {listscientificResearchJoin.map((item, index) => {
-                        let color = item.status === 'Chờ duyệt' ? 'red' : 'green';
+                    {listScientificResearchJoined.map((item, index) => {
+                        let color = item.scientificResearch.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
                                 className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.name}
+                                title={item.scientificResearch.scientificResearchName}
                                 extra={
-                                    <ButtonCustom primary verysmall to={config.routes.DeTaiNCKHThamGia_Department}>
+                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearch.scientificResearchId}`}>
                                         Chi tiết
                                     </ButtonCustom>
                                 }
                             >
                                 Trạng thái:
                                 <Tag color={color} className={cx('tag-status')}>
-                                    {item.status}
+                                    {item.scientificResearch.status.statusName}
                                 </Tag>
                             </Card>
                         );

@@ -4,7 +4,7 @@ import Button from '../../Core/Button';
 import { Wrapper as PopperWrapper } from '..';
 import Tippy from '@tippyjs/react/headless';
 import NotificationItem from './NotificationItem';
-import { Fragment, useCallback } from 'react';
+import { Fragment } from 'react';
 import { Divider } from 'antd';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { updateNotification } from '../../../services/notificationService';

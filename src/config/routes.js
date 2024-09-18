@@ -20,12 +20,11 @@ const routes = {
     NghiepVu: '/NghiepVu',
     Dashboard_Department: '/Department',
     MoHocPhan: '/Department/NghiepVu/MoHocPhan',
-    NghienCuuKhoaHoc_Department: '/Department/NghiepVu/NghienCuuKhoaHoc',
     DeTaiNCKHThamGia_Department: '/Department/NghiepVu/NghienCuuKhoaHoc/DeTaiNCKHThamGia',
     KhoaLuanThamGia_Department: '/Department/NghiepVu/KhoaLuan/KhoaLuanThamGia',
     KhoaLuan_Department: '/Department/NghiepVu/KhoaLuan',
     ThucTap_Department: '/Department/NghiepVu/ThucTap',
-    NhomDeTaiNCKH: '/Department/NghiepVu/NhomDeTaiNCKH',
+    NhomDeTaiNCKH: '/Department/NghiepVu/NghienCuuKhoaHoc',
 
     // THIẾT LẬP
     KhungCTDT: '/Department/ThietLap/KhungCTDT',

@@ -75,7 +75,7 @@ export const getscientificResearchUserByUserId = async (userId) => {
     }
 };
 
-export const getscientificResearchUserByscientificResearchId = async (scientificResearchId) => {
+export const getByscientificResearchId = async (scientificResearchId) => {
     try {
         const queryParams = new URLSearchParams(scientificResearchId).toString();
         const url = `/scientificResearch-user/getByScientificResearchId?${queryParams}`;
@@ -100,3 +100,17 @@ export const deletescientificResearchUserByUserIdAndscientificResearchId = async
         throw error;
     }
 };
+
+
+export const getListFollowerByUserId = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/followers/getFollowersByIdsAndSRGroupId?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
