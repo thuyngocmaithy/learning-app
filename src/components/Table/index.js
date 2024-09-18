@@ -5,7 +5,7 @@ import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
 import { listSubjectToFrame } from '../../services/subjectService';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { getUseridFromLocalStorage, registerSubject } from '../../services/userService';
+import { getUseridFromLocalStorage, registerSubject, getUserRegisteredSubjects } from '../../services/userService';
 
 const cx = classNames.bind(styles);
 const userid = getUseridFromLocalStorage();
@@ -46,7 +46,7 @@ const ColumnGroupingTable = ({ department = false }) => {
                     setScores(scoresResponse);
                     const registeredMap = {};
                     scoresResponse.forEach(score => {
-                        registeredMap[score.subject.subjectId] = true;
+                        registeredMap[score.subject.subjectId] = score.semester.semesterName;
                     });
                     setRegisteredSubjects(registeredMap);
                 }
@@ -60,16 +60,22 @@ const ColumnGroupingTable = ({ department = false }) => {
         fetchData();
     }, []);
 
-    const handleRegisterSubject = useCallback(async (subjectId, frameId) => {
+    const handleRegisterSubject = useCallback(async (subjectId, frameId, semesterIndex) => {
         try {
-            // Assume we have a current semester ID
-            const currentSemesterId = 'CURRENT_SEMESTER_ID';
-            await registerSubject(userid, subjectId, frameId, currentSemesterId);
-            setRegisteredSubjects(prev => ({ ...prev, [subjectId]: true }));
-            message.success('Subject registered successfully');
+            const semesterId = `SEMESTER_ID_${semesterIndex + 1}`;
+            console.log('Registering subject with params:', { userId: userid, subjectId, frameId, semesterId });
+            const response = await registerSubject(userid, subjectId, frameId, semesterId);
+            console.log('Registration response:', response);
+
+            if (response && response.success) {
+                setRegisteredSubjects(prev => ({ ...prev, [subjectId]: semesterIndex + 1 }));
+                message.success('Subject registered successfully');
+            } else {
+                throw new Error(response.error || 'Unknown error occurred');
+            }
         } catch (error) {
             console.error('Error registering subject:', error);
-            message.error('Failed to register subject');
+            message.error(`Failed to register subject: ${error.message}`);
         }
     }, []);
 
@@ -116,9 +122,9 @@ const ColumnGroupingTable = ({ department = false }) => {
                                 {Array.from({ length: 12 }).map((_, i) => (
                                     <TableCell key={`semester-${i}`} align="center">
                                         <Checkbox
-                                            checked={registeredSubjects[subject.subjectId]}
-                                            onChange={() => handleRegisterSubject(subject.subjectId, frame.id)}
-                                            disabled={registeredSubjects[subject.subjectId]}
+                                            checked={registeredSubjects[subject.subjectId] === i + 1}
+                                            onChange={() => handleRegisterSubject(subject.subjectId, frame.id, i)}
+                                            disabled={registeredSubjects[subject.subjectId] !== undefined}
                                         />
                                     </TableCell>
                                 ))}

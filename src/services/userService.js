@@ -120,3 +120,14 @@ export const registerSubject = async (userId, subjectId, frameId, semesterId) =>
     throw error;
   }
 };
+
+
+export const getUserRegisteredSubjects = async (userId) => {
+  try {
+    const response = await api.get(`/user-register-subject/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user registered subjects:', error);
+    throw error;
+  }
+};
