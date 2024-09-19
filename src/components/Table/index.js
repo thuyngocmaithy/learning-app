@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Checkbox, Spin, message } from 'antd';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio } from '@mui/material';
+import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
 import { listSubjectToFrame } from '../../services/subjectService';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { getUseridFromLocalStorage, registerSubject, getUserRegisteredSubjects } from '../../services/userService';
+import { getUseridFromLocalStorage, registerSubject } from '../../services/userService';
 
 const cx = classNames.bind(styles);
 const userid = getUseridFromLocalStorage();
@@ -24,7 +24,7 @@ const columns = [
     })),
 ];
 
-const ColumnGroupingTable = ({ department = false }) => {
+const ColumnGroupingTable = () => {
     const [frames, setFrames] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ const ColumnGroupingTable = ({ department = false }) => {
                     setScores(scoresResponse);
                     const registeredMap = {};
                     scoresResponse.forEach(score => {
-                        registeredMap[score.subject.subjectId] = score.semester.semesterName;
+                        registeredMap[score.subject.subjectId] = parseInt(score.semester.semesterName);
                     });
                     setRegisteredSubjects(registeredMap);
                 }
@@ -62,10 +62,8 @@ const ColumnGroupingTable = ({ department = false }) => {
 
     const handleRegisterSubject = useCallback(async (subjectId, frameId, semesterIndex) => {
         try {
-            const semesterId = `SEMESTER_ID_${semesterIndex + 1}`;
-            console.log('Registering subject with params:', { userId: userid, subjectId, frameId, semesterId });
+            const semesterId = `${semesterIndex + 1}`;
             const response = await registerSubject(userid, subjectId, frameId, semesterId);
-            console.log('Registration response:', response);
 
             if (response && response.success) {
                 setRegisteredSubjects(prev => ({ ...prev, [subjectId]: semesterIndex + 1 }));
@@ -79,64 +77,60 @@ const ColumnGroupingTable = ({ department = false }) => {
         }
     }, []);
 
-    const renderTableRows = useCallback(() => {
-        let index = 1;
-        return frames.flatMap(frame => {
-            const frameRows = [];
+    const renderFrameContent = useCallback((frame, level = 0) => {
+        const frameRows = [];
+        const paddingLeft = level * 20;
 
-            // Add frame header
-            frameRows.push(
-                <TableRow key={`frame-${frame.id}`}>
-                    <TableCell className={cx('title')} align="center" colSpan={5}>
-                        {frame.frameName} ({frame.creditHour})
-                    </TableCell>
-                    <TableCell align="center" colSpan={12}></TableCell>
-                </TableRow>
-            );
+        // Add frame header
+        frameRows.push(
+            <TableRow key={`frame-${frame.id}`}>
+                <TableCell className={cx('title')} align="left" colSpan={5} style={{ paddingLeft: `${paddingLeft}px` }}>
+                    {frame.frameName} ({frame.creditHour})
+                </TableCell>
+                <TableCell align="center" colSpan={12}></TableCell>
+            </TableRow>
+        );
 
-            // Add subframes if any
-            frames
-                .filter(subframe => subframe.parentFrameId === frame.id)
-                .forEach(subframe => {
+        // Add subframes if any
+        frames
+            .filter(subframe => subframe.parentFrameId === frame.id)
+            .forEach(subframe => {
+                frameRows.push(...renderFrameContent(subframe, level + 1));
+            });
+
+        // Add subjects
+        if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
+            frame.subjectInfo.forEach((subject, index) => {
+                if (subject) {
                     frameRows.push(
-                        <TableRow key={`subframe-${subframe.id}`}>
-                            <TableCell className={cx('title')} align="center" colSpan={5}>
-                                {subframe.frameName} ({subframe.creditHour})
-                            </TableCell>
-                            <TableCell align="center" colSpan={12}></TableCell>
+                        <TableRow key={`subject-${subject.subjectId}`}>
+                            <TableCell align="center">{index + 1}</TableCell>
+                            <TableCell align="center">{subject.subjectId}</TableCell>
+                            <TableCell align="left" style={{ paddingLeft: `${paddingLeft + 20}px` }}>{subject.subjectName}</TableCell>
+                            <TableCell align="center">{subject.creditHour}</TableCell>
+                            <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
+                            {Array.from({ length: 12 }).map((_, i) => (
+                                <TableCell key={`semester-${i}`} align="center">
+                                    <Radio
+                                        checked={registeredSubjects[subject.subjectId] === i + 1}
+                                        onChange={() => handleRegisterSubject(subject.subjectId, frame.id, i)}
+                                        disabled={registeredSubjects[subject.subjectId] !== undefined && registeredSubjects[subject.subjectId] !== i + 1}
+                                        size="small"
+                                    />
+                                </TableCell>
+                            ))}
                         </TableRow>
                     );
-                });
+                }
+            });
+        }
 
-            // Add subjects
-            if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
-                frame.subjectInfo.forEach(subject => {
-                    if (subject) {
-                        frameRows.push(
-                            <TableRow key={`subject-${subject.subjectId}`}>
-                                <TableCell align="center">{index++}</TableCell>
-                                <TableCell align="center">{subject.subjectId}</TableCell>
-                                <TableCell align="center">{subject.subjectName}</TableCell>
-                                <TableCell align="center">{subject.creditHour}</TableCell>
-                                <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
-                                {Array.from({ length: 12 }).map((_, i) => (
-                                    <TableCell key={`semester-${i}`} align="center">
-                                        <Checkbox
-                                            checked={registeredSubjects[subject.subjectId] === i + 1}
-                                            onChange={() => handleRegisterSubject(subject.subjectId, frame.id, i)}
-                                            disabled={registeredSubjects[subject.subjectId] !== undefined}
-                                        />
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        );
-                    }
-                });
-            }
-
-            return frameRows;
-        });
+        return frameRows;
     }, [frames, registeredSubjects, handleRegisterSubject]);
+
+    const renderTableRows = useCallback(() => {
+        return frames.filter(frame => !frame.parentFrameId).flatMap(frame => renderFrameContent(frame));
+    }, [frames, renderFrameContent]);
 
     if (isLoading) {
         return (
@@ -147,7 +141,7 @@ const ColumnGroupingTable = ({ department = false }) => {
     }
 
     return (
-        <div className={cx('container-table')}>
+        <Paper className={cx('container-table')}>
             <TableContainer sx={{ maxHeight: 880 }}>
                 <Table stickyHeader>
                     <TableHead>
@@ -173,7 +167,7 @@ const ColumnGroupingTable = ({ department = false }) => {
                     <TableBody>{renderTableRows()}</TableBody>
                 </Table>
             </TableContainer>
-        </div>
+        </Paper>
     );
 };
 
