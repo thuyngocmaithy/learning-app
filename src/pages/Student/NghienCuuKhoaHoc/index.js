@@ -6,7 +6,7 @@ import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
 import { getAllscientificResearch } from '../../../services/scientificResearchService';
-import { getscientificResearchUserByUserId, deletescientificResearchUserByUserIdAndscientificResearchId, getByscientificResearchId } from '../../../services/scientificResearchUserService';
+import { deletescientificResearchUserByUserIdAndscientificResearchId, getByscientificResearchId, getSRUByUserIdAndSRGroupId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -84,7 +84,7 @@ function NghienCuuKhoaHoc() {
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getscientificResearchUserByUserId({ user: userId });
+            const response = await getSRUByUserIdAndSRGroupId({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
@@ -190,16 +190,18 @@ function NghienCuuKhoaHoc() {
 
     const handleCancelNotification = async () => {
         const scientificResearchCancel = scientificResearchCancelRef.current;
+        console.log(scientificResearchCancel);
+
         try {
             const user = await getUserById(userId)
             const ListNotification = [
                 {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.name}`,
+                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
                     toUser: scientificResearchCancel.createUser,
                     createUser: user.data,
                 },
                 {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.name}`,
+                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
                     toUser: scientificResearchCancel.instructor,
                     createUser: user.data,
                 }
@@ -209,7 +211,7 @@ function NghienCuuKhoaHoc() {
                 scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.createUser.id &&
                 scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.instructor.id) {
                 ListNotification.push({
-                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${scientificResearchCancel.name}`,
+                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
                     toUser: scientificResearchCancel.lastModifyUser,
                     createUser: user.data,
                 });

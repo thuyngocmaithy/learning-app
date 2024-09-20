@@ -104,7 +104,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         try {
             if (scientificResearchFromUrl) {
                 const responsescientificResearchUser = await getByscientificResearchId({ scientificResearch: scientificResearchFromUrl });
-                console.log(responsescientificResearchUser.data.data);
+                console.log(responsescientificResearchUser);
 
                 setScientificResearch(responsescientificResearchUser.data.data)
                 setDataFollower(responsescientificResearchUser.data.data.scientificResearch.follower[0].followerDetails)

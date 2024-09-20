@@ -1,8 +1,8 @@
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiNCKH.module.scss';
-import { message, Tag } from 'antd';
+import { Card, message, Tabs, Tag } from 'antd';
 import { ListCourseIcon, ProjectIcon } from '../../../../assets/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
@@ -11,6 +11,9 @@ import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
 import { deletescientificResearchGroup, getAllscientificResearchGroup } from '../../../../services/scientificResearchGroupService';
 import NCKHListTopic from '../../../../components/FormListTopic/NCKHListTopic';
+import config from '../../../../config';
+import { getListSRJoinByUserIdAndSRGroupId, getscientificResearchUserById, getscientificResearchUserByUserId, getSRUByUserIdAndSRGroupId } from '../../../../services/scientificResearchUserService';
+import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
@@ -23,15 +26,29 @@ function NhomDeTaiNCKHNCKH() {
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
+    const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
+    const { userId } = useContext(AccountLoginContext);
+    const [isToolbar, setIsToolbar] = useState(true);
 
-    const columns = (showModal) => [
+    // HANDLE TAB
+    //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
+    const handleTabClick = (index) => {
+        if (index === 2) {
+            setIsToolbar(false);
+        } else {
+            setIsToolbar(true);
+        }
+    };
+
+    // =================
+    const columns = () => [
         {
-            title: 'Mã đề tài',
+            title: 'Mã nhóm đề tài',
             dataIndex: 'scientificResearchGroupId',
             key: 'scientificResearchGroupId',
         },
         {
-            title: 'Tên đề tài',
+            title: 'Tên nhóm đề tài',
             dataIndex: 'scientificResearchGroupName',
             key: 'scientificResearchGroupName',
         },
@@ -101,8 +118,23 @@ function NhomDeTaiNCKHNCKH() {
         }
     };
 
+    const listRegisterscientificResearchJoined = async () => {
+        try {
+            const response = await getSRUByUserIdAndSRGroupId({ userId: userId });
+
+            if (response.status === 200) {
+                setListscientificResearchJoined(response.data.data);
+            }
+
+        } catch (error) {
+            console.error('Error fetching registered scientificResearchs:', error);
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        listRegisterscientificResearchJoined();
     }, []);
 
     useEffect(() => {
@@ -111,8 +143,6 @@ function NhomDeTaiNCKHNCKH() {
             setIsChangeStatus(false);
         }
     }, [isChangeStatus]);
-
-
 
 
     const handleDelete = async () => {
@@ -150,9 +180,54 @@ function NhomDeTaiNCKHNCKH() {
             />
         );
     }, [showModalListTopic]);
-
+    const ITEM_TABS = [
+        {
+            id: 1,
+            title: 'Nhóm đề tài NCKH',
+            children: (
+                <TableCustomAnt
+                    height={'350px'}
+                    columns={columns(setShowModalUpdate)}
+                    data={data}
+                    setSelectedRowKeys={setSelectedRowKeys}
+                    keyIdChange='scientificResearchGroupId'
+                    loading={isLoading}
+                />
+            ),
+        },
+        {
+            id: 2,
+            title: 'Tất cả đề tài tham gia',
+            children: (
+                <div>
+                    {listScientificResearchJoined.map((item, index) => {
+                        let color = item.scientificResearch.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
+                        return (
+                            <Card
+                                className={cx('card-DeTaiNCKHThamGia')}
+                                key={index}
+                                type="inner"
+                                title={item.scientificResearch.scientificResearchName}
+                                extra={
+                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearch.scientificResearchId}`}>
+                                        Chi tiết
+                                    </ButtonCustom>
+                                }
+                            >
+                                Trạng thái:
+                                <Tag color={color} className={cx('tag-status')}>
+                                    {item.scientificResearch.status.statusName}
+                                </Tag>
+                            </Card>
+                        );
+                    })}
+                </div>
+            ),
+        },
+    ];
 
     return (
+
         <div className={cx('wrapper')}>
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
@@ -161,30 +236,38 @@ function NhomDeTaiNCKHNCKH() {
                     </span>
                     <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
                 </div>
-
-                <div className={cx('wrapper')}>
-                    <Toolbar
-                        type={'Tạo mới'}
-                        onClick={() => {
-                            setShowModalUpdate(true);
-                            setIsUpdate(false);
-                        }}
-                    />
-                    <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('đề tài nghiên cứu', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} />
-                    <Toolbar type={'Xuất file Excel'} />
-                </div>
-
+                {isToolbar ? (
+                    <div className={cx('wrapper')}>
+                        <Toolbar
+                            type={'Tạo mới'}
+                            onClick={() => {
+                                setShowModalUpdate(true);
+                                setIsUpdate(false);
+                            }}
+                        />
+                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('đề tài nghiên cứu', handleDelete)} />
+                        <Toolbar type={'Nhập file Excel'} />
+                        <Toolbar type={'Xuất file Excel'} />
+                    </div>
+                ) : null}
             </div>
 
-            <TableCustomAnt
-                height={'350px'}
-                columns={columns(setShowModalUpdate)}
-                data={data}
-                setSelectedRowKeys={setSelectedRowKeys}
-                keyIdChange='scientificResearchGroupId'
-                loading={isLoading}
+            <Tabs
+                defaultActiveKey={1}
+                centered
+                onTabClick={(index) => handleTabClick(index)}
+                items={ITEM_TABS.map((item, index) => {
+                    return {
+                        label: item.title,
+                        key: index + 1,
+                        children: item.children,
+                    };
+                })}
             />
+
+
+
+
             {NhomDeTaiNCKHUpdateMemoized}
             {NCKHListTopicMemoized}
         </div>

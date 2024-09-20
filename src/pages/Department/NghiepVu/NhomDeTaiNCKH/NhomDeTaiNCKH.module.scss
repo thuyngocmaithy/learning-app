@@ -1,7 +1,7 @@
 .conatainer-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin: 30px 15px 10px 0;
 
     .info {
         display: flex;
@@ -12,6 +12,8 @@
             font-weight: 700;
             display: flex;
             align-items: center;
+            max-width: 900px;
+            line-height: 2;
         }
 
         .icon {

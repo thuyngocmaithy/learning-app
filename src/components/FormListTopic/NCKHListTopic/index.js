@@ -1,9 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './NCKHListTopic.module.scss';
-import { Card, message, Modal, notification, Tabs, Tag } from 'antd';
+import { Card, message, Modal, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import config from "../../../config"
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../components/Core/Button';
 import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
@@ -12,7 +12,7 @@ import { showDeleteConfirm } from '../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../components/FormUpdate/DeTaiNCKHUpdate';
 
 import { deletescientificResearch, getByScientificResearchsGroupId } from '../../../services/scientificResearchService';
-import { getListFollowerByUserId, getByscientificResearchId } from '../../../services/scientificResearchUserService';
+import { getListSRJoinByUserIdAndSRGroupId, getByscientificResearchId, getSRUByUserIdAndSRGroupId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../FormDetail/DeTaiNCKHDetail';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -124,12 +124,10 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     ];
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getListFollowerByUserId({ userId: userId, srgroupId: showModalListTopic.scientificResearchGroupId });
+            const response = await getSRUByUserIdAndSRGroupId({ userId: userId, srgroupId: showModalListTopic.scientificResearchGroupId });
 
             if (response.status === 200) {
                 setListscientificResearchJoined(response.data.data);
-                console.log(response.data.data);
-
             }
 
         } catch (error) {
@@ -141,7 +139,6 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     const fetchData = async () => {
         try {
             const result = await getByScientificResearchsGroupId({ scientificResearchGroupId: showModalListTopic.scientificResearchGroupId });
-            console.log(result);
 
             const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
@@ -191,7 +188,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
         },
         {
             id: 2,
-            title: 'Đề tài tham gia',
+            title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
                     {listScientificResearchJoined.map((item, index) => {

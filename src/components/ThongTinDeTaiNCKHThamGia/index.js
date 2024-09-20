@@ -8,7 +8,6 @@ import { updatescientificResearchById } from '../../services/scientificResearchS
 const cx = classNames.bind(styles);
 
 function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
-
     const statusType = 'Tiến độ đề tài NCKH';
     const [statusSelected, setStatusSelected] = useState(
         {
@@ -61,7 +60,6 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
                         key: status.statusId,
                         label: status.statusName,
                     }));
-                    console.log(options);
 
                     setStatusOptions(options);
                     // Nếu có giá trị đã chọn, set lại giá trị đó

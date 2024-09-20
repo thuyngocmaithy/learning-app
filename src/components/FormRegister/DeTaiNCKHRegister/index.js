@@ -22,6 +22,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
     const { userId } = useContext(AccountLoginContext);
     const [typeRegister, setTypeRegister] = useState(null);
     const { sendNotification } = useSocketNotification();
+    const [isRegisting, setIsRegisting] = useState(false);
 
     const onChange = (e) => {
         console.log('Selected value:', e.target.value);
@@ -37,18 +38,19 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
 
     const handleSendNotification = async () => {
         try {
+            setIsRegisting(true);
             const user = await getUserById(userId)
             const ListNotification = [
                 {
                     content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NghienCuuKhoaHoc_Department,
+                    url: config.routes.NhomDeTaiNCKH,
                     toUser: showModal.createUser,
                     createUser: user.data,
                     type: 'warning',
                 },
                 {
                     content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NghienCuuKhoaHoc_Department,
+                    url: config.routes.NhomDeTaiNCKH,
                     toUser: showModal.instructor,
                     createUser: user.data,
                     type: 'warning',
@@ -60,7 +62,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                 showModal.lastModifyUser.id !== showModal.instructor.id) {
                 ListNotification.push({
                     content: `Sinh viên ${userId} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NghienCuuKhoaHoc_Department,
+                    url: config.routes.NhomDeTaiNCKH,
                     toUser: showModal.lastModifyUser,
                     createUser: user.data,
                     type: 'warning',
@@ -73,6 +75,9 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
 
         } catch (err) {
             console.error(err)
+        }
+        finally {
+            setIsRegisting(false);
         }
     };
 
@@ -119,6 +124,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onRegister={handleSubmit}
+            isRegisting={isRegisting}
         >
             <Form
                 form={form}

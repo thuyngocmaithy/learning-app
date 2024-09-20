@@ -63,10 +63,10 @@ export const gethighestGroup = async () => {
     }
 };
 
-export const getscientificResearchUserByUserId = async (userId) => {
+export const getSRUByUserIdAndSRGroupId = async (userId) => {
     try {
         const queryParams = new URLSearchParams(userId).toString();
-        const url = `/scientificResearch-user/getByUserId?${queryParams}`;
+        const url = `/scientificResearch-user/getByUserIdAndSRGroupId?${queryParams}`;
 
         const response = await api.get(url);
         return response;
@@ -102,10 +102,10 @@ export const deletescientificResearchUserByUserIdAndscientificResearchId = async
 };
 
 
-export const getListFollowerByUserId = async (conditions) => {
+export const getListSRJoinByUserIdAndSRGroupId = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
-        const url = `/followers/getFollowersByIdsAndSRGroupId?${queryParams}`;
+        const url = `/followers/getFollowersByUserIdAndSRGroupId?${queryParams}`;
 
         const response = await api.get(url);
         return response;
