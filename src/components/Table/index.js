@@ -61,7 +61,7 @@ const ColumnGroupingTable = () => {
     }, []);
 
     const handleRegisterSubject = useCallback(async (subjectId, frameId, semesterIndex) => {
-        try {
+        try { //nam hoc + thu tu ô
             const semesterId = `${semesterIndex + 1}`;
             const response = await registerSubject(userid, subjectId, frameId, semesterId);
 
