@@ -7,7 +7,8 @@ const routes = {
     DanhSachHocPhan: '/DanhSachHocPhan',
     DiemTotNghiep: '/DiemTotNghiep',
     TienDoHocPhan: '/TienDoHocPhan',
-    NghienCuuKhoaHoc: '/NghienCuuKhoaHoc',
+    NhomDeTaiNCKH: '/NhomDeTaiNCKH',
+    DeTaiNCKH: '/NhomDeTaiNCKH/DeTaiNCKH',
     DeTaiNCKHThamGia: '/NghienCuuKhoaHoc/DeTaiNCKHThamGia',
     KhoaLuanThamGia: '/KhoaLuan/KhoaLuanThamGia',
     KhoaLuan: '/KhoaLuan',
@@ -24,7 +25,7 @@ const routes = {
     KhoaLuanThamGia_Department: '/Department/NghiepVu/KhoaLuan/KhoaLuanThamGia',
     KhoaLuan_Department: '/Department/NghiepVu/KhoaLuan',
     ThucTap_Department: '/Department/NghiepVu/ThucTap',
-    NhomDeTaiNCKH: '/Department/NghiepVu/NghienCuuKhoaHoc',
+    NhomDeTaiNCKH_Department: '/Department/NghiepVu/NghienCuuKhoaHoc',
 
     // THIẾT LẬP
     KhungCTDT: '/Department/ThietLap/KhungCTDT',

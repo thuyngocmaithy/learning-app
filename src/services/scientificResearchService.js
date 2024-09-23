@@ -56,8 +56,7 @@ export const updateSRById = async (scientificResearchId, scientificResearchData)
 
 export const getBySRGId = async (scientificResearchGroupId) => {
     try {
-        const queryParams = new URLSearchParams(scientificResearchGroupId).toString();
-        const url = `/scientificResearchs/getByScientificResearchGroupId?${queryParams}`;
+        const url = `/scientificResearchs/getByScientificResearchGroupId?SRGId=${scientificResearchGroupId}`;
 
         const response = await api.get(url);
         return response;

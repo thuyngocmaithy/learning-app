@@ -1,31 +1,26 @@
-import React, { useEffect, useMemo, useState, useContext, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useContext } from 'react';
 import classNames from 'classnames/bind';
-import styles from './NghienCuuKhoaHoc.module.scss';
-import { Card, List, message, Skeleton, Tabs, Tag } from 'antd';
+import styles from './NhomDeTaiNCKH.module.scss';
+import { Card, List, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getAllSR } from '../../../services/scientificResearchService';
-import { deleteSRUByUserIdAndSRId, getBySRId, getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
+import { getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { showDeleteConfirm } from '../../../components/Core/Delete';
-import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { getUserById, login } from '../../../services/userService';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getAllSRGroup } from '../../../services/scientificResearchGroupService';
 
 const cx = classNames.bind(styles);
 
-function NghienCuuKhoaHoc() {
+function NhomDeTaiNCKH() {
     const [list, setList] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
-    const scientificResearchCancelRef = useRef(null);
-    const { deleteNotification } = useSocketNotification();
 
     // Xử lý active tab từ url
     const navigate = useNavigate();
@@ -45,36 +40,10 @@ function NghienCuuKhoaHoc() {
         navigate(`?tabIndex=${tabId}`); // Cập nhật URL
     };
 
-
     const fetchscientificResearchs = async () => {
         try {
-            const response = await getAllSR();
-
-            let scientificResearchs = response.data.map(scientificResearch => ({
-                scientificResearchId: scientificResearch.scientificResearchId,
-                scientificResearchName: scientificResearch.scientificResearchName,
-                executionTime: scientificResearch.executionTime,
-                instructorName: scientificResearch.instructor.fullname,
-                level: scientificResearch.level,
-                budget: scientificResearch.budget,
-                description: scientificResearch.description,
-                createUser: scientificResearch.createUser,
-                instructor: scientificResearch.instructor,
-                lastModifyUser: scientificResearch.lastModifyUser
-            }));
-            const promises = scientificResearchs.map(async (scientificResearch) => {
-                const responseCountRegister = await getBySRId({ scientificResearch: scientificResearch.scientificResearchId });
-                const count = responseCountRegister.data.data.length;
-
-                return { ...scientificResearch, count };
-            });
-
-            // Đợi tất cả các Promise hoàn thành
-            const updatedList = await Promise.all(promises);
-
-            // Cập nhật list một lần
-            setList(updatedList);
-
+            const result = await getAllSRGroup()
+            setList(result.data);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching scientificResearchs:', error);
@@ -113,37 +82,24 @@ function NghienCuuKhoaHoc() {
                     renderItem={(item, index) => (
                         <List.Item
                             actions={[
-                                <Button outline verysmall onClick={() => setShowModalDetail(item)}>
+                                <Button primary verysmall to={`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`}>
                                     Chi tiết
                                 </Button>,
-                                listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
-                                    <Button className={cx('btn-cancel')} outline verysmall onClick={() => {
-                                        scientificResearchCancelRef.current = item;
-                                        setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelWithConfirm, true), 0);
-
-                                    }} >
-                                        Hủy đăng ký
-                                    </Button> :
-                                    <Button primary verysmall onClick={() => setShowModalRegister(item)}>
-                                        Đăng ký
-                                    </Button>,
                             ]}
                         >
                             <Skeleton avatar title={false} loading={isLoading} active>
-                                {console.log(item)
-                                }
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.scientificResearchName}</div>}
+                                    title={<div className={cx('name')}>{item.scientificResearchGroupName}</div>}
                                     description={<div>
-                                        <p>Lượt đăng ký: {item.count} </p>
-                                        <p>Giảng viên hướng dẫn: {item.instructorName}</p>
+                                        <p>Khoa: {item.faculty.facultyName}</p>
+                                        <p>Trạng thái: <Tag color='green'>{item.status.statusName}</Tag> </p>
                                     </div>}
                                 />
                                 <p></p>
                                 <div className={cx('container-deadline-register')}>
                                     <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                    <p>{item.executionTime}</p>
+                                    <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
                                 </div>
                             </Skeleton>
                         </List.Item>
@@ -153,7 +109,7 @@ function NghienCuuKhoaHoc() {
         },
         {
             id: 2,
-            title: 'Đề tài tham gia',
+            title: 'Tất cả đề tài tham gia',
             children: (
                 <div>
                     {listscientificResearchRegister.map((item, index) => {
@@ -187,72 +143,6 @@ function NghienCuuKhoaHoc() {
             ),
         },
     ];
-
-    const handleCancelNotification = async () => {
-        const scientificResearchCancel = scientificResearchCancelRef.current;
-        console.log(scientificResearchCancel);
-
-        try {
-            const user = await getUserById(userId)
-            const ListNotification = [
-                {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
-                    toUser: scientificResearchCancel.createUser,
-                    createUser: user.data,
-                },
-                {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
-                    toUser: scientificResearchCancel.instructor,
-                    createUser: user.data,
-                }
-            ];
-
-            if (scientificResearchCancel.lastModifyUser &&
-                scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.createUser.id &&
-                scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.instructor.id) {
-                ListNotification.push({
-                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
-                    toUser: scientificResearchCancel.lastModifyUser,
-                    createUser: user.data,
-                });
-            }
-
-            ListNotification.map(async (item) => {
-                await deleteNotification(item.toUser, item);
-            })
-
-        } catch (err) {
-            console.error(err)
-        }
-    };
-
-
-    // Hàm xử lý hủy đăng ký đề tài với xác nhận
-    const handleCancelWithConfirm = async () => {
-        if (scientificResearchCancelRef.current) {
-            console.log(scientificResearchCancelRef.current)
-            try {
-                const responseCancel = await deleteSRUByUserIdAndSRId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
-                if (responseCancel) {
-                    message.success('Hủy đăng ký thành công');
-                    // Cập nhật danh sách đề tài đã đăng ký
-                    await checkRegisterscientificResearch();
-                    await fetchscientificResearchs(); // Cập nhật danh sách đề tài
-
-                    //xóa thông báo
-                    handleCancelNotification();
-                }
-
-
-            } catch (error) {
-                message.error('Hủy đăng ký thất bại');
-            } finally {
-                scientificResearchCancelRef.current = null // Reset scientificResearchCancel sau khi xử lý
-            }
-        } else {
-            message.error('đề tài không hợp lệ');
-        }
-    };
 
     const DeTaiNCKHDetailMemoized = useMemo(() => (
         <DeTaiNCKHDetail
@@ -288,7 +178,7 @@ function NghienCuuKhoaHoc() {
                     <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>Đề tài nghiên cứu khoa học</h3>
+                <h3 className={cx('title')}>Nhóm đề tài nghiên cứu khoa học</h3>
             </div>
             <Tabs
                 activeKey={tabActive}
@@ -307,4 +197,4 @@ function NghienCuuKhoaHoc() {
     );
 }
 
-export default NghienCuuKhoaHoc;
+export default NhomDeTaiNCKH;

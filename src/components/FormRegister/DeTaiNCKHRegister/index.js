@@ -43,14 +43,14 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
             const ListNotification = [
                 {
                     content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NhomDeTaiNCKH,
+                    url: config.routes.NhomDeTaiNCKH_Department,
                     toUser: showModal.createUser,
                     createUser: user.data,
                     type: 'warning',
                 },
                 {
                     content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NhomDeTaiNCKH,
+                    url: config.routes.NhomDeTaiNCKH_Department,
                     toUser: showModal.instructor,
                     createUser: user.data,
                     type: 'warning',
@@ -62,7 +62,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                 showModal.lastModifyUser.id !== showModal.instructor.id) {
                 ListNotification.push({
                     content: `Sinh viên ${userId} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NhomDeTaiNCKH,
+                    url: config.routes.NhomDeTaiNCKH_Department,
                     toUser: showModal.lastModifyUser,
                     createUser: user.data,
                     type: 'warning',

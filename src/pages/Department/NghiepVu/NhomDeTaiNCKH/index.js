@@ -9,16 +9,16 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, deletescientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
 import NCKHListTopic from '../../../../components/FormListTopic/NCKHListTopic';
 import config from '../../../../config';
-import { getListSRJoinByUserIdAndSRGId, getSRUById, getscientificResearchUserByUserId, getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
+import { getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
 
-function NhomDeTaiNCKHNCKH() {
+function NhomDeTaiNCKH() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [showModalListTopic, setShowModalListTopic] = useState(false); // hiển thị model list topic
@@ -153,7 +153,7 @@ function NhomDeTaiNCKHNCKH() {
             message.success('Xoá thành công');
         } catch (error) {
             message.error('Xoá thất bại');
-            console.error(' [Nghiep vu - NhomDeTaiNCKH - deleted] - Error', error);
+            console.error(' [Nghiep vu - NhomDeTaiNCKH_Department - deleted] - Error', error);
         }
     };
 
@@ -272,4 +272,4 @@ function NhomDeTaiNCKHNCKH() {
     );
 }
 
-export default NhomDeTaiNCKHNCKH;
+export default NhomDeTaiNCKH;

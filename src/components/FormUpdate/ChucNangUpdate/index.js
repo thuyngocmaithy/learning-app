@@ -43,7 +43,7 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
                 response = await createFeature(data);
             }
             console.log(response);
-            if (response.status === 201) {
+            if (response.status === 201 || response.status === 200) {
                 reLoad(true);
             }
             message.success('Cập nhật thành công');

@@ -125,6 +125,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     const listRegisterscientificResearchJoined = async () => {
         try {
             const response = await getSRUByUserIdAndSRGId({ userId: userId, srgroupId: showModalListTopic.scientificResearchGroupId });
+            console.log(response);
 
             if (response.status === 200) {
                 setListscientificResearchJoined(response.data.data);
@@ -138,7 +139,8 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
 
     const fetchData = async () => {
         try {
-            const result = await getBySRGId({ scientificResearchGroupId: showModalListTopic.scientificResearchGroupId });
+            const result = await getBySRGId(showModalListTopic.scientificResearchGroupId);
+            console.log(result);
 
             const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
