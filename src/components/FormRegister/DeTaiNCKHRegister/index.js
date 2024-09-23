@@ -4,8 +4,8 @@ import Register from '../../Core/Register';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHRegister.module.scss';
 import { Form, message, Radio } from 'antd';
-import { createscientificResearchUser, gethighestGroup } from '../../../services/scientificResearchUserService';
-import { getscientificResearchById } from '../../../services/scientificResearchService';
+import { createSRU, gethighestGroup } from '../../../services/scientificResearchUserService';
+import { getSRById } from '../../../services/scientificResearchService';
 import { getUserById } from '../../../services/userService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
@@ -90,7 +90,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                 if (response.message === "success") {
                     // Đăng ký với số nhóm = nhóm cao nhất hiện tại + 1 
                     const group = response.data + 1;
-                    const scientificResearch = await getscientificResearchById(showModal.scientificResearchId)
+                    const scientificResearch = await getSRById(showModal.scientificResearchId)
                     const user = await getUserById(userId)
 
                     const registerData =
@@ -101,7 +101,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                         isLeader: 1, // Đăng ký cá nhân => Người đăng ký là leader
                     }
 
-                    const responseAdd = await createscientificResearchUser(registerData);
+                    const responseAdd = await createSRU(registerData);
                     if (responseAdd) {
                         message.success(`Đăng ký thành công`);
                         handleSendNotification();

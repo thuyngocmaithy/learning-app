@@ -9,10 +9,10 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deletescientificResearchGroup, getAllscientificResearchGroup } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, deletescientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
 import NCKHListTopic from '../../../../components/FormListTopic/NCKHListTopic';
 import config from '../../../../config';
-import { getListSRJoinByUserIdAndSRGroupId, getscientificResearchUserById, getscientificResearchUserByUserId, getSRUByUserIdAndSRGroupId } from '../../../../services/scientificResearchUserService';
+import { getListSRJoinByUserIdAndSRGId, getSRUById, getscientificResearchUserByUserId, getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
@@ -108,7 +108,7 @@ function NhomDeTaiNCKHNCKH() {
 
     const fetchData = async () => {
         try {
-            const result = await getAllscientificResearchGroup()
+            const result = await getAllSRGroup()
             setData(result.data);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -120,7 +120,7 @@ function NhomDeTaiNCKHNCKH() {
 
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGroupId({ userId: userId });
+            const response = await getSRUByUserIdAndSRGId({ userId: userId });
 
             if (response.status === 200) {
                 setListscientificResearchJoined(response.data.data);
@@ -147,9 +147,7 @@ function NhomDeTaiNCKHNCKH() {
 
     const handleDelete = async () => {
         try {
-            for (const id of selectedRowKeys) {
-                await deletescientificResearchGroup(id);
-            }
+            await deleteScientificResearchGroups(selectedRowKeys);
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Xoá thành công');

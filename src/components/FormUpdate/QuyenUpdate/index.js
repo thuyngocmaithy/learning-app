@@ -61,7 +61,7 @@ const QuyenUpdate = memo(function QuyenUpdate({
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} quyền thành công!`);
                 handleCloseModal();
-                if (reLoad) reLoad();
+                if (reLoad) reLoad(true);
             }
 
         } catch (error) {

@@ -11,8 +11,8 @@ import Toolbar from '../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../components/FormUpdate/DeTaiNCKHUpdate';
 
-import { deletescientificResearch, getByScientificResearchsGroupId } from '../../../services/scientificResearchService';
-import { getListSRJoinByUserIdAndSRGroupId, getByscientificResearchId, getSRUByUserIdAndSRGroupId } from '../../../services/scientificResearchUserService';
+import { deleteSRs, getBySRGId } from '../../../services/scientificResearchService';
+import { getBySRId, getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../FormDetail/DeTaiNCKHDetail';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -124,7 +124,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
     ];
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGroupId({ userId: userId, srgroupId: showModalListTopic.scientificResearchGroupId });
+            const response = await getSRUByUserIdAndSRGId({ userId: userId, srgroupId: showModalListTopic.scientificResearchGroupId });
 
             if (response.status === 200) {
                 setListscientificResearchJoined(response.data.data);
@@ -138,11 +138,11 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
 
     const fetchData = async () => {
         try {
-            const result = await getByScientificResearchsGroupId({ scientificResearchGroupId: showModalListTopic.scientificResearchGroupId });
+            const result = await getBySRGId({ scientificResearchGroupId: showModalListTopic.scientificResearchGroupId });
 
             const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
-                const numberOfRegister = await getByscientificResearchId({ scientificResearch: data.scientificResearchId });
+                const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
                 return {
                     ...data,
                     numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
@@ -230,9 +230,7 @@ function NCKHListTopic({ showModalListTopic, setShowModalListTopic }) {
 
     const handleDelete = async () => {
         try {
-            for (const id of selectedRowKeys) {
-                await deletescientificResearch(id); // Xóa từng thesis
-            }
+            await deleteSRs(selectedRowKeys);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn

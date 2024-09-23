@@ -5,7 +5,7 @@ import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createscientificResearch, updatescientificResearchById } from '../../../services/scientificResearchService';
+import { createSR, updateSRById } from '../../../services/scientificResearchService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const { TextArea } = Input;
@@ -147,7 +147,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             let response;
             if (isUpdate) {
-                response = await updatescientificResearchById(showModal.scientificResearchId, scientificResearchData);
+                response = await updateSRById(showModal.scientificResearchId, scientificResearchData);
             } else {
                 const createUserResponse = await getUserById(userId);
                 const createUserId = createUserResponse.data;
@@ -157,7 +157,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     lastModifyUserId: null
                 }
 
-                response = await createscientificResearch(scientificResearchData);
+                response = await createSR(scientificResearchData);
             }
 
             if (response && response.data) {

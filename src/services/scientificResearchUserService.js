@@ -1,6 +1,6 @@
 import { api } from '../utils/apiConfig';
 
-export const getAllscientificResearchUser = async () => {
+export const getAllSRU = async () => {
     try {
         const response = await api.get('/scientificResearch-user');
         return response.data;
@@ -10,7 +10,7 @@ export const getAllscientificResearchUser = async () => {
     }
 };
 
-export const createscientificResearchUser = async (scientificResearchData) => {
+export const createSRU = async (scientificResearchData) => {
     try {
         const response = await api.post('/scientificResearch-user', scientificResearchData);
         return response.data;
@@ -20,19 +20,17 @@ export const createscientificResearchUser = async (scientificResearchData) => {
     }
 };
 
-
-export const deletescientificResearchUser = async (id) => {
+export const deleteSRUs = async (ids) => {
     try {
-        const response = await api.delete(`/scientificResearch-user/${id}`);
-        return response.data;
+        const response = await api.delete(`/scientificResearch-user?ids=${ids}`);
+        return response;
     } catch (error) {
-        console.error(error);
+        console.error('Delete scientificResearch-user error:', error);
         throw error;
     }
 };
 
-
-export const getscientificResearchUserById = async (id) => {
+export const getSRUById = async (id) => {
     try {
         const response = await api.get(`/scientificResearch-user/${id}`);
         return response.data;
@@ -43,7 +41,7 @@ export const getscientificResearchUserById = async (id) => {
 };
 
 
-export const updatescientificResearchUserById = async (scientificResearchId, scientificResearchData) => {
+export const updateSRUById = async (scientificResearchId, scientificResearchData) => {
     try {
         const response = await api.put(`/scientificResearch-user/${scientificResearchId}`, scientificResearchData);
         return response.data;
@@ -63,7 +61,7 @@ export const gethighestGroup = async () => {
     }
 };
 
-export const getSRUByUserIdAndSRGroupId = async (userId) => {
+export const getSRUByUserIdAndSRGId = async (userId) => {
     try {
         const queryParams = new URLSearchParams(userId).toString();
         const url = `/scientificResearch-user/getByUserIdAndSRGroupId?${queryParams}`;
@@ -75,7 +73,7 @@ export const getSRUByUserIdAndSRGroupId = async (userId) => {
     }
 };
 
-export const getByscientificResearchId = async (scientificResearchId) => {
+export const getBySRId = async (scientificResearchId) => {
     try {
         const queryParams = new URLSearchParams(scientificResearchId).toString();
         const url = `/scientificResearch-user/getByScientificResearchId?${queryParams}`;
@@ -89,7 +87,7 @@ export const getByscientificResearchId = async (scientificResearchId) => {
 
 
 
-export const deletescientificResearchUserByUserIdAndscientificResearchId = async (conditions) => {
+export const deleteSRUByUserIdAndSRId = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
         const url = `/scientificResearch-user/deleteByUserAndscientificResearch?${queryParams}`;
@@ -102,7 +100,7 @@ export const deletescientificResearchUserByUserIdAndscientificResearchId = async
 };
 
 
-export const getListSRJoinByUserIdAndSRGroupId = async (conditions) => {
+export const getListSRJoinByUserIdAndSRGId = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
         const url = `/followers/getFollowersByUserIdAndSRGroupId?${queryParams}`;

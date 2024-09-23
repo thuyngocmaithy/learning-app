@@ -38,13 +38,12 @@ export const updateNotification = async (id, data) => {
     }
 };
 
-export const deleteNotification = async (id) => {
+export const deleteNotifications = async (ids) => {
     try {
-        const response = await api.delete(`/notifications/${id}`);
+        const response = await api.delete(`/notifications?ids=${ids}`);
         return response;
     } catch (error) {
         console.error('Delete notifications error:', error);
         throw error;
     }
 };
-

@@ -21,17 +21,15 @@ export const createAccount = async (accountData) => {
   }
 };
 
-
-export const deleteAccount = async (id) => {
+export const deleteAccounts = async (ids) => {
   try {
-    const response = await api.delete(`/accounts/${id}`);
-    return response.data;
+    const response = await api.delete(`/accounts?ids=${ids}`);
+    return response;
   } catch (error) {
-    console.error('[accountServive - deleteAccount - error] : ', error);
+    console.error('Delete accounts error:', error);
     throw error;
   }
 };
-
 
 export const getAccountById = async (id) => {
   try {

@@ -9,7 +9,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import TaiKhoanUpdate from '../../../../components/FormUpdate/TaiKhoanUpdate';
-import { deleteAccount, getAllAccount } from '../../../../services/accountService';
+import { deleteAccounts, getAllAccount } from '../../../../services/accountService';
 
 const cx = classNames.bind(styles);
 
@@ -99,9 +99,7 @@ function TaiKhoan() {
 
     const handleDelete = async () => {
         try {
-            for (const id of selectedRowKeys) {
-                await deleteAccount(id);
-            }
+            await deleteAccounts(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
