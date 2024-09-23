@@ -18,15 +18,17 @@ export const getById = async (id) => {
         throw error;
     }
 };
-export const deletePermission = async (id) => {
+
+export const deletePermissions = async (ids) => {
     try {
-        const response = await api.delete(`/permissions/${id}`);
+        const response = await api.delete(`/permissions?ids=${ids}`);
         return response;
     } catch (error) {
-        console.error('Delete permission error:', error);
+        console.error('Delete permissions error:', error);
         throw error;
     }
 };
+
 export const updatePermissionById = async (permissionId, permissionData) => {
     try {
         const response = await api.put(`/permissions/${permissionId}`, permissionData);

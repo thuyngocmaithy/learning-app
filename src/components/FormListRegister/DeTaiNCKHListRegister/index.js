@@ -5,7 +5,7 @@ import ListRegister from '../../Core/ListRegister';
 import { Avatar, List, message, Skeleton, Tabs } from 'antd';
 import Button from '../../Core/Button';
 import { fetchDataImageAndScoreAccount, getImageAccount, getScore, getUserById } from '../../../services/userService';
-import { updatescientificResearchUserById } from '../../../services/scientificResearchUserService';
+import { updateSRUById } from '../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import config from '../../../config';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
@@ -70,7 +70,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                     isApprove: true,
                 }
 
-                const responseApprove = await updatescientificResearchUserById(item.id, appoveData);
+                const responseApprove = await updateSRUById(item.id, appoveData);
                 if (responseApprove) {
                     message.success('Duyệt thành công');
 
@@ -175,7 +175,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                     isApprove: false,
                 }
 
-                const responseApprove = await updatescientificResearchUserById(scientificResearchCancel.id, appoveData);
+                const responseApprove = await updateSRUById(scientificResearchCancel.id, appoveData);
                 if (responseApprove) {
                     message.success('Hủy duyệt thành công');
 

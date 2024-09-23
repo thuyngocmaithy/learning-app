@@ -1,6 +1,6 @@
 import { api } from '../utils/apiConfig';
 
-export const getAllscientificResearch = async () => {
+export const getAllSR = async () => {
     try {
         const response = await api.get('/scientificResearchs');
         return response.data;
@@ -10,7 +10,7 @@ export const getAllscientificResearch = async () => {
     }
 };
 
-export const createscientificResearch = async (scientificResearchData) => {
+export const createSR = async (scientificResearchData) => {
     try {
         const response = await api.post('/scientificResearchs', scientificResearchData);
         return response.data;
@@ -20,19 +20,19 @@ export const createscientificResearch = async (scientificResearchData) => {
     }
 };
 
-
-export const deletescientificResearch = async (id) => {
+export const deleteSRs = async (ids) => {
     try {
-        const response = await api.delete(`/scientificResearchs/${id}`);
-        return response.data;
+        const response = await api.delete(`/scientificResearchs?ids=${ids}`);
+        return response;
     } catch (error) {
-        console.error('[scientificResearchServive - deletescientificResearch - error] : ', error);
+        console.error('Delete scientificResearchs error:', error);
         throw error;
     }
 };
 
 
-export const getscientificResearchById = async (id) => {
+
+export const getSRById = async (id) => {
     try {
         const response = await api.get(`/scientificResearchs/${id}`);
         return response.data;
@@ -43,7 +43,7 @@ export const getscientificResearchById = async (id) => {
 };
 
 
-export const updatescientificResearchById = async (scientificResearchId, scientificResearchData) => {
+export const updateSRById = async (scientificResearchId, scientificResearchData) => {
     try {
         const response = await api.put(`/scientificResearchs/${scientificResearchId}`, scientificResearchData);
         return response.data;
@@ -54,7 +54,7 @@ export const updatescientificResearchById = async (scientificResearchId, scienti
 }
 
 
-export const getByScientificResearchsGroupId = async (scientificResearchGroupId) => {
+export const getBySRGId = async (scientificResearchGroupId) => {
     try {
         const queryParams = new URLSearchParams(scientificResearchGroupId).toString();
         const url = `/scientificResearchs/getByScientificResearchGroupId?${queryParams}`;

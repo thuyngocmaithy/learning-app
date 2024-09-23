@@ -5,8 +5,8 @@ import { Card, List, message, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getAllscientificResearch } from '../../../services/scientificResearchService';
-import { deletescientificResearchUserByUserIdAndscientificResearchId, getByscientificResearchId, getSRUByUserIdAndSRGroupId } from '../../../services/scientificResearchUserService';
+import { getAllSR } from '../../../services/scientificResearchService';
+import { deleteSRUByUserIdAndSRId, getBySRId, getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -48,7 +48,7 @@ function NghienCuuKhoaHoc() {
 
     const fetchscientificResearchs = async () => {
         try {
-            const response = await getAllscientificResearch();
+            const response = await getAllSR();
 
             let scientificResearchs = response.data.map(scientificResearch => ({
                 scientificResearchId: scientificResearch.scientificResearchId,
@@ -63,7 +63,7 @@ function NghienCuuKhoaHoc() {
                 lastModifyUser: scientificResearch.lastModifyUser
             }));
             const promises = scientificResearchs.map(async (scientificResearch) => {
-                const responseCountRegister = await getByscientificResearchId({ scientificResearch: scientificResearch.scientificResearchId });
+                const responseCountRegister = await getBySRId({ scientificResearch: scientificResearch.scientificResearchId });
                 const count = responseCountRegister.data.data.length;
 
                 return { ...scientificResearch, count };
@@ -84,7 +84,7 @@ function NghienCuuKhoaHoc() {
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGroupId({ userId: userId });
+            const response = await getSRUByUserIdAndSRGId({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
@@ -232,7 +232,7 @@ function NghienCuuKhoaHoc() {
         if (scientificResearchCancelRef.current) {
             console.log(scientificResearchCancelRef.current)
             try {
-                const responseCancel = await deletescientificResearchUserByUserIdAndscientificResearchId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
+                const responseCancel = await deleteSRUByUserIdAndSRId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
                 if (responseCancel) {
                     message.success('Hủy đăng ký thành công');
                     // Cập nhật danh sách đề tài đã đăng ký
