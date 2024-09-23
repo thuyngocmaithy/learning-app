@@ -38,9 +38,9 @@ export const updateFeature = async (id, data) => {
     }
 };
 
-export const deleteFeature = async (id) => {
+export const deleteFeatures = async (ids) => {
     try {
-        const response = await api.delete(`/features/${id}`);
+        const response = await api.delete(`/features?ids=${ids}`);
         return response;
     } catch (error) {
         console.error('Delete feature error:', error);

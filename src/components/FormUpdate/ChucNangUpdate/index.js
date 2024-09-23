@@ -35,6 +35,7 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
         };
         let response;
         try {
+            reLoad(false);
             if (isUpdate) {
                 response = await updateFeature(values.featureId, data);
                 setShowModal(false);
@@ -42,11 +43,10 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
                 response = await createFeature(data);
             }
             console.log(response);
-            if (response.status === 200) {
-                reLoad()
+            if (response.status === 201) {
+                reLoad(true);
             }
             message.success('Cập nhật thành công');
-            reLoad()
         } catch (error) {
             console.error(error);
 

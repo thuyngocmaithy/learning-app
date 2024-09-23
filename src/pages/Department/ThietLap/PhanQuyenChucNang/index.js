@@ -4,8 +4,8 @@ import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { deletePermission, getAll as getAllPermission, getById as getByIdPermission } from '../../../../services/permissionService';
-import { deleteFeature, getFeatureByStructure, getById as getByIdFeature, getAll, saveTreeFeature } from '../../../../services/featureService';
+import { deletePermission, getAll as getAllPermission } from '../../../../services/permissionService';
+import { deleteFeature, deleteFeatures, getAll, saveTreeFeature } from '../../../../services/featureService';
 import {
     createPermissionFeature,
     deletePermissionFeature,
@@ -174,12 +174,9 @@ function PhanQuyenChucNang() {
 
     // Hàm xử lý xóa các chức năng đã chọn
     const handleDeleteFeature = async () => {
-        console.log(selectedFeature);
-
         try {
-            for (const id of selectedFeature) {
-                await deleteFeature(id); // Xóa từng item một
-            } // Gọi API để xóa các hàng đã chọn
+            setReLoadStructureFeature(false);
+            await deleteFeatures(selectedFeature); // Gọi API để xóa các hàng đã chọn
             message.success('Xóa thành công');
             setSelectedFeature([]); // Xóa các hàng đã chọn sau khi xóa thành công
             setReLoadStructureFeature(true); // Tải lại dữ liệu
@@ -264,18 +261,13 @@ function PhanQuyenChucNang() {
             } else {
                 try {
                     const response = await getWherePermissionFeature(conditions);
-                    console.log(response);
 
                     if (response.status === "NoContent") {
-                        var permissionRs = await getByIdPermission(permissionId);
-                        var featureRs = await getByIdFeature(featureId);
                         //Không tồn tại
                         const data = {
-                            orderNo: 1,
-                            permission: permissionRs.data.data,
-                            feature: featureRs.data.data,
+                            permissionId: permissionId,
+                            featureId: featureId,
                         };
-                        console.log(data);
                         handleSavePhanQuyen(data);
                     }
                 } catch (error) {
@@ -405,6 +397,7 @@ function PhanQuyenChucNang() {
                     height="550px"
                     pagination={tableParamsFeature.pagination}
                     onChange={handleTableChange}
+                    isHaveRowSelection={false}
                 />
             ),
         },
