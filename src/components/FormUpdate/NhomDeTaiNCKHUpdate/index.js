@@ -7,7 +7,7 @@ import Update from '../../Core/Update';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getUserById } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createscientificResearchGroup, updatescientificResearchGroupById } from '../../../services/scientificResearchGroupService';
+import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const { TextArea } = Input;
@@ -122,7 +122,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             let response;
             if (isUpdate) {
-                response = await updatescientificResearchGroupById(showModal.scientificResearchGroupId, scientificResearchGroupData);
+                response = await updateScientificResearchGroupById(showModal.scientificResearchGroupId, scientificResearchGroupData);
                 handleCloseModal();
             } else {
                 const createUserResponse = await getUserById(userId);
@@ -133,7 +133,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     lastModifyUserId: createUserId
                 }
 
-                response = await createscientificResearchGroup(scientificResearchGroupData);
+                response = await createSRGroup(scientificResearchGroupData);
             }
 
             if (response && response.data) {

@@ -29,11 +29,12 @@ export const updatePermissionFeature = async (id, data) => {
     }
 };
 
-export const deletePermissionFeature = async (id) => {
+export const deletePermissionFeatures = async (ids) => {
     try {
-        return await httpRequest.delete(`/permission-features/${id}`);
+        const response = await httpRequest.delete(`/permission-features?ids=${ids}`);
+        return response;
     } catch (error) {
-        console.error('Delete feature error:', error);
+        console.error('Delete permission-features error:', error);
         throw error;
     }
 };

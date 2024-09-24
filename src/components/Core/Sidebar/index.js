@@ -29,12 +29,7 @@ function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const [openKeys, setOpenKeys] = useState([]);
     let location = useLocation();
-    const [current, setCurrent] = useState(
-        // sử dụng location.pathname.split('/')[1] để lấy đường dẫn đầu tiên
-        // => truy cập đường dẫn con vẫn active được menuitem
-        // ví dụ: /TienDoHocTap/schoolschedule vẫn active được /TienDoHocTap
-        location.pathname === '/' || location.pathname === '' ? '/' : '/' + location.pathname.split('/')[1],
-    );
+    const [current, setCurrent] = useState();
 
     const fetchParentData = async (parentId) => {
         try {
@@ -186,21 +181,43 @@ function Sidebar() {
         return null;
     };
 
+    // Hàm đệ quy để kiểm tra nếu key là một tính năng con
+    const isFeatureParent = (data, key) => {
+        for (const item of data) {
+            if (item.key === key) {
+                return true;
+            }
+            if (item.children) {
+                // Đệ quy kiểm tra trong các children
+                if (isFeatureParent(item.children, key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
     // Khi component mount, xác định menu hiện tại và mở rộng các menu cha
     useEffect(() => {
-        const pathKey = location.pathname; // Giả sử URL khớp với key của menu
+        const pathKey = location.pathname; // Giả sử URL khớp với key của menu        
+
+        // Kiểm tra xem có cần loại bỏ phần cuối của pathKey không
+        const isParent = isFeatureParent(menu, pathKey);
+        const pathActive = isParent ? pathKey : pathKey.substring(0, pathKey.lastIndexOf("/"));
 
         // Cập nhật key của menu hiện tại
-        setCurrent(pathKey);
+        setCurrent(pathActive);
 
         // Tìm menu cha tương ứng với key hiện tại
-        const parentKey = findParentKey(menu, pathKey);
+        const parentKey = findParentKey(menu, pathActive);
 
         // Chức năng cha A cần luôn mở rộng (giả sử key của nó là 'parentA')
         const alwaysOpenKey = '/NghiepVu';
 
         // Mở rộng các menu cha, bao gồm chức năng cha A
         const newOpenKeys = parentKey ? [parentKey, alwaysOpenKey] : [alwaysOpenKey];
+        console.log(newOpenKeys);
+
         setOpenKeys(newOpenKeys);
     }, [location.pathname, menu]);
 
@@ -208,8 +225,6 @@ function Sidebar() {
     const handleClick = (e) => {
         setCurrent(e.key);
     };
-
-
 
     return (
         <Sider className={cx("wrapper")} collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} width={210}>

@@ -7,8 +7,6 @@ export const getAccountIdFromLocalStorage = () => {
 
 export const getUseridFromLocalStorage = () => {
   const userLogin = localStorage.getItem('userLogin');
-  console.log('[userService - getUseridFromLocalStorage - userLogin]', userLogin); // Kiểm tra dữ liệu từ localStorage
-
   if (userLogin) {
     try {
       const user = JSON.parse(userLogin);
@@ -25,8 +23,6 @@ export const getUseridFromLocalStorage = () => {
 
 export const getUserTokenFromLocalStorage = () => {
   const userLogin = localStorage.getItem('userLogin');
-  console.log('[userService - getUserTokenFromLocalStorage - userLogin]', userLogin); // Kiểm tra dữ liệu từ localStorage
-
   if (userLogin) {
     try {
       const user = JSON.parse(userLogin);

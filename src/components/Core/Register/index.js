@@ -6,7 +6,7 @@ import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Register({ title = '', children, showModal, onClose, onRegister }) {
+function Register({ title = '', children, showModal, onClose, onRegister, isRegisting }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ function Register({ title = '', children, showModal, onClose, onRegister }) {
             open={open}
             title={title}
             onCancel={handleCancel}
-            footer={<ButtonCustom key={'register'} primary small onClick={onRegister}>
+            footer={<ButtonCustom key={'register'} primary small onClick={onRegister} disabled={isRegisting}>
                 Đăng ký
             </ButtonCustom>}
         >

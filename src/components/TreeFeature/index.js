@@ -63,6 +63,8 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad }) => {
             const response = await getAll();
             if (response.status === 200) {
                 const tree = buildTreeData(response.data.data);
+                console.log(tree);
+
                 setTreeData(tree);
             }
         } catch (error) {
@@ -73,8 +75,14 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad }) => {
         }
     };
     useEffect(() => {
-        fetchData();
+        if (reLoad) {
+            fetchData();
+        }
     }, [reLoad]);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
 
     const onDrop = (info) => {

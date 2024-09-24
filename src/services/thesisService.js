@@ -20,16 +20,15 @@ export const createThesis = async (thesisData) => {
     }
 };
 
-export const deleteThesis = async (id) => {
+export const deleteThesis = async (ids) => {
     try {
-        const response = await api.delete(`/thesis/${id}`);
-        return response.data;
+        const response = await api.delete(`/thesis?ids=${ids}`);
+        return response;
     } catch (error) {
-        console.error('[thesisServive - deleteThesis - error] : ', error);
+        console.error('Delete thesis error:', error);
         throw error;
     }
 };
-
 
 export const getThesisById = async (id) => {
     try {

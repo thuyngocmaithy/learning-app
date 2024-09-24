@@ -14,7 +14,8 @@ function TableCustomAnt({
     setSelectedRowKeys,
     selectedRowKeys,
     keyIdChange,
-    loading
+    loading,
+    isHaveRowSelection = true
 }) {
     const rowSelection = {
         selectedRowKeys,
@@ -45,7 +46,7 @@ function TableCustomAnt({
         >
             {isOutline ? <h2>Danh sách năm học</h2> : null}
             <Table
-                rowSelection={rowSelection}
+                rowSelection={isHaveRowSelection && rowSelection}
                 columns={columns}
                 dataSource={data.map((item, index) => ({
                     ...item,

@@ -9,7 +9,7 @@ import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { getByscientificResearchId } from '../../../services/scientificResearchUserService';
+import { getBySRId } from '../../../services/scientificResearchUserService';
 import { format } from 'date-fns';
 
 const cx = classNames.bind(styles);
@@ -103,8 +103,8 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const getInfoscientificResearch = async () => {
         try {
             if (scientificResearchFromUrl) {
-                const responsescientificResearchUser = await getByscientificResearchId({ scientificResearch: scientificResearchFromUrl });
-                console.log(responsescientificResearchUser.data.data);
+                const responsescientificResearchUser = await getBySRId({ scientificResearch: scientificResearchFromUrl });
+                console.log(responsescientificResearchUser);
 
                 setScientificResearch(responsescientificResearchUser.data.data)
                 setDataFollower(responsescientificResearchUser.data.data.scientificResearch.follower[0].followerDetails)

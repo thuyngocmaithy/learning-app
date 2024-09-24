@@ -4,11 +4,11 @@ import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { deletePermission, getAll as getAllPermission, getById as getByIdPermission } from '../../../../services/permissionService';
-import { deleteFeature, getFeatureByStructure, getById as getByIdFeature, getAll, saveTreeFeature } from '../../../../services/featureService';
+import { deletePermissions, getAll as getAllPermission } from '../../../../services/permissionService';
+import { deleteFeatures, getAll, saveTreeFeature } from '../../../../services/featureService';
 import {
     createPermissionFeature,
-    deletePermissionFeature,
+    deletePermissionFeatures,
     getAll as getAllPermissionFeature,
     getWhere as getWherePermissionFeature,
 } from '../../../../services/permissionFeatureService';
@@ -174,12 +174,9 @@ function PhanQuyenChucNang() {
 
     // Hàm xử lý xóa các chức năng đã chọn
     const handleDeleteFeature = async () => {
-        console.log(selectedFeature);
-
         try {
-            for (const id of selectedFeature) {
-                await deleteFeature(id); // Xóa từng item một
-            } // Gọi API để xóa các hàng đã chọn
+            setReLoadStructureFeature(false);
+            await deleteFeatures(selectedFeature); // Gọi API để xóa các hàng đã chọn
             message.success('Xóa thành công');
             setSelectedFeature([]); // Xóa các hàng đã chọn sau khi xóa thành công
             setReLoadStructureFeature(true); // Tải lại dữ liệu
@@ -188,9 +185,9 @@ function PhanQuyenChucNang() {
         }
     };
     // Hàm xử lý xóa các permisison_feature tồn tại mà có thay đổi
-    const handleDeletePermissionFeatureExist = async (id) => {
+    const handledeletePermissionsFeatureExist = async (id) => {
         try {
-            return await deletePermissionFeature(id);
+            return await deletePermissionFeatures(id);
         } catch (error) {
             console.log('Lỗi xóa các permisison_feature tồn tại mà có thay đổi: ' + error);
         }
@@ -256,7 +253,7 @@ function PhanQuyenChucNang() {
                 try {
                     const response = await getWherePermissionFeature(conditions);
                     if (response.status === "success") {
-                        handleDeletePermissionFeatureExist(response.data[0].id);
+                        handledeletePermissionsFeatureExist(response.data[0].id);
                     }
                 } catch (error) {
                     message.error('Lưu phân quyền thất bại:' + error);
@@ -264,18 +261,13 @@ function PhanQuyenChucNang() {
             } else {
                 try {
                     const response = await getWherePermissionFeature(conditions);
-                    console.log(response);
 
                     if (response.status === "NoContent") {
-                        var permissionRs = await getByIdPermission(permissionId);
-                        var featureRs = await getByIdFeature(featureId);
                         //Không tồn tại
                         const data = {
-                            orderNo: 1,
-                            permission: permissionRs.data.data,
-                            feature: featureRs.data.data,
+                            permissionId: permissionId,
+                            featureId: featureId,
                         };
-                        console.log(data);
                         handleSavePhanQuyen(data);
                     }
                 } catch (error) {
@@ -339,11 +331,9 @@ function PhanQuyenChucNang() {
     );
 
     // Hàm xử lý xóa các quyền đã chọn
-    const handleDeletePermission = async () => {
+    const handledeletePermissions = async () => {
         try {
-            for (const id of selectedPermission) {
-                await deletePermission(id);
-            }
+            await deletePermissions(selectedPermission);
             message.success('Xóa thành công');
             setSelectedPermission([])
             // Load lại data permission
@@ -360,7 +350,7 @@ function PhanQuyenChucNang() {
                 isUpdate={isUpdatePermission}
                 showModal={showModalPermission}
                 setShowModal={setShowModalPermission}
-                reLoad={getPermission(true)}
+                reLoad={getPermission}
             />
         );
     }, [showModalPermission, isUpdatePermission]);
@@ -405,6 +395,7 @@ function PhanQuyenChucNang() {
                     height="550px"
                     pagination={tableParamsFeature.pagination}
                     onChange={handleTableChange}
+                    isHaveRowSelection={false}
                 />
             ),
         },
@@ -447,7 +438,7 @@ function PhanQuyenChucNang() {
                                     showDeleteConfirm('chức năng', handleDeleteFeature)
                                 }
                                 if (tabActive === 1) {
-                                    showDeleteConfirm('quyền', handleDeletePermission)
+                                    showDeleteConfirm('quyền', handledeletePermissions)
                                 }
                             }
                             } />

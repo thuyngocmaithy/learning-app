@@ -4,8 +4,8 @@ import Register from '../../Core/Register';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHRegister.module.scss';
 import { Form, message, Radio } from 'antd';
-import { createscientificResearchUser, gethighestGroup } from '../../../services/scientificResearchUserService';
-import { getscientificResearchById } from '../../../services/scientificResearchService';
+import { createSRU, gethighestGroup } from '../../../services/scientificResearchUserService';
+import { getSRById } from '../../../services/scientificResearchService';
 import { getUserById } from '../../../services/userService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
@@ -22,6 +22,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
     const { userId } = useContext(AccountLoginContext);
     const [typeRegister, setTypeRegister] = useState(null);
     const { sendNotification } = useSocketNotification();
+    const [isRegisting, setIsRegisting] = useState(false);
 
     const onChange = (e) => {
         console.log('Selected value:', e.target.value);
@@ -37,18 +38,19 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
 
     const handleSendNotification = async () => {
         try {
+            setIsRegisting(true);
             const user = await getUserById(userId)
             const ListNotification = [
                 {
                     content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NghienCuuKhoaHoc_Department,
+                    url: config.routes.NhomDeTaiNCKH_Department,
                     toUser: showModal.createUser,
                     createUser: user.data,
                     type: 'warning',
                 },
                 {
                     content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NghienCuuKhoaHoc_Department,
+                    url: config.routes.NhomDeTaiNCKH_Department,
                     toUser: showModal.instructor,
                     createUser: user.data,
                     type: 'warning',
@@ -60,7 +62,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                 showModal.lastModifyUser.id !== showModal.instructor.id) {
                 ListNotification.push({
                     content: `Sinh viên ${userId} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NghienCuuKhoaHoc_Department,
+                    url: config.routes.NhomDeTaiNCKH_Department,
                     toUser: showModal.lastModifyUser,
                     createUser: user.data,
                     type: 'warning',
@@ -74,6 +76,9 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
         } catch (err) {
             console.error(err)
         }
+        finally {
+            setIsRegisting(false);
+        }
     };
 
     const handleSubmit = async () => {
@@ -85,7 +90,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                 if (response.message === "success") {
                     // Đăng ký với số nhóm = nhóm cao nhất hiện tại + 1 
                     const group = response.data + 1;
-                    const scientificResearch = await getscientificResearchById(showModal.scientificResearchId)
+                    const scientificResearch = await getSRById(showModal.scientificResearchId)
                     const user = await getUserById(userId)
 
                     const registerData =
@@ -96,7 +101,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                         isLeader: 1, // Đăng ký cá nhân => Người đăng ký là leader
                     }
 
-                    const responseAdd = await createscientificResearchUser(registerData);
+                    const responseAdd = await createSRU(registerData);
                     if (responseAdd) {
                         message.success(`Đăng ký thành công`);
                         handleSendNotification();
@@ -119,6 +124,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onRegister={handleSubmit}
+            isRegisting={isRegisting}
         >
             <Form
                 form={form}

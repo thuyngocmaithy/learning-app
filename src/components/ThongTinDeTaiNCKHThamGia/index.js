@@ -3,12 +3,11 @@ import styles from './ThongTinDeTaiNCKHThamGia.module.scss';
 import { Button, Descriptions, Dropdown, message, Select, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { getStatusByType } from '../../services/statusService';
-import { updatescientificResearchById } from '../../services/scientificResearchService';
+import { updateSRById } from '../../services/scientificResearchService';
 
 const cx = classNames.bind(styles);
 
 function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
-
     const statusType = 'Tiến độ đề tài NCKH';
     const [statusSelected, setStatusSelected] = useState(
         {
@@ -61,7 +60,6 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
                         key: status.statusId,
                         label: status.statusName,
                     }));
-                    console.log(options);
 
                     setStatusOptions(options);
                     // Nếu có giá trị đã chọn, set lại giá trị đó
@@ -90,7 +88,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
                 let scientificResearchData = {
                     status: key,
                 };
-                const response = await updatescientificResearchById(scientificResearch.scientificResearch.scientificResearchId, scientificResearchData);
+                const response = await updateSRById(scientificResearch.scientificResearch.scientificResearchId, scientificResearchData);
                 console.log(scientificResearchData);
 
                 if (response && response.data) {
