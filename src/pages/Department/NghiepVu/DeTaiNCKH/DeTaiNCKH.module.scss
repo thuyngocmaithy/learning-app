@@ -1,3 +1,7 @@
+.wrapper {
+    margin: 0px 15px 0 15px;
+}
+
 .conatainer-header {
     display: flex;
     justify-content: space-between;
@@ -25,16 +29,7 @@
 
 }
 
-.action-item {
-    display: grid;
-
-    .btnDetail {
-        margin-bottom: 5px;
-
-    }
-}
-
-
+// list scientificResearch
 .stt {
     color: var(--primary);
 }
@@ -63,4 +58,13 @@
 
 .btn-cancel {
     color: red;
+}
+
+.action-item {
+    display: grid;
+
+    .btnDetail {
+        margin-bottom: 5px;
+
+    }
 }

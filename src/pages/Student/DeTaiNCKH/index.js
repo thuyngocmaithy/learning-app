@@ -5,7 +5,7 @@ import { Breadcrumb, Card, List, message, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getAllSR, getBySRGId, getSRById } from '../../../services/scientificResearchService';
+import { getBySRGId } from '../../../services/scientificResearchService';
 import { deleteSRUByUserIdAndSRId, getBySRId, getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
@@ -31,7 +31,6 @@ function DeTaiNCKH() {
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const currentUrl = window.location.pathname + window.location.search;
     const [tabActive, setTabActive] = useState(getInitialTabIndex());
 
     // Lấy tabIndex từ URL nếu có
@@ -101,7 +100,7 @@ function DeTaiNCKH() {
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGId({ userId: userId });
+            const response = await getSRUByUserIdAndSRGId({ userId: userId, srgroupId: SRGIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
@@ -188,7 +187,8 @@ function DeTaiNCKH() {
                                                 setShowModalDetail(item.scientificResearch);
                                             }
                                         }}
-                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.id}` : null}>
+
+                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}` : null}>
                                         Chi tiết
                                     </Button>
                                 }
@@ -207,7 +207,6 @@ function DeTaiNCKH() {
 
     const handleCancelNotification = async () => {
         const scientificResearchCancel = scientificResearchCancelRef.current;
-        console.log(scientificResearchCancel);
 
         try {
             const user = await getUserById(userId)

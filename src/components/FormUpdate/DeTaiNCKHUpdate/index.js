@@ -7,6 +7,7 @@ import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createSR, updateSRById } from '../../../services/scientificResearchService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { getAllFaculty } from '../../../services/facultyService';
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
@@ -17,7 +18,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     showModal,
     setShowModal,
     reLoad,
-    groupTopic
+    SRGId
 }) {
     const [form] = useForm(); // Sử dụng hook useForm    
     const [instructorOptions, setInstructorOptions] = useState([]);
@@ -26,17 +27,43 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedMemberCount, setSelectedMemberCount] = useState(null);
     const [selectedLevel, setSelectedLevel] = useState(null);
+    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [selectedFaculty, setSelectedFaculty] = useState(null);
     const { userId } = useContext(AccountLoginContext);
 
     const statusType = 'Tiến độ đề tài NCKH';
+
+    // Fetch data khi component được mount
+    //lấy danh sách các khoa ra ngoài thẻ select
+    useEffect(() => {
+        const fetchFaculties = async () => {
+            const response = await getAllFaculty();
+            if (response && response.data) {
+                const options = response.data.map((faculty) => ({
+                    value: faculty.facultyId,
+                    label: faculty.facultyName,
+                }));
+                setFacultyOptions(options);
+
+                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
+                if (selectedFaculty) {
+                    const selectedOption = options.find((option) => option.value === selectedFaculty);
+                    if (selectedOption) {
+                        setSelectedFaculty(selectedOption.value);
+                    }
+                }
+            }
+        };
+
+        fetchFaculties();
+    }, [selectedFaculty]);
 
 
     //lấy danh sách giảng viên theo khoa
     useEffect(() => {
         const fetchInstructors = async () => {
-
-            if (groupTopic) {
-                const response = await getUsersByFaculty(groupTopic.faculty.facultyId);
+            if (showModal) {
+                const response = await getUsersByFaculty(showModal.faculty.facultyId);
                 if (response && response.data) {
                     const options = response.data.map((user) => ({
                         value: user.userId,
@@ -53,10 +80,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     }
                 }
             }
+
         };
 
         fetchInstructors();
-    }, [groupTopic, selectedInstructor]);
+    }, [selectedInstructor]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -97,10 +125,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 scientificResearchName: showModal.scientificResearchName,
                 description: showModal.description,
                 instructor: showModal.instructor.fullname,
+                faculty: showModal.faculty.facultyId,
                 status: showModal.status.statusId,
                 numberOfMember: showModal.numberOfMember,
                 level: showModal.level,
             });
+            setSelectedFaculty(showModal.faculty.facultyId);
             setSelectedInstructor(showModal.instructor.userId);
             setSelectedStatus(showModal.status.statusId);
             setSelectedMemberCount(showModal.numberOfMember);
@@ -132,6 +162,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
 
     const handleSubmit = async () => {
+
         try {
             const values = await form.validateFields();
             let scientificResearchData = {
@@ -141,8 +172,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 statusId: selectedStatus,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
-                scientificResearchGroup: groupTopic.scientificResearchGroupId,
-                facultyId: groupTopic.faculty.facultyId
+                scientificResearchGroup: SRGId,
+                facultyId: selectedFaculty,
             };
 
             let response;
@@ -167,8 +198,13 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             }
 
         } catch (error) {
-            console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
+            console.error(`[   ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
         }
+    };
+
+    const handleFacultySelect = (value) => {
+        setSelectedFaculty(value);
+        console.log(` [ DeTaiNCKHUpdate - selected faculty ] : ${value}`);
     };
 
     return (
@@ -187,6 +223,23 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     rules={[{ required: true, message: 'Vui lòng nhập tên đề tài!' }]}
                 >
                     <Input />
+                </FormItem>
+                <FormItem
+                    name="faculty"
+                    label="Khoa"
+                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn khoa"
+                        optionFilterProp="children"
+                        onChange={handleFacultySelect}
+                        value={selectedFaculty}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={facultyOptions}
+                    />
                 </FormItem>
                 <FormItem
                     name="instructor"

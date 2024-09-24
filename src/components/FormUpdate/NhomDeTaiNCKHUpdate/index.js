@@ -21,39 +21,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 }) {
 
     const [form] = useForm(); // Sử dụng hook useForm
-    const [facultyOptions, setFacultyOptions] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
+
     const [statusOptions, setStatusOptions] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const { userId } = useContext(AccountLoginContext);
 
     const statusType = 'Tiến độ nhóm đề tài NCKH';
-
-    // Fetch data khi component được mount
-    //lấy danh sách các khoa ra ngoài thẻ select
-    useEffect(() => {
-        const fetchFaculties = async () => {
-            const response = await getAllFaculty();
-            if (response && response.data) {
-                const options = response.data.map((faculty) => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyName,
-                }));
-                setFacultyOptions(options);
-
-                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
-                if (selectedFaculty) {
-                    const selectedOption = options.find((option) => option.value === selectedFaculty);
-                    if (selectedOption) {
-                        setSelectedFaculty(selectedOption.value);
-                    }
-                }
-            }
-        };
-
-        fetchFaculties();
-    }, [selectedFaculty]);
-
 
     // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài nghiên cứu"
     useEffect(() => {
@@ -89,7 +62,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 startYear: showModal.startYear,
                 finishYear: showModal.finishYear,
             });
-            setSelectedFaculty(showModal.faculty.facultyId);
             setSelectedStatus(showModal.status.statusId);
         } else {
             form.resetFields();
@@ -103,10 +75,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-        console.log(` [ DeTaiNCKHUpdate - selected faculty ] : ${value}`);
-    };
+
 
 
     const handleSubmit = async () => {
@@ -114,7 +83,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             const values = await form.validateFields();
             let scientificResearchGroupData = {
                 scientificResearchGroupName: values.scientificResearchGroupName,
-                facultyId: selectedFaculty,
                 statusId: selectedStatus,
                 startYear: values.startYear,
                 finishYear: values.finishYear
@@ -164,23 +132,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     <Input />
                 </FormItem>
 
-                <FormItem
-                    name="faculty"
-                    label="Khoa"
-                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn khoa"
-                        optionFilterProp="children"
-                        onChange={handleFacultySelect}
-                        value={selectedFaculty}
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={facultyOptions}
-                    />
-                </FormItem>
+
                 <FormItem
                     name="status"
                     label="Trạng thái"

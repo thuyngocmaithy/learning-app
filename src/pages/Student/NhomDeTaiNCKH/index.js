@@ -83,7 +83,7 @@ function NhomDeTaiNCKH() {
                         <List.Item
                             actions={[
                                 <Button primary verysmall to={`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`}>
-                                    Chi tiết
+                                    Danh sách
                                 </Button>,
                             ]}
                         >
@@ -127,7 +127,7 @@ function NhomDeTaiNCKH() {
                                                 setShowModalDetail(item.scientificResearch);
                                             }
                                         }}
-                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.id}` : null}>
+                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}` : null}>
                                         Chi tiết
                                     </Button>
                                 }

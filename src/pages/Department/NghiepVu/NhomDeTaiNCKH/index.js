@@ -10,7 +10,6 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
 import { deleteScientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
-import NCKHListTopic from '../../../../components/FormListTopic/NCKHListTopic';
 import config from '../../../../config';
 import { getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
@@ -84,9 +83,7 @@ function NhomDeTaiNCKH() {
             align: 'center',
             render: (_, record) => (
                 <div className={cx('action-item')}>
-                    <ButtonCustom className={cx('btnDetail')} leftIcon={<ListCourseIcon />} outline verysmall onClick={() => {
-                        setShowModalListTopic(record);
-                    }}>
+                    <ButtonCustom className={cx('btnDetail')} outline verysmall to={`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`}>
                         Danh sách
                     </ButtonCustom>
                     <ButtonCustom
@@ -170,14 +167,6 @@ function NhomDeTaiNCKH() {
         );
     }, [showModalUpdate, isUpdate]);
 
-    const NCKHListTopicMemoized = useMemo(() => {
-        return (
-            <NCKHListTopic
-                showModalListTopic={showModalListTopic}
-                setShowModalListTopic={setShowModalListTopic}
-            />
-        );
-    }, [showModalListTopic]);
     const ITEM_TABS = [
         {
             id: 1,
@@ -267,7 +256,6 @@ function NhomDeTaiNCKH() {
 
 
             {NhomDeTaiNCKHUpdateMemoized}
-            {NCKHListTopicMemoized}
         </div>
     );
 }

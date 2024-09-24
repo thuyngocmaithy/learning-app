@@ -19,6 +19,7 @@ import Dashboard_Department from '../pages/Department/NghiepVu/Dashboard';
 import KhungCTDT from '../pages/Department/ThietLap/KhungCTDT';
 import KhoaLuan_Department from '../pages/Department/NghiepVu/KhoaLuan';
 import NhomDeTaiNCKH_Department from '../pages/Department/NghiepVu/NhomDeTaiNCKH';
+import DeTaiNCKH_Department from '../pages/Department/NghiepVu/DeTaiNCKH';
 
 // THIẾT LẬP
 import PhanQuyenChucNang_Department from '../pages/Department/ThietLap/PhanQuyenChucNang';
@@ -41,7 +42,7 @@ const privateRoutes = [
     { path: config.routes.TienDoHocPhan, component: TienDoHocPhan },
     { path: config.routes.NhomDeTaiNCKH, component: NhomDeTaiNCKH },
     { path: config.routes.DeTaiNCKH, component: DeTaiNCKH, urlDepend: "NhomDeTaiNCKH" },
-    { path: config.routes.DeTaiNCKHThamGia, component: DeTaiNCKHThamGia, urlDepend: "NghienCuuKhoaHoc" },
+    { path: config.routes.DeTaiNCKHThamGia, component: DeTaiNCKHThamGia, urlDepend: "NhomDeTaiNCKH" },
     { path: config.routes.KhoaLuanThamGia, component: DeTaiNCKHThamGia, thesis: true, urlDepend: "KhoaLuan" },
     { path: config.routes.KhoaLuan, component: KhoaLuan },
     { path: config.routes.ThucTap, component: ThucTap },
@@ -52,6 +53,7 @@ const privateRoutes = [
     { path: config.routes.Dashboard_Department, component: Dashboard_Department, layout: DepartmentLayout },
     { path: config.routes.MoHocPhan, component: MoHocPhan, layout: DepartmentLayout },
     { path: config.routes.DeTaiNCKHThamGia_Department, component: DeTaiNCKHThamGia, layout: DepartmentLayout, urlDepend: "NhomDeTaiNCKH_Department" },
+    { path: config.routes.DeTaiNCKH_Department, component: DeTaiNCKH_Department, layout: DepartmentLayout, urlDepend: "NhomDeTaiNCKH_Department" },
     { path: config.routes.KhoaLuanThamGia_Department, component: DeTaiNCKHThamGia, thesis: true, layout: DepartmentLayout },
     { path: config.routes.KhoaLuan_Department, component: KhoaLuan_Department, layout: DepartmentLayout },
     { path: config.routes.NhomDeTaiNCKH_Department, component: NhomDeTaiNCKH_Department, layout: DepartmentLayout },
