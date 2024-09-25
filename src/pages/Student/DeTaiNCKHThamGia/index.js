@@ -91,6 +91,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const scientificResearchFromUrl = queryParams.get('scientificResearch');
+    const isAll = queryParams.get('all');
     const [isLoading, setIsLoading] = useState(true);
     const [scientificResearch, setScientificResearch] = useState(null);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
@@ -106,7 +107,6 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         try {
             if (scientificResearchFromUrl) {
                 const responsescientificResearchUser = await getSRById(scientificResearchFromUrl);
-                console.log(responsescientificResearchUser);
 
                 setScientificResearch(responsescientificResearchUser.data)
                 setDataFollower(responsescientificResearchUser.data.follower[0].followerDetails)
@@ -168,17 +168,36 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     ) : (
         < div className={cx('wrapper-DeTaiNCKHThamGia')} >
             <Breadcrumb
-                items={[
-                    {
-                        title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
-                    },
-                    {
-                        title: <Link to={config.routes.DeTaiNCKH}>Danh sách đề tài nghiên cứu khoa học</Link>,
-                    },
-                    {
-                        title: "Thông tin đề tài nghiên cứu khoa học",
-                    },
-                ]}
+                items={isAll !== "true" ?
+                    [
+
+                        {
+                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                        },
+                        {
+                            title: <Link to={
+                                location.pathname.split('/')[1] === "Department"
+                                    ? `${config.routes.DeTaiNCKH_Department}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}`
+                                    : `${config.routes.DeTaiNCKH}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}&tabIndex=2`
+                            }>
+                                Danh sách đề tài nghiên cứu khoa học
+                            </Link>,
+                        },
+                        {
+                            title: "Thông tin đề tài nghiên cứu khoa học",
+                        },
+
+                    ]
+                    :
+                    [
+                        {
+                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                        },
+                        {
+                            title: "Thông tin đề tài nghiên cứu khoa học",
+                        },
+                    ]
+                }
             />
             <div className={cx('container-header')}>
                 <span onClick={handleGoBack} className={cx('container-icon-back')}>
@@ -204,3 +223,4 @@ function DeTaiNCKHThamGia({ thesis = false }) {
 }
 
 export default DeTaiNCKHThamGia;
+

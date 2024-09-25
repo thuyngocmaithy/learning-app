@@ -11,8 +11,8 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
 
-import { deleteSRs, getBySRGId } from '../../../../services/scientificResearchService';
-import { getBySRId, getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
+import { deleteSRs, getBySRGId, getWhere } from '../../../../services/scientificResearchService';
+import { getBySRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
@@ -66,49 +66,6 @@ function DeTaiNCKH() {
 
     // Xử lý lấy SRGId    
     const SRGIdFromUrl = queryParams.get('SRGId');
-
-
-    // const fetchscientificResearchs = async () => {
-    //     try {
-    //         const response = await getBySRGId(SRGIdFromUrl);
-
-    //         let scientificResearchs = response.data.data.map(scientificResearch => ({
-    //             scientificResearchId: scientificResearch.scientificResearchId,
-    //             scientificResearchName: scientificResearch.scientificResearchName,
-    //             executionTime: scientificResearch.executionTime,
-    //             instructorName: scientificResearch.instructor.fullname,
-    //             level: scientificResearch.level,
-    //             budget: scientificResearch.budget,
-    //             description: scientificResearch.description,
-    //             createUser: scientificResearch.createUser,
-    //             instructor: scientificResearch.instructor,
-    //             lastModifyUser: scientificResearch.lastModifyUser
-    //         }));
-    //         const promises = scientificResearchs.map(async (scientificResearch) => {
-    //             const responseCountRegister = await getBySRId({ scientificResearch: scientificResearch.scientificResearchId });
-    //             const count = responseCountRegister.data.data.length;
-
-    //             return { ...scientificResearch, count };
-    //         });
-
-    //         // Đợi tất cả các Promise hoàn thành
-    //         const updatedList = await Promise.all(promises);
-
-    //         // Cập nhật list một lần
-    //         setList(updatedList);
-
-    //         setIsLoading(false);
-    //     } catch (error) {
-    //         console.error('Error fetching scientificResearchs:', error);
-    //         setIsLoading(false);
-    //     }
-    // };
-
-
-    // useEffect(() => {
-    //     fetchscientificResearchs();
-    // }, []);
-
 
     const columns = (showModalUpdate) => [
         {
@@ -192,9 +149,9 @@ function DeTaiNCKH() {
     ];
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGId({ userId: userId, srgroupId: SRGIdFromUrl });
+            const response = await getWhere({ instructor: userId, scientificResearchGroup: SRGIdFromUrl });
 
-            if (response.status === 200) {
+            if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
 
@@ -211,7 +168,6 @@ function DeTaiNCKH() {
             const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
                 // lấy số sinh viên đăng ký
                 const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
-
 
                 return {
                     ...data,
@@ -259,22 +215,22 @@ function DeTaiNCKH() {
             children: (
                 <div>
                     {listScientificResearchJoined.map((item, index) => {
-                        let color = item.scientificResearch.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
+                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
                                 className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearch.scientificResearchName}
+                                title={item.scientificResearchName}
                                 extra={
-                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearch.scientificResearchId}`}>
+                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`}>
                                         Chi tiết
                                     </ButtonCustom>
                                 }
                             >
                                 Trạng thái:
                                 <Tag color={color} className={cx('tag-status')}>
-                                    {item.scientificResearch.status.statusName}
+                                    {item.status.statusName}
                                 </Tag>
                             </Card>
                         );
@@ -318,7 +274,7 @@ function DeTaiNCKH() {
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
                 reLoad={fetchData}
-            // groupTopic={showModalListTopic}
+                SRGId={SRGIdFromUrl}
             />
         );
     }, [showModalUpdate, isUpdate]);

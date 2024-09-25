@@ -37,8 +37,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
 
     const statusType = 'Tiến độ khóa luận';
 
-    // console.log('userid : ', userid)
-
     // Fetch data khi component được mount
     //lấy danh sách các khoa ra ngoài thẻ select
     useEffect(() => {
@@ -147,12 +145,10 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
 
     const handleFacultySelect = (value) => {
         setSelectedFaculty(value);
-        console.log(` [ Khoaluanupdate - selected faculty ] : ${value}`);
     };
 
     const handleChangeSupervisor = (value) => {
         setSelectedSupervisor(value);
-        console.log(`[ Khoaluanupdate - selected supervisor ]  ${value}`);
     };
 
 

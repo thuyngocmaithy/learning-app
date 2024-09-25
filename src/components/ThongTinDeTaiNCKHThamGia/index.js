@@ -89,7 +89,6 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
                     status: key,
                 };
                 const response = await updateSRById(scientificResearch.scientificResearchId, scientificResearchData);
-                console.log(scientificResearchData);
 
                 if (response && response.data) {
                     message.success('Thay đổi trạng thái đề tài thành công!');

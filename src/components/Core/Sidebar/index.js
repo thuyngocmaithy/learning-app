@@ -216,7 +216,6 @@ function Sidebar() {
 
         // Mở rộng các menu cha, bao gồm chức năng cha A
         const newOpenKeys = parentKey ? [parentKey, alwaysOpenKey] : [alwaysOpenKey];
-        console.log(newOpenKeys);
 
         setOpenKeys(newOpenKeys);
     }, [location.pathname, menu]);

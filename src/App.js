@@ -20,8 +20,6 @@ function App() {
 
     const getListFeature = async () => {
         try {
-            console.log(permission);
-
             const response = await getWhere({ permission: permission });
             if (response.status === 'success') {
                 setListFeature((prevListFeature) => [
@@ -33,7 +31,7 @@ function App() {
 
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
         finally {
             setIsLoading(false)

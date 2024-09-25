@@ -32,6 +32,7 @@ const routes = {
     KhungCTDT: '/Department/ThietLap/KhungCTDT',
     PhanQuyenChucNang: '/Department/ThietLap/PhanQuyenChucNang',
     TaiKhoan: '/Department/ThietLap/TaiKhoan',
+    NguoiDung: '/Department/ThietLap/NguoiDung',
 };
 
 export default routes;

@@ -42,7 +42,6 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
             } else {
                 response = await createFeature(data);
             }
-            console.log(response);
             if (response.status === 201 || response.status === 200) {
                 reLoad(true);
             }
@@ -69,7 +68,6 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
     useEffect(() => {
         if (showModal) {
             setIsLoading(true)
-            console.log(showModal.icon);
 
             form.setFieldsValue({
                 featureId: showModal.featureId,

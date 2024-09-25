@@ -63,7 +63,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     useEffect(() => {
         const fetchInstructors = async () => {
             if (showModal) {
-                const response = await getUsersByFaculty(showModal.faculty.facultyId);
+                const response = await getUsersByFaculty(showModal.faculty ? showModal.faculty.facultyId : selectedFaculty);
                 if (response && response.data) {
                     const options = response.data.map((user) => ({
                         value: user.userId,
@@ -82,9 +82,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             }
 
         };
-
         fetchInstructors();
-    }, [selectedInstructor]);
+    }, [selectedInstructor, selectedFaculty]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -149,7 +148,10 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     const handleChangeInstructor = (value) => {
         setSelectedInstructor(value);
-        console.log(`[ DeTaiNCKHUpdate - selected instructor ]  ${value}`);
+    };
+
+    const handleFacultySelect = (value) => {
+        setSelectedFaculty(value);
     };
 
 
@@ -200,11 +202,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         } catch (error) {
             console.error(`[   ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
         }
-    };
-
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-        console.log(` [ DeTaiNCKHUpdate - selected faculty ] : ${value}`);
     };
 
     return (

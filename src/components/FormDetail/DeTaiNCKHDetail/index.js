@@ -45,8 +45,6 @@ const DeTaiNCKHDetail = memo(function DeTaiNCKHDetail({
                     <FormItem label={'Tên đề tài'}>
                         <p>{showModal.scientificResearchName}</p>
                     </FormItem>
-                    {console.log(showModal)
-                    }
                     <FormItem label={'Chủ nhiệm đề tài'}>
                         <p>{showModal.instructor ? showModal.instructor.fullname : ''}</p>
                     </FormItem>
