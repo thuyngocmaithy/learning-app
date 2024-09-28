@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
 import { InputNumber } from 'antd';
@@ -10,26 +10,22 @@ const cx = classNames.bind(styles);
 
 function DiemTotNghiep() {
     // State management
-    const [currentGPA, setCurrentGPA] = useState(2.69);
-    const [currentCredits, setCurrentCredits] = useState(104);
-    const [totalCredits, setTotalCredits] = useState(132);
-    const [creditsA, setCreditsA] = useState(19);
-    const [creditsB, setCreditsB] = useState(20);
-    const [creditsC, setCreditsC] = useState(10);
-    const [creditsD, setCreditsD] = useState(10);
-    const [improvedCredits, setImprovedCredits] = useState(4);
+    const [currentGPA, setCurrentGPA] = useState(0);
+    const [totalCredits, setTotalCredits] = useState(0);
+    const [creditsA, setCreditsA] = useState(0);
+    const [creditsB, setCreditsB] = useState(0);
+    const [creditsC, setCreditsC] = useState(0);
+    const [creditsD, setCreditsD] = useState(0);
+    const [improvedCredits, setImprovedCredits] = useState(0);
     const [calculatedGPA, setCalculatedGPA] = useState(currentGPA);
     const [remainingCredits, setRemainingCredits] = useState(0);
     const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
     const [graduationType, setGraduationType] = useState('');
+    const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
+    const [currentCredits, setCurrentCredits] = useState(0);
 
     // Handle input changes
-    useEffect(() => {
-        calculateResults();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentGPA, currentCredits, totalCredits, creditsA, creditsB, creditsC, creditsD, improvedCredits]);
-
-    const calculateResults = () => {
+    const calculateResults = useCallback(() => {
         const gradePointsA = creditsA * 4.0;
         const gradePointsB = creditsB * 3.0;
         const gradePointsC = creditsC * 2.0;
@@ -38,26 +34,44 @@ function DiemTotNghiep() {
         const totalGradePoints = gradePointsA + gradePointsB + gradePointsC + gradePointsD;
         const totalscientificResearchedCredits = creditsA + creditsB + creditsC + creditsD + improvedCredits;
 
-        const newGPA = parseFloat((totalGradePoints / totalscientificResearchedCredits).toFixed(2));
+        const newGPA = parseFloat((
+            (currentGPA * currentCredits + totalGradePoints) /
+            (currentCredits + totalscientificResearchedCredits)
+        ).toFixed(2));
+
         const remainingCredits = totalCredits - (currentCredits - improvedCredits);
 
         setCalculatedGPA(newGPA);
         setRemainingCredits(remainingCredits);
         setTotalscientificResearchedCredits(totalscientificResearchedCredits);
 
-        // Determine graduation type based on the new GPA
-        if (newGPA >= 3.6) {
-            setGraduationType('Xuất sắc');
-        } else if (newGPA >= 3.2) {
-            setGraduationType('Giỏi');
-        } else if (newGPA >= 2.5) {
-            setGraduationType('Khá');
-        } else if (newGPA >= 2.0) {
-            setGraduationType('Trung bình');
-        } else {
-            setGraduationType('Yếu');
-        }
+        if (newGPA >= 3.6) setGraduationType('Xuất sắc');
+        else if (newGPA >= 3.2) setGraduationType('Giỏi');
+        else if (newGPA >= 2.5) setGraduationType('Khá');
+        else if (newGPA >= 2.0) setGraduationType('Trung bình');
+        else setGraduationType('Yếu');
+    }, [currentGPA, currentCredits, totalCredits, creditsA, creditsB, creditsC, creditsD, improvedCredits]);
+
+    useEffect(() => {
+        calculateResults();
+    }, [calculateResults]);
+
+    const handleGradesChange = (totals) => {
+        setGradeTotals(totals);
+        setCreditsA(totals.A || 0);
+        setCreditsB(totals.B || 0);
+        setCreditsC(totals.C || 0);
+        setCreditsD(totals.D || 0);
     };
+
+
+    const handleCurrentCreditsChange = useCallback((credits) => {
+        setCurrentCredits(credits);
+    }, []);
+
+    const handleInputChange = useCallback((setter) => (value) => {
+        setter(value);
+    }, []);
 
     return (
         <div className={cx('wrapper-graduation')}>
@@ -70,7 +84,9 @@ function DiemTotNghiep() {
             <div className={cx('title-sapxep-diem')}>
                 <h3>Sắp xếp điểm dự kiến</h3>
             </div>
-            <TableScore />
+            <TableScore onGradesChange={handleGradesChange}
+                onCurrentCreditsChange={handleCurrentCreditsChange}
+            />
             <div className={cx('footer-table')}>
                 <ButtonCustom primary small className={cx('btnSave')}>
                     Lưu
@@ -87,10 +103,9 @@ function DiemTotNghiep() {
                             id="outlined-number"
                             min={0.0}
                             max={4.0}
-                            step={0.1}
+                            step={0.01}
                             value={currentGPA}
-                            onChange={(value) => setCurrentGPA(value)}
-                            disabled
+                            onChange={handleInputChange(setCurrentGPA)}
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -111,8 +126,7 @@ function DiemTotNghiep() {
                             min={0}
                             max={158}
                             value={totalCredits}
-                            onChange={(value) => setTotalCredits(value)}
-                            disabled
+                            onChange={handleInputChange(setTotalCredits)}
                         />
                     </div>
                     <div className={cx('content-left-item')}>

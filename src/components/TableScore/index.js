@@ -27,38 +27,81 @@ const OptionScore = [
     { value: 'Cải thiện B', label: 'Cải thiện B' },
     { value: 'Cải thiện C', label: 'Cải thiện C' },
     { value: 'Cải thiện D', label: 'Cải thiện D' },
+    { value: 'N/A', lable: 'N/A' },
 ];
 
-const TableScore = ({ height = 490 }) => {
+const TableScore = ({ height = 490, onGradesChange, onCurrentCreditsChange }) => {
     const [frames, setFrames] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedGrades, setSelectedGrades] = useState({});
+
+    const calculateTotalCredits = useCallback((scores) => {
+        return scores.reduce((total, score) => {
+            // Kiểm tra xem score.subject, score.subject.frame có tồn tại và không phải null
+            if (score.subject && score.subject.creditHour && score.subject.frame && score.subject.frame.frameId) {
+                // Kiểm tra frameId và subjectName để tính tổng tín chỉ
+                const isExcludedSubject =
+                    score.subject.subjectName.includes("Giáo dục quốc phòng") ||
+                    score.subject.subjectName.includes("Giáo dục thể chất");
+
+                if (score.subject.frame.frameId !== 'GDDC_TC' && !isExcludedSubject) {
+                    return total + score.subject.creditHour;
+                }
+            }
+            return total;
+        }, 0);
+    }, []);
+
+
+
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const [framesResponse, scoresResponse] = await Promise.all([
+                listSubjectToFrame(),
+                getScoreByStudentId(userid)
+            ]);
+            console.log('Scores response:', scoresResponse);
+            if (Array.isArray(framesResponse)) {
+                setFrames(framesResponse[0]);
+            }
+            if (Array.isArray(scoresResponse)) {
+                setScores(scoresResponse);
+                const totalCredits = calculateTotalCredits(scoresResponse);
+                onCurrentCreditsChange(totalCredits);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        setIsLoading(false);
+    }, [userid, onCurrentCreditsChange, calculateTotalCredits]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const framesResponse = await listSubjectToFrame();
-                const scoresResponse = await getScoreByStudentId(userid);
-
-                if (framesResponse && Array.isArray(framesResponse)) {
-                    setFrames(framesResponse[0]);
-                }
-                if (scoresResponse && Array.isArray(scoresResponse)) {
-                    setScores(scoresResponse);
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-            setIsLoading(false);
-        };
-
         fetchData();
-    }, [userid]);
+    }, [fetchData]);
 
-    const handleChange = useCallback((value) => {
-        console.log(value);
-    }, []);
+    const handleChange = useCallback((value, subjectId, creditHour) => {
+        setSelectedGrades(prevGrades => {
+            const newGrades = {
+                ...prevGrades,
+                [subjectId]: { grade: value, creditHour: creditHour }
+            };
+
+            // Calculate totals
+            const totals = Object.values(newGrades).reduce((acc, { grade, creditHour }) => {
+                const gradeType = grade.startsWith('Cải thiện') ? grade.split(' ')[1] : grade;
+                acc[gradeType] = (acc[gradeType] || 0) + creditHour;
+                return acc;
+            }, {});
+
+            // Pass the totals to the parent component
+            onGradesChange(totals);
+
+            return newGrades;
+        });
+    }, [onGradesChange]);
+
 
     const combinedData = useMemo(() => {
         if (!frames || !Array.isArray(frames)) return [];
@@ -135,8 +178,8 @@ const TableScore = ({ height = 490 }) => {
                             row.finalScoreLetter
                         ) : (
                             <Select
-                                onChange={handleChange}
-                                value={row.finalScoreLetter || 'N/A'}
+                                onChange={(value) => handleChange(value, row.subjectId, row.creditHour)}
+                                value={selectedGrades[row.subjectId]?.grade || 'N/A'}
                                 options={OptionScore}
                                 style={{ width: '60%' }}
                             />
@@ -180,4 +223,4 @@ const TableScore = ({ height = 490 }) => {
     );
 };
 
-export default TableScore;
+export default React.memo(TableScore);

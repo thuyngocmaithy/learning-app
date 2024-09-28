@@ -18,11 +18,11 @@ function DanhSachHocPhan() {
     }, []);
 
     const handleSave = async () => {
-        const registrationPromises = Object.entries(selectedSubjects).map(([subjectId, { frameId, semesterIndex }]) => {
+        const registrationPromises = Object.entries(selectedSubjects).map(([subjectId, { semesterIndex }]) => {
             const year = Math.floor(semesterIndex / 3) + 2020; // Assuming 2020 is the base year
             const semester = (semesterIndex % 3) + 1;
             const semesterId = `${year}${semester}`;
-            return registerSubject(getUseridFromLocalStorage(), subjectId, frameId, semesterId);
+            return registerSubject(getUseridFromLocalStorage(), subjectId, semesterId);
         });
 
         try {

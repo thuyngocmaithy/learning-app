@@ -69,13 +69,13 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         return (year - firstYear) * 3 + semester - 1;
     }, [studentInfo]);
 
-    const handleSelectSubject = useCallback((subjectId, frameId, semesterIndex) => {
+    const handleSelectSubject = useCallback((subjectId, semesterIndex) => {
         setSelectedSubjects(prev => {
             const newSelection = { ...prev };
             if (newSelection[subjectId] && newSelection[subjectId].semesterIndex === semesterIndex) {
                 delete newSelection[subjectId];
             } else {
-                newSelection[subjectId] = { frameId, semesterIndex };
+                newSelection[subjectId] = { semesterIndex };
             }
             return newSelection;
         });
