@@ -124,6 +124,8 @@ const data3 = [
         mahp_before: '',
     },
 ];
+
+
 function KhungCTDT() {
     return (
         <div className={cx('wrapper')}>
@@ -185,7 +187,7 @@ function KhungCTDT() {
             <div className={cx('title-namhoc-sapxep')}>
                 <h3>Sắp xếp học kì thực hiện</h3>
             </div>
-            <Table />
+            <Table department={true} />
         </div>
     );
 }
