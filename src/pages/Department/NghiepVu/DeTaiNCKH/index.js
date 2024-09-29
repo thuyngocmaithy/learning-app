@@ -93,8 +93,9 @@ function DeTaiNCKH() {
             key: 'status',
             dataIndex: ['status', 'statusName'],
             align: 'center',
+            width: '200px',
             render: (statusName) => (
-                <Tag color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
+                <Tag className={cx('tag-status')} color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
                     {statusName.toUpperCase()}
                 </Tag>
             ),

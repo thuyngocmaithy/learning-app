@@ -167,12 +167,18 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         </div>
     ) : (
         < div className={cx('wrapper-DeTaiNCKHThamGia')} >
+            {console.log(location.pathname.split('/')[1])}
             <Breadcrumb
                 items={isAll !== "true" ?
                     [
-
                         {
-                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                            title: <Link to={
+                                location.pathname.split('/')[1] === "Department"
+                                    ? config.routes.NhomDeTaiNCKH_Department
+                                    : config.routes.NhomDeTaiNCKH
+                            }>
+                                Nhóm đề tài nghiên cứu khoa học
+                            </Link>,
                         },
                         {
                             title: <Link to={
@@ -191,7 +197,13 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                     :
                     [
                         {
-                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                            title: <Link to={
+                                location.pathname.split('/')[1] === "Department"
+                                    ? config.routes.NhomDeTaiNCKH_Department
+                                    : config.routes.NhomDeTaiNCKH
+                            } >
+                                Nhóm đề tài nghiên cứu khoa học
+                            </Link>,
                         },
                         {
                             title: "Thông tin đề tài nghiên cứu khoa học",
@@ -199,14 +211,14 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                     ]
                 }
             />
-            <div className={cx('container-header')}>
+            < div className={cx('container-header')} >
                 <span onClick={handleGoBack} className={cx('container-icon-back')}>
                     <LeftOutlined className={cx('icon-back')} />
                 </span>
                 <h3 className={cx('title')}>
                     {thesis ? 'Thông tin khóa luận tốt nghiệp' : 'Thông tin đề tài nghiên cứu khoa học'}
                 </h3>
-            </div>
+            </div >
             <Tabs
                 defaultActiveKey="1"
                 centered

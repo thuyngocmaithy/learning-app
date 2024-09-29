@@ -38,7 +38,7 @@ const LoginForm = () => {
                 message.error(response.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
-            message.error('Đăng nhập thất bại: ' + (error.response?.data?.message || error.message));
+            message.error((error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
