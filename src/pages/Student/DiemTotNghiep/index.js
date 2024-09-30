@@ -32,11 +32,11 @@ function DiemTotNghiep() {
         const gradePointsD = creditsD * 1.0;
 
         const totalGradePoints = gradePointsA + gradePointsB + gradePointsC + gradePointsD;
-        const totalscientificResearchedCredits = creditsA + creditsB + creditsC + creditsD + improvedCredits;
+        const totalscientificResearchedCredits = creditsA + creditsB + creditsC + creditsD;
 
         const newGPA = parseFloat((
-            (currentGPA * currentCredits + totalGradePoints) /
-            (currentCredits + totalscientificResearchedCredits)
+            (currentGPA * (currentCredits - improvedCredits) + totalGradePoints) /
+            (currentCredits - improvedCredits + totalscientificResearchedCredits)
         ).toFixed(2));
 
         const remainingCredits = totalCredits - (currentCredits - improvedCredits);
@@ -64,9 +64,12 @@ function DiemTotNghiep() {
         setCreditsD(totals.D || 0);
     };
 
-
     const handleCurrentCreditsChange = useCallback((credits) => {
         setCurrentCredits(credits);
+    }, []);
+
+    const handleImprovedCreditsChange = useCallback((credits) => {
+        setImprovedCredits(credits);
     }, []);
 
     const handleInputChange = useCallback((setter) => (value) => {
@@ -84,8 +87,10 @@ function DiemTotNghiep() {
             <div className={cx('title-sapxep-diem')}>
                 <h3>Sắp xếp điểm dự kiến</h3>
             </div>
-            <TableScore onGradesChange={handleGradesChange}
+            <TableScore
+                onGradesChange={handleGradesChange}
                 onCurrentCreditsChange={handleCurrentCreditsChange}
+                onImprovedCreditsChange={handleImprovedCreditsChange}
             />
             <div className={cx('footer-table')}>
                 <ButtonCustom primary small className={cx('btnSave')}>
@@ -115,7 +120,6 @@ function DiemTotNghiep() {
                             min={0}
                             max={158}
                             value={currentCredits}
-                            onChange={(value) => setCurrentCredits(value)}
                             disabled
                         />
                     </div>
@@ -136,11 +140,9 @@ function DiemTotNghiep() {
                             min={0}
                             max={158}
                             value={creditsA}
-                            onChange={(value) => setCreditsA(value)}
                             disabled
                         />
                     </div>
-
                     <div className={cx('content-left-item')}>
                         <label>Số tín chỉ đạt loại B (dự kiến)</label>
                         <InputNumber
@@ -148,7 +150,6 @@ function DiemTotNghiep() {
                             min={0}
                             max={158}
                             value={creditsB}
-                            onChange={(value) => setCreditsB(value)}
                             disabled
                         />
                     </div>
@@ -159,7 +160,6 @@ function DiemTotNghiep() {
                             min={0}
                             max={150}
                             value={creditsC}
-                            onChange={(value) => setCreditsC(value)}
                             disabled
                         />
                     </div>
@@ -170,7 +170,6 @@ function DiemTotNghiep() {
                             min={0}
                             max={150}
                             value={creditsD}
-                            onChange={(value) => setCreditsD(value)}
                             disabled
                         />
                     </div>
@@ -181,7 +180,6 @@ function DiemTotNghiep() {
                             min={0}
                             max={150}
                             value={improvedCredits}
-                            onChange={(value) => setImprovedCredits(value)}
                             disabled
                         />
                     </div>

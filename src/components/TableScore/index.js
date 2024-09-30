@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
 import { Select, Spin } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableScore.module.scss';
@@ -20,14 +20,15 @@ const OptionScore = [
     { value: 'Cải thiện C', label: 'Cải thiện C' },
     { value: 'Cải thiện D', label: 'Cải thiện D' },
     { value: 'N/A', label: 'N/A' },
-
 ];
 
-const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) => {
+const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onImprovedCreditsChange }) => {
     const [frames, setFrames] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedGrades, setSelectedGrades] = useState({});
+    const [improvementSubjects, setImprovementSubjects] = useState({});
+    const [originalGrades, setOriginalGrades] = useState({});
     const didMountRef = useRef(false);
 
     const fetchData = useCallback(async () => {
@@ -48,6 +49,14 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
                 setScores(scoresResponse);
                 const totalCredits = calculateTotalCredits(scoresResponse);
                 onCurrentCreditsChange(totalCredits);
+
+                const origGrades = {};
+                scoresResponse.forEach(score => {
+                    if (score.subject && score.subject.subjectId) {
+                        origGrades[score.subject.subjectId] = score.finalScoreLetter;
+                    }
+                });
+                setOriginalGrades(origGrades);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -64,7 +73,8 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
             if (score.subject && score.subject.creditHour && score.subject.frame && score.subject.frame.frameId) {
                 const isExcludedSubject =
                     score.subject.subjectName.includes("Giáo dục quốc phòng") ||
-                    score.subject.subjectName.includes("Giáo dục thể chất");
+                    score.subject.subjectName.includes("Giáo dục thể chất") ||
+                    score.finalScoreLetter.includes("R");
 
                 if (score.subject.frame.frameId !== 'GDDC_TC' && !isExcludedSubject) {
                     return total + score.subject.creditHour;
@@ -93,16 +103,35 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
         });
     }, [onGradesChange]);
 
+    const handleImprovement = useCallback((subjectId, creditHour) => {
+        setImprovementSubjects(prev => {
+            const newImprovementSubjects = { ...prev };
+            if (newImprovementSubjects[subjectId]) {
+                // If canceling improvement, revert to original grade
+                delete newImprovementSubjects[subjectId];
+                setSelectedGrades(prevGrades => {
+                    const newGrades = { ...prevGrades };
+                    delete newGrades[subjectId];
+                    return newGrades;
+                });
+                onImprovedCreditsChange(prevCredits => prevCredits - creditHour);
+            } else {
+                newImprovementSubjects[subjectId] = true;
+                onImprovedCreditsChange(prevCredits => prevCredits + creditHour);
+            }
+            return newImprovementSubjects;
+        });
+    }, [onImprovedCreditsChange]);
+
     const renderFrameContent = useCallback((frame, level = 0) => {
         const frameRows = [];
         const paddingLeft = level * 20;
 
         frameRows.push(
             <TableRow key={`frame-${frame.id}`}>
-                <TableCell className={cx('title')} align="left" colSpan={5} style={{ paddingLeft: `${paddingLeft}px` }}>
+                <TableCell className={cx('title')} align="left" colSpan={6} style={{ paddingLeft: `${paddingLeft}px` }}>
                     {frame.frameName} ({frame.creditHour})
                 </TableCell>
-                <TableCell align="center"></TableCell>
             </TableRow>
         );
 
@@ -116,6 +145,8 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
             frame.subjectInfo.forEach((subject, index) => {
                 if (subject) {
                     const score = scores.find(s => s.subject.subjectId === subject.subjectId);
+                    const isImprovement = improvementSubjects[subject.subjectId];
+                    const currentGrade = selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || 'N/A';
                     frameRows.push(
                         <TableRow key={`subject-${subject.subjectId}`}>
                             <TableCell align="center">{index + 1}</TableCell>
@@ -125,11 +156,22 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
                             <TableCell align="center">
                                 <Select
                                     onChange={(value) => handleChange(value, subject.subjectId, subject.creditHour)}
-                                    value={selectedGrades[subject.subjectId]?.grade || score?.finalScoreLetter || 'N/A'}
+                                    value={currentGrade}
                                     options={OptionScore}
                                     style={{ width: '80px' }}
-                                    disabled={!!score}
+                                    disabled={!!score && !isImprovement}
                                 />
+                            </TableCell>
+                            <TableCell align="center">
+                                {score && (
+                                    <Button
+                                        variant="contained"
+                                        color={isImprovement ? "secondary" : "primary"}
+                                        onClick={() => handleImprovement(subject.subjectId, subject.creditHour)}
+                                    >
+                                        {isImprovement ? "Hủy cải thiện" : "Cải thiện"}
+                                    </Button>
+                                )}
                             </TableCell>
                         </TableRow>
                     );
@@ -138,7 +180,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
         }
 
         return frameRows;
-    }, [frames, scores, handleChange, selectedGrades]);
+    }, [frames, scores, handleChange, selectedGrades, improvementSubjects, handleImprovement, originalGrades]);
 
     const renderTableRows = useCallback(() => {
         return frames.filter(frame => !frame.parentFrameId).flatMap(frame => renderFrameContent(frame));
@@ -150,6 +192,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange }) =>
         { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
         { id: 'tinchi', label: 'Số tín chỉ', minWidth: 50, align: 'center' },
         { id: 'score', label: 'Điểm dự kiến', minWidth: 100, align: 'center' },
+        { id: 'improvement', label: 'Cải thiện', minWidth: 100, align: 'center' },
     ];
 
     if (isLoading) {
