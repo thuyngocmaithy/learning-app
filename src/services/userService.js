@@ -10,7 +10,6 @@ export const getUseridFromLocalStorage = () => {
   if (userLogin) {
     try {
       const user = JSON.parse(userLogin);
-      // console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
       return user.userId;
     } catch (error) {
       console.error('[userService - getUseridFromLocalStorage - error]', error);
@@ -26,7 +25,6 @@ export const getUserTokenFromLocalStorage = () => {
   if (userLogin) {
     try {
       const user = JSON.parse(userLogin);
-      console.log('Parsed user:', user); // Kiểm tra dữ liệu sau khi parse
       return user.token;
     } catch (error) {
       console.error('[userService - getUserTokenFromLocalStorage - error]', error);
@@ -41,7 +39,7 @@ export const login = async (username, password) => {
     const response = await api.post('/auth/login', { username, password });
     return response;
   } catch (error) {
-    console.log('[userService - login - error] : ', error);
+    console.error('[userService - login - error] : ', error);
     throw error;
   }
 };
@@ -52,7 +50,7 @@ export const loginToSgu = async (username, password) => {
     const response = await api.post('/authSGU/login-sgu', { username, password });
     return response.data;
   } catch (error) {
-    console.log('[userService - loginToSgu - error] : ', error);
+    console.error('[userService - loginToSgu - error] : ', error);
     throw error;
   }
 };
@@ -85,7 +83,7 @@ export const getImageAccount = async (access_token, username) => {
     const response = await api.post('/authSGU/getImageAccount', { access_token, username });
     return response.data;
   } catch (error) {
-    console.log('[userService - getImageAccount - error] : ', error);
+    console.error('[userService - getImageAccount - error] : ', error);
     throw error;
   }
 };
@@ -96,7 +94,7 @@ export const getScore = async (access_token) => {
     const response = await api.post('/authSGU/getScore', { access_token });
     return response.data;
   } catch (error) {
-    console.log('[userService - getScore - error] : ', error);
+    console.error('[userService - getScore - error] : ', error);
     throw error;
   }
 };
@@ -127,3 +125,34 @@ export const getUserRegisteredSubjects = async (userId) => {
     throw error;
   }
 };
+
+
+export const getAllUser = async () => {
+  try {
+    const response = await api.get('/users');
+    return response.data;
+  } catch (error) {
+    console.error(error)
+    throw error;
+  }
+};
+
+export const createUser = async (userData) => {
+  try {
+    const response = await api.post('/users', userData);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const updateUserById = async (userId, userData) => {
+  try {
+    const response = await api.put(`/users/${userId}`, userData);
+    return response.data;
+  } catch (error) {
+    console.error('[userServive - updateUserById - error] : ', error);
+    throw error;
+  }
+}

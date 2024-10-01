@@ -71,7 +71,7 @@ function NhomDeTaiNCKH() {
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Danh sách đề tài',
+            title: 'Danh sách nhóm đề tài',
             children: (
                 <List
                     pagination={{
@@ -83,7 +83,7 @@ function NhomDeTaiNCKH() {
                         <List.Item
                             actions={[
                                 <Button primary verysmall to={`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`}>
-                                    Chi tiết
+                                    Danh sách
                                 </Button>,
                             ]}
                         >
@@ -91,10 +91,12 @@ function NhomDeTaiNCKH() {
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.scientificResearchGroupName}</div>}
-                                    description={<div>
-                                        <p>Khoa: {item.faculty.facultyName}</p>
-                                        <p>Trạng thái: <Tag color='green'>{item.status.statusName}</Tag> </p>
-                                    </div>}
+                                    description={
+                                        <div>
+                                            <p>Khoa: {item.faculty.facultyName}</p>
+                                            <p style={{ margin: "7px 0" }}>Trạng thái: <Tag color='green'>{item.status.statusName}</Tag> </p>
+                                        </div>
+                                    }
                                 />
                                 <p></p>
                                 <div className={cx('container-deadline-register')}>
@@ -127,7 +129,7 @@ function NhomDeTaiNCKH() {
                                                 setShowModalDetail(item.scientificResearch);
                                             }
                                         }}
-                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.id}` : null}>
+                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}&all=true` : null}>
                                         Chi tiết
                                     </Button>
                                 }

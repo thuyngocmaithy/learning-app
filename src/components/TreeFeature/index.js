@@ -11,7 +11,7 @@ const cx = classNames.bind(styles)
 
 
 
-const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad }) => {
+const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setShowModalDetail }) => {
     const [expandedKeys, setExpandedKeys] = useState([]);
     const [showModalFeature, setShowModalFeature] = useState(false);
     const [isUpdateFeature, setIsUpdateFeature] = useState(false);
@@ -25,7 +25,7 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad }) => {
                 title: <div className={cx("item-feature")}>
                     <p>{item.featureName}</p>
                     <div className={cx("option")}>
-                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
+                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall onClick={() => { setShowModalDetail(item) }}>
                             Chi tiết
                         </Button>
                         <Button

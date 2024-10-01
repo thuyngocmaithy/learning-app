@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiNCKH.module.scss';
 import { Card, message, Tabs, Tag } from 'antd';
-import { ListCourseIcon, ProjectIcon } from '../../../../assets/icons';
+import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
@@ -10,10 +10,11 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { showDeleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
 import { deleteScientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
-import NCKHListTopic from '../../../../components/FormListTopic/NCKHListTopic';
 import config from '../../../../config';
 import { getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
+import { getWhere } from '../../../../services/scientificResearchService';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -21,7 +22,6 @@ const cx = classNames.bind(styles);
 function NhomDeTaiNCKH() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
-    const [showModalListTopic, setShowModalListTopic] = useState(false); // hiển thị model list topic
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
@@ -29,6 +29,36 @@ function NhomDeTaiNCKH() {
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isToolbar, setIsToolbar] = useState(true);
+
+    // Xử lý active tab từ url
+    const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const [tabActive, setTabActive] = useState(getInitialTabIndex());
+
+
+    // Lấy tabIndex từ URL nếu có
+    function getInitialTabIndex() {
+        return Number(queryParams.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+    }
+
+    // Cập nhật URL khi tab thay đổi
+    const handleTabChange = (tabId) => {
+        setTabActive(tabId);
+
+        const currentUrl = new URL(window.location.href);
+        const params = new URLSearchParams(currentUrl.search);
+
+        // Kiểm tra nếu tabIndex chưa có trong URL thì thêm mới
+        if (!params.has('tabIndex')) {
+            params.append('tabIndex', tabId);
+        } else {
+            params.set('tabIndex', tabId); // Cập nhật giá trị mới cho tabIndex nếu đã có
+        }
+
+        // Cập nhật URL với params mới
+        navigate(`${currentUrl.pathname}?${params.toString()}`);
+    };
 
     // HANDLE TAB
     //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
@@ -84,9 +114,7 @@ function NhomDeTaiNCKH() {
             align: 'center',
             render: (_, record) => (
                 <div className={cx('action-item')}>
-                    <ButtonCustom className={cx('btnDetail')} leftIcon={<ListCourseIcon />} outline verysmall onClick={() => {
-                        setShowModalListTopic(record);
-                    }}>
+                    <ButtonCustom className={cx('btnDetail')} outline verysmall to={`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`}>
                         Danh sách
                     </ButtonCustom>
                     <ButtonCustom
@@ -120,9 +148,8 @@ function NhomDeTaiNCKH() {
 
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGId({ userId: userId });
-
-            if (response.status === 200) {
+            const response = await getWhere({ instructor: userId });
+            if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
 
@@ -170,14 +197,6 @@ function NhomDeTaiNCKH() {
         );
     }, [showModalUpdate, isUpdate]);
 
-    const NCKHListTopicMemoized = useMemo(() => {
-        return (
-            <NCKHListTopic
-                showModalListTopic={showModalListTopic}
-                setShowModalListTopic={setShowModalListTopic}
-            />
-        );
-    }, [showModalListTopic]);
     const ITEM_TABS = [
         {
             id: 1,
@@ -199,22 +218,22 @@ function NhomDeTaiNCKH() {
             children: (
                 <div>
                     {listScientificResearchJoined.map((item, index) => {
-                        let color = item.scientificResearch.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
+                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
                                 className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearch.scientificResearchName}
+                                title={item.scientificResearchName}
                                 extra={
-                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearch.scientificResearchId}`}>
+                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}&all=true`}>
                                         Chi tiết
                                     </ButtonCustom>
                                 }
                             >
                                 Trạng thái:
                                 <Tag color={color} className={cx('tag-status')}>
-                                    {item.scientificResearch.status.statusName}
+                                    {item.status.statusName}
                                 </Tag>
                             </Card>
                         );
@@ -251,7 +270,8 @@ function NhomDeTaiNCKH() {
             </div>
 
             <Tabs
-                defaultActiveKey={1}
+                activeKey={tabActive}
+                onChange={handleTabChange}
                 centered
                 onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => {
@@ -267,7 +287,6 @@ function NhomDeTaiNCKH() {
 
 
             {NhomDeTaiNCKHUpdateMemoized}
-            {NCKHListTopicMemoized}
         </div>
     );
 }

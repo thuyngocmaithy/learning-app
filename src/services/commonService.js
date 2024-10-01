@@ -10,7 +10,6 @@ export const uploadFile = async (file) => {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        console.log(response);
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'An error occurred during file upload.');

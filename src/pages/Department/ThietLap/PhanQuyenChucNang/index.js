@@ -20,6 +20,7 @@ import ChucNangUpdate from '../../../../components/FormUpdate/ChucNangUpdate';
 import QuyenUpdate from '../../../../components/FormUpdate/QuyenUpdate';
 import TreeFeature from '../../../../components/TreeFeature';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ChucNangDetail from '../../../../components/FormDetail/ChucNangDetail';
 
 const cx = classNames.bind(styles);
 
@@ -38,6 +39,7 @@ function PhanQuyenChucNang() {
     const [selectedPermission, setSelectedPermission] = useState([]);
     const [treeData, setTreeData] = useState([]);
     const [reLoadStructureFeature, setReLoadStructureFeature] = useState(false);
+    const [showModalDetail, setShowModalDetail] = useState(false);
     const [tableParamsFeature, setTableParamsFeature] = useState({
         pagination: {
             current: 1,
@@ -119,13 +121,11 @@ function PhanQuyenChucNang() {
                         };
                     });
                     setCombinedColumns(() => () => columns(newColumnsPermission));
-                } else {
-                    console.log(response);
                 }
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             setIsLoadingPermission(false);
         }
@@ -134,7 +134,6 @@ function PhanQuyenChucNang() {
     const getFeature = async () => {
         try {
             const response = await getAll()
-            console.log(response);
 
             if (response.status === 200) {
                 setDataFeature(response.data.data)
@@ -153,11 +152,10 @@ function PhanQuyenChucNang() {
             if (response.status === 'success') {
                 return response.data;
             } else {
-                console.log(response);
                 return [];
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return [];
         } finally {
         }
@@ -189,7 +187,7 @@ function PhanQuyenChucNang() {
         try {
             return await deletePermissionFeatures(id);
         } catch (error) {
-            console.log('Lỗi xóa các permisison_feature tồn tại mà có thay đổi: ' + error);
+            console.error('Lỗi xóa các permisison_feature tồn tại mà có thay đổi: ' + error);
         }
     };
     // Hàm xử lý lưu phân quyền
@@ -285,6 +283,15 @@ function PhanQuyenChucNang() {
     };
 
 
+    const ChucNangDetailMemoized = useMemo(() => (
+        <ChucNangDetail
+            title={'Chức năng'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
+
     // =======================================QUẢN LÝ QUYỀN================================================
     const columnsPermisison = useCallback(
         () => [
@@ -303,9 +310,6 @@ function PhanQuyenChucNang() {
                 key: 'action',
                 render: (_, record) => (
                     <div className={cx('action-item')}>
-                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
-                            Chi tiết
-                        </Button>
                         <Button
                             className={cx('btnEdit')}
                             leftIcon={<EditOutlined />}
@@ -382,6 +386,7 @@ function PhanQuyenChucNang() {
                     setTreeData={setTreeData}
                     setSelectedFeature={setSelectedFeature}
                     reLoad={reLoadStructureFeature}
+                    setShowModalDetail={setShowModalDetail}
                 />
             ),
         },
@@ -465,6 +470,7 @@ function PhanQuyenChucNang() {
 
             {chucNangUpdateMemoized}
             {quyenUpdateMemoized}
+            {ChucNangDetailMemoized}
         </div>
     );
 }

@@ -5,7 +5,7 @@ export const getAll = async () => {
     const response = await api.get('/subjects');
     return response.data;
   } catch (error) {
-    console.log('[subjectService - getAll - error]:', error);
+    console.error('[subjectService - getAll - error]:', error);
     throw error;
   }
 };
@@ -15,7 +15,7 @@ export const listSubjectToFrame = async () => {
     const response = await api.get('/subjects/listSubjectToFrame');
     return response.data;
   } catch (error) {
-    console.log('[subjectService - listSubjectToFrame - error]:', error);
+    console.error('[subjectService - listSubjectToFrame - error]:', error);
     throw error;
   }
 };

@@ -61,9 +61,9 @@ export const gethighestGroup = async () => {
     }
 };
 
-export const getSRUByUserIdAndSRGId = async (userId) => {
+export const getSRUByUserIdAndSRGId = async (queryUserIdAndSRGId) => {
     try {
-        const queryParams = new URLSearchParams(userId).toString();
+        const queryParams = new URLSearchParams(queryUserIdAndSRGId).toString();
         const url = `/scientificResearch-user/getByUserIdAndSRGroupId?${queryParams}`;
 
         const response = await api.get(url);

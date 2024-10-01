@@ -5,7 +5,7 @@ import { Breadcrumb, Card, List, message, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getAllSR, getBySRGId, getSRById } from '../../../services/scientificResearchService';
+import { getBySRGId, getBySRGIdAndCheckApprove } from '../../../services/scientificResearchService';
 import { deleteSRUByUserIdAndSRId, getBySRId, getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
@@ -14,6 +14,7 @@ import { showDeleteConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { getUserById } from '../../../services/userService';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 
 const cx = classNames.bind(styles);
 
@@ -24,6 +25,7 @@ function DeTaiNCKH() {
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
+    const [SRGName, setSRGName] = useState();
     const scientificResearchCancelRef = useRef(null);
     const { deleteNotification } = useSocketNotification();
 
@@ -31,7 +33,6 @@ function DeTaiNCKH() {
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const currentUrl = window.location.pathname + window.location.search;
     const [tabActive, setTabActive] = useState(getInitialTabIndex());
 
     // Lấy tabIndex từ URL nếu có
@@ -65,32 +66,11 @@ function DeTaiNCKH() {
 
     const fetchscientificResearchs = async () => {
         try {
-            const response = await getBySRGId(SRGIdFromUrl);
+            const response = await getBySRGIdAndCheckApprove({ userId: userId, SRGId: SRGIdFromUrl });
 
-            let scientificResearchs = response.data.data.map(scientificResearch => ({
-                scientificResearchId: scientificResearch.scientificResearchId,
-                scientificResearchName: scientificResearch.scientificResearchName,
-                executionTime: scientificResearch.executionTime,
-                instructorName: scientificResearch.instructor.fullname,
-                level: scientificResearch.level,
-                budget: scientificResearch.budget,
-                description: scientificResearch.description,
-                createUser: scientificResearch.createUser,
-                instructor: scientificResearch.instructor,
-                lastModifyUser: scientificResearch.lastModifyUser
-            }));
-            const promises = scientificResearchs.map(async (scientificResearch) => {
-                const responseCountRegister = await getBySRId({ scientificResearch: scientificResearch.scientificResearchId });
-                const count = responseCountRegister.data.data.length;
-
-                return { ...scientificResearch, count };
-            });
-
-            // Đợi tất cả các Promise hoàn thành
-            const updatedList = await Promise.all(promises);
-
-            // Cập nhật list một lần
-            setList(updatedList);
+            if (response.status === 200) {
+                setList(response.data.data);
+            }
 
             setIsLoading(false);
         } catch (error) {
@@ -101,7 +81,7 @@ function DeTaiNCKH() {
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGId({ userId: userId });
+            const response = await getSRUByUserIdAndSRGId({ userId: userId, srgroupId: SRGIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
@@ -111,9 +91,24 @@ function DeTaiNCKH() {
         }
     };
 
+    const getSRGName = async () => {
+        try {
+            const SRG = await getScientificResearchGroupById(SRGIdFromUrl)
+            if (SRG.status === "success") {
+                setSRGName(SRG.data.scientificResearchGroupName);
+            }
+        } catch (error) {
+            console.error("Lỗi lấy tên SRG")
+        }
+    }
     useEffect(() => {
-        fetchscientificResearchs();
+
+        getSRGName();
+    }, [])
+    useEffect(() => {
+
         checkRegisterscientificResearch();
+        fetchscientificResearchs();
     }, [showModalRegister]);
 
     const ITEM_TABS = [
@@ -134,11 +129,16 @@ function DeTaiNCKH() {
                                     Chi tiết
                                 </Button>,
                                 listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
-                                    <Button className={cx('btn-cancel')} outline verysmall onClick={() => {
-                                        scientificResearchCancelRef.current = item;
-                                        setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelWithConfirm, true), 0);
-
-                                    }} >
+                                    <Button
+                                        className={cx('btn-cancel')}
+                                        outline
+                                        verysmall
+                                        onClick={() => {
+                                            scientificResearchCancelRef.current = item;
+                                            setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelWithConfirm, true), 0);
+                                        }}
+                                        disabled={item.approve}
+                                    >
                                         Hủy đăng ký
                                     </Button> :
                                     <Button primary verysmall onClick={() => setShowModalRegister(item)}>
@@ -147,14 +147,12 @@ function DeTaiNCKH() {
                             ]}
                         >
                             <Skeleton avatar title={false} loading={isLoading} active>
-                                {console.log(item)
-                                }
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.scientificResearchName}</div>}
                                     description={<div>
                                         <p>Lượt đăng ký: {item.count} </p>
-                                        <p>Giảng viên hướng dẫn: {item.instructorName}</p>
+                                        <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
                                     </div>}
                                 />
                                 <p></p>
@@ -188,7 +186,8 @@ function DeTaiNCKH() {
                                                 setShowModalDetail(item.scientificResearch);
                                             }
                                         }}
-                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.id}` : null}>
+
+                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}` : null}>
                                         Chi tiết
                                     </Button>
                                 }
@@ -207,7 +206,6 @@ function DeTaiNCKH() {
 
     const handleCancelNotification = async () => {
         const scientificResearchCancel = scientificResearchCancelRef.current;
-        console.log(scientificResearchCancel);
 
         try {
             const user = await getUserById(userId)
@@ -247,7 +245,6 @@ function DeTaiNCKH() {
     // Hàm xử lý hủy đăng ký đề tài với xác nhận
     const handleCancelWithConfirm = async () => {
         if (scientificResearchCancelRef.current) {
-            console.log(scientificResearchCancelRef.current)
             try {
                 const responseCancel = await deleteSRUByUserIdAndSRId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
                 if (responseCancel) {
@@ -315,7 +312,7 @@ function DeTaiNCKH() {
                     <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>Danh sách đề tài Nghiên cứu khoa học</h3>
+                <h3 className={cx('title')}>Nhóm đề tài: {SRGName}</h3>
             </div>
             <Tabs
                 activeKey={tabActive}

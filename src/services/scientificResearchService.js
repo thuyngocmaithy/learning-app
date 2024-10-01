@@ -76,3 +76,15 @@ export const getWhere = async (conditions) => {
         throw error;
     }
 };
+
+export const getBySRGIdAndCheckApprove = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/scientificResearchs/getBySRGIdAndCheckApprove?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

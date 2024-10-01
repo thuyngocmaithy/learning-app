@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinDeTaiNCKHThamGia.module.scss';
-import { Button, Descriptions, Dropdown, message, Select, Tag } from 'antd';
+import { Button, Descriptions, Dropdown, message, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { getStatusByType } from '../../services/statusService';
 import { updateSRById } from '../../services/scientificResearchService';
@@ -11,8 +11,8 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
     const statusType = 'Tiến độ đề tài NCKH';
     const [statusSelected, setStatusSelected] = useState(
         {
-            key: scientificResearch.scientificResearch.status.statusId,
-            label: scientificResearch.scientificResearch.status.statusName
+            key: scientificResearch.status.statusId,
+            label: scientificResearch.status.statusName
         }
         || {})
     const [statusOptions, setStatusOptions] = useState([]);
@@ -21,33 +21,33 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
         {
             key: '1-info',
             label: 'Khoa',
-            children: scientificResearch ? scientificResearch.scientificResearch.scientificResearchGroup.faculty.facultyName : '',
+            children: scientificResearch ? scientificResearch.faculty.facultyName : '',
         },
         {
             key: '2-info',
             label: 'Thời gian thực hiện',
-            children: scientificResearch ? scientificResearch.scientificResearch.executionTime : '',
+            children: scientificResearch ? scientificResearch.executionTime : '',
         },
         {
             key: '3-info',
             label: 'Thời điểm bắt đầu',
-            children: '10/03/2024 08:00:00',
+            children: scientificResearch ? scientificResearch.startDate : '',
         },
         {
             key: '4-info',
             label: 'Hạn hoàn thành',
-            children: '10/09/2024 17:00:00',
+            children: scientificResearch ? scientificResearch.finishDate : '',
         },
         {
             key: '5-info',
             label: 'Giảng viên hướng dẫn',
-            children: scientificResearch ? scientificResearch.scientificResearch.instructor.fullname : '',
+            children: scientificResearch ? scientificResearch.instructor.fullname : '',
         },
-        {
-            key: '6-info',
-            label: 'Sinh viên thực hiện',
-            children: scientificResearch ? scientificResearch.user.fullname : '',
-        },
+        // {
+        //     key: '6-info',
+        //     label: 'Sinh viên thực hiện',
+        //     children: scientificResearch ? scientificResearch.user.fullname : '',
+        // },
     ];
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -88,8 +88,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
                 let scientificResearchData = {
                     status: key,
                 };
-                const response = await updateSRById(scientificResearch.scientificResearch.scientificResearchId, scientificResearchData);
-                console.log(scientificResearchData);
+                const response = await updateSRById(scientificResearch.scientificResearchId, scientificResearchData);
 
                 if (response && response.data) {
                     message.success('Thay đổi trạng thái đề tài thành công!');
@@ -109,7 +108,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
                         title={
                             <div className={cx('container-title')}>
                                 <h2>Đề tài:</h2>
-                                <h2 className={cx("title-SR")}>{scientificResearch.scientificResearch.scientificResearchName}</h2>
+                                <h2 className={cx("title-SR")}>{scientificResearch.scientificResearchName}</h2>
                                 <Tag color="green">
                                     <Dropdown
                                         menu={{
@@ -134,7 +133,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
             <div className={cx('container-description')}>
                 <h4>Thông tin mô tả</h4>
                 <div>
-                    {scientificResearch.scientificResearch.description}
+                    {scientificResearch.description}
                 </div>
             </div>
         </div>

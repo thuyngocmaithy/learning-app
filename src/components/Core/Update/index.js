@@ -6,7 +6,7 @@ import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Update({ form, title = '', children, isUpdate, hideFooter = false, showModal, onClose, onUpdate }) {
+function Update({ form, title = '', children, isUpdate, hideFooter = false, width = "auto", showModal, onClose, onUpdate }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -30,8 +30,6 @@ function Update({ form, title = '', children, isUpdate, hideFooter = false, show
             : [
                 <ButtonCustom key={'saveClose'} outline small onClick={() => {
                     onUpdate();
-                    console.log(form);
-
                     if (form)
                         form.resetFields();
                 }}>
@@ -58,6 +56,7 @@ function Update({ form, title = '', children, isUpdate, hideFooter = false, show
             title={isUpdate ? `Cập nhật ${title}` : `Tạo mới ${title}`}
             onCancel={handleCancel}
             footer={hideFooter ? null : footer}
+            width={width}
         >
             {children}
         </Modal>
