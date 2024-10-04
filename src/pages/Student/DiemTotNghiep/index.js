@@ -5,12 +5,16 @@ import { InputNumber } from 'antd';
 import { GraduateActiveIcon } from '../../../assets/icons';
 import TableScore from '../../../components/TableScore';
 import ButtonCustom from '../../../components/Core/Button';
-
+import { getUserById, getUseridFromLocalStorage } from '../../../services/userService';
 const cx = classNames.bind(styles);
+
+const userId = getUseridFromLocalStorage();
+const userData = await getUserById(userId);
+console.log(userData.data.GPA);
 
 function DiemTotNghiep() {
     // State management
-    const [currentGPA, setCurrentGPA] = useState(0);
+    const [currentGPA, setCurrentGPA] = useState(userData.data.GPA);
     const [totalCredits, setTotalCredits] = useState(0);
     const [creditsA, setCreditsA] = useState(0);
     const [creditsB, setCreditsB] = useState(0);
@@ -110,7 +114,8 @@ function DiemTotNghiep() {
                             max={4.0}
                             step={0.01}
                             value={currentGPA}
-                            onChange={handleInputChange(setCurrentGPA)}
+                            // onChange={handleInputChange(setCurrentGPA)}
+                            disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>

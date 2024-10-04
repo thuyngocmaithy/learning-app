@@ -11,18 +11,14 @@ const cx = classNames.bind(styles);
 const userid = getUseridFromLocalStorage();
 
 const OptionScore = [
+    { value: '', label: '' },
     { value: 'A', label: 'A' },
     { value: 'B', label: 'B' },
     { value: 'C', label: 'C' },
     { value: 'D', label: 'D' },
-    { value: 'Cải thiện A', label: 'Cải thiện A' },
-    { value: 'Cải thiện B', label: 'Cải thiện B' },
-    { value: 'Cải thiện C', label: 'Cải thiện C' },
-    { value: 'Cải thiện D', label: 'Cải thiện D' },
-    { value: 'N/A', label: 'N/A' },
 ];
 
-const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onImprovedCreditsChange }) => {
+const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onImprovedCreditsChange }) => {
     const [frames, setFrames] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -146,7 +142,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                 if (subject) {
                     const score = scores.find(s => s.subject.subjectId === subject.subjectId);
                     const isImprovement = improvementSubjects[subject.subjectId];
-                    const currentGrade = selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || 'N/A';
+                    const currentGrade = selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || '';
                     frameRows.push(
                         <TableRow key={`subject-${subject.subjectId}`}>
                             <TableCell align="center">{index + 1}</TableCell>
