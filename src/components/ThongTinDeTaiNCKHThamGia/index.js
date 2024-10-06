@@ -8,6 +8,9 @@ import { updateSRById } from '../../services/scientificResearchService';
 const cx = classNames.bind(styles);
 
 function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
+    console.log(scientificResearch);
+
+
     const statusType = 'Tiến độ đề tài NCKH';
     const [statusSelected, setStatusSelected] = useState(
         {
@@ -21,7 +24,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
         {
             key: '1-info',
             label: 'Khoa',
-            children: scientificResearch ? scientificResearch.faculty.facultyName : '',
+            children: scientificResearch ? scientificResearch.scientificResearchGroup?.faculty?.facultyName : '',
         },
         {
             key: '2-info',
@@ -41,7 +44,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
         {
             key: '5-info',
             label: 'Giảng viên hướng dẫn',
-            children: scientificResearch ? scientificResearch.instructor.fullname : '',
+            children: scientificResearch ? scientificResearch.instructor?.fullname : '',
         },
         // {
         //     key: '6-info',

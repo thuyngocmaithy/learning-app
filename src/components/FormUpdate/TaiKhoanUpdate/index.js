@@ -82,6 +82,7 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
                     email: values.email,
                     password: values.password,
                     permission: selectedPermisison,
+                    isSystem: true
                 };
                 response = await createAccount(accountData);
             }

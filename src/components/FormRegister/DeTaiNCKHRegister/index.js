@@ -1,15 +1,15 @@
-import React, { memo, useContext, useState } from 'react';
+import React, { memo, useContext, useEffect, useState } from 'react';
 import FormItem from '../../Core/FormItem';
 import Register from '../../Core/Register';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHRegister.module.scss';
-import { Form, message, Radio } from 'antd';
-import { createSRU, gethighestGroup } from '../../../services/scientificResearchUserService';
-import { getSRById } from '../../../services/scientificResearchService';
-import { getUserById } from '../../../services/userService';
+import { Button, Form, message, Radio, Select, Space } from 'antd';
+import { createSRU } from '../../../services/scientificResearchUserService';
+import { getActiveStudents, getUserById } from '../../../services/userService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import config from '../../../config';
+import { CloseOutlined } from '@ant-design/icons';
+import notifications from '../../../config/notifications';
 
 const cx = classNames.bind(styles);
 
@@ -20,12 +20,38 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
 }) {
     const [form] = Form.useForm();
     const { userId } = useContext(AccountLoginContext);
-    const [typeRegister, setTypeRegister] = useState(null);
+    const [typeRegister, setTypeRegister] = useState("personal");
     const { sendNotification } = useSocketNotification();
     const [isRegisting, setIsRegisting] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [studentOptions, setStudentOptions] = useState([]);
+
+    // Fetch danh sách sinh viên
+    useEffect(() => {
+        const fetchStudent = async () => {
+            try {
+                const response = await getActiveStudents();
+                if (response.message === "success" && response.data) {
+                    const options = response.data.map((student) => ({
+                        value: student.userId,
+                        label: `${student.userId} - ${student.fullname}`,
+                    }));
+                    setStudentOptions(options);
+                    // Nếu có giá trị đã chọn, set lại giá trị đó
+                    if (selectedStudent) {
+                        setSelectedStudent(selectedStudent);
+                    }
+                }
+            } catch (error) {
+                console.error(' [ DeTaiNCKHRegister - fetchStudent - Error ] :', error);
+            }
+        };
+
+        fetchStudent();
+    }, [selectedStudent]);
+
 
     const onChange = (e) => {
-        console.log('Selected value:', e.target.value);
         setTypeRegister(e.target.value);
     };
 
@@ -38,39 +64,14 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
 
     const handleSendNotification = async () => {
         try {
+            const values = await form.validateFields();
             setIsRegisting(true);
-            const user = await getUserById(userId)
-            const ListNotification = [
-                {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NhomDeTaiNCKH_Department,
-                    toUser: showModal.createUser,
-                    createUser: user.data,
-                    type: 'warning',
-                },
-                {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NhomDeTaiNCKH_Department,
-                    toUser: showModal.instructor,
-                    createUser: user.data,
-                    type: 'warning',
-                }
-            ];
 
-            if (showModal.lastModifyUser &&
-                showModal.lastModifyUser.id !== showModal.createUser.id &&
-                showModal.lastModifyUser.id !== showModal.instructor.id) {
-                ListNotification.push({
-                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${showModal.scientificResearchName}`,
-                    url: config.routes.NhomDeTaiNCKH_Department,
-                    toUser: showModal.lastModifyUser,
-                    createUser: user.data,
-                    type: 'warning',
-                });
-            }
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getNCKHNotification('register', showModal, user.data, values.listMember);
 
-            ListNotification.map(async (item) => {
-                await sendNotification(item.toUser, item);
+            ListNotification.forEach(async (itemNoti) => {
+                await sendNotification(itemNoti.toUser, itemNoti);
             })
 
         } catch (err) {
@@ -84,37 +85,36 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
+
+            let registerData = null;
             if (values.type === "personal") { // Đăng ký cá nhân
-                // Lấy nhóm cao nhất trong database
-                const response = await gethighestGroup();
-                if (response.message === "success") {
-                    // Đăng ký với số nhóm = nhóm cao nhất hiện tại + 1 
-                    const group = response.data + 1;
-                    const scientificResearch = await getSRById(showModal.scientificResearchId)
-                    const user = await getUserById(userId)
-
-                    const registerData =
-                    {
-                        scientificResearch: scientificResearch.data,
-                        user: user.data,
-                        group: group,
-                        isLeader: 1, // Đăng ký cá nhân => Người đăng ký là leader
-                    }
-
-                    const responseAdd = await createSRU(registerData);
-                    if (responseAdd) {
-                        message.success(`Đăng ký thành công`);
-                        handleSendNotification();
-                        handleCloseModal();
+                registerData = {
+                    scientificResearchId: showModal.scientificResearchId,
+                    userId: [userId],
+                    isLeader: userId,
+                }
+            } else {
+                const userIdsFromMembers = values.listMember.map(member => member.userId) || [];
+                if (userIdsFromMembers.length > 0) {
+                    registerData = { // Đăng ký theo nhóm
+                        scientificResearchId: showModal.scientificResearchId,
+                        userId: [userId, ...userIdsFromMembers],
+                        isLeader: userId,
                     }
                 }
+            }
+            const responseAdd = await createSRU(registerData);
+            if (responseAdd) {
+                message.success(`Đăng ký thành công`);
+                await handleSendNotification();
+            }
 
-            }
-            if (values.type === "group") {
-                message.info("Chưa xử lý")
-            }
         } catch (error) {
             console.error("Lỗi đăng ký đề tài: " + error);
+        }
+        finally {
+            handleCloseModal();
+            form.resetFields();
         }
     };
 
@@ -128,9 +128,6 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
         >
             <Form
                 form={form}
-                style={{
-                    maxWidth: 600,
-                }}
             >
                 <FormItem
                     name="type"
@@ -147,8 +144,75 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
                         <Radio.Button value="group">Nhóm</Radio.Button>
                     </Radio.Group>
                 </FormItem>
+                <FormItem
+                    label="Thành viên nhóm"
+                    hidden={typeRegister === "personal"}
+                >
+                    <Form.List
+                        name={"listMember"}
+                        rules={[
+                            {
+                                required: typeRegister !== "personal",
+                                validator: async (_, names) => {
+                                    if (typeRegister !== "personal" && (!names || names.length < 1)) {
+                                        return Promise.reject(new Error('Bạn phải chọn ít nhất 1 thành viên'));
+                                    }
+                                    return Promise.resolve();
+                                },
+                            },
+                        ]}>
+                        {(subFields, subOpt) => (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    rowGap: 16,
+                                    width: "100%"
+                                }}
+                            >
+                                {subFields.map((subField) => (
+                                    <Space key={subField.key} style={{ width: '100%' }}>
+                                        <FormItem
+                                            noStyle
+                                            name={[subField.name, 'userId']}
+                                            rules={[
+                                                {
+                                                    required: typeRegister !== "personal",
+                                                    message: 'Vui lòng chọn thành viên',
+                                                }
+                                            ]}>
+                                            <Select
+                                                showSearch
+                                                placeholder="Chọn sinh viên"
+                                                optionFilterProp="children"
+                                                value={selectedStudent}
+                                                onChange={(value) => setSelectedStudent(value)}
+                                                filterOption={(input, option) =>
+                                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={studentOptions}
+                                                style={{ width: "100%" }}
+                                            />
+                                        </FormItem>
+                                        <CloseOutlined
+                                            onClick={() => {
+                                                subOpt.remove(subField.name);
+                                            }}
+                                        />
+                                    </Space>
+                                ))}
+                                <Button type="dashed" onClick={() => subOpt.add()} block>
+                                    + Thêm thành viên
+                                </Button>
+                            </div>
+                        )}
+                    </Form.List>
+                </FormItem>
+
+
+
             </Form>
-        </Register>
+        </Register >
     );
 });
 

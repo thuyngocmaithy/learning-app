@@ -59,7 +59,8 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     }, []);
 
     useEffect(() => {
-        onSelectionChange(selectedSubjects);
+        if (onSelectionChange)
+            onSelectionChange(selectedSubjects);
     }, [selectedSubjects, onSelectionChange]);
 
     const getSemesterIndex = useCallback((semesterId) => {

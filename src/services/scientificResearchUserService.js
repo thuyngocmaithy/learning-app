@@ -61,18 +61,6 @@ export const gethighestGroup = async () => {
     }
 };
 
-export const getSRUByUserIdAndSRGId = async (queryUserIdAndSRGId) => {
-    try {
-        const queryParams = new URLSearchParams(queryUserIdAndSRGId).toString();
-        const url = `/scientificResearch-user/getByUserIdAndSRGroupId?${queryParams}`;
-
-        const response = await api.get(url);
-        return response;
-    } catch (error) {
-        throw error;
-    }
-};
-
 export const getBySRId = async (scientificResearchId) => {
     try {
         const queryParams = new URLSearchParams(scientificResearchId).toString();
@@ -86,11 +74,10 @@ export const getBySRId = async (scientificResearchId) => {
 };
 
 
-
 export const deleteSRUByUserIdAndSRId = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
-        const url = `/scientificResearch-user/deleteByUserAndscientificResearch?${queryParams}`;
+        const url = `/scientificResearch-user/deleteByUserAndScientificResearch?${queryParams}`;
 
         const response = await api.delete(url);
         return response;
@@ -100,10 +87,10 @@ export const deleteSRUByUserIdAndSRId = async (conditions) => {
 };
 
 
-export const getListSRJoinByUserIdAndSRGId = async (conditions) => {
+export const getWhere = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
-        const url = `/followers/getFollowersByUserIdAndSRGroupId?${queryParams}`;
+        const url = `/scientificResearch-user/getWhere?${queryParams}`;
 
         const response = await api.get(url);
         return response;
@@ -111,4 +98,3 @@ export const getListSRJoinByUserIdAndSRGId = async (conditions) => {
         throw error;
     }
 };
-

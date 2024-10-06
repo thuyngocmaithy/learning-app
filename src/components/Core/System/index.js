@@ -1,42 +1,48 @@
 import classNames from 'classnames/bind';
 import styles from './System.module.scss';
-import { Avatar, List } from 'antd';
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { getImageAccount } from '../../../services/userService';
+import { Avatar, List, message } from 'antd';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Toolbar from '../Toolbar';
 import FollowerUpdate from '../../FormUpdate/FollowerUpdate';
-import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import noImage from '../../../assets/images/no-image.png';
+import { CloseOutlined } from '@ant-design/icons';
+import { showDeleteConfirm } from '../Delete';
+import { deleteFollowerDetail } from '../../../services/followerDetailService';
 
 const cx = classNames.bind(styles);
 
-function System({ dataInfoSystem, dataFollower }) {
+function System({ dataInfoSystem, dataFollower, reLoad }) {
     const [processedFollower, setProcessedFollower] = useState([]);
+    const followerCancelRef = useRef(null);
     const [showModal, setShowModal] = useState(false);
-    const { userId } = useContext(AccountLoginContext)
+
+    const handleListFollower = async () => {
+
+        const promises = dataFollower.map(async (item) => {
+            return { id: item.id, title: item.user.fullname, image: item.user.avatar };
+        });
+
+        const processed = await Promise.all(promises);
+        setProcessedFollower(processed)
+    }
 
     useEffect(() => {
-        // const handleListFollower = async () => {
-        //     const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
-
-        //     const promises = dataFollower.map(async (item) => {
-        //         const responseImage = await getImageAccount(accessToken, item.user?.userId);
-        //         const image = responseImage.data.data.thong_tin_sinh_vien.image;
-        //         return { title: item.user.fullname, image: image };
-        //     });
-
-        //     const processed = await Promise.all(promises);
-        //     setProcessedFollower(processed)
-        // }
-        const handleListFollower = async () => {
-            const promises = dataFollower.map(async (item) => {
-                return { title: item.user.fullname, image: item.user.avatar };
-            });
-
-            const processed = await Promise.all(promises);
-            setProcessedFollower(processed)
-        }
         handleListFollower();
     }, [dataFollower])
+
+    const handleRemoveFollower = async () => {
+        try {
+            await deleteFollowerDetail(followerCancelRef.current);
+            message.success("Xóa người theo dõi thành công");
+
+        } catch (error) {
+            console.log(`Lỗi xóa người theo dõi: ${error}`);
+        }
+        finally {
+            followerCancelRef.current = null;
+            reLoad();
+        }
+    }
 
     const followerUpdateMemoized = useMemo(() => {
         return (
@@ -45,6 +51,7 @@ function System({ dataInfoSystem, dataFollower }) {
                 isUpdate={false}
                 showModal={showModal}
                 setShowModal={setShowModal}
+                reLoad={reLoad}
             />
         );
     }, [showModal]);
@@ -77,11 +84,27 @@ function System({ dataInfoSystem, dataFollower }) {
                     <List
                         itemLayout="horizontal"
                         dataSource={processedFollower}
-                        renderItem={(item, index) => (
+                        renderItem={(item) => (
                             <List.Item>
                                 <List.Item.Meta
-                                    avatar={<Avatar src={`data:image/jpeg;base64,${item.image}`} size={'large'} />}
-                                    title={item.title}
+                                    avatar={
+                                        <Avatar
+                                            src={item.image
+                                                ? `data:image/jpeg;base64,${item.image}`
+                                                : noImage}
+                                            size={'large'}
+                                        />}
+                                    title={
+                                        <div className={cx('user-follower')}>
+                                            <p>{item.title}</p>
+                                            <CloseOutlined
+                                                onClick={() => {
+                                                    followerCancelRef.current = item.id;
+                                                    setTimeout(() => showDeleteConfirm('người theo dõi', handleRemoveFollower, false), 0)
+                                                }}
+                                            />
+                                        </div>
+                                    }
                                 />
                             </List.Item>
                         )}

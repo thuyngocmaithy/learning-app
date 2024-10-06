@@ -21,10 +21,12 @@ function App() {
     const getListFeature = async () => {
         try {
             const response = await getWhere({ permission: permission });
-            if (response.status === 'success') {
+            console.log(response);
+
+            if (response.status === 200) {
                 setListFeature((prevListFeature) => [
                     ...prevListFeature,
-                    ...response.data.map((item) => item.feature),
+                    ...response.data.data.map((item) => item.feature),
                 ]);
 
             }

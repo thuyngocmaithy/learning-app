@@ -138,7 +138,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         { title: 'Ngày chỉnh sửa', description: scientificResearch ? format(scientificResearch.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
     ], [scientificResearch]);
 
-    const ITEM_TABS = useMemo(() => [
+    const ITEM_TABS = [
         {
             id: 1,
             title: 'Chi tiết',
@@ -157,9 +157,9 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         {
             id: 4,
             title: 'Hệ thống',
-            children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} />,
+            children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} reLoad={getInfoscientificResearch} />,
         },
-    ], [scientificResearch, dataInfoSystem, dataFollower]);
+    ];
 
     return isLoading ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>

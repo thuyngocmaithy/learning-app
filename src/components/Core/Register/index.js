@@ -23,6 +23,7 @@ function Register({ title = '', children, showModal, onClose, onRegister, isRegi
 
     return (
         <Modal
+            width={"600px"}
             className={cx('modal-register')}
             centered
             open={open}

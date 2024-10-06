@@ -1,8 +1,8 @@
-import httpRequest from '../utils/httpRequest';
+import { api } from '../utils/apiConfig';
 
 export const getAll = async () => {
     try {
-        const response = await httpRequest.get('/permission-features');
+        const response = await api.get('/permission-features');
         return response;
     } catch (error) {
         throw error;
@@ -11,7 +11,7 @@ export const getAll = async () => {
 
 export const createPermissionFeature = async (data) => {
     try {
-        const response = await httpRequest.post('/permission-features', data);
+        const response = await api.post('/permission-features', data);
         return response;
     } catch (error) {
         console.error('Create permission-features error:', error);
@@ -21,7 +21,7 @@ export const createPermissionFeature = async (data) => {
 
 export const updatePermissionFeature = async (id, data) => {
     try {
-        const response = await httpRequest.put(`/permission-features/${id}`, data);
+        const response = await api.put(`/permission-features/${id}`, data);
         return response;
     } catch (error) {
         console.error('Update feature error:', error);
@@ -31,7 +31,7 @@ export const updatePermissionFeature = async (id, data) => {
 
 export const deletePermissionFeatures = async (ids) => {
     try {
-        const response = await httpRequest.delete(`/permission-features?ids=${ids}`);
+        const response = await api.delete(`/permission-features?ids=${ids}`);
         return response;
     } catch (error) {
         console.error('Delete permission-features error:', error);
@@ -44,7 +44,7 @@ export const getWhere = async (conditions) => {
         const queryParams = new URLSearchParams(conditions).toString();
         const url = `/permission-features/getPermisisonFeatureWhere?${queryParams}`;
 
-        const response = await httpRequest.get(url);
+        const response = await api.get(url);
         return response;
     } catch (error) {
         throw error;

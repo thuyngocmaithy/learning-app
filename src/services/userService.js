@@ -137,6 +137,16 @@ export const getAllUser = async () => {
   }
 };
 
+export const getActiveStudents = async () => {
+  try {
+    const response = await api.get('/users/students');
+    return response.data;
+  } catch (error) {
+    console.error(error)
+    throw error;
+  }
+};
+
 export const createUser = async (userData) => {
   try {
     const response = await api.post('/users', userData);

@@ -90,17 +90,6 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
         const dropKey = node.key;
         const dragKey = dragNode.key;
 
-        // const findNode = (data, key) => {
-        //     for (const item of data) {
-        //         if (item.key === key) return item;
-        //         if (item.children) {
-        //             const result = findNode(item.children, key);
-        //             if (result) return result;
-        //         }
-        //     }
-        //     return null;
-        // };
-
         const loop = (data, key, callback) => {
             for (let i = 0; i < data.length; i++) {
                 if (data[i].key === key) {
@@ -143,9 +132,11 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
         }
 
         // Cập nhật orderNo cho tất cả phần tử ở cùng cấp
+        let currentOrderNo = 1; // Biến theo dõi thứ tự hiện tại
+
         const updateOrderNo = (items) => {
-            items.forEach((item, index) => {
-                item.orderNo = index + 1; // Cập nhật thứ tự dựa trên vị trí mới
+            items.forEach((item) => {
+                item.orderNo = currentOrderNo++; // Cập nhật thứ tự dựa trên vị trí hiện tại
                 if (item.children && item.children.length > 0) {
                     updateOrderNo(item.children); // Đệ quy cho các phần tử con
                 }

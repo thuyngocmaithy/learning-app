@@ -7,7 +7,6 @@ import { Menu } from 'antd';
 import Sider from 'antd/es/layout/Sider';
 import {
     MenuOutlined,
-    SettingFilled,
 } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -16,7 +15,6 @@ import {
 import listIcon from '../../../assets/icons/listIconAnt';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getWhere } from '../../../services/permissionFeatureService';
-import routes from '../../../config/routes';
 
 const cx = classNames.bind(styles);
 
@@ -47,6 +45,9 @@ function Sidebar() {
         const treeData = [];
         const parentCache = {}; // Cache để tránh gọi fetchParentData nhiều lần cho cùng một parentId    
 
+        // Sắp xếp danh sách theo orderNo
+        const sortedList = list.sort((a, b) => a.feature.orderNo - b.feature.orderNo);
+        console.log(sortedList);
 
         function findNodeByFeatureId(treeData, featureId) {
             for (const node of treeData) {
@@ -62,7 +63,7 @@ function Sidebar() {
             }
             return null; // Không tìm thấy node với featureId
         }
-        for (const item of list) {
+        for (const item of sortedList) {
             const { feature } = item;
 
             const parentId = feature.parent?.featureId;
@@ -141,6 +142,7 @@ function Sidebar() {
         treeData.forEach(node => sortAndCleanTree(node));
         // Sắp xếp các nút cấp cao nhất theo orderNo
         treeData.sort((a, b) => a.orders - b.orders);
+        console.log(treeData);
 
         return treeData;
     };
@@ -151,8 +153,8 @@ function Sidebar() {
         const fetchData = async () => {
             try {
                 const response = await getWhere({ permission: permission });
-                if (response.status === 'success') {
-                    const tree = await buildTreeData(response.data);
+                if (response.status === 200) {
+                    const tree = await buildTreeData(response.data.data);
                     setMenu(tree);
                 }
             } catch (error) {
