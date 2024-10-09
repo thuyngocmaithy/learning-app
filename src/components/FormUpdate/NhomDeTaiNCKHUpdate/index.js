@@ -3,12 +3,11 @@ import { Input, InputNumber, Select, Form, message } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-
-import { getAllFaculty } from '../../../services/facultyService';
 import { getUserById } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { getAllFaculty } from '../../../services/facultyService';
 
 const { TextArea } = Input;
 
@@ -25,6 +24,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const [statusOptions, setStatusOptions] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const { userId } = useContext(AccountLoginContext);
+    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [selectedFaculty, setSelectedFaculty] = useState(null);
 
     const statusType = 'Tiến độ nhóm đề tài NCKH';
 
@@ -52,6 +53,36 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         fetchStatusByType();
     }, [statusType, selectedStatus]);
 
+    // Fetch data khi component được mount
+    //lấy danh sách các khoa ra ngoài thẻ select
+    useEffect(() => {
+        const fetchFaculties = async () => {
+            const response = await getAllFaculty();
+            if (response && response.data) {
+                const options = response.data.map((faculty) => ({
+                    value: faculty.facultyId,
+                    label: faculty.facultyName,
+                }));
+                setFacultyOptions(options);
+
+                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
+                if (selectedFaculty) {
+                    const selectedOption = options.find((option) => option.value === selectedFaculty);
+                    if (selectedOption) {
+                        setSelectedFaculty(selectedOption.value);
+                    }
+                }
+            }
+        };
+
+        fetchFaculties();
+    }, [selectedFaculty]);
+
+    const handleFacultySelect = (value) => {
+        setSelectedFaculty(value);
+    };
+
+
     useEffect(() => {
         if (showModal && isUpdate) {
             form.setFieldsValue({
@@ -62,6 +93,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 startYear: showModal.startYear,
                 finishYear: showModal.finishYear,
             });
+            setSelectedFaculty(showModal.faculty.facultyId);
             setSelectedStatus(showModal.status.statusId);
         } else {
             form.resetFields();
@@ -76,8 +108,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     };
 
 
-
-
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
@@ -85,7 +115,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 scientificResearchGroupName: values.scientificResearchGroupName,
                 statusId: selectedStatus,
                 startYear: values.startYear,
-                finishYear: values.finishYear
+                finishYear: values.finishYear,
+                facultyId: selectedFaculty,
             };
 
             let response;
@@ -100,7 +131,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     createUserId: createUserId,
                     lastModifyUserId: createUserId
                 }
-
                 response = await createSRGroup(scientificResearchGroupData);
             }
 
@@ -131,7 +161,23 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 >
                     <Input />
                 </FormItem>
-
+                <FormItem
+                    name="faculty"
+                    label="Khoa"
+                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn khoa"
+                        optionFilterProp="children"
+                        onChange={handleFacultySelect}
+                        value={selectedFaculty}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={facultyOptions}
+                    />
+                </FormItem>
 
                 <FormItem
                     name="status"

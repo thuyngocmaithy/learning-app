@@ -1,11 +1,15 @@
-import React, { useState, memo } from 'react';
-import { Input, Form, message } from 'antd';
+import React, { useContext, useState, memo, useEffect } from 'react';
+import { Form, message, Select } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getImageAccount } from '../../../services/userService';
-
-const { Search } = Input;
+import { getAllUser, getUserById } from '../../../services/userService';
+import { getSRById } from '../../../services/scientificResearchService';
+import { useLocation } from 'react-router-dom';
+import { createFollowerDetail } from '../../../services/followerDetailService';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { useSocketNotification } from '../../../context/SocketNotificationContext';
+import notifications from '../../../config/notifications';
 
 const FollowerUpdate = memo(function FollowerUpdate({
     title,
@@ -15,29 +19,41 @@ const FollowerUpdate = memo(function FollowerUpdate({
     reLoad
 }) {
     const [form] = useForm();
-    const [isLoadingSearch, setIsLoadingSearch] = useState(false);
-    const [searchError, setSearchError] = useState(null); // Trạng thái để lưu thông báo lỗi
-    const [searchSuccess, setSearchSuccess] = useState(null); // Trạng thái để lưu thông báo thành công
-    const [successValidate, setSuccessValidate] = useState(false);
-    const accessToken = JSON.parse(localStorage.getItem('userLogin')).token;
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [userOptions, setUserOptions] = useState([]);
+    const { userId } = useContext(AccountLoginContext);
+    const { sendNotification } = useSocketNotification();
 
-    const onSearch = async (value) => {
-        setIsLoadingSearch(true);
-        setSearchError(null); // Đặt lỗi thành null trước khi tìm kiếm
-        setSearchSuccess(null); // Đặt thành công thành null trước khi tìm kiếm
-        try {
-            const responseImage = await getImageAccount(accessToken, value);
-            if (responseImage.data.code !== 200) {
-                setSearchError("Không tìm thấy mã người dùng");
-            } else {
-                setSearchSuccess("Mã người dùng hợp lệ");
+    // Xử lý lấy url    
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+
+    //Lấy SRID
+    const SRIdFromUrl = queryParams.get('scientificResearch');
+
+    // Fetch danh sách người dùng
+    useEffect(() => {
+        const fetchStudent = async () => {
+            try {
+                const response = await getAllUser()
+                if (response.status === "success" && response.data) {
+                    const options = response.data.map((student) => ({
+                        value: student.userId,
+                        label: `${student.userId} - ${student.fullname}`,
+                    }));
+                    setUserOptions(options);
+                    // Nếu có giá trị đã chọn, set lại giá trị đó
+                    if (selectedUser) {
+                        setSelectedUser(selectedUser);
+                    }
+                }
+            } catch (error) {
+                console.error(' [ DeTaiNCKHRegister - fetchStudent - Error ] :', error);
             }
-        } catch (error) {
-            setSearchError("Đã xảy ra lỗi khi tìm kiếm");
-        } finally {
-            setIsLoadingSearch(false);
-        }
-    };
+        };
+
+        fetchStudent();
+    }, [selectedUser]);
 
     const handleCloseModal = () => {
         if (showModal !== false) {
@@ -45,20 +61,50 @@ const FollowerUpdate = memo(function FollowerUpdate({
         }
     };
 
+    const handleSendNotification = async (SR) => {
+        try {
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getNCKHNotification('follow', SR, user.data);
+
+            ListNotification.forEach(async (itemNoti) => {
+                await sendNotification(itemNoti.toUser, itemNoti);
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    };
+
+
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            console.log(values);
 
+            const followerData = {
+                scientificResearchId: SRIdFromUrl,
+                userId: values.userId,
+            }
+
+            const responseAdd = await createFollowerDetail(followerData);
+            if (responseAdd) {
+                message.success(`Thêm người theo dõi thành công`);
+                // Thêm thông báo cho user được add follow
+                const user = await getUserById(values.userId);
+                const SR = await getSRById(SRIdFromUrl);
+                const dataSendNoti = { ...SR.data, toUser: user.data }
+                handleSendNotification(dataSendNoti);
+            }
 
         } catch (error) {
-            // Xử lý lỗi khi validateFields
-            console.error('Có lỗi khi xác thực các trường:', error);
+            console.error("Lỗi thêm người theo dõi: " + error);
+        }
+        finally {
+            if (reLoad) reLoad();
         }
     };
 
     return (
         <Update
+            form={form}
             title={title}
             isUpdate={isUpdate}
             showModal={showModal !== false}
@@ -67,16 +113,26 @@ const FollowerUpdate = memo(function FollowerUpdate({
         >
             <Form form={form}>
                 <FormItem
-                    name="userId"
-                    label="Mã người dùng"
-                    rules={[{ required: true, message: 'Vui lòng nhập mã người dùng' }]}
-                    help={searchError || searchSuccess} // Hiển thị thông báo lỗi hoặc thành công
-                    validateStatus={searchError ? 'error' : searchSuccess ? 'success' : undefined} // Xác định trạng thái của FormItem
+                    label={"Người dùng"}
+                    name={"userId"}
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Vui lòng chọn thành viên',
+                        }
+                    ]}
                 >
-                    <Search
-                        placeholder="Nhập mã người dùng để tìm kiếm"
-                        loading={isLoadingSearch}
-                        onSearch={onSearch}
+                    <Select
+                        showSearch
+                        placeholder="Chọn sinh viên"
+                        optionFilterProp="children"
+                        value={selectedUser}
+                        onChange={(value) => setSelectedUser(value)}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={userOptions}
+                        style={{ width: '250px' }}
                     />
                 </FormItem>
             </Form>

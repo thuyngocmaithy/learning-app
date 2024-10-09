@@ -38,7 +38,7 @@ const ChucNangDetail = memo(function ChucNangDetail({
                 </FormItem>
 
                 <FormItem label={'Biểu tượng'} name="icon">
-                    <p><IconComponent /></p>
+                    <p>{IconComponent ? <IconComponent /> : null}</p>
                 </FormItem>
             </div>
         </Detail>

@@ -23,7 +23,6 @@ const cx = classNames.bind(styles);
 
 
 function DeTaiNCKH() {
-    const [list, setList] = useState([]);
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
@@ -201,7 +200,7 @@ function DeTaiNCKH() {
             title: 'Danh sách đề tài',
             children: (
                 <TableCustomAnt
-                    height={'350px'}
+                    height={'400px'}
                     columns={columns(setShowModalUpdate)}
                     data={data}
                     setSelectedRowKeys={setSelectedRowKeys}
@@ -258,6 +257,7 @@ function DeTaiNCKH() {
             await deleteSRs(selectedRowKeys);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
+            listRegisterscientificResearchJoined();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
 
             message.success('Xoá thành công');
@@ -278,7 +278,7 @@ function DeTaiNCKH() {
                 SRGId={SRGIdFromUrl}
             />
         );
-    }, [showModalUpdate, isUpdate]);
+    }, [showModalUpdate, isUpdate, SRGIdFromUrl]);
 
     const DeTaiNCKHListRegisterMemoized = useMemo(() => {
         return (

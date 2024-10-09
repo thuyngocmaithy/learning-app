@@ -6,7 +6,7 @@ import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Update({ form, title = '', children, isUpdate, hideFooter = false, width = "auto", showModal, onClose, onUpdate }) {
+function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFooter = false, width = "auto", showModal, onClose, onUpdate, ...props }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -21,27 +21,26 @@ function Update({ form, title = '', children, isUpdate, hideFooter = false, widt
     }, [onClose]);
 
     const footer = useMemo(() => {
-        return isUpdate
+        return isUpdate || fullTitle
             ? [
                 <ButtonCustom key={'save'} primary small onClick={onUpdate}>
                     Lưu
                 </ButtonCustom>,
             ]
             : [
-                <ButtonCustom key={'saveClose'} outline small onClick={() => {
-                    onUpdate();
-                    if (form)
-                        form.resetFields();
-                }}>
+                <ButtonCustom key={'saveClose'} outline small
+                    onClick={async () => {
+                        await onUpdate();  // Đảm bảo rằng onUpdate được gọi và hoàn thành
+                        if (form) form.resetFields();  // Reset form sau khi hoàn thành onUpdate
+                    }}>
                     Lưu & Nhập tiếp
-                </ButtonCustom>,
+                </ButtonCustom >,
                 <ButtonCustom
                     key={'saveCopy'}
                     className={cx('btnSaveCopy')}
                     primary
                     small
                     onClick={onUpdate}
-                //   disabled={isSubmitting};
                 >
                     Lưu & Sao chép
                 </ButtonCustom>,
@@ -53,10 +52,11 @@ function Update({ form, title = '', children, isUpdate, hideFooter = false, widt
             className={cx('modal-add')}
             centered
             open={open}
-            title={isUpdate ? `Cập nhật ${title}` : `Tạo mới ${title}`}
+            title={fullTitle ? fullTitle : isUpdate ? `Cập nhật ${title}` : `Tạo mới ${title}`}
             onCancel={handleCancel}
             footer={hideFooter ? null : footer}
             width={width}
+            {...props}
         >
             {children}
         </Modal>

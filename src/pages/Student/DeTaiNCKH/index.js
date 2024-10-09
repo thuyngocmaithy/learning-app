@@ -5,8 +5,8 @@ import { Breadcrumb, Card, List, message, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getBySRGId, getBySRGIdAndCheckApprove } from '../../../services/scientificResearchService';
-import { deleteSRUByUserIdAndSRId, getBySRId, getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
+import { getBySRGIdAndCheckApprove } from '../../../services/scientificResearchService';
+import { deleteSRUByUserIdAndSRId, getWhere } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -15,6 +15,7 @@ import { useSocketNotification } from '../../../context/SocketNotificationContex
 import { getUserById } from '../../../services/userService';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
+import notifications from '../../../config/notifications';
 
 const cx = classNames.bind(styles);
 
@@ -81,7 +82,7 @@ function DeTaiNCKH() {
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGId({ userId: userId, srgroupId: SRGIdFromUrl });
+            const response = await getWhere({ userId: userId, srgroupId: SRGIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
@@ -102,14 +103,90 @@ function DeTaiNCKH() {
         }
     }
     useEffect(() => {
-
         getSRGName();
     }, [])
-    useEffect(() => {
 
+    useEffect(() => {
         checkRegisterscientificResearch();
         fetchscientificResearchs();
     }, [showModalRegister]);
+
+
+    const handleCancelNotification = async () => {
+        const scientificResearchCancel = scientificResearchCancelRef.current;
+        try {
+            let listMember = [];
+            const SRU = await getWhere({ userId: userId, srId: scientificResearchCancel.scientificResearchId });
+
+            if (SRU.data.data[0].group !== 0) {
+                const listSRU = await getWhere({ group: SRU.data.data[0].group })
+                listMember = listSRU.data.data
+                    .filter((SRU) => SRU.user.userId !== userId)
+                    .map((SRU) => SRU.user);
+            }
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getNCKHNotification('register', scientificResearchCancel, user.data, listMember);
+
+            ListNotification.map(async (itemNoti) => {
+                await deleteNotification(itemNoti.toUser, itemNoti);
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    };
+
+    // Hàm xử lý hủy đăng ký đề tài với xác nhận
+    const handleCancelWithConfirm = async () => {
+        if (scientificResearchCancelRef.current) {
+            try {
+                //xóa thông báo
+                await handleCancelNotification();
+                // Xóa danh sách đăng ký trong bảng SGU
+                const responseCancel = await deleteSRUByUserIdAndSRId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
+                if (responseCancel) {
+                    message.success('Hủy đăng ký thành công');
+                    // Cập nhật danh sách đề tài đã đăng ký
+                    await checkRegisterscientificResearch();
+                    await fetchscientificResearchs(); // Cập nhật danh sách đề tài
+
+
+                }
+            } catch (error) {
+                message.error('Hủy đăng ký thất bại');
+            } finally {
+                scientificResearchCancelRef.current = null // Reset scientificResearchCancel sau khi xử lý
+            }
+        } else {
+            message.error('đề tài không hợp lệ');
+        }
+    };
+
+    const DeTaiNCKHDetailMemoized = useMemo(() => (
+        <DeTaiNCKHDetail
+            title={'đề tài nghiên cứu'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
+    const DeTaiNCKHRegisterMemoized = useMemo(() => (
+        <DeTaiNCKHRegister
+            title={
+                <>
+                    <p>Đăng ký đề tài nghiên cứu</p>
+                    <p className={cx("title-model-register")}>{showModalRegister.scientificResearchName}</p>
+                </>
+            }
+            showModal={showModalRegister}
+            setShowModal={setShowModalRegister}
+        />
+    ), [showModalRegister]);
+
+    // Set tab được chọn vào state 
+    const handleTabClick = (index) => {
+        setTabActive(index)
+    };
+
 
     const ITEM_TABS = [
         {
@@ -203,97 +280,6 @@ function DeTaiNCKH() {
             ),
         },
     ];
-
-    const handleCancelNotification = async () => {
-        const scientificResearchCancel = scientificResearchCancelRef.current;
-
-        try {
-            const user = await getUserById(userId)
-            const ListNotification = [
-                {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
-                    toUser: scientificResearchCancel.createUser,
-                    createUser: user.data,
-                },
-                {
-                    content: `Sinh viên ${userId} - ${user.data.fullname} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
-                    toUser: scientificResearchCancel.instructor,
-                    createUser: user.data,
-                }
-            ];
-
-            if (scientificResearchCancel.lastModifyUser &&
-                scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.createUser.id &&
-                scientificResearchCancel.lastModifyUser.id !== scientificResearchCancel.instructor.id) {
-                ListNotification.push({
-                    content: `Sinh viên ${userId} đăng ký tham gia đề tài ${scientificResearchCancel.scientificResearchName}`,
-                    toUser: scientificResearchCancel.lastModifyUser,
-                    createUser: user.data,
-                });
-            }
-
-            ListNotification.map(async (item) => {
-                await deleteNotification(item.toUser, item);
-            })
-
-        } catch (err) {
-            console.error(err)
-        }
-    };
-
-
-    // Hàm xử lý hủy đăng ký đề tài với xác nhận
-    const handleCancelWithConfirm = async () => {
-        if (scientificResearchCancelRef.current) {
-            try {
-                const responseCancel = await deleteSRUByUserIdAndSRId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
-                if (responseCancel) {
-                    message.success('Hủy đăng ký thành công');
-                    // Cập nhật danh sách đề tài đã đăng ký
-                    await checkRegisterscientificResearch();
-                    await fetchscientificResearchs(); // Cập nhật danh sách đề tài
-
-                    //xóa thông báo
-                    handleCancelNotification();
-                }
-
-
-            } catch (error) {
-                message.error('Hủy đăng ký thất bại');
-            } finally {
-                scientificResearchCancelRef.current = null // Reset scientificResearchCancel sau khi xử lý
-            }
-        } else {
-            message.error('đề tài không hợp lệ');
-        }
-    };
-
-    const DeTaiNCKHDetailMemoized = useMemo(() => (
-        <DeTaiNCKHDetail
-            title={'đề tài nghiên cứu'}
-            showModal={showModalDetail}
-            setShowModal={setShowModalDetail}
-        />
-    ), [showModalDetail]);
-
-    const DeTaiNCKHRegisterMemoized = useMemo(() => (
-        <DeTaiNCKHRegister
-            title={
-                <>
-                    <p>Đăng ký đề tài nghiên cứu</p>
-                    <p className={cx("title-model-register")}>{showModalRegister.scientificResearchName}</p>
-                </>
-            }
-            showModal={showModalRegister}
-            setShowModal={setShowModalRegister}
-        />
-    ), [showModalRegister]);
-
-    // Set tab được chọn vào state 
-    const handleTabClick = (index) => {
-        setTabActive(index)
-    };
-
 
     return (
         <div className={cx('wrapper')}>

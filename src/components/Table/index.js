@@ -71,7 +71,8 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
 
     // Update selection changes
     useEffect(() => {
-        onSelectionChange(selectedSubjects);
+        if (onSelectionChange)
+            onSelectionChange(selectedSubjects);
     }, [selectedSubjects, onSelectionChange]);
 
     // Helper function to get semester index

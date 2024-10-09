@@ -15,7 +15,8 @@ function TableCustomAnt({
     selectedRowKeys,
     keyIdChange,
     loading,
-    isHaveRowSelection = true
+    isHaveRowSelection = true,
+    isPagination = true,
 }) {
     const rowSelection = {
         selectedRowKeys,
@@ -59,6 +60,7 @@ function TableCustomAnt({
                     y: height,
                 }}
                 loading={loading}
+                pagination={isPagination}
             />
         </div>
     );

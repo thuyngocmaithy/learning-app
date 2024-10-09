@@ -323,11 +323,25 @@ body {
         margin-top: 15px;
     }
 
+    .modal-register .ant-space-item {
+        width: 100%;
+        display: contents;
+    }
+
+
     // FORM ITEM
     :where(.css-dev-only-do-not-override-17seli4).ant-form-item .ant-form-item-label {
         width: 160px;
         margin-right: 10px;
         text-align: left;
+    }
+
+    :where(.css-dev-only-do-not-override-17seli4).ant-form-item .ant-form-item-label>label {
+        height: fit-content;
+    }
+
+    .form-item-label {
+        white-space: pre-wrap;
     }
 
     .ant-form-item-control {

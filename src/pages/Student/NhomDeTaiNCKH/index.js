@@ -5,7 +5,7 @@ import { Card, List, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getSRUByUserIdAndSRGId } from '../../../services/scientificResearchUserService';
+import { getSRUByUserIdAndSRGId, getWhere } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -53,7 +53,7 @@ function NhomDeTaiNCKH() {
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getSRUByUserIdAndSRGId({ userId: userId });
+            const response = await getWhere({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
