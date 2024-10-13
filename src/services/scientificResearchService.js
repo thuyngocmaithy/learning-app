@@ -53,6 +53,16 @@ export const updateSRById = async (scientificResearchId, scientificResearchData)
     }
 }
 
+export const updateSRByIds = async (scientificResearchIds, scientificResearchData) => {
+    try {
+        const response = await api.put(`/scientificResearchs/updateSRMulti/${scientificResearchIds}`, scientificResearchData);
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearchServive - updatescientificResearchByIds - error] : ', error);
+        throw error;
+    }
+}
+
 
 export const getBySRGId = async (scientificResearchGroupId) => {
     try {

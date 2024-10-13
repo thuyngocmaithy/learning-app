@@ -8,13 +8,14 @@ import Sider from 'antd/es/layout/Sider';
 import {
     MenuOutlined,
 } from '@ant-design/icons';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     getById,
 } from '../../../services/featureService';
 import listIcon from '../../../assets/icons/listIconAnt';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getWhere } from '../../../services/permissionFeatureService';
+import routes from '../../../config/routes';
 
 const cx = classNames.bind(styles);
 
@@ -27,6 +28,7 @@ function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const [openKeys, setOpenKeys] = useState([]);
     let location = useLocation();
+    const navigate = useNavigate();
     const [current, setCurrent] = useState();
 
     const fetchParentData = async (parentId) => {
@@ -47,7 +49,6 @@ function Sidebar() {
 
         // Sắp xếp danh sách theo orderNo
         const sortedList = list.sort((a, b) => a.feature.orderNo - b.feature.orderNo);
-        console.log(sortedList);
 
         function findNodeByFeatureId(treeData, featureId) {
             for (const node of treeData) {
@@ -96,7 +97,7 @@ function Sidebar() {
                     const IconComponentChildren = feature.icon ? listIcon[feature.icon] : null;
                     // Thêm chức năng con vào danh sách children của cha
                     parentNode.children.push({
-                        label: <Link to={config.routes[feature.keyRoute]}>{feature.featureName}</Link>,
+                        label: <Link to={config.routes[feature.keyRoute]} onClick={handleClickA}>{feature.featureName}</Link>,
                         key: config.routes[feature.keyRoute],
                         featureid: feature.featureId,
                         icon: feature.icon ? <IconComponentChildren /> : <MenuOutlined />,
@@ -111,7 +112,7 @@ function Sidebar() {
                 treeData.push({
                     key: config.routes[feature.keyRoute],
                     featureid: feature.featureId,
-                    label: <Link to={config.routes[feature.keyRoute]}>{feature.featureName}</Link>,
+                    label: <Link to={config.routes[feature.keyRoute]} onClick={handleClickA}>{feature.featureName}</Link>,
                     icon: feature.icon ? <IconComponentFree /> : <MenuOutlined />,
                     orders: feature.orderNo,
                     children: [],
@@ -142,7 +143,6 @@ function Sidebar() {
         treeData.forEach(node => sortAndCleanTree(node));
         // Sắp xếp các nút cấp cao nhất theo orderNo
         treeData.sort((a, b) => a.orders - b.orders);
-        console.log(treeData);
 
         return treeData;
     };
@@ -224,7 +224,25 @@ function Sidebar() {
 
     // Xử lý khi người dùng nhấn vào một menu
     const handleClick = (e) => {
+        const isValidRoute = Object.values(routes).includes(e.key);
+        if (!isValidRoute) {
+            e.preventDefault(); // Ngăn chặn hành động click nếu route không hợp lệ
+            alert('Đường dẫn không tồn tại');
+        } else {
+            navigate(e.key);
+
+        }
         setCurrent(e.key);
+    };
+
+    // Xử lý khi người dùng nhấn vào thẻ a trên menu
+    const handleClickA = (e) => {
+        const isValidRoute = Object.values(routes).includes(e.key);
+        if (!isValidRoute) {
+            e.preventDefault(); // Ngăn chặn hành động click nếu route không hợp lệ        
+        } else {
+            navigate(e.key);
+        }
     };
 
     return (

@@ -1,4 +1,6 @@
 .wrapper {
+    width: 5rem;
+    height: 5rem;
     padding: 9px 12px;
     font-size: 22px;
     border-radius: 10px;
@@ -15,4 +17,8 @@
         background-color: rgb(180, 193, 245);
         box-shadow: var(--box-shadow-hover-button);
     }
+}
+
+.icon {
+    color: var(--blue-900);
 }

@@ -7,11 +7,13 @@ import config from './config';
 import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';
+import { PermissionDetailContext } from './context/PermissionDetailContext';
 
 function App() {
     const { userId, permission } = useContext(AccountLoginContext);
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
+    const { updatePermissionDetails } = useContext(PermissionDetailContext);
 
     const findKeyByValue = (obj, value) => {
         return Object.keys(obj).find(key => obj[key] === value);
@@ -21,17 +23,19 @@ function App() {
     const getListFeature = async () => {
         try {
             const response = await getWhere({ permission: permission });
-            console.log(response);
-
             if (response.status === 200) {
+                const features = response.data.data.map((item) => ({
+                    feature: item.feature,
+                    permissionDetail: item.permissionDetail,
+                }));
                 setListFeature((prevListFeature) => [
                     ...prevListFeature,
-                    ...response.data.data.map((item) => item.feature),
+                    ...features
                 ]);
 
+                updatePermissionDetails(features);
+
             }
-
-
         } catch (error) {
             console.error(error);
         }
@@ -39,6 +43,7 @@ function App() {
             setIsLoading(false)
         }
     };
+
     useEffect(() => {
         setIsLoading(true);
         getListFeature();
@@ -88,13 +93,32 @@ function App() {
                         if (userId !== 0) {
                             if (permission !== null) {
                                 // Kiểm tra xem keyRoute có trong danh sách các tính năng được phép không
-                                if (listFeature.some(data => data.keyRoute === key)) {
-                                    element = <Layout>{route.thesis ? <Page thesis={true} /> : <Page />}</Layout>;
-                                } else {
+                                const matchedFeature = listFeature.find(data => data.feature.keyRoute === key);
+                                if (matchedFeature) {
+                                    element = (
+                                        <Layout>
+                                            {route.thesis
+                                                ? <Page thesis={true} featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />
+                                                : <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />}
+                                        </Layout>
+                                    );
+                                }
+                                else {
                                     // Kiểm tra điều kiện phụ thuộc URL
-                                    if (route.urlDepend && listFeature.some(data => data.keyRoute === route.urlDepend)) {
-                                        element = <Layout>{route.thesis ? <Page thesis={true} /> : <Page />}</Layout>;
-                                    } else {
+                                    const matchedFeature = route.urlDepend && listFeature.find(data => data.feature.keyRoute === route.urlDepend);
+
+                                    if (matchedFeature) {
+                                        // Nếu tìm thấy phần tử phù hợp, tạo phần tử Layout chứa Page
+                                        element = (
+                                            <Layout>
+                                                {route.thesis
+                                                    ? <Page thesis={true} featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} /> // Nếu có thesis, truyền tham số thesis
+                                                    : <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />
+                                                }
+                                            </Layout>
+                                        );
+                                    }
+                                    else {
                                         // Nếu không có quyền, hiển thị thông báo Không có quyền truy cập
                                         element = <ResultCustomAnt />;
                                     }

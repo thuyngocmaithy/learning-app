@@ -7,14 +7,14 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
 import { deleteScientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
 import config from '../../../../config';
-import { getSRUByUserIdAndSRGId } from '../../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
-import { getWhere } from '../../../../services/scientificResearchService';
+import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles);
 
@@ -29,10 +29,18 @@ function NhomDeTaiNCKH() {
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isToolbar, setIsToolbar] = useState(true);
-
-    // Xử lý active tab từ url
     const navigate = useNavigate();
     const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
+    // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
     const [tabActive, setTabActive] = useState(getInitialTabIndex());
 
@@ -114,21 +122,28 @@ function NhomDeTaiNCKH() {
             align: 'center',
             render: (_, record) => (
                 <div className={cx('action-item')}>
-                    <ButtonCustom className={cx('btnDetail')} outline verysmall to={`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`}>
+                    <ButtonCustom
+                        className={cx('btnDetail')}
+                        outline
+                        verysmall
+                        to={`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`}
+                    >
                         Danh sách
                     </ButtonCustom>
-                    <ButtonCustom
-                        className={cx('btnEdit')}
-                        leftIcon={<EditOutlined />}
-                        primary
-                        verysmall
-                        onClick={() => {
-                            setShowModalUpdate(record);
-                            setIsUpdate(true)
-                        }}
-                    >
-                        Sửa
-                    </ButtonCustom>
+                    {permissionDetailData.isEdit &&
+                        <ButtonCustom
+                            className={cx('btnEdit')}
+                            leftIcon={<EditOutlined />}
+                            primary
+                            verysmall
+                            onClick={() => {
+                                setShowModalUpdate(record);
+                                setIsUpdate(true)
+                            }}
+                        >
+                            Sửa
+                        </ButtonCustom>
+                    }
                 </div>
             ),
         }
@@ -148,7 +163,7 @@ function NhomDeTaiNCKH() {
 
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getWhere({ instructor: userId });
+            const response = await getWhereSR({ instructor: userId });
             if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
@@ -244,7 +259,6 @@ function NhomDeTaiNCKH() {
     ];
 
     return (
-
         <div className={cx('wrapper')}>
             <div className={cx('conatainer-header')}>
                 <div className={cx('info')}>
@@ -253,7 +267,7 @@ function NhomDeTaiNCKH() {
                     </span>
                     <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
                 </div>
-                {isToolbar ? (
+                {isToolbar && (
                     <div className={cx('wrapper')}>
                         <Toolbar
                             type={'Tạo mới'}
@@ -261,12 +275,16 @@ function NhomDeTaiNCKH() {
                                 setShowModalUpdate(true);
                                 setIsUpdate(false);
                             }}
+                            isVisible={permissionDetailData.isAdd}
                         />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('đề tài nghiên cứu', handleDelete)} />
-                        <Toolbar type={'Nhập file Excel'} />
-                        <Toolbar type={'Xuất file Excel'} />
+                        <Toolbar
+                            type={'Xóa'}
+                            onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
+                            isVisible={permissionDetailData.isDelete} />
+                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} />
+                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
                     </div>
-                ) : null}
+                )}
             </div>
 
             <Tabs

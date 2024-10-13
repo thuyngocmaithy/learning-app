@@ -8,7 +8,7 @@ import config from '../../../../config';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 import KhoaLuanUpdate from '../../../../components/FormUpdate/KhoaLuanUpdate';
 import { getAllThesis, deleteThesis } from '../../../../services/thesisService';
 
@@ -236,7 +236,7 @@ function KhoaLuan() {
                                 setSelectedThesis(null);
                             }}
                         />
-                        <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('khóa luận', handleDelete)} />
+                        <Toolbar type={'Xóa'} onClick={() => deleteConfirm('khóa luận', handleDelete)} />
                         <Toolbar type={'Nhập file Excel'} />
                         <Toolbar type={'Xuất file Excel'} />
                     </div>

@@ -130,8 +130,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
             setSelectedSupervisor(selectedThesis.supervisor.id);
             setSelectedStatus(selectedThesis.status.statusId);
             setSelectedMemberCount(selectedThesis.registrationCount);
-        } else {
-            form.resetFields();
         }
     }, [selectedThesis, isUpdate, form]);
 

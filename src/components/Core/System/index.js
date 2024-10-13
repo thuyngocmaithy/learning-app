@@ -6,7 +6,7 @@ import Toolbar from '../Toolbar';
 import FollowerUpdate from '../../FormUpdate/FollowerUpdate';
 import noImage from '../../../assets/images/no-image.png';
 import { CloseOutlined } from '@ant-design/icons';
-import { showDeleteConfirm } from '../Delete';
+import { deleteConfirm } from '../Delete';
 import { deleteFollowerDetail } from '../../../services/followerDetailService';
 
 const cx = classNames.bind(styles);
@@ -100,7 +100,7 @@ function System({ dataInfoSystem, dataFollower, reLoad }) {
                                             <CloseOutlined
                                                 onClick={() => {
                                                     followerCancelRef.current = item.id;
-                                                    setTimeout(() => showDeleteConfirm('người theo dõi', handleRemoveFollower, false), 0)
+                                                    setTimeout(() => deleteConfirm('người theo dõi', handleRemoveFollower, false), 0)
                                                 }}
                                             />
                                         </div>

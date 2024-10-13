@@ -1,15 +1,15 @@
-// src/components/Toolbar/index.js
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Modal } from 'antd';
 
 const { confirm } = Modal;
-export const showDeleteConfirm = (title, onDelete, isCancelRegister = false, isCancelApprove = false) => {
-    const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1);
+
+// Hàm confirm chung
+const showConfirm = ({ title, content, okText, onOk }) => {
     confirm({
-        title: isCancelApprove ? `Hủy duyệt ${title}` : isCancelRegister ? `Hủy đăng ký ${title}` : `Xóa ${title}`,
+        title: title,
         icon: <ExclamationCircleFilled style={{ color: 'red', width: '20px' }} />,
-        content: isCancelApprove ? `Xác nhận hủy duyệt ${title}` : isCancelRegister ? `Xác nhận hủy đăng ký ${title}` : `${capitalizedTitle} đã chọn sẽ được xóa khỏi hệ thống.`,
-        okText: isCancelApprove ? `Hủy duyệt` : isCancelRegister ? 'Hủy đăng ký' : 'Xóa',
+        content: content,
+        okText: okText,
         cancelText: 'Hủy',
         centered: true,
         okButtonProps: {
@@ -21,7 +21,59 @@ export const showDeleteConfirm = (title, onDelete, isCancelRegister = false, isC
             },
         },
         onOk() {
-            if (onDelete) onDelete();
+            if (onOk) onOk();
         },
     });
 };
+
+// Confirm dùng để xóa
+export const deleteConfirm = (title, onDelete) => {
+    showConfirm({
+        title: `Xóa ${title}`,
+        content: `${title.charAt(0).toUpperCase() + title.slice(1)} đã chọn sẽ được xóa khỏi hệ thống.`,
+        okText: 'Xóa',
+        onOk: onDelete,
+    });
+};
+
+// Confirm dùng để hủy đăng ký
+export const cancelRegisterConfirm = (title, onCancelRegister) => {
+    showConfirm({
+        title: `Hủy đăng ký ${title}`,
+        content: `Xác nhận hủy đăng ký ${title}.`,
+        okText: 'Hủy đăng ký',
+        onOk: onCancelRegister,
+    });
+};
+
+// Confirm dùng để hủy duyệt
+export const cancelApproveConfirm = (title, onCancelApprove) => {
+    showConfirm({
+        title: `Hủy duyệt ${title}`,
+        content: `Xác nhận hủy duyệt ${title}.`,
+        okText: 'Hủy duyệt',
+        onOk: onCancelApprove,
+    });
+};
+
+
+// Confirm dùng để Disable
+export const disableConfirm = (title, onDisable) => {
+    showConfirm({
+        title: `Ẩn ${title}`,
+        content: `Xác nhận ẩn ${title}.`,
+        okText: 'Ẩn',
+        onOk: onDisable,
+    });
+};
+
+// Confirm dùng để Enable
+export const enableConfirm = (title, onEnable) => {
+    showConfirm({
+        title: `Hiển thị ${title}`,
+        content: `Xác nhận hiển thị ${title}.`,
+        okText: 'Hiển thị',
+        onOk: onEnable,
+    });
+};
+

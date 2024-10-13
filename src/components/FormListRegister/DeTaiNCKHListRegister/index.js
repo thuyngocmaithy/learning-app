@@ -8,7 +8,7 @@ import { getUserById } from '../../../services/userService';
 import { updateSRUById } from '../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { showDeleteConfirm } from '../../Core/Delete';
+import { cancelRegisterConfirm } from '../../Core/Delete';
 import notifications from '../../../config/notifications';
 import { deleteFollowerDetailBySRIdAndUserId } from '../../../services/followerDetailService';
 
@@ -59,7 +59,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                 {groupItems.isApprove
                                     ? <Button className={cx("btn-cancel")} verysmall outline key="list-loadmore-more" onClick={() => {
                                         scientificResearchCancelApproveRef.current = groupItems;
-                                        setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelApprove, false, true), 0);
+                                        setTimeout(() => cancelRegisterConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                     }}>
                                         Hủy duyệt
                                     </Button>
@@ -243,7 +243,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                 item.isApprove ?
                                     <Button className={cx("btn-cancel")} verysmall outline key="list-loadmore-more" onClick={() => {
                                         scientificResearchCancelApproveRef.current = item;
-                                        setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelApprove, false, true), 0);
+                                        setTimeout(() => cancelRegisterConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                     }}>Hủy duyệt</Button> :
                                     <Button verysmall primary key="list-loadmore-more" onClick={() => handleApprove(item)}>Duyệt</Button>
                             ]}

@@ -9,8 +9,6 @@ import ChucNangUpdate from '../FormUpdate/ChucNangUpdate';
 
 const cx = classNames.bind(styles)
 
-
-
 const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setShowModalDetail }) => {
     const [expandedKeys, setExpandedKeys] = useState([]);
     const [showModalFeature, setShowModalFeature] = useState(false);
@@ -63,8 +61,6 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
             const response = await getAll();
             if (response.status === 200) {
                 const tree = buildTreeData(response.data.data);
-                console.log(tree);
-
                 setTreeData(tree);
             }
         } catch (error) {
@@ -179,6 +175,7 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
         <>
             <Tree
                 checkable
+                checkStrictly
                 className="draggable-tree"
                 expandedKeys={expandedKeys}
                 draggable

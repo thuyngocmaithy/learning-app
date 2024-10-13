@@ -9,7 +9,7 @@ import { deleteFeatures, saveTreeFeature } from '../../../../services/featureSer
 import { EditOutlined } from '@ant-design/icons';
 import { message, Spin, Tabs } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 import ChucNangUpdate from '../../../../components/FormUpdate/ChucNangUpdate';
 import QuyenUpdate from '../../../../components/FormUpdate/QuyenUpdate';
 import TreeFeature from '../../../../components/TreeFeature';
@@ -72,11 +72,25 @@ function PhanQuyenChucNang() {
 
     // =======================================QUẢN LÝ CHỨC NĂNG================================================
 
+    // Hàm đệ quy để tìm và xóa phần tử con
+    const deleteChildNode = (data, keyToRemove) => {
+        return data
+            .map(item => {
+                if (item.children) {
+                    // Xóa phần tử con trong danh sách children
+                    item.children = deleteChildNode(item.children, keyToRemove);
+                }
+                // Chỉ giữ lại phần tử không trùng key
+                return item.key !== keyToRemove ? item : null;
+            })
+            .filter(Boolean); // Loại bỏ các phần tử null
+    };
+
     // Hàm xử lý xóa các chức năng đã chọn
     const handleDeleteFeature = async () => {
         try {
             setReLoadStructureFeature(false);
-            await deleteFeatures(selectedFeature); // Gọi API để xóa các hàng đã chọn
+            await deleteFeatures(selectedFeature.checked); // Gọi API để xóa các hàng đã chọn
             message.success('Xóa thành công');
             setSelectedFeature([]); // Xóa các hàng đã chọn sau khi xóa thành công
             setReLoadStructureFeature(true); // Tải lại dữ liệu
@@ -276,10 +290,10 @@ function PhanQuyenChucNang() {
                     />
                     <Toolbar type={'Xóa'} onClick={() => {
                         if (tabActive === 2) {
-                            showDeleteConfirm('chức năng', handleDeleteFeature)
+                            deleteConfirm('chức năng', handleDeleteFeature)
                         }
                         if (tabActive === 1) {
-                            showDeleteConfirm('quyền', handledeletePermissions)
+                            deleteConfirm('quyền', handledeletePermissions)
                         }
                     }
                     } />

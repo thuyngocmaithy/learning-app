@@ -429,3 +429,32 @@ export const CheckListIcon = ({ width = '3rem', height = '3rem', className }) =>
         </g>
     </svg>
 );
+
+export const DisableIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 32 32"
+        enableBackground="new 0 0 32 32"
+        id="Editable-line"
+        version="1.1"
+        xmlSpace="preserve">
+        <path d="  M16,7C9.934,7,4.798,10.776,3,16c1.798,5.224,6.934,9,13,9s11.202-3.776,13-9C27.202,10.776,22.066,7,16,7z" fill="none" id="XMLID_13_" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10" strokeWidth="2" />
+        <circle cx="16" cy="16" fill="none" id="XMLID_14_" r="5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10" strokeWidth="2" /><line fill="none" id="XMLID_15_" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10" strokeWidth="2" x1="3" x2="29" y1="3" y2="29" />
+    </svg>
+);
+
+export const EnableIcon = ({ width = '3rem', height = '3rem', className }) => (
+    <svg
+        height={height}
+        width={width}
+        className={className}
+        viewBox="0 0 32 32"
+        enableBackground="new 0 0 32 32"
+        id="Editable-line"
+        version="1.1"
+        xmlSpace="preserve">
+        <path d="  M16,7C9.934,7,4.798,10.776,3,16c1.798,5.224,6.934,9,13,9s11.202-3.776,13-9C27.202,10.776,22.066,7,16,7z" fill="none" id="XMLID_10_" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10" strokeWidth="2" />
+        <circle cx="16" cy="16" fill="none" id="XMLID_12_" r="5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10" strokeWidth="2" />
+    </svg>
+);

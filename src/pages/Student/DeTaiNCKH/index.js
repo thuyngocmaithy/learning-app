@@ -10,7 +10,7 @@ import { deleteSRUByUserIdAndSRId, getWhere } from '../../../services/scientific
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { showDeleteConfirm } from '../../../components/Core/Delete';
+import { cancelRegisterConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { getUserById } from '../../../services/userService';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -212,7 +212,7 @@ function DeTaiNCKH() {
                                         verysmall
                                         onClick={() => {
                                             scientificResearchCancelRef.current = item;
-                                            setTimeout(() => showDeleteConfirm('đề tài nghiên cứu', handleCancelWithConfirm, true), 0);
+                                            setTimeout(() => cancelRegisterConfirm('đề tài nghiên cứu', handleCancelWithConfirm), 0);
                                         }}
                                         disabled={item.approve}
                                     >

@@ -7,7 +7,7 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { deleteAccounts } from '../../../../services/accountService';
 import { getAllUser } from '../../../../services/userService';
@@ -206,7 +206,7 @@ function NguoiDung() {
                             setIsUpdate(false);
                         }}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('người dùng', handleDelete)} />
+                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('người dùng', handleDelete)} />
                     <Toolbar type={'Nhập file Excel'} />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>

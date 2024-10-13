@@ -8,6 +8,7 @@ import { getStatusByType } from '../../../services/statusService';
 import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getAllFaculty } from '../../../services/facultyService';
+import { getWhere } from '../../../services/permissionFeatureService';
 
 const { TextArea } = Input;
 
@@ -18,9 +19,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     setShowModal,
     reLoad
 }) {
-
     const [form] = useForm(); // Sử dụng hook useForm
-
     const [statusOptions, setStatusOptions] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const { userId } = useContext(AccountLoginContext);
@@ -95,8 +94,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             });
             setSelectedFaculty(showModal.faculty.facultyId);
             setSelectedStatus(showModal.status.statusId);
-        } else {
-            form.resetFields();
         }
     }, [showModal, isUpdate, form]);
 
@@ -143,6 +140,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearchGroup `, error);
         }
     };
+
 
     return (
         <Update

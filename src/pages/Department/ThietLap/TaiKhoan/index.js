@@ -7,7 +7,7 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 import TaiKhoanUpdate from '../../../../components/FormUpdate/TaiKhoanUpdate';
 import { deleteAccounts, getAllAccount } from '../../../../services/accountService';
 
@@ -141,7 +141,7 @@ function TaiKhoan() {
                             setIsUpdate(false);
                         }}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('tài khoản', handleDelete)} />
+                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('tài khoản', handleDelete)} />
                 </div>
 
             </div>
