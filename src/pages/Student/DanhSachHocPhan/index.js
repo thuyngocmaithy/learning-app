@@ -4,7 +4,7 @@ import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
 import { ListCourseActiveIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
-import { registerSubject } from '../../../services/userService';
+import { registerSubject, deleteUserRegisteredSubject } from '../../../services/userService'; // Import the delete function
 import { message } from 'antd';
 import { getUseridFromLocalStorage } from '../../../services/userService';
 
@@ -12,22 +12,40 @@ const cx = classNames.bind(styles);
 
 function DanhSachHocPhan() {
     const [selectedSubjects, setSelectedSubjects] = useState({});
+    const [registeredSubjects, setRegisteredSubjects] = useState({}); // Track registered subjects
 
     const handleSelectionChange = useCallback((newSelection) => {
         setSelectedSubjects(newSelection);
     }, []);
 
     const handleSave = async () => {
-        const registrationPromises = Object.entries(selectedSubjects).map(([subjectId, { semesterIndex }]) => {
-            const year = Math.floor(semesterIndex / 3) + 2020; // Assuming 2020 is the base year
+        const userId = getUseridFromLocalStorage();
+
+        // Create an array of promises for subject registrations and deletions
+        const registrationPromises = Object.entries(selectedSubjects).map(async ([subjectId, { semesterIndex }]) => {
+            // Calculate the new semester ID
+            const year = Math.floor(semesterIndex / 3) + 2020; // Assume 2020 is the starting year
             const semester = (semesterIndex % 3) + 1;
-            const semesterId = `${year}${semester}`;
-            return registerSubject(getUseridFromLocalStorage(), subjectId, semesterId);
+            const semesterId = `${year}${semester}`; // Format semesterId as "YYYY0S"
+
+            // Check if the subject is already registered for a different semester
+            const oldRegistration = registeredSubjects[subjectId];
+            if (oldRegistration && oldRegistration.semesterId !== semesterId) {
+                // If the user selected a different semester, delete the old registration
+                console.log(`Deleting old registration: SubjectID: ${subjectId}, Old SemesterID: ${oldRegistration.semesterId}`);
+                await deleteUserRegisteredSubject(userId, subjectId, oldRegistration.semesterId);
+            }
+
+            // Register the subject for the new semester
+            console.log(`Registering: SubjectID: ${subjectId}, SemesterID: ${semesterId}, SemesterIndex: ${semesterIndex}`);
+            return registerSubject(userId, subjectId, semesterId);
         });
 
         try {
             const results = await Promise.all(registrationPromises);
-            const successCount = results.filter(result => result && result.success).length;
+
+            // Updated code to correctly check the "success" inside the "data" object
+            const successCount = results.filter(result => result?.data?.success).length;
 
             if (successCount === registrationPromises.length) {
                 message.success('All subjects registered successfully');
@@ -39,6 +57,9 @@ function DanhSachHocPhan() {
 
             // Reset selections after registration
             setSelectedSubjects({});
+            // Update registered subjects
+            const newRegisteredSubjects = await getUserRegisteredSubjects(userId);
+            setRegisteredSubjects(newRegisteredSubjects); // Refresh the registered subjects state
         } catch (error) {
             console.error('Error registering subjects:', error);
             message.error('An error occurred while registering subjects');

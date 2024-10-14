@@ -5,7 +5,7 @@ import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
 import { GetSubjectByMajor } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { getUseridFromLocalStorage, getUserById } from '../../services/userService';
+import { getUseridFromLocalStorage, getUserById, getUserRegisteredSubjects } from '../../services/userService';
 
 const cx = classNames.bind(styles);
 
@@ -29,12 +29,13 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
             const userid = getUseridFromLocalStorage();
             const userData = await getUserById(userid);
             const userMajorId = userData.data.major.majorId;
-            const firstYear = userData.data.firstAcademicYear; // Lấy thông tin năm học đầu tiên
-            const lastYear = userData.data.lastAcademicYear;  // Lấy thông tin năm học cuối cùng
+            const firstYear = userData.data.firstAcademicYear;
+            const lastYear = userData.data.lastAcademicYear;
 
-            const [framesResponse, scoresResponse] = await Promise.all([
+            const [framesResponse, scoresResponse, registeredSubjectsResponse] = await Promise.all([
                 GetSubjectByMajor(userMajorId),
-                getScoreByStudentId(userid)
+                getScoreByStudentId(userid),
+                getUserRegisteredSubjects(userid)
             ]);
 
             if (framesResponse && Array.isArray(framesResponse)) {
@@ -43,18 +44,21 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
 
             if (scoresResponse && Array.isArray(scoresResponse)) {
                 setScores(scoresResponse);
+            }
+
+            if (registeredSubjectsResponse && Array.isArray(registeredSubjectsResponse)) {
                 const registeredMap = {};
-                scoresResponse.forEach(score => {
-                    registeredMap[score.subject.subjectId] = {
-                        semesterId: score.semester.semesterId,
-                        finalScore10: score.finalScore10,
-                        finalScoreLetter: score.finalScoreLetter
+                registeredSubjectsResponse.forEach(registration => {
+                    registeredMap[registration.subject.subjectId] = {
+                        semesterId: registration.semester.semesterId,
+                        registerDate: registration.registerDate
                     };
                 });
                 setRegisteredSubjects(registeredMap);
-                if (scoresResponse.length > 0) {
-                    setStudentInfo({ ...scoresResponse[0].student, firstAcademicYear: firstYear, lastAcademicYear: lastYear });
-                }
+            }
+
+            if (scoresResponse.length > 0) {
+                setStudentInfo({ ...scoresResponse[0].student, firstAcademicYear: firstYear, lastAcademicYear: lastYear });
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -78,18 +82,17 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     // Helper function to get semester index
     const getSemesterIndex = useCallback((semesterId) => {
         if (!studentInfo) return -1;
-        const year = parseInt(semesterId.substring(0, 4)); // Lấy năm từ `semesterId`
-        const semester = parseInt(semesterId.substring(4)); // Lấy kỳ từ `semesterId`
+        const year = parseInt(semesterId.substring(0, 4));
+        const semester = parseInt(semesterId.substring(4));
         const firstYear = studentInfo.firstAcademicYear;
 
-        return (year - firstYear) * 3 + (semester - 1); // Tính index của học kỳ
+        return (year - firstYear) * 3 + (semester - 1);
     }, [studentInfo]);
 
 
 
     // Handle subject selection
     const handleSelectSubject = useCallback((subjectId, frameId, semesterIndex) => {
-        if (registeredSubjects[subjectId]) return; // Don't allow selection of registered subjects
         setSelectedSubjects(prev => {
             const newSelection = { ...prev };
             if (newSelection[subjectId] && newSelection[subjectId].semesterIndex === semesterIndex) {
@@ -99,7 +102,7 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
             }
             return newSelection;
         });
-    }, [registeredSubjects]);
+    }, []);
 
     // Check if frame exists
     const frameExists = useCallback((frameId) => {
@@ -118,13 +121,17 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         );
     }, [frames, frameExists]);
 
-    // Render subject row
     const renderSubjectRow = useCallback((subject, index, paddingLeft) => {
         if (!subject) return null;
 
         const registeredInfo = registeredSubjects[subject.subjectId];
         const isRegistered = !!registeredInfo;
         const registeredIndex = isRegistered ? getSemesterIndex(registeredInfo.semesterId) : -1;
+
+        // Check if the subject has a score in any semester
+        const hasScoreInAnySemester = scores.some(score =>
+            score.subject.subjectId === subject.subjectId && score.finalScore10 !== undefined
+        );
 
         return (
             <TableRow key={`subject-${subject.subjectId}`}>
@@ -143,32 +150,34 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
                         score.subject.subjectId === subject.subjectId &&
                         getSemesterIndex(score.semester.semesterId) === i
                     );
-                    const shouldBeChecked = isThisSemesterRegistered || (scoreInfo && scoreInfo.result === true);
+                    const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
 
                     return (
                         <TableCell key={`semester-${i}`} align="center">
                             {department ? (
                                 <Checkbox
-                                    checked={shouldBeChecked || isSelected}
+                                    checked={isThisSemesterRegistered || isSelected}
                                     onChange={() => handleSelectSubject(subject.subjectId, subject.frameId, i)}
-                                    disabled={isRegistered || (scoreInfo && scoreInfo.result === true)}
+                                    disabled={hasScore}
                                     size="small"
                                 />
                             ) : (
                                 <Radio
-                                    checked={shouldBeChecked || isSelected}
+                                    checked={isThisSemesterRegistered || isSelected}
                                     onChange={() => handleSelectSubject(subject.subjectId, subject.frameId, i)}
-                                    disabled={isRegistered || (scoreInfo && scoreInfo.result === true)}
+                                    disabled={hasScore}
                                     size="small"
                                 />
                             )}
-                            {shouldBeChecked && scoreInfo && (
+                            {hasScore && (
                                 <span>{scoreInfo.finalScore10} ({scoreInfo.finalScoreLetter})</span>
+                            )}
+                            {isThisSemesterRegistered && !hasScore && (
+                                <span>Registered: {new Date(registeredInfo.registerDate).toLocaleDateString()}</span>
                             )}
                         </TableCell>
                     );
                 })}
-
             </TableRow>
         );
     }, [department, repeatHK, registeredSubjects, selectedSubjects, getSemesterIndex, handleSelectSubject, scores]);

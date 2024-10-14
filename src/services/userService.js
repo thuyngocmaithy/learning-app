@@ -100,12 +100,11 @@ export const getScore = async (access_token) => {
 };
 
 
-export const registerSubject = async (userId, subjectId, frameId, semesterId) => {
+export const registerSubject = async (userId, subjectId, semesterId) => {
   try {
     const response = await api.post('/user-register-subject/register', {
       userId,
       subjectId,
-      frameId,
       semesterId
     });
     return response.data;
@@ -119,12 +118,29 @@ export const registerSubject = async (userId, subjectId, frameId, semesterId) =>
 export const getUserRegisteredSubjects = async (userId) => {
   try {
     const response = await api.get(`/user-register-subject/user/${userId}`);
-    return response.data;
+    if (response.data && response.data.message === "success" && Array.isArray(response.data.data)) {
+      return response.data.data;
+    } else {
+      console.error('[userServive - getUserRegisteredSubjects - errorFormatData]', response.data);
+      return [];
+    }
   } catch (error) {
-    console.error('Error getting user registered subjects:', error);
+    console.error('[userServive - getUserRegisteredSubjects - error] ', error);
     throw error;
   }
 };
+
+
+export const deleteUserRegisteredSubject = async (userId, subjectId, semesterId) => {
+  try {
+    const response = await api.delete(`/user-register-subject/user/${userId}/subject/${subjectId}/semester/${semesterId}`);
+    return response.data;
+  } catch (error) {
+    console.error('[userService - deleteUserRegisteredSubject - error] ', error);
+    throw error;
+  }
+};
+
 
 
 export const getAllUser = async () => {
