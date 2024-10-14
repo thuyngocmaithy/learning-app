@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb } from 'antd';
+import { Card, message, Tabs, Tag, Breadcrumb, Input } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -8,15 +8,16 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
 
-import { deleteSRs, getBySRGId, getWhere } from '../../../../services/scientificResearchService';
+import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRById, updateSRByIds } from '../../../../services/scientificResearchService';
 import { getBySRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles);
 
@@ -33,10 +34,18 @@ function DeTaiNCKH() {
     const [showModalDetail, setShowModalDetail] = useState(false);
     const { userId } = useContext(AccountLoginContext);
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
-
-    // Xử lý active tab từ url
     const navigate = useNavigate();
     const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
+    // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
     const [tabActive, setTabActive] = useState(getInitialTabIndex());
 
@@ -97,6 +106,16 @@ function DeTaiNCKH() {
                 <Tag className={cx('tag-status')} color={statusName === 'Xác định chủ đề và vấn đề nghiên cứu' ? 'green' : 'red'}>
                     {statusName.toUpperCase()}
                 </Tag>
+            ),
+        },
+        {
+            title: 'Ẩn',
+            key: 'isDisable',
+            dataIndex: 'isDisable',
+            align: 'center',
+            width: '100px',
+            render: (isDisable) => (
+                <Input type='checkbox' checked={isDisable} readOnly />
             ),
         },
         {
@@ -163,9 +182,17 @@ function DeTaiNCKH() {
 
     const fetchData = async () => {
         try {
-            const result = await getBySRGId(SRGIdFromUrl);
+            let result = null;
 
-            const scientificResearchs = await Promise.all(result.data.data.map(async (data) => {
+            if (SRGIdFromUrl) {
+                result = await getBySRGId(SRGIdFromUrl);
+            }
+            else {
+                result = await getAllSR();
+            }
+            console.log(result);
+
+            const scientificResearchs = await Promise.all((result.data.data || result.data).map(async (data) => {
                 // lấy số sinh viên đăng ký
                 const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
 
@@ -204,6 +231,7 @@ function DeTaiNCKH() {
                     columns={columns(setShowModalUpdate)}
                     data={data}
                     setSelectedRowKeys={setSelectedRowKeys}
+                    selectedRowKeys={selectedRowKeys}
                     keyIdChange='scientificResearchId'
                     loading={isLoading}
                 />
@@ -259,11 +287,44 @@ function DeTaiNCKH() {
             fetchData();
             listRegisterscientificResearchJoined();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
-
             message.success('Xoá thành công');
         } catch (error) {
             message.error('Xoá thất bại');
-            console.error(' [Nghiep vu - khoa luan - deletedThesis] : Error deleting theses:', error);
+            console.error('Error [Nghiep vu - DeTaiNCKH - delete]:', error);
+        }
+    };
+
+    const handleEnable = async () => {
+        try {
+            let scientificResearchData = {
+                isDisable: false
+            };
+            await updateSRByIds(selectedRowKeys, scientificResearchData);
+            // Refresh dữ liệu sau khi xóa thành công
+            fetchData();
+            listRegisterscientificResearchJoined();
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            message.success('Hiển thị thành công');
+        } catch (error) {
+            message.error('Hiển thị thất bại');
+            console.error('Error [Nghiep vu - DeTaiNCKH - enable]:', error);
+        }
+    };
+
+    const handleDisable = async () => {
+        try {
+            let scientificResearchData = {
+                isDisable: true
+            };
+            await updateSRByIds(selectedRowKeys, scientificResearchData);
+            // Refresh dữ liệu sau khi disable thành công
+            fetchData();
+            listRegisterscientificResearchJoined();
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            message.success('Ẩn thành công');
+        } catch (error) {
+            message.error('Ẩn thất bại');
+            console.error('Error [Nghiep vu - DeTaiNCKH - disable]:', error);
         }
     };
 
@@ -320,15 +381,22 @@ function DeTaiNCKH() {
                         <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
                     </div>
                     {isToolbar ? (
-                        <div className={cx('wrapper')}>
+                        <div className={cx('wrapper-toolbar')}>
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {
                                     setShowModalUpdate(true);
                                     setIsUpdate(false);
                                 }}
+                                isVisible={permissionDetailData.isAdd}
                             />
-                            <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('đề tài nghiên cứu', handleDelete)} />
+                            <Toolbar
+                                type={'Xóa'}
+                                onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
+                                isVisible={permissionDetailData.isDelete}
+                            />
+                            <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài nghiên cứu', handleDisable)} />
+                            <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài nghiên cứu', handleEnable)} />
                             <Toolbar type={'Nhập file Excel'} />
                             <Toolbar type={'Xuất file Excel'} />
                         </div>

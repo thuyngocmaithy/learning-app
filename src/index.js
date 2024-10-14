@@ -7,6 +7,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AccountLoginProvider } from './context/AccountLoginContext';
 import { SocketNotificationProvider } from './context/SocketNotificationContext';
 import { SocketMessagesProvider } from './context/SocketMessagesContext';
+import { PermissionDetailProvider } from './context/PermissionDetailContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,11 +15,13 @@ root.render(
     <ThemeProvider>
         <GlobalStyles>
             <AccountLoginProvider>
-                <SocketNotificationProvider>
-                    <SocketMessagesProvider>
-                        <App />
-                    </SocketMessagesProvider>
-                </SocketNotificationProvider>
+                <PermissionDetailProvider>
+                    <SocketNotificationProvider>
+                        <SocketMessagesProvider>
+                            <App />
+                        </SocketMessagesProvider>
+                    </SocketNotificationProvider>
+                </PermissionDetailProvider>
             </AccountLoginProvider>
         </GlobalStyles>
     </ThemeProvider>,

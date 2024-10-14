@@ -8,7 +8,7 @@ import { useState } from 'react'; //
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import Toolbar from '../../../../components/Core/Toolbar';
 import Update from '../../../../components/Core/Update';
-import { showDeleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 import { Tag } from 'antd';
 import { EditOutlined, FormOutlined } from '@ant-design/icons';
 import FormItem from '../../../../components/Core/FormItem';
@@ -157,7 +157,7 @@ function MoHocPhan() {
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
                 <div className={cx('wrapper')}>
                     <Toolbar type={'Tạo mới'} onClick={() => setShowModalAdd(true)} />
-                    <Toolbar type={'Xóa'} onClick={() => showDeleteConfirm('năm học')} />
+                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('năm học')} />
                     <Toolbar type={'Nhập file Excel'} />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>

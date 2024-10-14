@@ -9,7 +9,7 @@ import { createSR, updateSRById } from '../../../services/scientificResearchServ
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { useLocation } from 'react-router-dom';
-import { getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
+import { getAllSRGroup, getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import notifications from '../../../config/notifications';
 
 const { TextArea } = Input;
@@ -29,6 +29,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedMemberCount, setSelectedMemberCount] = useState(null);
     const [selectedLevel, setSelectedLevel] = useState(null);
+    const [srgroupOptions, setSRGroupOptions] = useState([]);
+    const [selectedSRGroup, setSelectedSRGroup] = useState(null);
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
     const location = useLocation();
@@ -40,35 +42,58 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     // Xử lý lấy SRGId    
     const SRGIdFromUrl = queryParams.get('SRGId');
 
+    //lấy danh sách nhóm đề tài NCKH
+    const fetchSRGroups = async () => {
+        const response = await getAllSRGroup();
+        if (response && response.data) {
+            const options = response.data.map((SRG) => ({
+                value: SRG.scientificResearchGroupId,
+                label: `${SRG.scientificResearchGroupName}`,
+            }));
+            setSRGroupOptions(options);
 
-    //lấy danh sách giảng viên theo khoa
-    useEffect(() => {
-        const fetchInstructors = async () => {
-
-            const SRG = await getScientificResearchGroupById(SRGIdFromUrl);
-            const response = await getUsersByFaculty(SRG.data.faculty.facultyId);
-            if (response && response.data) {
-                const options = response.data.map((user) => ({
-                    value: user.userId,
-                    label: `${user.fullname}`,
-                }));
-                setInstructorOptions(options);
-
-                // Nếu selectedInstructor đã có giá trị, cập nhật lại giá trị đó
-                if (selectedInstructor) {
-                    const selectedOption = options.find((option) => option.value === selectedInstructor);
-                    if (selectedOption) {
-                        setSelectedInstructor(selectedOption.value);
-                    }
+            // Nếu selectedSRGroup đã có giá trị, cập nhật lại giá trị đó
+            if (selectedSRGroup) {
+                const selectedOption = options.find((option) => option.value === selectedSRGroup);
+                if (selectedOption) {
+                    setSelectedInstructor(selectedOption.value);
                 }
             }
-
-
-        };
-        if (showModal) {
-            fetchInstructors();
         }
-    }, [showModal, SRGIdFromUrl, selectedInstructor]);
+    };
+
+    //lấy danh sách giảng viên theo khoa
+    const fetchInstructors = async (SRGIdInput) => {
+        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput);
+        const response = await getUsersByFaculty(SRG.data.faculty.facultyId);
+        if (response && response.data) {
+            const options = response.data.map((user) => ({
+                value: user.userId,
+                label: `${user.fullname}`,
+            }));
+            setInstructorOptions(options);
+
+            // Nếu selectedInstructor đã có giá trị, cập nhật lại giá trị đó
+            if (selectedInstructor) {
+                const selectedOption = options.find((option) => option.value === selectedInstructor);
+                if (selectedOption) {
+                    setSelectedInstructor(selectedOption.value);
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (showModal) {
+            if (SRGIdFromUrl) {
+                fetchInstructors();
+            }
+            else {
+                fetchSRGroups();
+            }
+        }
+
+    }, [showModal, SRGIdFromUrl]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -107,6 +132,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         if (showModal && isUpdate) {
             form.setFieldsValue({
                 scientificResearchName: showModal.scientificResearchName,
+                srgroup: showModal.scientificResearchGroup.scientificResearchGroupName,
                 description: showModal.description,
                 instructor: showModal.instructor.fullname,
                 status: showModal.status.statusId,
@@ -116,8 +142,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             setSelectedInstructor(showModal.instructor.userId);
             setSelectedStatus(showModal.status.statusId);
             setSelectedMemberCount(showModal.numberOfMember);
-        } else {
-            form.resetFields();
         }
     }, [showModal, isUpdate, form]);
 
@@ -133,7 +157,10 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         setSelectedInstructor(value);
     };
 
-
+    const handleChangeSRGroup = (value) => {
+        setSelectedSRGroup(value);
+        fetchInstructors(value);
+    };
 
     //hàm chỉ cho phép nhập số 
     const formatValue = (value) => {
@@ -153,7 +180,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 statusId: selectedStatus,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
-                scientificResearchGroup: SRGId,
+                scientificResearchGroup: SRGId || values.srgroup,
             };
 
             let response;
@@ -205,6 +232,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             showModal={(showModal && showModal !== false) ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
+            width='800px'
         >
             <Form form={form}>
                 <FormItem
@@ -213,6 +241,27 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     rules={[{ required: true, message: 'Vui lòng nhập tên đề tài!' }]}
                 >
                     <Input />
+                </FormItem>
+                <FormItem
+                    hidden={SRGIdFromUrl}
+                    name="srgroup"
+                    label="Nhóm đề tài NCKH"
+                    rules={[
+                        { required: true, message: 'Vui lòng chọn nhóm đề tài NCKH!' },
+                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài NCKH không được để trống!') }
+                    ]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn nhóm đề tài NCKH"
+                        optionFilterProp="children"
+                        onChange={handleChangeSRGroup}
+                        value={selectedSRGroup}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={srgroupOptions}
+                    />
                 </FormItem>
                 <FormItem
                     name="instructor"

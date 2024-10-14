@@ -4,6 +4,7 @@ import Detail from '../../Core/Detail';
 import classNames from 'classnames/bind';
 import styles from './ChucNangDetail.module.scss';
 import listIcon from '../../../assets/icons/listIconAnt';
+import { Form } from 'antd';
 
 const cx = classNames.bind(styles);
 
@@ -26,7 +27,7 @@ const ChucNangDetail = memo(function ChucNangDetail({
             onClose={handleCloseModal}
             className={cx('wrapper-modal-detail')}
         >
-            <div className={cx('container-detail')}>
+            <Form className={cx('container-detail')}>
                 <FormItem label={'Mã chức năng'} name="featureId">
                     <p>{showModal.featureId}</p>
                 </FormItem>
@@ -40,7 +41,7 @@ const ChucNangDetail = memo(function ChucNangDetail({
                 <FormItem label={'Biểu tượng'} name="icon">
                     <p>{IconComponent ? <IconComponent /> : null}</p>
                 </FormItem>
-            </div>
+            </Form>
         </Detail>
     );
 });

@@ -1,7 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
 import { Table } from 'antd';
-import { useRef, useState } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -18,22 +17,19 @@ function TableCustomAnt({
     isHaveRowSelection = true,
     isPagination = true,
 }) {
+    const onSelectChange = (newSelectedRowKeys, selectedRows) => {
+        // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
+        if (keyIdChange) {
+            const selectedIds = selectedRows.map(row => row[keyIdChange]);
+            setSelectedRowKeys(selectedIds);
+        } else {
+            setSelectedRowKeys(newSelectedRowKeys);
+        }
+    };
+
     const rowSelection = {
         selectedRowKeys,
-        onChange: (newSelectedRowKeys, selectedRows) => {
-            setSelectedRowKeys(newSelectedRowKeys);
-
-            // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
-            if (keyIdChange) {
-                const selectedIds = selectedRows.map(row => row[keyIdChange]);
-                setSelectedRowKeys(selectedIds);
-            }
-
-        },
-        getCheckboxProps: (record) => ({
-            disabled: record.name === 'Disabled User', // Disable row nếu cần thiết
-            name: record.name,
-        }),
+        onChange: onSelectChange,
     };
 
     return (
@@ -46,13 +42,17 @@ function TableCustomAnt({
             }}
         >
             {isOutline ? <h2>Danh sách năm học</h2> : null}
+
             <Table
-                rowSelection={isHaveRowSelection && rowSelection}
+                rowSelection={isHaveRowSelection ? rowSelection : null}
                 columns={columns}
-                dataSource={data.map((item, index) => ({
-                    ...item,
-                    key: item.id || index,
-                }))}
+                dataSource={data.map((item) => {
+                    const key = item.id || item[keyIdChange];
+                    return {
+                        ...item,
+                        key: key,
+                    };
+                })}
                 showSorterTooltip={{
                     target: 'sorter-icon',
                 }}
