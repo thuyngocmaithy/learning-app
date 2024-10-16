@@ -213,7 +213,7 @@ function NguoiDung() {
 
             </div>
             <TableCustomAnt
-                height={'350px'}
+                height={'600px'}
                 columns={columns(setShowModal)}
                 data={data}
                 setSelectedRowKeys={setSelectedRowKeys}

@@ -4,7 +4,7 @@ import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
 import { ListCourseActiveIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
-import { registerSubject, deleteUserRegisteredSubject } from '../../../services/userService'; // Import the delete function
+import { registerSubject, deleteUserRegisteredSubject, getUserRegisteredSubjects } from '../../../services/userService'; // Import the delete function
 import { message } from 'antd';
 import { getUseridFromLocalStorage } from '../../../services/userService';
 

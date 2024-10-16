@@ -65,7 +65,12 @@ export const getUsersByFaculty = async (facultyId) => {
   }
 };
 
+
 export const getUserById = async (userId) => {
+  if (!userId) {
+    console.warn('[userService - getUsersById] Attempted to fetch user with null/undefined ID');
+    return null;
+  }
   try {
     const response = await api.get(`/users/${userId}`);
     return response.data;
@@ -74,7 +79,6 @@ export const getUserById = async (userId) => {
     throw error;
   }
 };
-
 
 
 // Hàm lấy avt từ API SGU

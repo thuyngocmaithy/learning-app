@@ -8,9 +8,9 @@ import ButtonCustom from '../../../components/Core/Button';
 import { getUserById, getUseridFromLocalStorage } from '../../../services/userService';
 const cx = classNames.bind(styles);
 
-const userId = getUseridFromLocalStorage();
+const userId = await getUseridFromLocalStorage();
 const userData = await getUserById(userId);
-console.log(userData.data.GPA);
+// console.log(userData.data.GPA);
 
 function DiemTotNghiep() {
     // State management

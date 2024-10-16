@@ -21,14 +21,14 @@ const LoginForm = () => {
         try {
             const response = await loginToSgu(values.username, values.password);
 
-            if (response.status === 'success') {
+            if (response.status === 'success' && response.data?.user?.userId) {
                 message.success('Đăng nhập thành công');
                 localStorage.setItem('userLogin', JSON.stringify({
                     userId: response.data.user.userId,
                     token: response.data.accessToken,
                     permission: response.data.user.roles
                 }));
-                updateUserInfo();
+                await updateUserInfo();
                 if (response.data.user.roles === "SINHVIEN") {
                     navigate('/', { replace: true });
                 } else if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {
@@ -38,11 +38,13 @@ const LoginForm = () => {
                 message.error(response.message || 'Đăng nhập thất bại');
             }
         } catch (error) {
-            message.error((error.response?.data?.message || error.message));
+            console.error('Login error:', error);
+            message.error((error.response?.data?.message || error.message) || 'Đăng nhập thất bại');
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className={cx('wrapper')}>
