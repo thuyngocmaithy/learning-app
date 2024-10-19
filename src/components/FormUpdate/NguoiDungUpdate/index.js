@@ -1,6 +1,6 @@
 import React, { useState, memo, useEffect } from 'react';
-import { Input, Select, Form, message, DatePicker, ConfigProvider, Checkbox, Steps, Button, Row, Col } from 'antd';
-import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { Input, Select, Form, message, DatePicker, ConfigProvider, Checkbox, Steps, Button, Row, Col, Upload } from 'antd';
+import { EyeInvisibleOutlined, EyeTwoTone, InboxOutlined } from '@ant-design/icons';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -17,6 +17,7 @@ const cx = classNames.bind(styles)
 const { Option } = Select;
 const { TextArea } = Input;
 const { Step } = Steps;
+const { Dragger } = Upload;
 
 //khai báo user tạo
 const CreateUserId = getUseridFromLocalStorage();
@@ -29,7 +30,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
     reLoad
 }) {
 
-    const [form] = useForm();
+    const [form] = Form.useForm();
     const [formData, setFormData] = useState({});
     const [currentStep, setCurrentStep] = useState(0);
     const [permissionOptions, setStatusOptions] = useState([]);
@@ -44,6 +45,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
     const [majorOptions, setMajorOptions] = useState([]);
     const [selectedMajor, setSelectedMajor] = useState(null);
 
+    const [fileList, setFileList] = useState([]);
+    const [avatarPreview, setAvatarPreview] = useState(null);
     // Fetch danh sách quyền hệ thống
 
 
@@ -163,8 +166,10 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
 
 
     useEffect(() => {
-        form.setFieldsValue(formData); // Khôi phục dữ liệu từ state mỗi khi chuyển bước
-    }, [currentStep, formData]);
+        if (form) {
+            form.setFieldsValue(formData);
+        }
+    }, [currentStep, formData, form]);
 
 
 
@@ -191,8 +196,31 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
         setIsStudent(value)
     }
 
-    const handleCheckboxChange = (e) => {
-        setIsActive(e.target.checked);
+    const handleAvatarUpload = async (file) => {
+        const isImage = file.type.startsWith('image/');
+        if (!isImage) {
+            message.error('You can only upload image files!');
+            return false;
+        }
+        const isLt2M = file.size / 1024 / 1024 < 2;
+        if (!isLt2M) {
+            message.error('Image must be smaller than 2MB!');
+            return false;
+        }
+
+        const base64 = await convertToBase64(file);
+        setFormData(prev => ({ ...prev, avatar: base64 }));
+        setAvatarPreview(base64);
+        return false;  // Prevent default upload behavior
+    };
+
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
     };
 
 
@@ -388,7 +416,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
                         <Col span={12}>
                             <FormItem
                                 name="facultyId"
-                                label="Khoa"
+                                label="Khoa-Ngành"
                             >
                                 <Select
                                     showSearch
@@ -474,7 +502,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
                             </FormItem>
                         </Col>
                     </Row>
-
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem
@@ -483,6 +510,40 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
                             >
                                 <Input maxLength={12} />
                             </FormItem>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="avatar"
+                                label="Avatar"
+                                valuePropName="file"
+                            >
+                                <Dragger
+                                    name="avatar"
+                                    listType="picture"
+                                    accept="image/*"
+                                    beforeUpload={handleAvatarUpload}
+                                    fileList={fileList}
+                                    onChange={({ fileList }) => setFileList(fileList)}
+                                    onRemove={() => {
+                                        setFormData(prev => ({ ...prev, avatar: null }));
+                                        setAvatarPreview(null);
+                                    }}
+                                >
+                                    <p className="ant-upload-drag-icon">
+                                        <InboxOutlined />
+                                    </p>
+                                    <p className="ant-upload-text">Ấn hoặc kéo tệp vào vùng này để tải lên tệp</p>
+                                </Dragger>
+                            </Form.Item>
+                            {avatarPreview && (
+                                <img
+                                    src={avatarPreview}
+                                    alt="Avatar preview"
+                                    style={{ maxWidth: '100%', maxHeight: '200px', marginTop: '10px' }}
+                                />
+                            )}
                         </Col>
                         <Col span={12}>
                             <FormItem
@@ -692,7 +753,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({
                                 hidden={isStudent ? true : false}
                             >
                                 <Select>
-                                    <Option value="ThS">Thạc Sĩ</Option>
+                                    <Option value="ThS">Thạc sĩ</Option>
+                                    <Option value="NCS">Nghiên cứu sinh</Option>
                                     <Option value="TS">Tiến sĩ</Option>
                                     <Option value="PGS">Phó giáo sư</Option>
                                     <Option value="GS">Giáo sư</Option>

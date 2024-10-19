@@ -186,3 +186,14 @@ export const updateUserById = async (userId, userData) => {
     throw error;
   }
 }
+
+export const deleteUserById = async (params) => {
+  try {
+    const response = await api.delete('/users', { params });
+    return response.data;
+  }
+  catch (error) {
+    console.error('[userServive - deleteUserById - error] : ', error);
+    throw error;
+  }
+};
