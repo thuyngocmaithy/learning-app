@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHThamGia.module.scss';
-import { Breadcrumb, Spin, Tabs } from 'antd';
+import { Breadcrumb, message, Spin, Tabs } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 import ChatBox from '../../../components/Core/ChatBox';
@@ -8,95 +8,83 @@ import ThongTinDeTaiNCKHThamGia from '../../../components/ThongTinDeTaiNCKHThamG
 import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import { getBySRId } from '../../../services/scientificResearchUserService';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { getSRById } from '../../../services/scientificResearchService';
+import { uploadFile, downloadFile } from '../../../services/megaService';
 import config from '../../../config';
+import Toolbar from '../../../components/Core/Toolbar';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { getWhere } from '../../../services/attachService';
+import Button from '../../../components/Core/Button';
+import { ProjectIcon } from '../../../assets/icons';
 
 const cx = classNames.bind(styles);
 
-const columns = [
-    {
-        title: 'STT',
-        dataIndex: 'key',
-    },
-    {
-        title: 'File đính kèm',
-        dataIndex: 'file',
-        key: 'file',
-        render: (_, { file }) => (
-            <>
-                <Link key={file} style={{ textDecoration: 'underline' }}>
-                    {file}
-                </Link>
-            </>
-        ),
-    },
-    {
-        title: 'Thời gian',
-        dataIndex: 'thoigian',
-        key: 'thoigian',
-        defaultSortOrder: 'descend',
-        sorter: (a, b) => a.thoigian - b.thoigian,
-    },
-    {
-        title: 'Người đính kèm',
-        key: 'nguoidinhkem',
-        dataIndex: 'nguoidinhkem',
-    },
-];
-const data = [
-    {
-        key: '1',
-        file: 'Tên file',
-        thoigian: '10/03/2024 09:00:00',
-        nguoidinhkem: 'Nguyễn Văn A',
-    },
-    {
-        key: '2',
-        file: 'Tên file',
-        thoigian: '10/03/2024 08:00:00',
-        nguoidinhkem: 'Nguyễn Văn A',
-    },
-    {
-        key: '3',
-        file: 'Tên file',
-        thoigian: '10/03/2024 08:00:00',
-        nguoidinhkem: 'Nguyễn Văn A',
-    },
-    {
-        key: '4',
-        file: 'Tên file',
-        thoigian: '10/03/2024 08:00:00',
-        nguoidinhkem: 'Nguyễn Văn A',
-    },
-    {
-        key: '5',
-        file: 'Tên file',
-        thoigian: '10/03/2024 08:00:00',
-        nguoidinhkem: 'Nguyễn Văn A',
-    },
-];
-
-
-
 function DeTaiNCKHThamGia({ thesis = false }) {
-    const navigate = useNavigate();
-
-    const handleGoBack = () => {
-        navigate(-1);
-    };
-
+    const { userId } = useContext(AccountLoginContext);
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const scientificResearchFromUrl = queryParams.get('scientificResearch');
+    const SRIdFromUrl = queryParams.get('scientificResearch');
     const isAll = queryParams.get('all');
     const [isLoading, setIsLoading] = useState(true);
     const [scientificResearch, setScientificResearch] = useState(null);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     const [dataFollower, setDataFollower] = useState([])
+    const [dataAttach, setDataAttach] = useState([])
+    const fileInputRef = useRef(null);
+    const urlPreviousLevel1 = location.state?.from;
+    const urlPreviousLevel2 = location.state?.urlPrevious;
+    const navigate = useNavigate();
 
+    // Xử lý active tab từ url
+    const [isToolbar, setIsToolbar] = useState(false);
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
+
+    // Lấy tabIndex từ URL nếu có
+    function getInitialTabIndex() {
+        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+        setTabActive(tab);
+    }
+
+    useEffect(() => {
+        getInitialTabIndex();
+    }, [tabIndexFromUrl])
+
+    // Cập nhật URL khi tab thay đổi
+    const handleTabChange = (tabId) => {
+        const currentUrl = new URL(window.location.href);
+        const params = new URLSearchParams(currentUrl.search);
+
+        // Kiểm tra nếu tabIndex chưa có trong URL thì thêm mới
+        if (!params.has('tabIndex')) {
+            params.append('tabIndex', tabId);
+        } else {
+            params.set('tabIndex', tabId); // Cập nhật giá trị mới cho tabIndex nếu đã có
+        }
+
+        // Cập nhật URL với params mới
+        navigate(`${currentUrl.pathname}?${params.toString()}`, { state: { from: urlPreviousLevel1 } });
+    };
+
+    //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
+    const handleTabClick = (index) => {
+        setTabActive(index)
+        if (index === 3) {
+            setIsToolbar(true);
+        } else {
+            setIsToolbar(false);
+        }
+    };
+
+    useEffect(() => {
+        if (tabActive === 3) {
+            setIsToolbar(true);
+        } else {
+            setIsToolbar(false);
+        }
+    }, [tabActive])
 
     useEffect(() => {
         const height = document.getElementsByClassName('main-content')[0].clientHeight;
@@ -105,24 +93,90 @@ function DeTaiNCKHThamGia({ thesis = false }) {
 
     const getInfoscientificResearch = async () => {
         try {
-            if (scientificResearchFromUrl) {
-                const responsescientificResearchUser = await getSRById(scientificResearchFromUrl);
-
-                setScientificResearch(responsescientificResearchUser.data)
-                setDataFollower(responsescientificResearchUser.data.follower[0].followerDetails)
+            if (SRIdFromUrl) {
+                const responsescientificResearchUser = await getSRById(SRIdFromUrl);
+                if (responsescientificResearchUser.status === "success") {
+                    setScientificResearch(responsescientificResearchUser.data)
+                    setDataFollower(responsescientificResearchUser.data.follower[0].followerDetails)
+                }
             }
         } catch (error) {
             console.error("Lỗi lấy thông tin đề tài" + error);
         }
-        finally {
-            setIsLoading(false);
+    }
+
+    const getAttach = async () => {
+        try {
+            if (SRIdFromUrl) {
+                const response = await getWhere({ SRId: SRIdFromUrl });
+                if (response.status === 200) {
+                    const dataAttach = response.data.data.map((data, index) => {
+                        return {
+                            key: index + 1,
+                            filename: data.filename,
+                            createDate: data.createDate,
+                            createUser: data.createUser.fullname
+                        }
+                    })
+                    setDataAttach(dataAttach)
+                }
+            }
+        } catch (error) {
+            console.error("Lỗi lấy file đính kèm" + error);
         }
     }
 
 
+
     useEffect(() => {
-        getInfoscientificResearch();
-    }, [scientificResearchFromUrl]);
+        const fetchData = async () => {
+            setIsLoading(true); // Bắt đầu quá trình load
+
+            try {
+                await Promise.all([getInfoscientificResearch(), getAttach()]); // Đợi cả 2 function hoàn thành
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu: " + error);
+            } finally {
+                setIsLoading(false); // Đặt trạng thái hoàn tất sau khi cả hai function hoàn thành
+            }
+        };
+
+        if (SRIdFromUrl) {
+            fetchData();
+        }
+    }, [SRIdFromUrl]);
+
+
+
+    // Hàm để xử lý upload file
+    const handleUpload = async (files) => {
+
+        if (files.length === 0) {
+            message.warning('Please select a file to upload.'); // Kiểm tra xem có file đã chọn hay không
+            return;
+        }
+
+        try {
+            const response = await uploadFile(files, userId, SRIdFromUrl); // Gọi hàm upload file
+            console.log('Upload successful:', response);
+            message.success('Tệp đã được tải lên thành công');
+        } catch (error) {
+            console.error('Upload failed:', error);
+            message.error('Tải tệp lên thất bại.');
+        } finally {
+            getAttach();
+        }
+    };
+
+    // Hàm xử lý download file
+    const handleDownload = async (file) => {
+        try {
+            const response = await downloadFile(file); // Gọi hàm download file
+            console.log('Download successful:', response);
+        } catch (error) {
+            console.error('Download failed:', error);
+        }
+    }
 
 
     const dataInfoSystem = useMemo(() => [
@@ -138,6 +192,37 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         { title: 'Ngày chỉnh sửa', description: scientificResearch ? format(scientificResearch.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
     ], [scientificResearch]);
 
+    const columns = [
+        {
+            title: 'STT',
+            dataIndex: 'key',
+        },
+        {
+            title: 'File đính kèm',
+            dataIndex: 'filename',
+            key: 'filename',
+            render: (_, { filename }) => (
+                <>
+                    <Link key={filename} style={{ textDecoration: 'underline' }} onClick={() => handleDownload(filename)}>
+                        {filename}
+                    </Link>
+                </>
+            ),
+        },
+        {
+            title: 'Thời gian',
+            dataIndex: 'createDate',
+            key: 'createDate',
+            defaultSortOrder: 'descend',
+            sorter: (a, b) => a.createDate - b.createDate,
+        },
+        {
+            title: 'Người đính kèm',
+            key: 'createUser',
+            dataIndex: 'createUser',
+        },
+    ];
+
     const ITEM_TABS = [
         {
             id: 1,
@@ -152,7 +237,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         {
             id: 3,
             title: 'Đính kèm',
-            children: <Attach columns={columns} data={data} />,
+            children: <Attach columns={columns} data={dataAttach} />,
         },
         {
             id: 4,
@@ -161,33 +246,57 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         },
     ];
 
+    // Kiểm tra Department
+    const isDepartment = location.pathname.split('/')[1] === "Department";
+    // Đường dẫn active trước đó hợp lệ
+    const activeRoute = isDepartment ? `${config.routes.NhomDeTaiNCKH_Department}_active` : `${config.routes.NhomDeTaiNCKH}_active`;
+    // Kiểm tra rlPrevious có match với activeRoute không
+    // replace => Bỏ search query trong url
+    const isUrlPreviousValid = (url) => url?.replace(/\?.*_/, "_") === activeRoute;
+
     return isLoading ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
             <Spin size="large" />
         </div>
     ) : (
         < div className={cx('wrapper-DeTaiNCKHThamGia')} >
-            {console.log(location.pathname.split('/')[1])}
             <Breadcrumb
+
                 items={isAll !== "true" ?
                     [
+                        // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị
+                        ...(isUrlPreviousValid(urlPreviousLevel1) || isUrlPreviousValid(urlPreviousLevel2)
+                            ? [
+                                {
+                                    title: <Link
+                                        to={
+                                            location.pathname.split('/')[1] === "Department"
+                                                ? config.routes.NhomDeTaiNCKH_Department
+                                                : config.routes.NhomDeTaiNCKH
+                                        }>
+                                        Nhóm đề tài nghiên cứu khoa học
+                                    </Link>,
+                                }
+                            ] : []),
                         {
-                            title: <Link to={
-                                location.pathname.split('/')[1] === "Department"
-                                    ? config.routes.NhomDeTaiNCKH_Department
-                                    : config.routes.NhomDeTaiNCKH
-                            }>
-                                Nhóm đề tài nghiên cứu khoa học
-                            </Link>,
-                        },
-                        {
-                            title: <Link to={
-                                location.pathname.split('/')[1] === "Department"
-                                    ? `${config.routes.DeTaiNCKH_Department}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}`
-                                    : `${config.routes.DeTaiNCKH}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}&tabIndex=2`
-                            }>
+                            title: <span
+                                className={cx('breadcrumb-item')}
+                                onClick={() => {
+                                    const url = location.pathname.split('/')[1] === "Department"
+                                        ? `${config.routes.DeTaiNCKH_Department}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}`
+                                        : `${config.routes.DeTaiNCKH}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}&tabIndex=2`
+                                    navigate(url,
+                                        {
+                                            state: {
+                                                urlPrevious: urlPreviousLevel2,
+                                                from: `${location.pathname + location.search + "_active"}`
+                                            }
+                                        });
+
+                                }}
+                            >
                                 Danh sách đề tài nghiên cứu khoa học
-                            </Link>,
+                            </span>,
                         },
                         {
                             title: "Thông tin đề tài nghiên cứu khoa học",
@@ -196,32 +305,49 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                     ]
                     :
                     [
-                        {
-                            title: <Link to={
-                                location.pathname.split('/')[1] === "Department"
-                                    ? config.routes.NhomDeTaiNCKH_Department
-                                    : config.routes.NhomDeTaiNCKH
-                            } >
-                                Nhóm đề tài nghiên cứu khoa học
-                            </Link>,
-                        },
+                        // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị
+                        ...(isUrlPreviousValid(urlPreviousLevel1) || isUrlPreviousValid(urlPreviousLevel2)
+                            ? [
+                                {
+                                    title: <Link to={
+                                        location.pathname.split('/')[1] === "Department"
+                                            ? config.routes.NhomDeTaiNCKH_Department
+                                            : config.routes.NhomDeTaiNCKH
+                                    } >
+                                        Nhóm đề tài nghiên cứu khoa học
+                                    </Link>,
+                                }
+                            ] : []),
                         {
                             title: "Thông tin đề tài nghiên cứu khoa học",
                         },
                     ]
                 }
             />
-            < div className={cx('container-header')} >
-                <span onClick={handleGoBack} className={cx('container-icon-back')}>
-                    <LeftOutlined className={cx('icon-back')} />
-                </span>
-                <h3 className={cx('title')}>
-                    {thesis ? 'Thông tin khóa luận tốt nghiệp' : 'Thông tin đề tài nghiên cứu khoa học'}
-                </h3>
+            <div className={cx('container-header')} >
+                <div className={cx('info')}>
+                    <span className={cx('icon')}>
+                        <ProjectIcon />
+                    </span>
+                    <h3 className={cx('title')}>
+                        {thesis ? 'Thông tin khóa luận tốt nghiệp' : 'Thông tin đề tài nghiên cứu khoa học'}
+                    </h3>
+                </div>
+                {isToolbar && (
+                    <div className={cx('wrapper-toolbar')}>
+                        <Toolbar
+                            type={'Upload'}
+                            onClick={handleUpload}
+                            fileInputRef={fileInputRef}
+                        />
+                    </div>
+                )}
             </div >
             <Tabs
-                defaultActiveKey="1"
+                activeKey={tabActive}
+                onChange={handleTabChange}
                 centered
+                onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => {
                     return {
                         label: item.title,

@@ -26,7 +26,8 @@ const LoginForm = () => {
                 localStorage.setItem('userLogin', JSON.stringify({
                     userId: response.data.user.userId,
                     token: response.data.accessToken,
-                    permission: response.data.user.roles
+                    permission: response.data.user.roles,
+                    facultyId: response.data.user.faculty
                 }));
                 updateUserInfo();
                 if (response.data.user.roles === "SINHVIEN") {

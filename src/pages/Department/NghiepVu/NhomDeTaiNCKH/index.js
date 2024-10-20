@@ -28,7 +28,6 @@ function NhomDeTaiNCKH() {
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
     const { userId } = useContext(AccountLoginContext);
-    const [isToolbar, setIsToolbar] = useState(true);
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
@@ -42,13 +41,18 @@ function NhomDeTaiNCKH() {
 
     // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
-    const [tabActive, setTabActive] = useState(getInitialTabIndex());
-
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     // Lấy tabIndex từ URL nếu có
     function getInitialTabIndex() {
-        return Number(queryParams.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+        setTabActive(tab);
     }
+
+    useEffect(() => {
+        getInitialTabIndex();
+    }, [tabIndexFromUrl])
 
     // Cập nhật URL khi tab thay đổi
     const handleTabChange = (tabId) => {
@@ -66,16 +70,6 @@ function NhomDeTaiNCKH() {
 
         // Cập nhật URL với params mới
         navigate(`${currentUrl.pathname}?${params.toString()}`);
-    };
-
-    // HANDLE TAB
-    //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
-    const handleTabClick = (index) => {
-        if (index === 2) {
-            setIsToolbar(false);
-        } else {
-            setIsToolbar(true);
-        }
     };
 
     // =================
@@ -126,7 +120,10 @@ function NhomDeTaiNCKH() {
                         className={cx('btnDetail')}
                         outline
                         verysmall
-                        to={`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`}
+                        onClick={() => {
+                            navigate(`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`,
+                                { state: { from: `${config.routes.NhomDeTaiNCKH_Department}_active` } });
+                        }}
                     >
                         Danh sách
                     </ButtonCustom>
@@ -241,7 +238,14 @@ function NhomDeTaiNCKH() {
                                 type="inner"
                                 title={item.scientificResearchName}
                                 extra={
-                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}&all=true`}>
+                                    <ButtonCustom
+                                        primary
+                                        verysmall
+                                        onClick={() => {
+                                            navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}&all=true`,
+                                                { state: { from: `${config.routes.NhomDeTaiNCKH_Department}_active` } });
+                                        }}
+                                    >
                                         Chi tiết
                                     </ButtonCustom>
                                 }
@@ -260,15 +264,15 @@ function NhomDeTaiNCKH() {
 
     return (
         <div className={cx('wrapper')}>
-            <div className={cx('conatainer-header')}>
+            <div className={cx('container-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
                     <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
                 </div>
-                {isToolbar && (
-                    <div className={cx('wrapper')}>
+                {tabActive === 1 && (
+                    <div className={cx('wrapper-toolbar')}>
                         <Toolbar
                             type={'Tạo mới'}
                             onClick={() => {
@@ -291,7 +295,6 @@ function NhomDeTaiNCKH() {
                 activeKey={tabActive}
                 onChange={handleTabChange}
                 centered
-                onTabClick={(index) => handleTabClick(index)}
                 items={ITEM_TABS.map((item, index) => {
                     return {
                         label: item.title,

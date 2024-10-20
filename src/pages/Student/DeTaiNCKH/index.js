@@ -29,23 +29,28 @@ function DeTaiNCKH() {
     const [SRGName, setSRGName] = useState();
     const scientificResearchCancelRef = useRef(null);
     const { deleteNotification } = useSocketNotification();
-
-    // Xử lý active tab từ url
     const navigate = useNavigate();
     const location = useLocation();
+    const urlPreviousLevel1 = location.state?.from;
+    const urlPreviousLevel2 = location.state?.urlPrevious;
+
+    // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
-    const [tabActive, setTabActive] = useState(getInitialTabIndex());
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     // Lấy tabIndex từ URL nếu có
     function getInitialTabIndex() {
-        return Number(queryParams.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+        setTabActive(tab);
     }
 
+    useEffect(() => {
+        getInitialTabIndex();
+    }, [tabIndexFromUrl])
 
     // Cập nhật URL khi tab thay đổi
     const handleTabChange = (tabId) => {
-        setTabActive(tabId);
-
         const currentUrl = new URL(window.location.href);
         const params = new URLSearchParams(currentUrl.search);
 
@@ -56,8 +61,16 @@ function DeTaiNCKH() {
             params.set('tabIndex', tabId); // Cập nhật giá trị mới cho tabIndex nếu đã có
         }
 
-        // Cập nhật URL với params mới
-        navigate(`${currentUrl.pathname}?${params.toString()}`);
+        // Cập nhật URL với params mới        
+        navigate(`${currentUrl.pathname}?${params.toString()}`,
+            {
+                state: {
+                    urlPrevious: urlPreviousLevel2,
+                    from: urlPreviousLevel1
+                }
+            });
+
+        setTabActive(tabId);
     };
 
 
@@ -103,8 +116,10 @@ function DeTaiNCKH() {
         }
     }
     useEffect(() => {
-        getSRGName();
-    }, [])
+        if (SRGIdFromUrl) {
+            getSRGName();
+        }
+    }, [SRGIdFromUrl])
 
     useEffect(() => {
         checkRegisterscientificResearch();
@@ -205,7 +220,7 @@ function DeTaiNCKH() {
                                 <Button outline verysmall onClick={() => setShowModalDetail(item)}>
                                     Chi tiết
                                 </Button>,
-                                listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
+                                listscientificResearchRegister && listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
                                     <Button
                                         className={cx('btn-cancel')}
                                         outline
@@ -248,7 +263,7 @@ function DeTaiNCKH() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
-                    {listscientificResearchRegister.map((item, index) => {
+                    {listscientificResearchRegister && listscientificResearchRegister.map((item, index) => {
                         let color = item.isApprove ? 'green' : 'red';
                         return (
                             <Card
@@ -260,11 +275,23 @@ function DeTaiNCKH() {
                                     <Button primary verysmall
                                         onClick={() => {
                                             if (!item.isApprove) {
+                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
                                                 setShowModalDetail(item.scientificResearch);
                                             }
+                                            else {
+                                                // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`,
+                                                    {
+                                                        state: {
+                                                            urlPrevious: urlPreviousLevel1,
+                                                            from: `${location.pathname + location.search + "_active"}`
+                                                        }
+                                                    }
+                                                );
+                                            }
                                         }}
+                                    >
 
-                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}` : null}>
                                         Chi tiết
                                     </Button>
                                 }
@@ -283,22 +310,35 @@ function DeTaiNCKH() {
 
     return (
         <div className={cx('wrapper')}>
-            <Breadcrumb
-                items={[
-                    {
-                        title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
-                    },
-                    {
-                        title: 'Danh sách đề tài nghiên cứu khoa học',
-                    },
-                ]}
-            />
+            {
+                (urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH}_active`
+                    || urlPreviousLevel2 === `${config.routes.NhomDeTaiNCKH}_active`
+                ) &&
+                <Breadcrumb
+                    items={[
+                        {
+                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                        },
+                        {
+                            title: 'Danh sách đề tài nghiên cứu khoa học',
+                        },
+                    ]}
+                />
+            }
+
             <div className={cx('info')}>
                 <span className={cx('icon')}>
                     <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>Nhóm đề tài: {SRGName}</h3>
+                <h3 className={cx('title')}>
+                    {
+                        urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH}_active`
+                            ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
+                            : 'Danh sách đề tài nghiên cứu khoa học'
+                    }
+
+                </h3>
             </div>
             <Tabs
                 activeKey={tabActive}

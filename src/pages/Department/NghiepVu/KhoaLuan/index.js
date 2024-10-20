@@ -218,7 +218,7 @@ function KhoaLuan() {
     }, [showModal, isUpdate, selectedThesis]);
     return (
         <div className={cx('wrapper')}>
-            <div className={cx('conatainer-header')}>
+            <div className={cx('container-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
                         <ProjectIcon />
@@ -227,7 +227,7 @@ function KhoaLuan() {
                 </div>
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
                 {isToolbar ? (
-                    <div className={cx('wrapper')}>
+                    <div className={cx('wrapper-toolbar')}>
                         <Toolbar
                             type={'Tạo mới'}
                             onClick={() => {

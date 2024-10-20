@@ -9,9 +9,6 @@ import TienDoHocPhan from '../pages/Student/TienDoHocPhan';
 import DiemTotNghiep from '../pages/Student/DiemTotNghiep';
 import DeTaiNCKHThamGia from '../pages/Student/DeTaiNCKHThamGia';
 import KhoaLuan from '../pages/Student/KhoaLuan';
-import ThucTap from '../pages/Student/ThucTap';
-import ThongTinThucTap from '../pages/Student/ThongTinThucTap';
-import ChuanDauRa from '../pages/Student/ChuanDauRa';
 import MoHocPhan from '../pages/Department/NghiepVu/MoHocPhan';
 
 // DEPARTMENT
@@ -47,9 +44,6 @@ const privateRoutes = [
     { path: config.routes.DeTaiNCKHThamGia, component: DeTaiNCKHThamGia, urlDepend: "NhomDeTaiNCKH" },
     { path: config.routes.KhoaLuanThamGia, component: DeTaiNCKHThamGia, thesis: true, urlDepend: "KhoaLuan" },
     { path: config.routes.KhoaLuan, component: KhoaLuan },
-    { path: config.routes.ThucTap, component: ThucTap },
-    { path: config.routes.ThongTinThucTap, component: ThongTinThucTap, layout: null, urlDepend: "ThucTap" },
-    { path: config.routes.ChuanDauRa, component: ChuanDauRa },
 
     // NGHIỆP VỤ
     { path: config.routes.Dashboard_Department, component: Dashboard_Department, layout: DepartmentLayout },

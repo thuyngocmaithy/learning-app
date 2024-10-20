@@ -25,13 +25,19 @@ function NhomDeTaiNCKH() {
     // Xử lý active tab từ url
     const navigate = useNavigate();
     const location = useLocation();
-    const [tabActive, setTabActive] = useState(getInitialTabIndex());
+    const queryParams = new URLSearchParams(location.search);
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     // Lấy tabIndex từ URL nếu có
     function getInitialTabIndex() {
-        const params = new URLSearchParams(location.search);
-        return Number(params.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+        setTabActive(tab);
     }
+
+    useEffect(() => {
+        getInitialTabIndex();
+    }, [tabIndexFromUrl])
 
 
     // Cập nhật URL khi tab thay đổi
@@ -55,7 +61,6 @@ function NhomDeTaiNCKH() {
         try {
             const response = await getWhere({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
-            // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
             setListscientificResearchRegister(response.data.data);
         } catch (error) {
             console.error('Error fetching registered scientificResearchs:', error);
@@ -82,7 +87,14 @@ function NhomDeTaiNCKH() {
                     renderItem={(item, index) => (
                         <List.Item
                             actions={[
-                                <Button primary verysmall to={`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`}>
+                                <Button
+                                    primary
+                                    verysmall
+                                    onClick={() => {
+                                        navigate(`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`,
+                                            { state: { from: `${config.routes.NhomDeTaiNCKH}_active` } });
+                                    }}
+                                >
                                     Danh sách
                                 </Button>,
                             ]}
@@ -126,10 +138,17 @@ function NhomDeTaiNCKH() {
                                     <Button primary verysmall
                                         onClick={() => {
                                             if (!item.isApprove) {
+                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
                                                 setShowModalDetail(item.scientificResearch);
                                             }
+                                            else {
+                                                // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}&all=true`,
+                                                    { state: { from: `${location.pathname + location.search}_active` } });
+                                            }
                                         }}
-                                        to={item.isApprove ? `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}&all=true` : null}>
+
+                                    >
                                         Chi tiết
                                     </Button>
                                 }

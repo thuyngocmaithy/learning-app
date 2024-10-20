@@ -10,8 +10,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
-
-import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRById, updateSRByIds } from '../../../../services/scientificResearchService';
+import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRByIds } from '../../../../services/scientificResearchService';
 import { getBySRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
@@ -37,6 +36,8 @@ function DeTaiNCKH() {
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
+    const urlPreviousLevel1 = location.state?.from;
+    const urlPreviousLevel2 = location.state?.urlPrevious;
 
     // Lấy keyRoute tương ứng từ URL
     const currentPath = location.pathname;
@@ -47,17 +48,21 @@ function DeTaiNCKH() {
 
     // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
-    const [tabActive, setTabActive] = useState(getInitialTabIndex());
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     // Lấy tabIndex từ URL nếu có
     function getInitialTabIndex() {
-        return Number(queryParams.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+        setTabActive(tab);
     }
+
+    useEffect(() => {
+        getInitialTabIndex();
+    }, [tabIndexFromUrl])
 
     // Cập nhật URL khi tab thay đổi
     const handleTabChange = (tabId) => {
-        setTabActive(tabId);
-
         const currentUrl = new URL(window.location.href);
         const params = new URLSearchParams(currentUrl.search);
 
@@ -68,8 +73,10 @@ function DeTaiNCKH() {
             params.set('tabIndex', tabId); // Cập nhật giá trị mới cho tabIndex nếu đã có
         }
 
-        // Cập nhật URL với params mới
-        navigate(`${currentUrl.pathname}?${params.toString()}`);
+        // Cập nhật URL với params mới        
+        navigate(`${currentUrl.pathname}?${params.toString()}`, { state: { from: urlPreviousLevel1 } });
+
+        setTabActive(tabId);
     };
 
     // Xử lý lấy SRGId    
@@ -169,7 +176,6 @@ function DeTaiNCKH() {
     const listRegisterscientificResearchJoined = async () => {
         try {
             const response = await getWhere({ instructor: userId, scientificResearchGroup: SRGIdFromUrl });
-
             if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
@@ -190,7 +196,6 @@ function DeTaiNCKH() {
             else {
                 result = await getAllSR();
             }
-            console.log(result);
 
             const scientificResearchs = await Promise.all((result.data.data || result.data).map(async (data) => {
                 // lấy số sinh viên đăng ký
@@ -251,7 +256,20 @@ function DeTaiNCKH() {
                                 type="inner"
                                 title={item.scientificResearchName}
                                 extra={
-                                    <ButtonCustom primary verysmall to={`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`}>
+                                    <ButtonCustom
+                                        primary
+                                        verysmall
+                                        onClick={() => {
+                                            navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`,
+                                                {
+                                                    state: {
+                                                        urlPrevious: urlPreviousLevel1,
+                                                        from: `${location.pathname + location.search + "_active"}`
+                                                    }
+                                                }
+                                            );
+                                        }}
+                                    >
                                         Chi tiết
                                     </ButtonCustom>
                                 }
@@ -267,18 +285,6 @@ function DeTaiNCKH() {
             ),
         },
     ];
-    const [isToolbar, setIsToolbar] = useState(true);
-
-    //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
-    const handleTabClick = (index) => {
-        setTabActive(index)
-        if (index === 2) {
-            setIsToolbar(false);
-        } else {
-            setIsToolbar(true);
-        }
-    };
-
 
     const handleDelete = async () => {
         try {
@@ -363,24 +369,30 @@ function DeTaiNCKH() {
     return (
         <>
             <div className={cx('wrapper')}>
-                <Breadcrumb
-                    items={[
-                        {
-                            title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu khoa học</Link>,
-                        },
-                        {
-                            title: 'Danh sách đề tài nghiên cứu khoa học',
-                        },
-                    ]}
-                />
-                <div className={cx('conatainer-header')}>
+                {
+                    // Nếu url trước đó là NhomDeTaiNCKH_Department thì hiển thị Breadcrumb
+                    (urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH_Department}_active`
+                        || urlPreviousLevel2 === `${config.routes.NhomDeTaiNCKH_Department}_active`
+                    ) &&
+                    <Breadcrumb
+                        items={[
+                            {
+                                title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                            },
+                            {
+                                title: 'Danh sách đề tài nghiên cứu khoa học',
+                            },
+                        ]}
+                    />
+                }
+                <div className={cx('container-header')}>
                     <div className={cx('info')}>
                         <span className={cx('icon')}>
                             <ProjectIcon />
                         </span>
                         <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
                     </div>
-                    {isToolbar ? (
+                    {tabActive === 1 ? (
                         <div className={cx('wrapper-toolbar')}>
                             <Toolbar
                                 type={'Tạo mới'}
@@ -407,7 +419,6 @@ function DeTaiNCKH() {
                     activeKey={tabActive}
                     onChange={handleTabChange}
                     centered
-                    onTabClick={(index) => handleTabClick(index)}
                     items={ITEM_TABS.map((item, index) => {
                         return {
                             label: item.title,

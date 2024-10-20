@@ -5,13 +5,11 @@ import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import { Collapse, Divider, Segmented } from 'antd';
 import TransferCustom from '../../../../components/Core/TransferCustom';
+import { useContext, useEffect, useState } from 'react';
+import { getWhere } from '../../../../services/majorService';
+import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
-const text = `
-  A dog is a type of domesticated animal.
-  Known for its loyalty and faithfulness,
-  it can be found:a welcome guest in many households across the world.
-`;
 
 const columns = [
     {
@@ -127,6 +125,23 @@ const data3 = [
 
 
 function KhungCTDT() {
+    const { facultyId } = useContext(AccountLoginContext);
+    const [listMajor, setListMajor] = useState([]);
+
+    const fetchMajors = async () => {
+        try {
+            const response = await getWhere({ facultyId: facultyId })
+            if (response.status === 200) {
+
+            }
+
+        } catch (error) {
+
+        }
+    }
+    useEffect(() => {
+        fetchMajors();
+    }, [])
     return (
         <div className={cx('wrapper')}>
             <div className={cx('info')}>
@@ -163,7 +178,8 @@ function KhungCTDT() {
                 ]}
             />
             <Divider orientation="left">Khối kiến thức chuyên nghiệp</Divider>
-            <Segmented size="large" options={['Kiến thức cơ sở ngành', 'Kiến thức ngành']} block />
+            <Segmented size="large" options={['Kiến thức cơ sở ngành', 'Kiến thức ngành', 'Kiến thức chuyên ngành']} block />
+            <Segmented size="large" options={['Kiến thức cơ sở ngành', 'Kiến thức ngành', 'Kiến thức chuyên ngành']} block />
             <Collapse
                 bordered={false}
                 items={[

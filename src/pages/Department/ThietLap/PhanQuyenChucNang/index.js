@@ -34,13 +34,19 @@ function PhanQuyenChucNang() {
     const [showModalDetail, setShowModalDetail] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const [tabActive, setTabActive] = useState(getInitialTabIndex());
+    const queryParams = new URLSearchParams(location.search);
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     // Lấy tabIndex từ URL nếu có
     function getInitialTabIndex() {
-        const params = new URLSearchParams(location.search);
-        return Number(params.get('tabIndex')) || 1; // Mặc định là tab đầu tiên
+        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+        setTabActive(tab);
     }
+
+    useEffect(() => {
+        getInitialTabIndex();
+    }, [tabIndexFromUrl])
 
     // Cập nhật URL khi tab thay đổi
     const handleTabChange = (tabId) => {
@@ -264,7 +270,7 @@ function PhanQuyenChucNang() {
         </div>
     ) : (
         <div className={cx('wrapper')}>
-            <div className={cx('conatainer-header')}>
+            <div className={cx('container-header')}>
                 <div className={cx('info')}>
                     <div className={cx('title')}>
                         <span className={cx('icon')}>

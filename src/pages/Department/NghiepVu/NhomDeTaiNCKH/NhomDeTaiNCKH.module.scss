@@ -1,4 +1,4 @@
-.conatainer-header {
+.container-header {
     display: flex;
     justify-content: space-between;
     margin: 30px 15px 10px 0;
@@ -23,7 +23,12 @@
         }
     }
 
+    .wrapper-toolbar {
+        display: flex;
+    }
+
 }
+
 
 // list scientificResearch
 .stt {

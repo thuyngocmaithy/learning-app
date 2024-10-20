@@ -23,11 +23,18 @@ function AccountLoginProvider({ children }) {
         return initialData ? initialData.permission : null;
     });
 
+
+    const [facultyId, setFacultyId] = useState(() => {
+        const initialData = getLocalStorageWithExpiration('userLogin');
+        return initialData ? initialData.faculty : null;
+    });
+
     // Hàm để cập nhật userId và permission sau khi login hoặc logout
     const updateUserInfo = () => {
         const userlogin = getLocalStorageWithExpiration('userLogin');
         setUserId(userlogin ? userlogin.userId : 0);
         setPermission(userlogin ? userlogin.permission : null);
+        setFacultyId(userlogin ? userlogin.facultyId : null);
     };
 
     useEffect(() => {
@@ -35,7 +42,7 @@ function AccountLoginProvider({ children }) {
     }, []);
 
     return (
-        <AccountLoginContext.Provider value={{ userId, permission, updateUserInfo }}>
+        <AccountLoginContext.Provider value={{ userId, permission, facultyId, updateUserInfo }}>
             {children}
         </AccountLoginContext.Provider>
     );

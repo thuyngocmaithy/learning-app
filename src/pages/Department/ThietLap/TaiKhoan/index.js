@@ -126,14 +126,14 @@ function TaiKhoan() {
 
     return (
         <div className={cx('wrapper')}>
-            <div className={cx('conatainer-header')}>
+            <div className={cx('container-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
                     <h3 className={cx('title')}>Tài khoản</h3>
                 </div>
-                <div className={cx('wrapper')}>
+                <div className={cx('wrapper-toolbar')}>
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {

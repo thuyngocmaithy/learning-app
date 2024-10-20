@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinDeTaiNCKHThamGia.module.scss';
-import { Button, Descriptions, Dropdown, message, Tag } from 'antd';
+import { Descriptions, Dropdown, message, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { getStatusByType } from '../../services/statusService';
 import { updateSRById } from '../../services/scientificResearchService';
@@ -8,9 +8,6 @@ import { updateSRById } from '../../services/scientificResearchService';
 const cx = classNames.bind(styles);
 
 function ThongTinDeTaiNCKHThamGia({ scientificResearch, thesis = false }) {
-    console.log(scientificResearch);
-
-
     const statusType = 'Tiến độ đề tài NCKH';
     const [statusSelected, setStatusSelected] = useState(
         {

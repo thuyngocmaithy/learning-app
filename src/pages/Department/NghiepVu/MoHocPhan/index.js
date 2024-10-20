@@ -147,7 +147,7 @@ function MoHocPhan() {
 
     return (
         <div className={cx('mohocphan-wrapper')}>
-            <div className={cx('conatainer-header')}>
+            <div className={cx('container-header')}>
                 <div className={cx('info')}>
                     <span className={cx('icon')}>
                         <ListCourseActiveIcon />
@@ -155,7 +155,7 @@ function MoHocPhan() {
                     <h3 className={cx('title')}>Mở học phần</h3>
                 </div>
                 {/* Truyền hàm setShowModalAdd vào Toolbar */}
-                <div className={cx('wrapper')}>
+                <div className={cx('wrapper-toolbar')}>
                     <Toolbar type={'Tạo mới'} onClick={() => setShowModalAdd(true)} />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('năm học')} />
                     <Toolbar type={'Nhập file Excel'} />

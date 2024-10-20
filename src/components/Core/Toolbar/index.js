@@ -7,14 +7,13 @@ import {
     ImportOutlined,
     PlusOutlined,
     SaveOutlined,
+    UploadOutlined,
 } from '@ant-design/icons';
 import { DisableIcon, EnableIcon } from '../../../assets/icons';
 
 const cx = classNames.bind(styles);
 
-function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3', isVisible }) {
-    // console.log(type + "-" + isVisible);
-
+function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3', isVisible, fileInputRef = null }) {
     let icon = null;
     if (type === 'Xóa') {
         icon = <DeleteOutlined />;
@@ -29,16 +28,46 @@ function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3', isVisible }) {
     } else if (type === 'Lưu cấu trúc') {
         icon = <SaveOutlined />;
     } else if (type === 'Ẩn') {
-        icon = <DisableIcon classNames={cx('icon')} />;
+        icon = <DisableIcon className={cx('icon')} />;
     } else if (type === 'Hiện') {
-        icon = <EnableIcon classNames={cx('icon')} />;
+        icon = <EnableIcon className={cx('icon')} />;
+    } else if (type === 'Upload') {
+        icon = <UploadOutlined className={cx('icon')} />;
     }
+
+    const handleFileChange = (event) => {
+        const files = event.target.files;
+        const fileArray = Array.from(files);
+        if (fileArray) {
+            // Gọi hàm upload file            
+            onClick(fileArray);
+        }
+    };
+    const handleClick = () => {
+        if (type === 'Upload' && fileInputRef.current) {
+            fileInputRef.current.click(); // Kích hoạt click vào input file            ;
+        } else {
+            onClick(); // Gọi onClick nếu không phải là type Upload
+        }
+    };
+
     return (
-        <Tooltip title={type}>
-            <button hidden={isVisible !== undefined && !isVisible} className={cx('wrapper')} onClick={onClick} style={{ backgroundColor: backgroundCustom }}>
-                <span className={cx('icon')}>{icon}</span>
-            </button>
-        </Tooltip>
+        <div className={cx('wrapper-toolbar')} >
+            <Tooltip title={type}>
+                <button hidden={isVisible !== undefined && !isVisible} className={cx('wrapper-button')} onClick={handleClick} style={{ backgroundColor: backgroundCustom }}>
+                    <span className={cx('icon')}>{icon}</span>
+                </button>
+            </Tooltip>
+            {type === 'Upload' && (
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    multiple
+                    hidden
+                />
+            )}
+        </div>
     );
 }
 
