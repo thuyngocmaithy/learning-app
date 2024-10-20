@@ -27,8 +27,17 @@
 
 }
 
+.link-file {
+    margin-right: 20px;
+}
+
 .breadcrumb-item:hover {
     color: rgba(0, 0, 0, 0.88);
     background-color: rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+}
+
+.link-file:hover {
+    color: var(--primary);
     cursor: pointer;
 }

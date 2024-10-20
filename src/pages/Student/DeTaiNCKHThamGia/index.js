@@ -1,7 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHThamGia.module.scss';
 import { Breadcrumb, message, Spin, Tabs } from 'antd';
-import { LeftOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 import ChatBox from '../../../components/Core/ChatBox';
 import ThongTinDeTaiNCKHThamGia from '../../../components/ThongTinDeTaiNCKHThamGia';
@@ -16,7 +15,6 @@ import config from '../../../config';
 import Toolbar from '../../../components/Core/Toolbar';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getWhere } from '../../../services/attachService';
-import Button from '../../../components/Core/Button';
 import { ProjectIcon } from '../../../assets/icons';
 
 const cx = classNames.bind(styles);
@@ -33,6 +31,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const [dataFollower, setDataFollower] = useState([])
     const [dataAttach, setDataAttach] = useState([])
     const fileInputRef = useRef(null);
+    const [loadingFiles, setLoadingFiles] = useState({}); // Trạng thái loading cho từng file
     const urlPreviousLevel1 = location.state?.from;
     const urlPreviousLevel2 = location.state?.urlPrevious;
     const navigate = useNavigate();
@@ -170,11 +169,14 @@ function DeTaiNCKHThamGia({ thesis = false }) {
 
     // Hàm xử lý download file
     const handleDownload = async (file) => {
+        setLoadingFiles(prev => ({ ...prev, [file]: true })); // Bắt đầu tải file cho file cụ thể
         try {
             const response = await downloadFile(file); // Gọi hàm download file
             console.log('Download successful:', response);
         } catch (error) {
             console.error('Download failed:', error);
+        } finally {
+            setLoadingFiles(prev => ({ ...prev, [file]: false })); // Kết thúc tải file cho file cụ thể
         }
     }
 
@@ -202,11 +204,14 @@ function DeTaiNCKHThamGia({ thesis = false }) {
             dataIndex: 'filename',
             key: 'filename',
             render: (_, { filename }) => (
-                <>
-                    <Link key={filename} style={{ textDecoration: 'underline' }} onClick={() => handleDownload(filename)}>
+                <div className='container-link-file' onClick={() => handleDownload(filename)}>
+                    {console.log(loadingFiles[filename])}
+
+                    <span className={cx('link-file')} key={filename} style={{ textDecoration: 'underline' }}>
                         {filename}
-                    </Link>
-                </>
+                    </span>
+                    <Spin spinning={loadingFiles[filename] !== undefined && loadingFiles[filename]} />
+                </div>
             ),
         },
         {
