@@ -65,7 +65,12 @@ export const getUsersByFaculty = async (facultyId) => {
   }
 };
 
+
 export const getUserById = async (userId) => {
+  if (!userId) {
+    console.warn('[userService - getUsersById] Attempted to fetch user with null/undefined ID');
+    return null;
+  }
   try {
     const response = await api.get(`/users/${userId}`);
     return response.data;
@@ -74,7 +79,6 @@ export const getUserById = async (userId) => {
     throw error;
   }
 };
-
 
 
 // Hàm lấy avt từ API SGU
@@ -100,12 +104,11 @@ export const getScore = async (access_token) => {
 };
 
 
-export const registerSubject = async (userId, subjectId, frameId, semesterId) => {
+export const registerSubject = async (userId, subjectId, semesterId) => {
   try {
     const response = await api.post('/user-register-subject/register', {
       userId,
       subjectId,
-      frameId,
       semesterId
     });
     return response.data;
@@ -119,12 +122,29 @@ export const registerSubject = async (userId, subjectId, frameId, semesterId) =>
 export const getUserRegisteredSubjects = async (userId) => {
   try {
     const response = await api.get(`/user-register-subject/user/${userId}`);
-    return response.data;
+    if (response.data && response.data.message === "success" && Array.isArray(response.data.data)) {
+      return response.data.data;
+    } else {
+      console.error('[userServive - getUserRegisteredSubjects - errorFormatData]', response.data);
+      return [];
+    }
   } catch (error) {
-    console.error('Error getting user registered subjects:', error);
+    console.error('[userServive - getUserRegisteredSubjects - error] ', error);
     throw error;
   }
 };
+
+
+export const deleteUserRegisteredSubject = async (userId, subjectId, semesterId) => {
+  try {
+    const response = await api.delete(`/user-register-subject/user/${userId}/subject/${subjectId}/semester/${semesterId}`);
+    return response.data;
+  } catch (error) {
+    console.error('[userService - deleteUserRegisteredSubject - error] ', error);
+    throw error;
+  }
+};
+
 
 
 export const getAllUser = async () => {
@@ -166,3 +186,14 @@ export const updateUserById = async (userId, userData) => {
     throw error;
   }
 }
+
+export const deleteUserById = async (params) => {
+  try {
+    const response = await api.delete('/users', { params });
+    return response.data;
+  }
+  catch (error) {
+    console.error('[userServive - deleteUserById - error] : ', error);
+    throw error;
+  }
+};

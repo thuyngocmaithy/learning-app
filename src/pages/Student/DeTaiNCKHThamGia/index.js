@@ -266,7 +266,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     ) : (
         < div className={cx('wrapper-DeTaiNCKHThamGia')} >
             <Breadcrumb
-
+                className={cx('breadcrumb')}
                 items={isAll !== "true" ?
                     [
                         // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị

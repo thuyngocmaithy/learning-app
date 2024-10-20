@@ -1,26 +1,29 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useCallback } from 'react';
 
 const AccountLoginContext = createContext();
 
 function AccountLoginProvider({ children }) {
     const getLocalStorageWithExpiration = (key) => {
-        const data = localStorage.getItem(key);
-        if (!data) {
+        try {
+            const data = localStorage.getItem(key);
+            if (!data) {
+                return null;
+            }
+            return JSON.parse(data);
+        } catch (error) {
+            console.error('Error parsing localStorage data:', error);
             return null;
         }
-
-        const parsedData = JSON.parse(data);
-        return parsedData;
     };
 
     const [userId, setUserId] = useState(() => {
         const initialData = getLocalStorageWithExpiration('userLogin');
-        return initialData ? initialData.userId : 0;
+        return initialData?.userId || null;
     });
 
     const [permission, setPermission] = useState(() => {
         const initialData = getLocalStorageWithExpiration('userLogin');
-        return initialData ? initialData.permission : null;
+        return initialData?.permission || null;
     });
 
 
@@ -30,16 +33,16 @@ function AccountLoginProvider({ children }) {
     });
 
     // Hàm để cập nhật userId và permission sau khi login hoặc logout
-    const updateUserInfo = () => {
+    const updateUserInfo = useCallback(() => {
         const userlogin = getLocalStorageWithExpiration('userLogin');
-        setUserId(userlogin ? userlogin.userId : 0);
+        setUserId(userlogin ? userlogin.userId : null);
         setPermission(userlogin ? userlogin.permission : null);
         setFacultyId(userlogin ? userlogin.facultyId : null);
-    };
+    }, []);
 
     useEffect(() => {
-        updateUserInfo(); // Cập nhật thông tin ngay khi component được mount
-    }, []);
+        updateUserInfo();
+    }, [updateUserInfo]);
 
     return (
         <AccountLoginContext.Provider value={{ userId, permission, facultyId, updateUserInfo }}>

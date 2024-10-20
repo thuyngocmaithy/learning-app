@@ -375,6 +375,7 @@ function DeTaiNCKH() {
                         || urlPreviousLevel2 === `${config.routes.NhomDeTaiNCKH_Department}_active`
                     ) &&
                     <Breadcrumb
+                        className={cx('breadcrumb')}
                         items={[
                             {
                                 title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu khoa học</Link>,

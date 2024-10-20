@@ -3,12 +3,11 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
-import { listSubjectToFrame } from '../../services/subjectService';
+import { GetSubjectByMajor } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { getUseridFromLocalStorage } from '../../services/userService';
+import { getUseridFromLocalStorage, getUserById, getUserRegisteredSubjects } from '../../services/userService';
 
 const cx = classNames.bind(styles);
-const userid = getUseridFromLocalStorage();
 
 const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     const [frames, setFrames] = useState([]);
@@ -19,135 +18,250 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     const [studentInfo, setStudentInfo] = useState(null);
     const didMountRef = useRef(false);
 
-    const repeatHK = department ? 3 : 12;
+    const firstYear = studentInfo?.firstAcademicYear || 2020; // Mặc định là 2020 nếu không có
+    const lastYear = studentInfo?.lastAcademicYear || 2024; // Mặc định là 2024 nếu không có
+    const repeatHK = department ? 3 : (lastYear - firstYear + 1) * 3; // Số học kỳ cần hiển thị (3 kỳ mỗi năm)
+
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            const userid = getUseridFromLocalStorage();
+            const userData = await getUserById(userid);
+            const userMajorId = userData.data.major.majorId;
+            const firstYear = userData.data.firstAcademicYear;
+            const lastYear = userData.data.lastAcademicYear;
+
+            const [framesResponse, scoresResponse, registeredSubjectsResponse] = await Promise.all([
+                GetSubjectByMajor(userMajorId),
+                getScoreByStudentId(userid),
+                getUserRegisteredSubjects(userid)
+            ]);
+
+            if (framesResponse && Array.isArray(framesResponse)) {
+                setFrames(framesResponse);
+            }
+
+            if (scoresResponse && Array.isArray(scoresResponse)) {
+                setScores(scoresResponse);
+            }
+
+            if (registeredSubjectsResponse && Array.isArray(registeredSubjectsResponse)) {
+                const registeredMap = {};
+                registeredSubjectsResponse.forEach(registration => {
+                    registeredMap[registration.subject.subjectId] = {
+                        semesterId: registration.semester.semesterId,
+                        registerDate: registration.registerDate
+                    };
+                });
+                setRegisteredSubjects(registeredMap);
+            }
+
+            if (scoresResponse.length > 0) {
+                setStudentInfo({ ...scoresResponse[0].student, firstAcademicYear: firstYear, lastAcademicYear: lastYear });
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            message.error('Failed to load data');
+        }
+        setIsLoading(false);
+    };
+
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (didMountRef.current) return;
-            didMountRef.current = true;
-
-            setIsLoading(true);
-            try {
-                const [framesResponse, scoresResponse] = await Promise.all([
-                    listSubjectToFrame(),
-                    getScoreByStudentId(userid)
-                ]);
-
-                if (framesResponse && Array.isArray(framesResponse)) {
-                    setFrames(framesResponse[0]);
-                }
-                if (scoresResponse && Array.isArray(scoresResponse)) {
-                    setScores(scoresResponse);
-                    const registeredMap = {};
-                    scoresResponse.forEach(score => {
-                        registeredMap[score.subject.subjectId] = score.semester.semesterId;
-                    });
-                    setRegisteredSubjects(registeredMap);
-
-                    if (scoresResponse.length > 0) {
-                        setStudentInfo(scoresResponse[0].student);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                message.error('Failed to load data');
-            }
-            setIsLoading(false);
-        };
-
         fetchData();
     }, []);
 
+
+    // Update selection changes
     useEffect(() => {
         if (onSelectionChange)
             onSelectionChange(selectedSubjects);
     }, [selectedSubjects, onSelectionChange]);
 
+    // Helper function to get semester index
     const getSemesterIndex = useCallback((semesterId) => {
+        if (!studentInfo) return -1;
         const year = parseInt(semesterId.substring(0, 4));
         const semester = parseInt(semesterId.substring(4));
-        const firstYear = studentInfo ? studentInfo.firstAcademicYear : 2020;
-        return (year - firstYear) * 3 + semester - 1;
+        const firstYear = studentInfo.firstAcademicYear;
+
+        return (year - firstYear) * 3 + (semester - 1);
     }, [studentInfo]);
 
-    const handleSelectSubject = useCallback((subjectId, semesterIndex) => {
+
+
+    // Handle subject selection
+    const handleSelectSubject = useCallback((subjectId, frameId, semesterIndex) => {
         setSelectedSubjects(prev => {
             const newSelection = { ...prev };
             if (newSelection[subjectId] && newSelection[subjectId].semesterIndex === semesterIndex) {
                 delete newSelection[subjectId];
             } else {
-                newSelection[subjectId] = { semesterIndex };
+                newSelection[subjectId] = { frameId, semesterIndex };
             }
             return newSelection;
         });
     }, []);
 
-    const renderFrameContent = useCallback((frame, level = 0) => {
-        const frameRows = [];
+    // Check if frame exists
+    const frameExists = useCallback((frameId) => {
+        return frames.some(frame => frame.id === frameId);
+    }, [frames]);
+
+    // Get all frames by parent ID
+    const getFramesByParentId = useCallback((parentId = null) => {
+        return frames.filter(frame => frame.parentFrameId === parentId);
+    }, [frames]);
+
+    // Get orphaned frames (frames with non-existent parent)
+    const getOrphanedFrames = useCallback(() => {
+        return frames.filter(frame =>
+            frame.parentFrameId && !frameExists(frame.parentFrameId)
+        );
+    }, [frames, frameExists]);
+
+    const renderSubjectRow = useCallback((subject, index, paddingLeft) => {
+        if (!subject) return null;
+
+        const registeredInfo = registeredSubjects[subject.subjectId];
+        const isRegistered = !!registeredInfo;
+        const registeredIndex = isRegistered ? getSemesterIndex(registeredInfo.semesterId) : -1;
+
+        // Check if the subject has a score in any semester
+        const hasScoreInAnySemester = scores.some(score =>
+            score.subject.subjectId === subject.subjectId && score.finalScore10 !== undefined
+        );
+
+        return (
+            <TableRow key={`subject-${subject.subjectId}`}>
+                <TableCell align="center">{index + 1}</TableCell>
+                <TableCell align="center">{subject.subjectId}</TableCell>
+                <TableCell align="left" style={{ paddingLeft: `${paddingLeft + 20}px` }}>
+                    {subject.subjectName}
+                </TableCell>
+                <TableCell align="center">{subject.creditHour}</TableCell>
+                <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
+                {Array.from({ length: repeatHK }).map((_, i) => {
+                    const isSelected = selectedSubjects[subject.subjectId]?.semesterIndex === i;
+                    const isThisSemesterRegistered = registeredIndex === i;
+
+                    const scoreInfo = scores.find(score =>
+                        score.subject.subjectId === subject.subjectId &&
+                        getSemesterIndex(score.semester.semesterId) === i
+                    );
+                    const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
+
+                    return (
+                        <TableCell key={`semester-${i}`} align="center">
+                            {department ? (
+                                <Checkbox
+                                    checked={isThisSemesterRegistered || isSelected}
+                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameId, i)}
+                                    disabled={hasScore}
+                                    size="small"
+                                />
+                            ) : (
+                                <Radio
+                                    checked={isThisSemesterRegistered || isSelected}
+                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameId, i)}
+                                    disabled={hasScore}
+                                    size="small"
+                                />
+                            )}
+                            {hasScore && (
+                                <span>{scoreInfo.finalScore10} ({scoreInfo.finalScoreLetter})</span>
+                            )}
+                            {isThisSemesterRegistered && !hasScore && (
+                                <span>Registered: {new Date(registeredInfo.registerDate).toLocaleDateString()}</span>
+                            )}
+                        </TableCell>
+                    );
+                })}
+            </TableRow>
+        );
+    }, [department, repeatHK, registeredSubjects, selectedSubjects, getSemesterIndex, handleSelectSubject, scores]);
+
+
+
+    // Render frame and its content
+    const renderFrame = useCallback((frame, level = 0) => {
+        if (!frame) return [];
+
+        const rows = [];
         const paddingLeft = level * 20;
 
-        frameRows.push(
+        // Render frame header
+        rows.push(
             <TableRow key={`frame-${frame.id}`}>
-                <TableCell className={cx('title')} align="left" colSpan={5} style={{ paddingLeft: `${paddingLeft}px` }}>
-                    {frame.frameName} ({frame.creditHour})
+                <TableCell
+                    className={cx('title')}
+                    align="left"
+                    colSpan={5}
+                    style={{ paddingLeft: `${paddingLeft}px` }}
+                >
+                    {frame.frameName} {frame.creditHour ? `(${frame.creditHour})` : ''}
+                    {frame.majorName ? ` - ${frame.majorName}` : ''}
                 </TableCell>
                 <TableCell align="center" colSpan={repeatHK}></TableCell>
             </TableRow>
         );
 
-        frames
-            .filter(subframe => subframe.parentFrameId === frame.id)
-            .forEach(subframe => {
-                frameRows.push(...renderFrameContent(subframe, level + 1));
-            });
-
+        // Render subjects
         if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
             frame.subjectInfo.forEach((subject, index) => {
                 if (subject) {
-                    frameRows.push(
-                        <TableRow key={`subject-${subject.subjectId}`}>
-                            <TableCell align="center">{index + 1}</TableCell>
-                            <TableCell align="center">{subject.subjectId}</TableCell>
-                            <TableCell align="left" style={{ paddingLeft: `${paddingLeft + 20}px` }}>{subject.subjectName}</TableCell>
-                            <TableCell align="center">{subject.creditHour}</TableCell>
-                            <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
-                            {Array.from({ length: repeatHK }).map((_, i) => {
-                                const isRegistered = registeredSubjects[subject.subjectId];
-                                const registeredIndex = isRegistered ? getSemesterIndex(isRegistered) : -1;
-                                const isSelected = selectedSubjects[subject.subjectId]?.semesterIndex === i;
-                                return (
-                                    <TableCell key={`semester-${i}`} align="center">
-                                        {department ? (
-                                            <Checkbox
-                                                checked={registeredIndex === i || isSelected}
-                                                onChange={() => handleSelectSubject(subject.subjectId, frame.id, i)}
-                                                disabled={isRegistered !== undefined}
-                                                size="small"
-                                            />
-                                        ) : (
-                                            <Radio
-                                                checked={registeredIndex === i || isSelected}
-                                                onChange={() => handleSelectSubject(subject.subjectId, frame.id, i)}
-                                                disabled={isRegistered !== undefined}
-                                                size="small"
-                                            />
-                                        )}
-                                    </TableCell>
-                                );
-                            })}
-                        </TableRow>
-                    );
+                    rows.push(renderSubjectRow(subject, index, paddingLeft));
                 }
             });
         }
 
-        return frameRows;
-    }, [frames, registeredSubjects, handleSelectSubject, getSemesterIndex, department, repeatHK, selectedSubjects]);
+        // Render child frames
+        const childFrames = getFramesByParentId(frame.id);
+        childFrames.forEach(childFrame => {
+            rows.push(...renderFrame(childFrame, level + 1));
+        });
 
+        return rows;
+    }, [repeatHK, renderSubjectRow, getFramesByParentId]);
+
+    // Render all table rows
     const renderTableRows = useCallback(() => {
-        return frames.filter(frame => !frame.parentFrameId).flatMap(frame => renderFrameContent(frame));
-    }, [frames, renderFrameContent]);
+        const rows = [];
 
+        // Render root frames
+        const rootFrames = getFramesByParentId(null);
+        rootFrames.forEach(frame => {
+            rows.push(...renderFrame(frame));
+        });
+
+        // Render orphaned frames
+        const orphanedFrames = getOrphanedFrames();
+        if (orphanedFrames.length > 0) {
+            // Add separator for orphaned frames
+            rows.push(
+                <TableRow key="orphaned-separator">
+                    <TableCell
+                        className={cx('title')}
+                        align="left"
+                        colSpan={5 + repeatHK}
+                        style={{ backgroundColor: '#f5f5f5' }}
+                    >
+                        Chương trình đào tạo chuyên ngành
+                    </TableCell>
+                </TableRow>
+            );
+
+            // Render each orphaned frame
+            orphanedFrames.forEach(frame => {
+                rows.push(...renderFrame(frame));
+            });
+        }
+
+        return rows;
+    }, [getFramesByParentId, getOrphanedFrames, renderFrame, repeatHK]);
+
+    // Define table columns
     const columns = [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },

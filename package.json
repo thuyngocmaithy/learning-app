@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "@ant-design/icons": "^5.3.7",
+        "@babel/plugin-transform-private-property-in-object": "^7.25.7",
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -63,5 +64,8 @@
             "last 1 safari version"
         ]
     },
-    "homepage": "/Login"
+    "homepage": "/Login",
+    "devDependencies": {
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    }
 }

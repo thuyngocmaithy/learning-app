@@ -9,7 +9,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
-import { deleteAccounts } from '../../../../services/accountService';
+import { deleteUserById } from '../../../../services/userService';
 import { getAllUser } from '../../../../services/userService';
 
 const cx = classNames.bind(styles);
@@ -138,16 +138,20 @@ function NguoiDung() {
                 ten_truong: user.ten_truong || "",
                 hoc_vi: user.hoc_vi || "",
                 isActive: user.isActive,
-                avatar: user.avatar || ""
+                avatar: user.avatar || "",
+                permission: user.permission || null,
             }));
 
             setData(listUser);
+            console.log(listUser);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
             setIsLoading(false);
         }
     };
+
+
 
     useEffect(() => {
         fetchData();
@@ -164,7 +168,8 @@ function NguoiDung() {
 
     const handleDelete = async () => {
         try {
-            await deleteAccounts(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
+            // Gọi API để xóa các user theo ID
+            await deleteUserById({ ids: selectedRowKeys.join(',') }); // Chuyển đổi mảng ID thành chuỗi
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
@@ -175,6 +180,7 @@ function NguoiDung() {
             console.error(' [ThietLap - NguoiDung - deletedAccount] : Error deleting account:', error);
         }
     };
+
 
 
     const NguoiDungUpdateMemoized = useMemo(() => {
@@ -213,11 +219,13 @@ function NguoiDung() {
 
             </div>
             <TableCustomAnt
-                height={'350px'}
+                height={'600px'}
                 columns={columns(setShowModal)}
                 data={data}
+                selectedRowKeys={selectedRowKeys}
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
+                keyIdChange="userId"
             />
             {NguoiDungUpdateMemoized}
 

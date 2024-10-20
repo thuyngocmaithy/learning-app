@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Empty, Input, InputNumber, Progress, Segmented } from 'antd';
+import { Empty, Input, InputNumber, Progress } from 'antd';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableHP from '../../../../components/Table';
 import { useState } from 'react'; //
