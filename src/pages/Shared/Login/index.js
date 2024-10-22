@@ -8,11 +8,13 @@ import styles from './Login.module.scss';
 import sgu from '../../../assets/images/sgu.jpg';
 import Button from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { SRAndThesisJoinContext } from '../../../context/SRAndThesisJoinContext';
 
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
     const { updateUserInfo } = useContext(AccountLoginContext);
+    const { updateSRAndThesisJoin } = useContext(SRAndThesisJoinContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -30,6 +32,7 @@ const LoginForm = () => {
                     facultyId: response.data.user.faculty
                 }));
                 await updateUserInfo();
+                await updateSRAndThesisJoin();
                 if (response.data.user.roles === "SINHVIEN") {
                     navigate('/', { replace: true });
                 } else if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {

@@ -232,7 +232,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         {
             id: 1,
             title: 'Chi tiết',
-            children: <ThongTinDeTaiNCKHThamGia scientificResearch={scientificResearch} thesis={true} />,
+            children: <ThongTinDeTaiNCKHThamGia scientificResearch={scientificResearch} />,
         },
         {
             id: 2,

@@ -8,6 +8,7 @@ import { AccountLoginProvider } from './context/AccountLoginContext';
 import { SocketNotificationProvider } from './context/SocketNotificationContext';
 import { SocketMessagesProvider } from './context/SocketMessagesContext';
 import { PermissionDetailProvider } from './context/PermissionDetailContext';
+import { SRAndThesisJoinProvider } from './context/SRAndThesisJoinContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,11 +17,13 @@ root.render(
         <GlobalStyles>
             <AccountLoginProvider>
                 <PermissionDetailProvider>
-                    <SocketNotificationProvider>
-                        <SocketMessagesProvider>
-                            <App />
-                        </SocketMessagesProvider>
-                    </SocketNotificationProvider>
+                    <SRAndThesisJoinProvider>
+                        <SocketNotificationProvider>
+                            <SocketMessagesProvider>
+                                <App />
+                            </SocketMessagesProvider>
+                        </SocketNotificationProvider>
+                    </SRAndThesisJoinProvider>
                 </PermissionDetailProvider>
             </AccountLoginProvider>
         </GlobalStyles>

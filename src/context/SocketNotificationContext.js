@@ -20,7 +20,7 @@ export const SocketNotificationProvider = ({ children }) => {
             // Tạo kết nối socket cho thông báo
             socketIo = io('http://localhost:5000/notifications', {
                 transports: ['websocket'], // Chỉ sử dụng WebSocket
-                path: '/socket.io' // Đảm bảo đường dẫn khớp với cấu hình server
+                path: '/socket.io'
             });
 
             // Xử lý kết nối thành công

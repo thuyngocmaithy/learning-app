@@ -57,6 +57,16 @@ function App() {
         <Router>
             <div className="App">
                 <Routes>
+                    {/* Điều hướng đến trang đăng nhập hoặc dashboard */}
+                    <Route
+                        path="/"
+                        element={userId
+                            ? permission === "SINHVIEN"
+                                ? <Navigate to={config.routes.Dashboard} replace />
+                                : <Navigate to={config.routes.Dashboard_Department} replace />
+                            : <Navigate to={config.routes.Login} replace />}
+                    />
+
                     {publicRoutes.map((route, index) => {
                         let Layout = MainLayout;
 

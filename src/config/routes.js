@@ -3,7 +3,7 @@ const routes = {
     Login: '/Login',
 
     // STUDENT
-    Dashboard: '/',
+    Dashboard: '/Dashboard',
     DanhSachHocPhan: '/DanhSachHocPhan',
     DiemTotNghiep: '/DiemTotNghiep',
     TienDoHocPhan: '/TienDoHocPhan',
@@ -19,7 +19,7 @@ const routes = {
     // NGHIỆP VỤ
     ThietLap: '/ThietLap',
     NghiepVu: '/NghiepVu',
-    Dashboard_Department: '/Department',
+    Dashboard_Department: '/Department/Dashboard',
     MoHocPhan: '/Department/NghiepVu/MoHocPhan',
     DeTaiNCKHThamGia_Department: '/Department/NghiepVu/DeTaiNCKH/DeTaiNCKHThamGia',
     DeTaiNCKH_Department: '/Department/NghiepVu/DeTaiNCKH',
