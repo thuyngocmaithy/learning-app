@@ -36,7 +36,7 @@ const LoginForm = () => {
                 if (response.data.user.roles === "SINHVIEN") {
                     navigate('/', { replace: true });
                 } else if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {
-                    navigate('/Department', { replace: true });
+                    navigate('/Department/Dashboard', { replace: true });
                 }
             } else {
                 message.error(response.message || 'Đăng nhập thất bại');
