@@ -22,6 +22,8 @@ import DeTaiNCKH_Department from '../pages/Department/NghiepVu/DeTaiNCKH';
 import PhanQuyenChucNang_Department from '../pages/Department/ThietLap/PhanQuyenChucNang';
 import TaiKhoan_Department from '../pages/Department/ThietLap/TaiKhoan';
 import NguoiDung_Department from '../pages/Department/ThietLap/NguoiDung';
+import HocKy_Department from '../pages/Department/ThietLap/HocKy';
+import ChuKy_Department from '../pages/Department/ThietLap/ChuKy';
 
 // COMMON
 import LoginForm from '../pages/Shared/Login';
@@ -59,6 +61,8 @@ const privateRoutes = [
     { path: config.routes.PhanQuyenChucNang, component: PhanQuyenChucNang_Department, layout: DepartmentLayout },
     { path: config.routes.TaiKhoan, component: TaiKhoan_Department, layout: DepartmentLayout },
     { path: config.routes.NguoiDung, component: NguoiDung_Department, layout: DepartmentLayout },
+    { path: config.routes.HocKy, component: HocKy_Department, layout: DepartmentLayout },
+    { path: config.routes.ChuKy, component: ChuKy_Department, layout: DepartmentLayout },
 ];
 
 //Không đăng nhập vẫn vào được

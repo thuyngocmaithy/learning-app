@@ -87,6 +87,7 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleUpdate}
+            form={form}
         >
             <Form form={form}>
                 <FormItem label={'Mã chức năng'} name="featureId">

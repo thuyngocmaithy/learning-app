@@ -33,6 +33,9 @@ const routes = {
     PhanQuyenChucNang: '/Department/ThietLap/PhanQuyenChucNang',
     TaiKhoan: '/Department/ThietLap/TaiKhoan',
     NguoiDung: '/Department/ThietLap/NguoiDung',
+    HocKy: '/Department/ThietLap/HocKy',
+    ChuKy: '/Department/ThietLap/ChuKy',
+
 };
 
 export default routes;
