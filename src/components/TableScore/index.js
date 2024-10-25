@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
 import { Select, Spin } from 'antd';
 import classNames from 'classnames/bind';
@@ -6,9 +6,9 @@ import styles from './TableScore.module.scss';
 import { getScoreByStudentId } from '../../services/scoreService';
 import { listSubjectToFrame } from '../../services/subjectService';
 import { getUseridFromLocalStorage } from '../../services/userService';
+import { AccountLoginContext } from '../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
-const userid = getUseridFromLocalStorage();
 
 const OptionScore = [
     { value: '', label: '' },
@@ -19,6 +19,7 @@ const OptionScore = [
 ];
 
 const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onImprovedCreditsChange }) => {
+    const { userId } = useContext(AccountLoginContext)
     const [frames, setFrames] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -34,9 +35,10 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
         setIsLoading(true);
         try {
             const [framesResponse, scoresResponse] = await Promise.all([
-                listSubjectToFrame(),
-                getScoreByStudentId(userid)
+                listSubjectToFrame(userId),
+                getScoreByStudentId(userId)
             ]);
+            console.log(framesResponse);
 
             if (framesResponse && Array.isArray(framesResponse)) {
                 setFrames(framesResponse[0]);
@@ -179,7 +181,9 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
     }, [frames, scores, handleChange, selectedGrades, improvementSubjects, handleImprovement, originalGrades]);
 
     const renderTableRows = useCallback(() => {
-        return frames.filter(frame => !frame.parentFrameId).flatMap(frame => renderFrameContent(frame));
+        console.log(frames);
+
+        return frames.filter(frame => !frame.parentFrameComponent).flatMap(frame => renderFrameContent(frame));
     }, [frames, renderFrameContent]);
 
     const columns = [

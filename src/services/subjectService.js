@@ -10,17 +10,12 @@ export const getAll = async () => {
   }
 };
 
-export const listSubjectToFrame = async () => {
+export const listSubjectToFrame = async (userId) => {
   try {
-    const response = await api.get('/subjects/listSubjectToFrame');
+    const response = await api.get(`/subjects/listSubjectToFrame?userId=${userId}`);
     return response.data;
   } catch (error) {
     console.error('[subjectService - listSubjectToFrame - error]:', error);
     throw error;
   }
 };
-
-
-
-
-

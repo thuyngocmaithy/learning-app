@@ -1,32 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
 import { InputNumber } from 'antd';
 import { GraduateActiveIcon } from '../../../assets/icons';
 import TableScore from '../../../components/TableScore';
 import ButtonCustom from '../../../components/Core/Button';
-import { getUserById, getUseridFromLocalStorage } from '../../../services/userService';
+import { getUserById } from '../../../services/userService';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 const cx = classNames.bind(styles);
 
-const userId = await getUseridFromLocalStorage();
-const userData = await getUserById(userId);
-// console.log(userData.data.GPA);
-
 function DiemTotNghiep() {
-    // State management
-    const [currentGPA, setCurrentGPA] = useState(userData.data.GPA);
+    const { userId } = useContext(AccountLoginContext);
+    const [currentGPA, setCurrentGPA] = useState(0);
     const [totalCredits, setTotalCredits] = useState(0);
     const [creditsA, setCreditsA] = useState(0);
     const [creditsB, setCreditsB] = useState(0);
     const [creditsC, setCreditsC] = useState(0);
     const [creditsD, setCreditsD] = useState(0);
     const [improvedCredits, setImprovedCredits] = useState(0);
-    const [calculatedGPA, setCalculatedGPA] = useState(currentGPA);
+    const [calculatedGPA, setCalculatedGPA] = useState(0);
     const [remainingCredits, setRemainingCredits] = useState(0);
     const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
     const [graduationType, setGraduationType] = useState('');
     const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
     const [currentCredits, setCurrentCredits] = useState(0);
+
+    useEffect(() => {
+        const fetchPoint = async () => {
+            const userData = await getUserById(userId);
+            const gpa = parseFloat(userData.data.GPA) || 0;
+            setCurrentGPA(gpa);
+            setCalculatedGPA(gpa);
+        }
+        if (userId) fetchPoint();
+    }, [userId])
 
     // Handle input changes
     const calculateResults = useCallback(() => {
@@ -69,11 +76,11 @@ function DiemTotNghiep() {
     };
 
     const handleCurrentCreditsChange = useCallback((credits) => {
-        setCurrentCredits(credits);
+        setCurrentCredits(parseInt(credits));
     }, []);
 
     const handleImprovedCreditsChange = useCallback((credits) => {
-        setImprovedCredits(credits);
+        setImprovedCredits(parseInt(credits));
     }, []);
 
     const handleInputChange = useCallback((setter) => (value) => {
