@@ -78,7 +78,10 @@ function NguoiDung() {
                         leftIcon={<EditOutlined />}
                         outline
                         verysmall
-                        onClick={() => setShowModalDetail(record)}>
+                        onClick={() => {
+                            setShowModalDetail(record);  // Pass the record to show details
+                            setIsUpdate(false);  // Set readonly mode
+                        }}>
                         Chi tiết
                     </ButtonCustom>
                     <ButtonCustom
@@ -87,10 +90,9 @@ function NguoiDung() {
                         primary
                         verysmall
                         onClick={() => {
-                            showModal(record);
-                            setIsUpdate(true);
-                        }}
-                    >
+                            setShowModal(record);  // Pass the record to edit
+                            setIsUpdate(true);  // Set edit mode
+                        }}>
                         Sửa
                     </ButtonCustom>
                 </div>
