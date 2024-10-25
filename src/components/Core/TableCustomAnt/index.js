@@ -33,6 +33,16 @@ function TableCustomAnt({
         onChange: onSelectChange,
     };
 
+    const columnsWithSTT = [
+        {
+            title: 'STT',
+            dataIndex: 'index',
+            key: 'stt',
+            render: (text, record, index) => index + 1,
+        },
+        ...columns // Các cột khác
+    ];
+
     return (
         <div
             className={cx('container-crud')}
@@ -46,12 +56,12 @@ function TableCustomAnt({
 
             <Table
                 rowSelection={isHaveRowSelection ? rowSelection : null}
-                columns={columns}
+                columns={columnsWithSTT}
                 dataSource={data.map((item) => {
                     const key = item.id || item[keyIdChange];
                     return {
                         ...item,
-                        key: key,
+                        key: key
                     };
                 })}
                 showSorterTooltip={{

@@ -34,7 +34,7 @@ const LoginForm = () => {
                 await updateUserInfo();
                 await updateSRAndThesisJoin();
                 if (response.data.user.roles === "SINHVIEN") {
-                    navigate('/', { replace: true });
+                    navigate('/Dashboard', { replace: true });
                 } else if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {
                     navigate('/Department/Dashboard', { replace: true });
                 }
@@ -60,7 +60,7 @@ const LoginForm = () => {
                     <div className={cx('form-content')}>
                         <div className={cx('login-form')}>
                             <div className={cx('title')}>SGU</div>
-                            <Spin spinning={loading} tip="Đang đăng nhập..." indicator={<LoadingOutlined spin />} size='large' >
+                            <Spin spinning={loading} indicator={<LoadingOutlined spin />} size='large' >
                                 <Form
                                     name="normal_login"
                                     className={cx('login-form')}

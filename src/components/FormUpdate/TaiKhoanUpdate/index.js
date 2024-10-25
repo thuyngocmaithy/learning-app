@@ -17,7 +17,7 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
 }) {
 
     const [form] = useForm();
-    const [permissionOptions, setStatusOptions] = useState([]);
+    const [permissionOptions, setPermissionOptions] = useState([]);
     const [selectedPermisison, setSelectedPermisison] = useState(null);
 
     // Fetch danh sách quyền hệ thống
@@ -30,7 +30,7 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
                         value: permission.permissionId,
                         label: permission.permissionName,
                     }));
-                    setStatusOptions(options);
+                    setPermissionOptions(options);
                     // Nếu có giá trị đã chọn, set lại giá trị đó
                     if (selectedPermisison) {
                         setSelectedPermisison(selectedPermisison);
