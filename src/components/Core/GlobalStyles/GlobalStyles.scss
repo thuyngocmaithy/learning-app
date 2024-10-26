@@ -372,4 +372,21 @@ body {
         max-height: 350px;
         overflow-y: auto;
     }
+
+    // FORM
+    .form-inline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    //EMPTY
+    .empty {
+        min-height: 500px;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+    }
 }

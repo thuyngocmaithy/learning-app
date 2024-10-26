@@ -32,3 +32,18 @@
     text-align: center;
     box-shadow: var(--box-shadow-3);
 }
+
+// BUTTON SAVE
+.footer-frame {
+    display: flow-root;
+
+    .btnSave {
+        display: flex;
+        float: right;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        background-color: #ff9f9f;
+        color: var(--blue-900);
+        border-color: #ff9f9f;
+    }
+}

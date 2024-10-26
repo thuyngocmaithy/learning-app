@@ -1,0 +1,14 @@
+.container-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container-table {
+    box-shadow: var(--box-shadow-1);
+    border-radius: 17px;
+}
+
+.radio-period {
+    cursor: pointer;
+}

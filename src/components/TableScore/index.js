@@ -4,8 +4,7 @@ import { Select, Spin } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableScore.module.scss';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { listSubjectToFrame } from '../../services/subjectService';
-import { getUseridFromLocalStorage } from '../../services/userService';
+import { listSubjectToFrame } from '../../services/studyFrameService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
@@ -18,9 +17,9 @@ const OptionScore = [
     { value: 'D', label: 'D' },
 ];
 
-const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onImprovedCreditsChange }) => {
+const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onImprovedCreditsChange }) => {
     const { userId } = useContext(AccountLoginContext)
-    const [frames, setFrames] = useState([]);
+    const [frameComponents, setFrameComponents] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedGrades, setSelectedGrades] = useState({});
@@ -34,14 +33,14 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
 
         setIsLoading(true);
         try {
-            const [framesResponse, scoresResponse] = await Promise.all([
+            const [frameComponentsResponse, scoresResponse] = await Promise.all([
                 listSubjectToFrame(userId),
                 getScoreByStudentId(userId)
             ]);
-            console.log(framesResponse);
+            console.log(frameComponentsResponse);
 
-            if (framesResponse && Array.isArray(framesResponse)) {
-                setFrames(framesResponse[0]);
+            if (frameComponentsResponse && Array.isArray(frameComponentsResponse)) {
+                setFrameComponents(frameComponentsResponse);
             }
             if (scoresResponse && Array.isArray(scoresResponse)) {
                 setScores(scoresResponse);
@@ -60,7 +59,7 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
             console.error('Error fetching data:', error);
         }
         setIsLoading(false);
-    }, [onCurrentCreditsChange]);
+    }, [userId]);
 
     useEffect(() => {
         fetchData();
@@ -68,13 +67,15 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
 
     const calculateTotalCredits = useCallback((scores) => {
         return scores.reduce((total, score) => {
-            if (score.subject && score.subject.creditHour && score.subject.frame && score.subject.frame.frameId) {
+            if (score.subject && score.subject.creditHour && score.subject.frameComponent && score.subject.frameComponent.frameComponentId) {
+                console.log(score.subject);
+
                 const isExcludedSubject =
                     score.subject.subjectName.includes("Giáo dục quốc phòng") ||
                     score.subject.subjectName.includes("Giáo dục thể chất") ||
                     score.finalScoreLetter.includes("R");
 
-                if (score.subject.frame.frameId !== 'GDDC_TC' && !isExcludedSubject) {
+                if (score.subject.frameComponent.frameComponentId !== 'GDDC_TC' && !isExcludedSubject) {
                     return total + score.subject.creditHour;
                 }
             }
@@ -121,35 +122,41 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
         });
     }, [onImprovedCreditsChange]);
 
-    const renderFrameContent = useCallback((frame, level = 0) => {
-        const frameRows = [];
-        const paddingLeft = level * 20;
+    const renderFrameComponentContent = useCallback((frameComponent, level = 0, renderedIds) => {
+        if (renderedIds.has(frameComponent.id)) return []; // Bỏ qua nếu đã render
+        renderedIds.add(frameComponent.id);
 
-        frameRows.push(
-            <TableRow key={`frame-${frame.id}`}>
+        const frameComponentRows = [];
+        const initialPaddingLeft = 50;
+        const paddingLeft = initialPaddingLeft + (level * 50);
+
+        frameComponentRows.push(
+            <TableRow key={`frameComponent-${frameComponent.id}`}>
                 <TableCell className={cx('title')} align="left" colSpan={6} style={{ paddingLeft: `${paddingLeft}px` }}>
-                    {frame.frameName} ({frame.creditHour})
+                    {frameComponent.frameComponentName}
+                    {frameComponent.creditHour ? ` (${frameComponent.creditHour})` : ""}
                 </TableCell>
             </TableRow>
         );
 
-        frames
-            .filter(subframe => subframe.parentFrameId === frame.id)
-            .forEach(subframe => {
-                frameRows.push(...renderFrameContent(subframe, level + 1));
+        frameComponents
+            .filter(subframeComponent => subframeComponent.parentFrameComponentId === frameComponent.id)
+            .forEach(subframeComponent => {
+                frameComponentRows.push(...renderFrameComponentContent(subframeComponent, level + 1, renderedIds));
             });
 
-        if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
-            frame.subjectInfo.forEach((subject, index) => {
+        if (frameComponent.subjectInfo && Array.isArray(frameComponent.subjectInfo)) {
+            frameComponent.subjectInfo.forEach((subject, index) => {
                 if (subject) {
                     const score = scores.find(s => s.subject.subjectId === subject.subjectId);
                     const isImprovement = improvementSubjects[subject.subjectId];
                     const currentGrade = selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || '';
-                    frameRows.push(
-                        <TableRow key={`subject-${subject.subjectId}`}>
+
+                    frameComponentRows.push(
+                        <TableRow key={`${frameComponent.frameComponentId}-subject-${subject.subjectId}`}>
                             <TableCell align="center">{index + 1}</TableCell>
                             <TableCell align="center">{subject.subjectId}</TableCell>
-                            <TableCell align="center" style={{ paddingLeft: `${paddingLeft + 20}px` }}>{subject.subjectName}</TableCell>
+                            <TableCell align="left">{subject.subjectName}</TableCell>
                             <TableCell align="center">{subject.creditHour}</TableCell>
                             <TableCell align="center">
                                 <Select
@@ -177,14 +184,17 @@ const TableScore = ({ height = 400, onGradesChange, onCurrentCreditsChange, onIm
             });
         }
 
-        return frameRows;
-    }, [frames, scores, handleChange, selectedGrades, improvementSubjects, handleImprovement, originalGrades]);
+        return frameComponentRows;
+    }, [frameComponents, scores, handleChange, selectedGrades, improvementSubjects, handleImprovement, originalGrades]);
 
     const renderTableRows = useCallback(() => {
-        console.log(frames);
+        const renderedIds = new Set(); // Lưu ID của frameComponent đã render
 
-        return frames.filter(frame => !frame.parentFrameComponent).flatMap(frame => renderFrameContent(frame));
-    }, [frames, renderFrameContent]);
+        return frameComponents
+            .filter(frameComponent => !frameComponent.parentFrameComponent)
+            .flatMap(frameComponent => renderFrameComponentContent(frameComponent, 0, renderedIds));
+    }, [frameComponents, renderFrameComponentContent]);
+
 
     const columns = [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
