@@ -148,14 +148,14 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             if (selectedFaculty) {
                 try {
                     const response = await getWhere({ facultyId: selectedFaculty });
-                    if (response && Array.isArray(response)) {
+                    if (response && Array.isArray(response.data)) {
                         const options = response.data.map((major) => ({
                             value: major.majorId,
                             label: major.majorName,
                         }));
                         setMajorOptions(options);
+                        console.log('Fetched Major Options:', options); // Log the options for debugging
 
-                        // Check if we have major data in showModal
                         if (isUpdate && showModal && showModal.major) {
                             const majorId = showModal.major.majorId;
                             setSelectedMajor(majorId);
@@ -172,6 +172,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
         };
         fetchMajor();
     }, [selectedFaculty, showModal, isUpdate, form]);
+
+
 
     useEffect(() => {
         if (showModal && isUpdate && form) {
@@ -521,6 +523,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 />
                             </FormItem>
                         </Col>
+
                     </Row>
                 </div>
             ),
