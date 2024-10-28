@@ -381,6 +381,13 @@ body {
         gap: 16px;
     }
 
+    // UPLOAD
+    :where(.css-dev-only-do-not-override-17seli4).ant-upload-wrapper .ant-upload-select {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     //EMPTY
     .empty {
         min-height: 500px;

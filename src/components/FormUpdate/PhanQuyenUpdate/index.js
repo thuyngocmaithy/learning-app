@@ -218,7 +218,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                         && Object.keys(permissionDetail).every((key) => permissionDetail[key]);
 
                     return (
-                        <div>
+                        <div className={cx('container-featureId')}>
                             <input
                                 type="checkbox"
                                 onChange={() => handleSelectRow(record)}
@@ -253,6 +253,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isView",
                 key: "isView",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isView ?? false; // Sử dụng giá trị mặc định là false nếu không có dữ liệu
                     return record.keyRoute && (
@@ -290,6 +291,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isAdd",
                 key: "isAdd",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isAdd ?? false; // Giá trị mặc định
                     return record.keyRoute && (
@@ -327,6 +329,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isEdit",
                 key: "isEdit",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isEdit ?? false; // Giá trị mặc định
                     return record.keyRoute && (
@@ -364,6 +367,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isDelete",
                 key: "isDelete",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isDelete ?? false; // Giá trị mặc định
                     return record.keyRoute && (

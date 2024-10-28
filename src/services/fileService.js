@@ -17,3 +17,17 @@ export const uploadFile = async (file) => {
         throw error;
     }
 };
+
+export const downloadTemplate = (url) => {
+    // Lấy tên file từ URL
+    const fileName = url.substring(url.lastIndexOf('/') + 1);
+    // Tạo link để tải file xuống
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName); // Tên file tải về
+    document.body.appendChild(link);
+    link.click();
+
+    // Xóa link sau khi tải xuống
+    document.body.removeChild(link);
+};

@@ -11,6 +11,8 @@ import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { deleteUserById } from '../../../../services/userService';
 import { getAllUser } from '../../../../services/userService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +24,8 @@ function NguoiDung() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
+
 
     const columns = (showModal) => [
         {
@@ -213,7 +217,7 @@ function NguoiDung() {
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('người dùng', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} />
+                    <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImport(true)} />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>
 
@@ -228,7 +232,13 @@ function NguoiDung() {
                 keyIdChange="userId"
             />
             {NguoiDungUpdateMemoized}
-
+            <ImportExcel
+                title={'người dùng'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.USER}
+            />
         </div>
     );
 }

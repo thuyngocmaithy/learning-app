@@ -197,3 +197,13 @@ export const deleteUserById = async (params) => {
     throw error;
   }
 };
+
+export const importUser = async (userData) => {
+  try {
+    const response = await api.post('/users/import', userData);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
