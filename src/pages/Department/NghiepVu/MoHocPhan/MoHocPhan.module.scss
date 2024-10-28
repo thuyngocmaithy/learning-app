@@ -21,50 +21,39 @@
         }
     }
 
-    .wrapper-toolbar {
-        display: flex;
-    }
-
 }
 
 
-
-.container-manage-NH {
-    height: 590px;
+.container-arrange {
+    height: 100%;
     margin: 50px 0 30px 0;
-    display: flex;
 
-
-    .container-table {
-        width: 60%;
-        margin: 0 20px 0 0;
-
-        // SELECT-TIME
-        .select-time {
-            display: flex;
-            align-items: center;
-            height: 10%;
-        }
-
-        .select-time>input {
-            margin: 0 10px;
-            text-align: center;
-        }
-
-        .info-warning {
-            color: rgb(210, 0, 0);
-        }
-
-        // BUTTON SAVE
-        .btnSave {
-            display: flex;
-            float: right;
-            margin-top: 10px;
-            margin-bottom: 30px;
-        }
+    // SELECT-TIME
+    .form-data-arrange {
+        display: flex;
+        align-items: center;
+        height: 10%;
     }
 
-    .arrange {
+    .form-data-arrange>input {
+        margin: 0 10px;
+        text-align: center;
+    }
+
+    .info-warning {
+        color: rgb(210, 0, 0);
+    }
+
+    // BUTTON SAVE
+    .btnSave {
+        display: flex;
+        float: right;
+        margin-top: 10px;
+        margin-bottom: 30px;
+    }
+
+
+    .table-arrange {
         height: calc(100% - 60px);
         align-items: center;
         display: grid;

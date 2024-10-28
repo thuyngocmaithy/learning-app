@@ -74,8 +74,6 @@ export const SocketMessagesProvider = ({ children }) => {
         return new Promise((resolve, reject) => {
             if (socket) {
                 const room = scientificResearchId;
-                console.log(userId);
-
                 socket.emit('sendMessage', { room, messageContent, senderId: userId }, (response) => {
                     resolve(response);
                 });
@@ -90,8 +88,6 @@ export const SocketMessagesProvider = ({ children }) => {
             let messagesMapTemp = {}; // Biến tạm để lưu tin nhắn của tất cả SRId
 
             socketIo.on('messagesList', (SRIdReceice, messagesReceice) => {
-                console.log(SRIdReceice);
-                console.log(messagesReceice);
                 // Cập nhật tin nhắn của từng SRId vào biến tạm
                 messagesMapTemp[SRIdReceice] = messagesReceice;
 

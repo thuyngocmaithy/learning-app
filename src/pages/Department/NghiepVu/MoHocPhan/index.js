@@ -1,123 +1,29 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Empty, Input, InputNumber, Progress } from 'antd';
+import { Empty, Form, InputNumber, Progress, Select } from 'antd';
 import ButtonCustom from '../../../../components/Core/Button';
-import TableHP from '../../../../components/Table';
-import { useState } from 'react'; //
-import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
+import TableHP from '../../../../components/TableDepartment';
+import { useEffect, useState } from 'react'; //
 import Toolbar from '../../../../components/Core/Toolbar';
-import Update from '../../../../components/Core/Update';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { Tag } from 'antd';
-import { EditOutlined, FormOutlined } from '@ant-design/icons';
 import FormItem from '../../../../components/Core/FormItem';
+import { getAllFaculty } from '../../../../services/facultyService';
+import { useForm } from 'antd/es/form/Form';
+import { getAll } from '../../../../services/cycleService';
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
-const columns = (showModalUpdated, handleArrange) => [
-    {
-        title: 'Năm học',
-        dataIndex: 'NH',
-        key: 'NH',
-        width: '30%',
-        defaultSortOrder: 'descend',
-        sorter: (a, b) => a.NH - b.NH,
-        filters: [
-            {
-                text: '2020',
-                value: '2020',
-            },
-            {
-                text: '2021',
-                value: '2021',
-            },
-            {
-                text: '2022',
-                value: '2022',
-            },
-        ],
-        onFilter: (value, record) => record.NH.indexOf(value) === 0,
-    },
-    {
-        title: 'Tiến độ',
-        key: 'tags',
-        width: '30%',
-        dataIndex: 'tags',
-        render: (_, { tags }) => (
-            <>
-                {tags.map((tag) => {
-                    let color = tag === 'Đã sắp xếp' ? 'green' : 'red';
-                    return (
-                        <Tag color={color} key={tag}>
-                            {tag.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
-        ),
-        filters: [
-            {
-                text: 'Đã sắp xếp',
-                value: 'Đã sắp xếp',
-            },
-            {
-                text: 'Chưa sắp xếp',
-                value: 'Chưa sắp xếp',
-            },
-        ],
-        onFilter: (value, record) => record.tags.indexOf(value) === 0,
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: (_, record) => (
-            <div className={cx('action-item')}>
-                <ButtonCustom
-                    className={cx('btnEdit')}
-                    leftIcon={<EditOutlined />}
-                    outline
-                    verysmall
-                    onClick={() => showModalUpdated(record.NH)}
-                >
-                    Sửa
-                </ButtonCustom>
-                <ButtonCustom
-                    className={cx('btnArrange')}
-                    leftIcon={<FormOutlined />}
-                    primary
-                    verysmall
-                    onClick={() => handleArrange(record.NH)}
-                >
-                    Sắp xếp
-                </ButtonCustom>
-            </div>
-        ),
-    },
-];
-
-const data = [
-    {
-        key: '1',
-        NH: '2020',
-        tags: ['Đã sắp xếp'],
-    },
-    {
-        key: '2',
-        NH: '2021',
-        tags: ['Chưa sắp xếp'],
-    },
-    {
-        key: '3',
-        NH: '2022',
-        tags: ['Đã sắp xếp'],
-    },
-];
-
 function MoHocPhan() {
-    const [NHUpdated, setNHUpdated] = useState(''); // Trạng thái để lưu giá trị năm học hiện tại
+    const [form] = useForm();
+    const [cycleOptions, setCycleOptions] = useState([]);
+    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [dataArrange, setDataArrange] = useState(null);
     const [showModalAdd, setShowModalAdd] = useState(false); //hiển thị model add
     const [showModalUpdated, setShowModalUpdated] = useState(false); // hiển thị model updated
+    const [minYear, setMinYear] = useState(0);
+    const [maxYear, setMaxYear] = useState(5000);
+    const [disableValidation, setDisableValidation] = useState(false);
 
     // Trạng thái để lưu giá trị năm học nhập vào
     const [inputValueNH, setInputValueNH] = useState('');
@@ -145,6 +51,112 @@ function MoHocPhan() {
         console.log(`selected ${value}`);
     };
 
+    //hàm chỉ cho phép nhập số 
+    const formatValue = (value) => {
+        // Chỉ cho phép nhập số
+        return value.replace(/[^0-9]/g, '');
+    };
+
+
+
+    useEffect(() => {
+        // Lấy danh sách ngành
+        const fetchFaculties = async () => {
+            const response = await getAllFaculty();
+            if (response && response.data) {
+                const options = response.data.map((faculty) => ({
+                    value: faculty.facultyId,
+                    label: faculty.facultyName,
+                }));
+                setFacultyOptions(options);
+            }
+        };
+        // Fetch danh sách chu kỳ
+        const fetchCycle = async () => {
+            try {
+                const response = await getAll();
+                if (response) {
+                    const options = response.data.data.map((cycle) => ({
+                        value: cycle.cycleId,
+                        label: cycle.cycleName,
+                        startYear: cycle.startYear,
+                        endYear: cycle.endYear
+                    }));
+                    setCycleOptions(options);
+                }
+            } catch (error) {
+                console.error('HocKyUpdate - fetchCycle - error:', error);
+            }
+        };
+
+        fetchCycle();
+        fetchFaculties();
+    }, []);
+
+    const handleCycleChange = (value) => {
+        const selectedCycle = cycleOptions.find(option => option.value === value.value);
+        if (selectedCycle) {
+            setMinYear(selectedCycle.startYear);
+            form.setFieldsValue({
+                academicYear: selectedCycle.startYear
+            });
+            setMaxYear(selectedCycle.endYear);
+        }
+    };
+
+    const handleYearChange = async () => {
+        // Kiểm tra cycle đã có giá trị chưa
+        const cycleValue = form.getFieldValue('cycle');
+
+        if (!cycleValue) {
+            // Nếu `cycle` chưa được chọn, hiển thị cảnh báo cho `cycle`
+            form.setFields([
+                {
+                    name: 'cycle',
+                    errors: ['Vui lòng chọn chu kỳ'],
+                },
+            ]);
+            // Reset lại academicYear
+            form.setFieldsValue({
+                academicYear: ''
+            });
+            return;
+        }
+    };
+
+
+    const onReset = () => {
+        // Tạm thời tắt rule validation
+        setDisableValidation(true);
+
+        // Reset form
+        form.resetFields();
+        setDataArrange(null)
+
+        // Kích hoạt lại rule validation
+        setTimeout(() => {
+            setDisableValidation(false);
+        }, 0); // Sử dụng setTimeout với giá trị 0 để kích hoạt lại validation ngay sau khi reset
+    };
+
+    const handleArrange = async () => {
+        try {
+            const values = await form.validateFields();
+            const data = {
+                startYear: values.academicYear,
+                facultyId: values.faculty.value
+            }
+            console.log(data);
+
+            setDataArrange(data);
+
+
+        } catch (error) {
+            if (error.errorFields.length === 0)
+                console.error(`[ MoHocPhan - handleArrange - error]: ${error}`);
+        }
+    }
+
     return (
         <div className={cx('mohocphan-wrapper')}>
             <div className={cx('container-header')}>
@@ -154,76 +166,96 @@ function MoHocPhan() {
                     </span>
                     <h3 className={cx('title')}>Mở học phần</h3>
                 </div>
-                {/* Truyền hàm setShowModalAdd vào Toolbar */}
-                <div className={cx('wrapper-toolbar')}>
-                    <Toolbar type={'Tạo mới'} onClick={() => setShowModalAdd(true)} />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('năm học')} />
-                    <Toolbar type={'Nhập file Excel'} />
-                    <Toolbar type={'Xuất file Excel'} />
-                </div>
             </div>
-            <div className={cx('container-manage-NH')}>
-                <div className={cx('container-table')}>
-                    <div className={cx('select-time')}>
-                        <h4>Năm học</h4>
-                        {/* Input hiển thị giá trị năm học hiện tại */}
-                        <Input value={inputValueNH} onChange={handleInputChange} style={{ width: '80px' }} readOnly />
-                        {/* Nút Reset để xóa giá trị năm học */}
-                        <ButtonCustom outline small onClick={handleReset}>
+            <div className={cx('container-arrange')}>
+                <div className={cx('form-data-arrange')}>
+                    <Form form={form} layout="inline" className={cx("form-inline")}>
+                        <FormItem
+                            name="cycle"
+                            label="Chu kỳ"
+                            rules={disableValidation ? [] : [{ required: true, message: 'Vui lòng chọn chu kỳ' }]}
+                        >
+                            <Select
+                                style={{ width: '200px', marginLeft: "-70px" }}
+                                showSearch
+                                placeholder="Chọn chu kỳ"
+                                optionFilterProp="children"
+                                labelInValue // Hiển thị label trên input
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={cycleOptions}
+                                onChange={handleCycleChange}
+                            />
+                        </FormItem>
+                        <FormItem
+                            name="academicYear"
+                            label="Năm học"
+                            rules={disableValidation ? [] : [{ required: true, message: 'Vui lòng nhập năm học' }]}
+                        >
+                            <InputNumber
+                                style={{ width: '200px', marginLeft: "-50px" }}
+                                min={minYear}
+                                max={maxYear}
+                                step={1}
+                                parser={formatValue}
+                                onChange={handleYearChange}
+                            />
+                        </FormItem>
+                        <FormItem
+                            name="faculty"
+                            label="Ngành"
+                            rules={disableValidation ? [] : [{ required: true, message: 'Vui lòng chọn ngành' }]}
+                        >
+                            <Select
+                                style={{ width: '200px', marginLeft: "-70px" }}
+                                showSearch
+                                placeholder="Chọn ngành"
+                                optionFilterProp="children"
+                                labelInValue // Hiển thị label trên input
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={facultyOptions}
+                            />
+                        </FormItem>
+                        <ButtonCustom primary type="primary" onClick={handleArrange}>
+                            Sắp xếp
+                        </ButtonCustom>
+                        <ButtonCustom outline onClick={onReset}>
                             Reset
                         </ButtonCustom>
-                    </div>
-                    <div className={cx('arrange')}>
-                        {inputValueNH !== '' ? (
-                            <>
-                                {/* Hiển thị bảng nếu có năm học */}
-                                <TableHP department={true} />
-                                <div className={cx('footer-table')}>
-                                    <ButtonCustom primary small className={cx('btnSave')}>
-                                        Lưu
-                                    </ButtonCustom>
-                                </div>
-                            </>
-                        ) : (
-                            // Hiển thị thông báo khi không chọn năm học
-                            <Empty description="Bạn chưa chọn năm học sắp xếp" />
-                        )}
-                    </div>
+                    </Form>
                 </div>
-                {/* TABLE MANAGE NĂM HỌC */}
-                <TableCustomAnt
-                    columns={columns(setShowModalUpdated, setInputValueNH)}
-                    data={data}
-                    // handleCustom={setInputValueNH}
-                    width={'40%'}
-                    isOutline={true}
+                <Progress
+                    percent={80}
+                    percentposition={{
+                        align: 'start',
+                        type: 'outer',
+                    }}
+                    size={['100%', 15]}
+                    style={{ margin: "50px 0" }}
                 />
+                <div className={cx('table-arrange')}>
+                    {dataArrange ? (
+                        <>
+                            {/* Hiển thị bảng nếu có năm học */}
+                            <TableHP data={dataArrange} />
+                            <div className={cx('footer-table')}>
+                                <ButtonCustom primary small className={cx('btnSave')}>
+                                    Lưu
+                                </ButtonCustom>
+                            </div>
+                        </>
+                    ) : (
+                        // Hiển thị thông báo khi không chọn năm học
+                        <Empty
+                            className={cx("empty")}
+                            description="Bạn chưa chọn năm học sắp xếp"
+                        />
+                    )}
+                </div>
             </div>
-            <Progress
-                percent={80}
-                percentposition={{
-                    align: 'start',
-                    type: 'outer',
-                }}
-                size={['100%', 15]}
-            />
-            {/* Modal để thêm năm học */}
-            <Update
-                title="năm học"
-                showModalAdd={showModalAdd}
-                showModalUpdated={showModalUpdated}
-                onClose={handleCloseModal}
-            >
-                <FormItem label={'Năm học'}>
-                    <InputNumber
-                        style={{ marginLeft: '20px', width: '100%' }}
-                        min={2020}
-                        max={2030}
-                        value={showModalUpdated ? NHUpdated : ''}
-                        step={1}
-                    />
-                </FormItem>
-            </Update>
         </div>
     );
 }

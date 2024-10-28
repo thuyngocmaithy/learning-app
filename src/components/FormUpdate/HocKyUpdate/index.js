@@ -25,7 +25,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 const response = await getAll();
                 if (response) {
                     const options = response.data.data.map((cycle) => ({
-                        value: cycle.id,
+                        value: cycle.cycleId,
                         label: cycle.cycleName,
                     }));
                     setCycleOptions(options);
@@ -46,7 +46,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
                     semesterName: showModal.semesterName,
                     ...(showModal.cycle && {
                         cycle: {
-                            value: showModal.cycle.id,
+                            value: showModal.cycle.cycleId,
                             label: showModal.cycle.cycleName
                         }
                     }),

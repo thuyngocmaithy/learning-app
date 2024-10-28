@@ -1,16 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio, Checkbox } from '@mui/material';
 import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
 import { GetSubjectByMajor } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { getUseridFromLocalStorage, getUserById, getUserRegisteredSubjects } from '../../services/userService';
+import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
+import { AccountLoginContext } from '../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
 const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
-    const [frames, setFrames] = useState([]);
+    const { userId } = useContext(AccountLoginContext)
+    const [frameComponents, setFrameComponents] = useState([]);
     const [scores, setScores] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [registeredSubjects, setRegisteredSubjects] = useState({});
@@ -26,20 +28,18 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const userid = getUseridFromLocalStorage();
-            const userData = await getUserById(userid);
-            const userMajorId = userData.data.major.majorId;
+            const userData = await getUserById(userId);
             const firstYear = userData.data.firstAcademicYear;
             const lastYear = userData.data.lastAcademicYear;
 
-            const [framesResponse, scoresResponse, registeredSubjectsResponse] = await Promise.all([
-                GetSubjectByMajor(userMajorId),
-                getScoreByStudentId(userid),
-                getUserRegisteredSubjects(userid)
+            const [frameComponentsResponse, scoresResponse, registeredSubjectsResponse] = await Promise.all([
+                GetSubjectByMajor(userId),
+                getScoreByStudentId(userId),
+                getUserRegisteredSubjects(userId)
             ]);
 
-            if (framesResponse && Array.isArray(framesResponse)) {
-                setFrames(framesResponse);
+            if (frameComponentsResponse && Array.isArray(frameComponentsResponse)) {
+                setFrameComponents(frameComponentsResponse);
             }
 
             if (scoresResponse && Array.isArray(scoresResponse)) {
@@ -92,34 +92,34 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
 
 
     // Handle subject selection
-    const handleSelectSubject = useCallback((subjectId, frameId, semesterIndex) => {
+    const handleSelectSubject = useCallback((subjectId, frameComponentId, semesterIndex) => {
         setSelectedSubjects(prev => {
             const newSelection = { ...prev };
             if (newSelection[subjectId] && newSelection[subjectId].semesterIndex === semesterIndex) {
                 delete newSelection[subjectId];
             } else {
-                newSelection[subjectId] = { frameId, semesterIndex };
+                newSelection[subjectId] = { frameComponentId, semesterIndex };
             }
             return newSelection;
         });
     }, []);
 
-    // Check if frame exists
-    const frameExists = useCallback((frameId) => {
-        return frames.some(frame => frame.id === frameId);
-    }, [frames]);
+    // Check if frameComponent exists
+    const frameComponentExists = useCallback((frameComponentId) => {
+        return frameComponents.some(frameComponent => frameComponent.id === frameComponentId);
+    }, [frameComponents]);
 
-    // Get all frames by parent ID
-    const getFramesByParentId = useCallback((parentId = null) => {
-        return frames.filter(frame => frame.parentFrameId === parentId);
-    }, [frames]);
+    // Get all frameComponents by parent ID
+    const getFrameComponentsByParentId = useCallback((parentId = null) => {
+        return frameComponents.filter(frameComponent => frameComponent.parentframeComponentId === parentId);
+    }, [frameComponents]);
 
-    // Get orphaned frames (frames with non-existent parent)
-    const getOrphanedFrames = useCallback(() => {
-        return frames.filter(frame =>
-            frame.parentFrameId && !frameExists(frame.parentFrameId)
+    // Get orphaned frameComponents (frameComponents with non-existent parent)
+    const getOrphanedFrameComponents = useCallback(() => {
+        return frameComponents.filter(frameComponent =>
+            frameComponent.parentframeComponentId && !frameComponentExists(frameComponent.parentframeComponentId)
         );
-    }, [frames, frameExists]);
+    }, [frameComponents, frameComponentExists]);
 
     const renderSubjectRow = useCallback((subject, index, paddingLeft) => {
         if (!subject) return null;
@@ -134,10 +134,10 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         );
 
         return (
-            <TableRow key={`subject-${subject.subjectId}`}>
+            <TableRow key={`subject-${subject.subjectId}-${index}`}>
                 <TableCell align="center">{index + 1}</TableCell>
                 <TableCell align="center">{subject.subjectId}</TableCell>
-                <TableCell align="left" style={{ paddingLeft: `${paddingLeft + 20}px` }}>
+                <TableCell align="left">
                     {subject.subjectName}
                 </TableCell>
                 <TableCell align="center">{subject.creditHour}</TableCell>
@@ -157,14 +157,14 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
                             {department ? (
                                 <Checkbox
                                     checked={isThisSemesterRegistered || isSelected}
-                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameId, i)}
+                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameComponentId, i)}
                                     disabled={hasScore}
                                     size="small"
                                 />
                             ) : (
                                 <Radio
                                     checked={isThisSemesterRegistered || isSelected}
-                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameId, i)}
+                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameComponentId, i)}
                                     disabled={hasScore}
                                     size="small"
                                 />
@@ -184,61 +184,62 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
 
 
 
-    // Render frame and its content
-    const renderFrame = useCallback((frame, level = 0) => {
-        if (!frame) return [];
+    // Render frameComponent and its content
+    const renderFrameComponent = useCallback((frameComponent, level = 0) => {
+        if (!frameComponent) return [];
 
         const rows = [];
-        const paddingLeft = level * 20;
+        const initialPaddingLeft = 50;
+        const paddingLeft = initialPaddingLeft + (level * 50);
 
-        // Render frame header
+        // Render frameComponent header
         rows.push(
-            <TableRow key={`frame-${frame.id}`}>
+            <TableRow key={`frameComponent-${frameComponent.id}`}>
                 <TableCell
                     className={cx('title')}
                     align="left"
                     colSpan={5}
                     style={{ paddingLeft: `${paddingLeft}px` }}
                 >
-                    {frame.frameName} {frame.creditHour ? `(${frame.creditHour})` : ''}
-                    {frame.majorName ? ` - ${frame.majorName}` : ''}
+                    {frameComponent.frameComponentName} {frameComponent.creditHour ? `(${frameComponent.creditHour})` : ''}
+                    {frameComponent.majorName ? ` - ${frameComponent.majorName}` : ''}
                 </TableCell>
                 <TableCell align="center" colSpan={repeatHK}></TableCell>
             </TableRow>
         );
 
         // Render subjects
-        if (frame.subjectInfo && Array.isArray(frame.subjectInfo)) {
-            frame.subjectInfo.forEach((subject, index) => {
+        if (frameComponent.subjectInfo && Array.isArray(frameComponent.subjectInfo)) {
+            frameComponent.subjectInfo.forEach((subject, index) => {
                 if (subject) {
                     rows.push(renderSubjectRow(subject, index, paddingLeft));
                 }
             });
         }
 
-        // Render child frames
-        const childFrames = getFramesByParentId(frame.id);
-        childFrames.forEach(childFrame => {
-            rows.push(...renderFrame(childFrame, level + 1));
+        // Render child frameComponents
+        const childFrameComponents = getFrameComponentsByParentId(frameComponent.id);
+        childFrameComponents.forEach(childFrameComponent => {
+            rows.push(...renderFrameComponent(childFrameComponent, level + 1));
         });
 
         return rows;
-    }, [repeatHK, renderSubjectRow, getFramesByParentId]);
+    }, [repeatHK, renderSubjectRow, getFrameComponentsByParentId]);
 
     // Render all table rows
     const renderTableRows = useCallback(() => {
         const rows = [];
 
-        // Render root frames
-        const rootFrames = getFramesByParentId(null);
-        rootFrames.forEach(frame => {
-            rows.push(...renderFrame(frame));
+        // Render root frameComponents
+        const rootFrameComponents = getFrameComponentsByParentId(null);
+        rootFrameComponents.forEach(frameComponent => {
+            rows.push(...renderFrameComponent(frameComponent));
         });
 
-        // Render orphaned frames
-        const orphanedFrames = getOrphanedFrames();
-        if (orphanedFrames.length > 0) {
-            // Add separator for orphaned frames
+        // Render orphaned frameComponents
+        const orphanedFrameComponents = getOrphanedFrameComponents();
+        if (orphanedFrameComponents.length > 0) {
+            // Add separator for orphaned frameComponents
             rows.push(
                 <TableRow key="orphaned-separator">
                     <TableCell
@@ -252,14 +253,14 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
                 </TableRow>
             );
 
-            // Render each orphaned frame
-            orphanedFrames.forEach(frame => {
-                rows.push(...renderFrame(frame));
+            // Render each orphaned frameComponent
+            orphanedFrameComponents.forEach(frameComponent => {
+                rows.push(...renderFrameComponent(frameComponent));
             });
         }
 
         return rows;
-    }, [getFramesByParentId, getOrphanedFrames, renderFrame, repeatHK]);
+    }, [getFrameComponentsByParentId, getOrphanedFrameComponents, renderFrameComponent, repeatHK]);
 
     // Define table columns
     const columns = [
