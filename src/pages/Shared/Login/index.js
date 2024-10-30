@@ -13,6 +13,7 @@ import { SRAndThesisJoinContext } from '../../../context/SRAndThesisJoinContext'
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
+
     const { updateUserInfo } = useContext(AccountLoginContext);
     const { updateSRAndThesisJoin } = useContext(SRAndThesisJoinContext);
     const navigate = useNavigate();

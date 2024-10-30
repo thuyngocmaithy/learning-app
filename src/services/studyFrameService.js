@@ -23,7 +23,7 @@ export const GetSubjectByMajor = async (userId) => {
 
 export const listSubjectToFrame = async (userId) => {
     try {
-        const response = await api.get(`/subjects/listSubjectToFrame?userId=${userId}`);
+        const response = await api.get(`/study-frames/listSubjectToFrame?userId=${userId}`);
         return response.data;
     } catch (error) {
         console.error('[subjectService - listSubjectToFrame - error]:', error);
@@ -39,7 +39,7 @@ export const listSubjectToFrameDepartment = async (startYear, facultyId, cycleId
             ...(cycleId && { cycleId }) // Chỉ thêm cycleId nếu nó có giá trị
         };
 
-        const response = await api.get('/subjects/listSubjectToFrameDepartment', { params });
+        const response = await api.get('/study-frames/listSubjectToFrameDepartment', { params });
         return response.data;
     } catch (error) {
         console.error('[subjectService - listSubjectToFrame - error]:', error);

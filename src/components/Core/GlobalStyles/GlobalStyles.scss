@@ -206,12 +206,12 @@ body {
     }
 
     //Devider 
-    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal.ant-divider-with-text::before,
-    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal.ant-divider-with-text::after {
+    .ant-divider-horizontal.ant-divider-with-text::before,
+    .ant-divider-horizontal.ant-divider-with-text::after {
         border-block-start-color: var(--blue-100);
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-divider-horizontal {
+    .ant-divider-horizontal {
         background-color: var(--blue-50);
         border-radius: 4px;
         padding: 5px 0;
@@ -265,17 +265,17 @@ body {
         line-height: 5rem;
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-switcher {
+    :where(.css-dev-only-do-not-override-apn68).ant-tree .ant-tree-switcher {
         justify-content: center;
         display: flex;
         align-items: center;
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-treenode {
+    :where(.css-dev-only-do-not-override-apn68).ant-tree .ant-tree-treenode {
         width: 100%;
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-node-content-wrapper {
+    :where(.css-dev-only-do-not-override-apn68).ant-tree .ant-tree-node-content-wrapper {
         width: 100%;
     }
 
@@ -284,12 +284,12 @@ body {
         border-radius: 16px;
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-checkbox {
+    :where(.css-dev-only-do-not-override-apn68).ant-tree .ant-tree-checkbox {
         align-self: center;
     }
 
     // BUTTON
-    :where(.css-dev-only-do-not-override-17seli4).ant-btn-lg.ant-btn-icon-only {
+    :where(.css-dev-only-do-not-override-apn68).ant-btn-lg.ant-btn-icon-only {
         margin-left: 15px;
         background-color: #3465D4;
     }
@@ -320,7 +320,9 @@ body {
 
 
     .ant-modal-footer {
-        margin-top: 15px;
+        margin-top: 35px !important;
+        display: flex;
+        justify-content: flex-end;
     }
 
     .modal-register .ant-space-item {
@@ -330,18 +332,15 @@ body {
 
 
     // FORM ITEM
-    :where(.css-dev-only-do-not-override-17seli4).ant-form-item .ant-form-item-label {
+    .ant-form-item .ant-form-item-label {
         width: 190px;
         margin-right: 10px;
         text-align: left;
-    }
-
-    :where(.css-dev-only-do-not-override-17seli4).ant-form-item .ant-form-item-label>label {
-        height: fit-content;
-    }
-
-    .form-item-label {
         white-space: pre-wrap;
+    }
+
+    .ant-form-item .ant-form-item-label>label {
+        height: fit-content;
     }
 
     .ant-form-item-control {
@@ -349,7 +348,7 @@ body {
     }
 
     // INPUT
-    :where(.css-dev-only-do-not-override-17seli4).ant-input-number-outlined.ant-input-number-disabled {
+    .ant-input-number-outlined.ant-input-number-disabled {
         color: var(--black);
     }
 
@@ -362,13 +361,13 @@ body {
         opacity: 1 !important;
     }
 
-    :where(.css-dev-only-do-not-override-17seli4).ant-tree .ant-tree-treenode {
+    .ant-tree .ant-tree-treenode {
         align-items: center;
     }
 
     // DROPDOWN
-    :where(.css-dev-only-do-not-override-17seli4).ant-dropdown .ant-dropdown-menu,
-    :where(.css-dev-only-do-not-override-17seli4).ant-dropdown-menu-submenu .ant-dropdown-menu {
+    .ant-dropdown .ant-dropdown-menu,
+    .ant-dropdown-menu-submenu .ant-dropdown-menu {
         max-height: 350px;
         overflow-y: auto;
     }
@@ -382,7 +381,7 @@ body {
     }
 
     // UPLOAD
-    :where(.css-dev-only-do-not-override-17seli4).ant-upload-wrapper .ant-upload-select {
+    .ant-upload-wrapper .ant-upload-select {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -395,5 +394,18 @@ body {
         align-items: center;
         display: flex;
         flex-direction: column;
+    }
+
+    // ANIMATION SLIDE
+    .slide {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease, opacity 0.5s ease;
+        opacity: 0;
+    }
+
+    .slide.open {
+        max-height: 300px;
+        opacity: 1;
     }
 }

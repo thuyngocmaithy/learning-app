@@ -18,7 +18,6 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     const [registeredSubjects, setRegisteredSubjects] = useState({});
     const [selectedSubjects, setSelectedSubjects] = useState({});
     const [studentInfo, setStudentInfo] = useState(null);
-    const didMountRef = useRef(false);
 
     const firstYear = studentInfo?.firstAcademicYear || 2020; // Mặc định là 2020 nếu không có
     const lastYear = studentInfo?.lastAcademicYear || 2024; // Mặc định là 2024 nếu không có
@@ -106,18 +105,18 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
 
     // Check if frameComponent exists
     const frameComponentExists = useCallback((frameComponentId) => {
-        return frameComponents.some(frameComponent => frameComponent.id === frameComponentId);
+        return frameComponents.some(frameComponent => frameComponent.frameComponentId === frameComponentId);
     }, [frameComponents]);
 
     // Get all frameComponents by parent ID
     const getFrameComponentsByParentId = useCallback((parentId = null) => {
-        return frameComponents.filter(frameComponent => frameComponent.parentframeComponentId === parentId);
+        return frameComponents.filter(frameComponent => frameComponent.studyFrameComponentParentId === parentId);
     }, [frameComponents]);
 
     // Get orphaned frameComponents (frameComponents with non-existent parent)
     const getOrphanedFrameComponents = useCallback(() => {
         return frameComponents.filter(frameComponent =>
-            frameComponent.parentframeComponentId && !frameComponentExists(frameComponent.parentframeComponentId)
+            frameComponent.studyFrameComponentParentId && !frameComponentExists(frameComponent.studyFrameComponentParentId)
         );
     }, [frameComponents, frameComponentExists]);
 
@@ -157,14 +156,14 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
                             {department ? (
                                 <Checkbox
                                     checked={isThisSemesterRegistered || isSelected}
-                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameComponentId, i)}
+                                    onChange={() => handleSelectSubject(subject.subjectId, subject.studyFrameComponentId, i)}
                                     disabled={hasScore}
                                     size="small"
                                 />
                             ) : (
                                 <Radio
                                     checked={isThisSemesterRegistered || isSelected}
-                                    onChange={() => handleSelectSubject(subject.subjectId, subject.frameComponentId, i)}
+                                    onChange={() => handleSelectSubject(subject.subjectId, subject.studyFrameComponentId, i)}
                                     disabled={hasScore}
                                     size="small"
                                 />
@@ -194,7 +193,7 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
 
         // Render frameComponent header
         rows.push(
-            <TableRow key={`frameComponent-${frameComponent.id}`}>
+            <TableRow key={`frameComponent-${frameComponent.frameComponentId}`}>
                 <TableCell
                     className={cx('title')}
                     align="left"
@@ -218,7 +217,7 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         }
 
         // Render child frameComponents
-        const childFrameComponents = getFrameComponentsByParentId(frameComponent.id);
+        const childFrameComponents = getFrameComponentsByParentId(frameComponent.frameComponentId);
         childFrameComponents.forEach(childFrameComponent => {
             rows.push(...renderFrameComponent(childFrameComponent, level + 1));
         });

@@ -6,22 +6,27 @@ import Menu from '../../Popper/Menu';
 import { BellIcon, SupportIcon, UserIcon } from '../../../assets/icons';
 import Notification from '../../Popper/Notification';
 import Support from '../../Popper/Support';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Badge } from 'antd';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import config from '../../../config';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const { updateUserInfo } = useContext(AccountLoginContext)
     const { notifications } = useSocketNotification();
     const [countNotRead, setCountNotRead] = useState(0);
 
-    const navigate = useNavigate();
     // LOGOUT
     function logout() {
         localStorage.removeItem('userLogin');
-        navigate('/Login');
+        localStorage.removeItem('token');
+        updateUserInfo();
+        // Redirect to login page
+        <Navigate to={config.routes.Login} replace />
     }
 
     const MENU_ITEMS = [

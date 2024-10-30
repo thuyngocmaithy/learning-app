@@ -1,7 +1,6 @@
-import Animate from 'rc-animate';
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiNCKH.module.scss';
-import { Card, Col, Divider, Input, message, Select, Tabs, Tag } from 'antd';
+import { Card, Col, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -349,26 +348,21 @@ function NhomDeTaiNCKH() {
         }
     };
 
-
     const ITEM_TABS = [
         {
             id: 1,
             title: 'Nhóm đề tài NCKH',
             children: (
                 <>
-                    <Animate
-                        showProp="show"
-                        transitionName="fade"
-                    >
-
+                    <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
+
                             getFields={getFilterFields}
                             onSearch={onSearch}
                             onReset={fetchData}
                         />
                         <Divider />
-
-                    </Animate>
+                    </div>
                     <TableCustomAnt
                         height={'350px'}
                         columns={columns(setShowModalUpdate)}
@@ -385,6 +379,9 @@ function NhomDeTaiNCKH() {
             title: 'Tất cả đề tài tham gia',
             children: (
                 <div>
+                    {listScientificResearchJoined.length === 0 &&
+                        <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    }
                     {listScientificResearchJoined.map((item, index) => {
                         let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (

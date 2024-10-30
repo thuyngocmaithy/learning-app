@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb, Input } from 'antd';
+import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -247,6 +247,9 @@ function DeTaiNCKH() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
+                    {listScientificResearchJoined.length === 0 &&
+                        <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    }
                     {listScientificResearchJoined.map((item, index) => {
                         let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
@@ -369,10 +372,12 @@ function DeTaiNCKH() {
     return (
         <>
             <div className={cx('wrapper')}>
+                {console.log(urlPreviousLevel1)}
                 {
                     // Nếu url trước đó là NhomDeTaiNCKH_Department thì hiển thị Breadcrumb
                     (urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH_Department}_active`
                         || urlPreviousLevel2 === `${config.routes.NhomDeTaiNCKH_Department}_active`
+                        || SRGIdFromUrl
                     ) &&
                     <Breadcrumb
                         className={cx('breadcrumb')}
