@@ -54,107 +54,105 @@ function App() {
             <Spin size="large" />
         </div>
     ) : (
-        <Router>
-            <div className="App">
-                <Routes>
-                    {/* Điều hướng đến trang dashboard */}
-                    {
-                        userId &&
-                        <Route
-                            path="/"
-                            element={permission === "SINHVIEN"
-                                ? <Navigate to={config.routes.Dashboard} replace />
-                                : <Navigate to={config.routes.Dashboard_Department} replace />
-                            }
-                        />
+        <div className="App">
+            <Routes>
+                {/* Điều hướng đến trang dashboard */}
+                {
+                    userId &&
+                    <Route
+                        path="/"
+                        element={permission === "SINHVIEN"
+                            ? <Navigate to={config.routes.Dashboard} replace />
+                            : <Navigate to={config.routes.Dashboard_Department} replace />
+                        }
+                    />
+                }
+
+                {publicRoutes.map((route, index) => {
+                    let Layout = MainLayout;
+
+                    if (route.layout === null) {
+                        Layout = Fragment;
+                    } else if (route.layout) {
+                        Layout = route.layout;
                     }
 
-                    {publicRoutes.map((route, index) => {
-                        let Layout = MainLayout;
+                    const Page = route.component;
+                    return (
+                        <Route
+                            key={index}
+                            path={route.path}
+                            element={<Layout>{route.thesis ? <Page thesis={true} /> : <Page />}</Layout>}
+                        />
+                    );
+                })}
 
-                        if (route.layout === null) {
-                            Layout = Fragment;
-                        } else if (route.layout) {
-                            Layout = route.layout;
-                        }
+                {/* Duyệt qua danh sách các route riêng tư và tạo Route component */}
+                {privateRoutes.map((route, index) => {
+                    // Xác định layout cho route
+                    const Layout = route.layout === null ? Fragment : (route.layout || MainLayout);
+                    const Page = route.component;
 
-                        const Page = route.component;
-                        return (
-                            <Route
-                                key={index}
-                                path={route.path}
-                                element={<Layout>{route.thesis ? <Page thesis={true} /> : <Page />}</Layout>}
-                            />
-                        );
-                    })}
+                    // Lấy keyRoute từ route
+                    const keyRoute = route.path;
+                    // Tìm key tương ứng với keyRoute trong cấu hình
+                    const key = findKeyByValue(config.routes, keyRoute);
 
-                    {/* Duyệt qua danh sách các route riêng tư và tạo Route component */}
-                    {privateRoutes.map((route, index) => {
-                        // Xác định layout cho route
-                        const Layout = route.layout === null ? Fragment : (route.layout || MainLayout);
-                        const Page = route.component;
+                    // Kiểm tra quyền truy cập của người dùng
+                    let element;
 
-                        // Lấy keyRoute từ route
-                        const keyRoute = route.path;
-                        // Tìm key tương ứng với keyRoute trong cấu hình
-                        const key = findKeyByValue(config.routes, keyRoute);
+                    if (userId !== 0) {
+                        if (permission !== null) {
+                            // Kiểm tra xem keyRoute có trong danh sách các tính năng được phép không
+                            const matchedFeature = listFeature.find(data => data.feature.keyRoute === key);
+                            if (matchedFeature) {
+                                element = (
+                                    <Layout>
+                                        {route.thesis
+                                            ? <Page thesis={true} featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />
+                                            : <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />}
+                                    </Layout>
+                                );
+                            }
+                            else {
+                                // Kiểm tra điều kiện phụ thuộc URL
+                                const matchedFeature = route.urlDepend && listFeature.find(data => data.feature.keyRoute === route.urlDepend);
 
-                        // Kiểm tra quyền truy cập của người dùng
-                        let element;
-
-                        if (userId !== 0) {
-                            if (permission !== null) {
-                                // Kiểm tra xem keyRoute có trong danh sách các tính năng được phép không
-                                const matchedFeature = listFeature.find(data => data.feature.keyRoute === key);
                                 if (matchedFeature) {
+                                    // Nếu tìm thấy phần tử phù hợp, tạo phần tử Layout chứa Page
                                     element = (
                                         <Layout>
                                             {route.thesis
-                                                ? <Page thesis={true} featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />
-                                                : <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />}
+                                                ? <Page thesis={true} featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} /> // Nếu có thesis, truyền tham số thesis
+                                                : <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />
+                                            }
                                         </Layout>
                                     );
                                 }
                                 else {
-                                    // Kiểm tra điều kiện phụ thuộc URL
-                                    const matchedFeature = route.urlDepend && listFeature.find(data => data.feature.keyRoute === route.urlDepend);
-
-                                    if (matchedFeature) {
-                                        // Nếu tìm thấy phần tử phù hợp, tạo phần tử Layout chứa Page
-                                        element = (
-                                            <Layout>
-                                                {route.thesis
-                                                    ? <Page thesis={true} featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} /> // Nếu có thesis, truyền tham số thesis
-                                                    : <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />
-                                                }
-                                            </Layout>
-                                        );
-                                    }
-                                    else {
-                                        // Nếu không có quyền, hiển thị thông báo Không có quyền truy cập
-                                        element = <ResultCustomAnt />;
-                                    }
+                                    // Nếu không có quyền, hiển thị thông báo Không có quyền truy cập
+                                    element = <ResultCustomAnt />;
                                 }
-                            } else {
-                                // Nếu không có permission, chuyển hướng đến trang đăng nhập
-                                element = <Navigate to={config.routes.Login} replace={true} />;
                             }
                         } else {
-                            // Nếu người dùng chưa đăng nhập, chuyển hướng đến trang đăng nhập
+                            // Nếu không có permission, chuyển hướng đến trang đăng nhập
                             element = <Navigate to={config.routes.Login} replace={true} />;
                         }
+                    } else {
+                        // Nếu người dùng chưa đăng nhập, chuyển hướng đến trang đăng nhập
+                        element = <Navigate to={config.routes.Login} replace={true} />;
+                    }
 
-                        return (
-                            <Route
-                                key={index}
-                                path={route.path}
-                                element={element}
-                            />
-                        );
-                    })}
-                </Routes>
-            </div>
-        </Router>
+                    return (
+                        <Route
+                            key={index}
+                            path={route.path}
+                            element={element}
+                        />
+                    );
+                })}
+            </Routes>
+        </div>
     );
 }
 

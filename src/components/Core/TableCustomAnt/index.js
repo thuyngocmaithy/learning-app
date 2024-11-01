@@ -15,6 +15,7 @@ function TableCustomAnt({
     loading,
     isHaveRowSelection = true,
     isPagination = true,
+    isHideSTT = false
 }) {
     const onSelectChange = (newSelectedRowKeys, selectedRows) => {
         // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
@@ -33,13 +34,17 @@ function TableCustomAnt({
     };
 
     const columnsWithSTT = [
-        {
-            title: 'STT',
-            dataIndex: 'index',
-            key: 'stt',
-            width: '70px',
-            render: (text, record, index) => index + 1,
-        },
+        ...(isHideSTT
+            ? []
+            : [
+                {
+                    title: 'STT',
+                    dataIndex: 'index',
+                    key: 'stt',
+                    width: '70px',
+                    render: (text, record, index) => index + 1,
+                },
+            ]),
         ...columns // Các cột khác
     ];
 

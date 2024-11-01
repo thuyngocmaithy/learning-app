@@ -1,6 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './SearchForm.module.scss';
 import { Button, Form, Row, Space, theme } from 'antd';
+import { useEffect } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -15,9 +16,25 @@ function SearchForm({ getFields, onSearch, onReset }) {
         padding: 24,
     };
 
+    useEffect(() => {
+        // Thực hiện search khi nhấn F9
+        const handleKeyDown = (event) => {
+            if (event.key === 'F9') {
+                event.preventDefault();
+                form.submit();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [form]);
+
     return (
-        <Form form={form} name="advanced_search" style={formStyle} onFinish={onSearch}>
-            <Row gutter={24}>{getFields()}</Row>
+        <Form form={form} className={cx("advanced_search")} style={formStyle} onFinish={onSearch}>
+            <Row gutter={24} className={cx('row-filter')}>{getFields()}</Row>
             <div
                 style={{
                     textAlign: 'right',

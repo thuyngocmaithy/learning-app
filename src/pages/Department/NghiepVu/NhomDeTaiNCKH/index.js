@@ -171,7 +171,7 @@ function NhomDeTaiNCKH() {
     // Lấy danh sách đề tài làm người hướng dẫn => Giảng viên
     const listSRJoined = async () => {
         try {
-            const response = await getWhereSR({ instructor: userId });
+            const response = await getWhereSR({ instructorId: userId });
             if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
@@ -310,7 +310,7 @@ function NhomDeTaiNCKH() {
                 </Col>
                 <Col className="gutter-row" span={6}>
                     <FormItem
-                        name={'statusId'}
+                        name={'status'}
                         label={'Trạng thái'}
                     >
                         <Select
@@ -356,7 +356,6 @@ function NhomDeTaiNCKH() {
                 <>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
-
                             getFields={getFilterFields}
                             onSearch={onSearch}
                             onReset={fetchData}
@@ -424,6 +423,8 @@ function NhomDeTaiNCKH() {
                     </span>
                     <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
                 </div>
+                {console.log(permissionDetailData)
+                }
                 {tabActive === 1 && (
                     <div className={cx('wrapper-toolbar')}>
                         <Toolbar

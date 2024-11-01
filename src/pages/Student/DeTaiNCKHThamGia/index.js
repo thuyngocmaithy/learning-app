@@ -24,6 +24,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const SRIdFromUrl = queryParams.get('scientificResearch');
+    const SRGIdFromUrl = queryParams.get('SRG');
     const isAll = queryParams.get('all');
     const [isLoading, setIsLoading] = useState(true);
     const [scientificResearch, setScientificResearch] = useState(null);
@@ -32,8 +33,6 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     const [dataAttach, setDataAttach] = useState([])
     const fileInputRef = useRef(null);
     const [loadingFiles, setLoadingFiles] = useState({}); // Trạng thái loading cho từng file
-    const urlPreviousLevel1 = location.state?.from;
-    const urlPreviousLevel2 = location.state?.urlPrevious;
     const navigate = useNavigate();
 
     // Xử lý active tab từ url
@@ -64,7 +63,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         }
 
         // Cập nhật URL với params mới
-        navigate(`${currentUrl.pathname}?${params.toString()}`, { state: { from: urlPreviousLevel1 } });
+        navigate(`${currentUrl.pathname}?${params.toString()}`);
     };
 
     //Khi chọn tab 2 (đề tài tham gia) => Ẩn toolbar
@@ -251,13 +250,28 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         },
     ];
 
-    // Kiểm tra Department
-    const isDepartment = location.pathname.split('/')[1] === "Department";
-    // Đường dẫn active trước đó hợp lệ
-    const activeRoute = isDepartment ? `${config.routes.NhomDeTaiNCKH_Department}_active` : `${config.routes.NhomDeTaiNCKH}_active`;
-    // Kiểm tra rlPrevious có match với activeRoute không
-    // replace => Bỏ search query trong url
-    const isUrlPreviousValid = (url) => url?.replace(/\?.*_/, "_") === activeRoute;
+    const urlNCKH = () => {
+        if (location.pathname.split('/')[1] === "Department") {
+            if (SRGIdFromUrl) {
+                return `${config.routes.DeTaiNCKH_Department}?SRGId=${SRGIdFromUrl}`
+            }
+            else {
+                return `${config.routes.DeTaiNCKH_Department}?tabIndex=2`
+            }
+
+        }
+        else {
+            if (SRGIdFromUrl) {
+                return `${config.routes.DeTaiNCKH}?SRGId=${SRGIdFromUrl}`
+            }
+            else {
+                return `${config.routes.DeTaiNCKH}?tabIndex=2`
+            }
+        }
+
+    }
+
+
 
     return isLoading ? (
         <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
@@ -270,7 +284,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                 items={isAll !== "true" ?
                     [
                         // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị
-                        ...(isUrlPreviousValid(urlPreviousLevel1) || isUrlPreviousValid(urlPreviousLevel2)
+                        ...(SRGIdFromUrl
                             ? [
                                 {
                                     title: <Link
@@ -287,17 +301,8 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                             title: <span
                                 className={cx('breadcrumb-item')}
                                 onClick={() => {
-                                    const url = location.pathname.split('/')[1] === "Department"
-                                        ? `${config.routes.DeTaiNCKH_Department}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}`
-                                        : `${config.routes.DeTaiNCKH}?SRGId=${scientificResearch.scientificResearchGroup.scientificResearchGroupId}&tabIndex=2`
-                                    navigate(url,
-                                        {
-                                            state: {
-                                                urlPrevious: urlPreviousLevel2,
-                                                from: `${location.pathname + location.search + "_active"}`
-                                            }
-                                        });
-
+                                    const url = urlNCKH();
+                                    navigate(url);
                                 }}
                             >
                                 Danh sách đề tài nghiên cứu khoa học
@@ -311,7 +316,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                     :
                     [
                         // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị
-                        ...(isUrlPreviousValid(urlPreviousLevel1) || isUrlPreviousValid(urlPreviousLevel2)
+                        ...(SRGIdFromUrl
                             ? [
                                 {
                                     title: <Link to={
