@@ -13,7 +13,7 @@ export const getAll = async () => {
 
 export const GetSubjectByMajor = async (userId) => {
     try {
-        const response = await api.get(`/study-frames/major?userId=${userId}`);
+        const response = await api.get(`/study-frames/major/${userId}`);
         return response.data;
     } catch (error) {
         console.error('[study-frames - GetSubjectByMajor - error]:', error);
@@ -21,12 +21,13 @@ export const GetSubjectByMajor = async (userId) => {
     }
 };
 
+
 export const listSubjectToFrame = async (userId) => {
     try {
-        const response = await api.get(`/subjects/listSubjectToFrame?userId=${userId}`);
+        const response = await api.get(`/study-frames/listSubjectToFrame?userId=${userId}`);
         return response.data;
     } catch (error) {
-        console.error('[subjectService - listSubjectToFrame - error]:', error);
+        console.error('[study-frames - listSubjectToFrame - error]:', error);
         throw error;
     }
 };
@@ -42,7 +43,7 @@ export const listSubjectToFrameDepartment = async (startYear, facultyId, cycleId
         const response = await api.get('/subjects/listSubjectToFrameDepartment', { params });
         return response.data;
     } catch (error) {
-        console.error('[subjectService - listSubjectToFrame - error]:', error);
+        console.error('[study-frames - listSubjectToFrame - error]:', error);
         throw error;
     }
 };  

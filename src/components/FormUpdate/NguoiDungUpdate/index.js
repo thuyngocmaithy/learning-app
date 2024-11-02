@@ -40,7 +40,7 @@ const { Dragger } = Upload;
 //khai báo user tạo
 const CreateUserId = getUseridFromLocalStorage();
 
-const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
+const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showModal, setShowModal, reLoad, viewOnly }) {
     const [form] = Form.useForm();
     const [formData, setFormData] = useState({});
     const [currentStep, setCurrentStep] = useState(0);
@@ -103,7 +103,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     setFacultyOptions(options);
 
                     // Check if we have faculty data in showModal
-                    if (isUpdate && showModal && showModal.faculty) {
+                    if (showModal && isUpdate && showModal.faculty) {
                         const facultyId = showModal.faculty.facultyId;
                         setSelectedFaculty(facultyId);
                         form.setFieldValue('facultyId', facultyId);
@@ -114,7 +114,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             }
         };
         fetchFaculties();
-    }, [showModal, isUpdate, form]);
+    }, [showModal, form]);
 
     //lấy danh sách giảng viên theo khoa
 
@@ -148,15 +148,15 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             if (selectedFaculty) {
                 try {
                     const response = await getWhere({ facultyId: selectedFaculty });
-                    if (response && Array.isArray(response.data)) {
-                        const options = response.data.map((major) => ({
+                    // Thay đổi cách truy cập data ở đây
+                    if (response?.data?.data && Array.isArray(response.data.data)) {
+                        const options = response.data.data.map((major) => ({
                             value: major.majorId,
                             label: major.majorName,
                         }));
                         setMajorOptions(options);
-                        console.log('Fetched Major Options:', options); // Log the options for debugging
 
-                        if (isUpdate && showModal && showModal.major) {
+                        if (showModal?.major) {
                             const majorId = showModal.major.majorId;
                             setSelectedMajor(majorId);
                             form.setFieldValue('majorId', majorId);
@@ -164,25 +164,26 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     }
                 } catch (error) {
                     console.error('Error fetching majors:', error);
+                    setMajorOptions([]);
                 }
             } else {
                 setMajorOptions([]);
                 setSelectedMajor(null);
+                form.setFieldValue('majorId', null);
             }
         };
         fetchMajor();
-    }, [selectedFaculty, showModal, isUpdate, form]);
+    }, [selectedFaculty, showModal, form]);
+
 
 
 
     useEffect(() => {
         if (showModal && isUpdate && form) {
-            console.log('SHOW MODAL : ', showModal);
 
             // Set selected values for dropdowns
             if (showModal.faculty) {
                 const facultyId = showModal.faculty;
-                console.log(facultyId)
                 setSelectedFaculty(facultyId);
                 form.setFieldValue('facultyId', facultyId);
             }
@@ -207,8 +208,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 phone: showModal.phone,
                 dateOfBirth: dateOfBirth,
                 placeOfBirth: showModal.placeOfBirth,
-                faculty: showModal.faculty,
-                major: showModal.major,
+                faculty: showModal.faculty?.facultyId,
+                major: showModal.major?.majorId,
                 isStudent: showModal.isStudent,
                 sex: showModal.sex,
                 dan_toc: showModal.dan_toc,
@@ -257,6 +258,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleFacultySelect = (value) => {
         setSelectedFaculty(value);
+        setSelectedMajor(null); // Reset selected major
+        form.setFieldValue('majorId', null); // Reset major field in form
     };
 
     const handleChangeSupervisor = (value) => {
@@ -265,6 +268,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleMajorSelect = (value) => {
         setSelectedMajor(value);
+        form.setFieldValue('majorId', value);
     };
 
     const handleChangeIsStudent = (value) => {
@@ -301,11 +305,11 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
     const next = () => {
         form.validateFields()
             .then((values) => {
-                setFormData((prev) => ({ ...prev, ...values })); // Lưu dữ liệu form hiện tại vào state
+                setFormData((prev) => ({ ...prev, ...values }));
                 setCurrentStep(currentStep + 1);
             })
-            .catch((errorInfo) => {
-                console.log('Validation failed:', errorInfo);
+            .catch((error) => {
+                console.error('Validation failed:', error);
             });
     };
 
@@ -318,60 +322,60 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             const values = await form.validateFields();
             const finalData = { ...formData, ...values };
             let response;
+            let userData = {
+                userId: finalData.userId,
+                email: finalData.email,
+                password: finalData.password,
+                fullname: finalData.fullname,
+                dateOfBirth: finalData.dateOfBirth,
+                placeOfBirth: finalData.placeOfBirth,
+                phone: finalData.phone,
+                isStudent: finalData.isStudent,
+                class: finalData.class || '',
+                faculty: selectedFaculty,
+                major: selectedMajor,
+                stillStudy: finalData.stillStudy || 0,
+                nien_khoa: finalData.nien_khoa || '',
+                sex: finalData.sex || '',
+                dan_toc: finalData.dan_toc || '',
+                ton_giao: finalData.ton_giao || '',
+                quoc_tich: finalData.quoc_tich || '',
+                cccd: finalData.cccd || '',
+                ho_khau_thuong_tru: finalData.ho_khau_thuong_tru || '',
+                khu_vuc: finalData.khu_vuc || '',
+                khoi: finalData.khoi || '',
+                bac_he_dao_tao: finalData.bac_he_dao_tao || '',
+                ma_cvht: finalData.ma_cvht || '',
+                ho_ten_cvht: finalData.ho_ten_cvht || '',
+                email_cvht: finalData.email_cvht || '',
+                dien_thoai_cvht: finalData.dien_thoai_cvht || '',
+                ma_cvht_ng2: finalData.ma_cvht_ng2 || '',
+                ho_ten_cvht_ng2: finalData.ho_ten_cvht_ng2 || '',
+                email_cvht_ng2: finalData.email_cvht_ng2 || '',
+                dien_thoai_cvht_ng2: finalData.dien_thoai_cvht_ng2 || '',
+                ma_truong: finalData.ma_truong || '',
+                ten_truong: finalData.ten_truong || '',
+                hoc_vi: finalData.hoc_vi || '',
+                isActive: finalData.isActive,
+                avatar: finalData.avatar || '',
+                GPA: null,
+                createUser: CreateUserId || 'admin',
+                lastModifyUser: CreateUserId || 'admin',
+            };
 
+            if (finalData.nien_khoa) {
+                const [firstYear, lastYear] = finalData.nien_khoa.split('-');
+                userData.firstAcademicYear = parseInt(firstYear, 10);
+                userData.lastAcademicYear = parseInt(lastYear, 10);
+            }
             if (isUpdate) {
-                let userData = {
-                    permission: selectedPermisison,
+                userData = {
+                    ...userData,
+                    // permission: selectedPermission,
                 };
-                response = await updateUserById(showModal.id, userData);
+                console.log(showModal.userId);
+                response = await updateUserById(showModal.userId, userData);
             } else {
-                let userData = {
-                    userId: finalData.userId,
-                    email: finalData.email,
-                    password: finalData.password,
-                    fullname: finalData.fullname,
-                    dateOfBirth: finalData.dateOfBirth,
-                    placeOfBirth: finalData.placeOfBirth,
-                    phone: finalData.phone,
-                    isStudent: finalData.isStudent,
-                    class: finalData.class || '',
-                    faculty: selectedFaculty,
-                    major: selectedMajor,
-                    stillStudy: finalData.stillStudy || 0,
-                    nien_khoa: finalData.nien_khoa || '',
-                    sex: finalData.sex || '',
-                    dan_toc: finalData.dan_toc || '',
-                    ton_giao: finalData.ton_giao || '',
-                    quoc_tich: finalData.quoc_tich || '',
-                    cccd: finalData.cccd || '',
-                    ho_khau_thuong_tru: finalData.ho_khau_thuong_tru || '',
-                    khu_vuc: finalData.khu_vuc || '',
-                    khoi: finalData.khoi || '',
-                    bac_he_dao_tao: finalData.bac_he_dao_tao || '',
-                    ma_cvht: finalData.ma_cvht || '',
-                    ho_ten_cvht: finalData.ho_ten_cvht || '',
-                    email_cvht: finalData.email_cvht || '',
-                    dien_thoai_cvht: finalData.dien_thoai_cvht || '',
-                    ma_cvht_ng2: finalData.ma_cvht_ng2 || '',
-                    ho_ten_cvht_ng2: finalData.ho_ten_cvht_ng2 || '',
-                    email_cvht_ng2: finalData.email_cvht_ng2 || '',
-                    dien_thoai_cvht_ng2: finalData.dien_thoai_cvht_ng2 || '',
-                    ma_truong: finalData.ma_truong || '',
-                    ten_truong: finalData.ten_truong || '',
-                    hoc_vi: finalData.hoc_vi || '',
-                    isActive: finalData.isActive,
-                    avatar: finalData.avatar || '',
-                    GPA: null,
-                    createUser: CreateUserId || 'admin',
-                    lastModifyUser: CreateUserId || 'admin',
-                };
-
-                if (finalData.nien_khoa) {
-                    const [firstYear, lastYear] = finalData.nien_khoa.split('-');
-                    userData.firstAcademicYear = parseInt(firstYear, 10);
-                    userData.lastAcademicYear = parseInt(lastYear, 10);
-                }
-                console.log(userData);
                 response = await createUser(userData);
             }
 
@@ -400,7 +404,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             <FormItem
                                 name="isStudent"
                                 label="Chức danh"
-                                rules={[{ required: true, message: 'Vui lòng chọn chức danh' }]}
+                                rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng chọn chức danh' }]}
                             >
                                 <Select
                                     onChange={(value) => {
@@ -410,6 +414,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                         { value: true, label: 'Sinh viên' },
                                         { value: false, label: 'Giảng viên' },
                                     ]}
+                                    disabled={viewOnly}
                                 ></Select>
                             </FormItem>
                         </Col>
@@ -417,15 +422,15 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             <FormItem
                                 name="userId"
                                 label="Mã người dùng"
-                                rules={[{ required: true, message: 'Vui lòng nhập mã người dùng' }]}
+                                rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng nhập mã người dùng' }]}
                             >
-                                <Input maxLength={10} />
+                                <Input maxLength={10} disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
 
                     <Row gutter={16}>
-                        <Col span={12}>
+                        {/* <Col span={12}>
                             <FormItem
                                 name="password"
                                 label="Mật khẩu"
@@ -436,14 +441,14 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                     iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                                 />
                             </FormItem>
-                        </Col>
+                        </Col> */}
                         <Col span={12}>
                             <FormItem
                                 name="fullname"
                                 label="Họ tên"
-                                rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                                rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng nhập họ tên' }]}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -453,9 +458,9 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             <FormItem
                                 name="email"
                                 label="Email"
-                                rules={[{ required: true, message: 'Vui lòng nhập email' }]}
+                                rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng nhập Email' }]}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                         <Col span={12}>
@@ -463,9 +468,9 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 <FormItem
                                     name="dateOfBirth"
                                     label="Ngày sinh"
-                                    rules={[{ required: true, message: 'Vui lòng nhập ngày sinh' }]}
+                                    rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
                                 >
-                                    <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
+                                    <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} disabled={viewOnly} />
                                 </FormItem>
                             </ConfigProvider>
                         </Col>
@@ -476,18 +481,18 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             <FormItem
                                 name="placeOfBirth"
                                 label="Nơi sinh"
-                                rules={[{ required: true, message: 'Vui lòng nhập nơi sinh' }]}
+                                rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng nhập nơi sinh' }]}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                         <Col span={12}>
                             <FormItem
                                 name="phone"
                                 label="Số điện thoại"
-                                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                                rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -505,6 +510,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                     }
                                     options={facultyOptions}
+                                    disabled={viewOnly}
                                 />
                             </FormItem>
                         </Col>
@@ -520,6 +526,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                     }
                                     options={majorOptions}
+                                    disabled={viewOnly}
                                 />
                             </FormItem>
                         </Col>
@@ -535,7 +542,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="sex" label="Giới tính">
-                                <Select>
+                                <Select disabled={viewOnly} >
                                     <Option value="Nam">Nam</Option>
                                     <Option value="Nữ">Nữ</Option>
                                 </Select>
@@ -543,7 +550,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                         </Col>
                         <Col span={12}>
                             <FormItem name="dan_toc" label="Dân tộc">
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -551,7 +558,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="ton_giao" label="Tôn giáo">
-                                <Select>
+                                <Select disabled={viewOnly} >
                                     <Option value="Không"></Option>
                                     <Option value="Phật giáo">Phật giáo</Option>
                                     <Option value="Hồi giáo">Hồi giáo</Option>
@@ -564,14 +571,14 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                         </Col>
                         <Col span={12}>
                             <FormItem name="quoc_tich" label="Quốc tịch">
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="cccd" label="CCCD">
-                                <Input maxLength={12} />
+                                <Input maxLength={12} disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -589,11 +596,22 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                         setFormData((prev) => ({ ...prev, avatar: null }));
                                         setAvatarPreview(null);
                                     }}
+                                    disabled={viewOnly}
                                 >
-                                    <p className="ant-upload-drag-icon">
-                                        <InboxOutlined />
-                                    </p>
-                                    <p className="ant-upload-text">Ấn hoặc kéo tệp vào vùng này để tải lên tệp</p>
+                                    {fileList.length > 0 ? (
+                                        <img
+                                            src={URL.createObjectURL(fileList[0].originFileObj)}
+                                            alt="Avatar Preview"
+                                            style={{ width: 'auto', height: 'auto', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <>
+                                            <p className="ant-upload-drag-icon">
+                                                <InboxOutlined />
+                                            </p>
+                                            <p className="ant-upload-text">Ấn hoặc kéo tệp vào vùng này để tải lên tệp</p>
+                                        </>
+                                    )}
                                 </Dragger>
                             </Form.Item>
                         </Col>
@@ -607,6 +625,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                         height: 120,
                                         resize: 'none',
                                     }}
+                                    disabled={viewOnly}
                                 />
                             </FormItem>
                         </Col>
@@ -615,7 +634,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="khu_vuc" label="Khu vực" hidden={isStudent ? false : true}>
-                                <Select>
+                                <Select disabled={viewOnly} >
                                     <Option value="Khu vực 1">Khu vực 1</Option>
                                     <Option value="Khu vực 2">Khu vực 2</Option>
                                     <Option value="Khu vực 3">Khu vực 3</Option>
@@ -624,7 +643,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                         </Col>
                         <Col span={12}>
                             <FormItem name="khoi" label="Khối" hidden={isStudent ? false : true}>
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -632,7 +651,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="bac_he_dao_tao" label="Bậc hệ đào tạo" hidden={isStudent ? false : true}>
-                                <Select>
+                                <Select disabled={viewOnly} >
                                     <Option value="Đại học chính quy">Đại học chính quy</Option>
                                     <Option value="Chất lượng cao">Chất lượng cao</Option>
                                     <Option value="Vừa học vừa làm">Vừa học vừa làm</Option>
@@ -641,7 +660,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                         </Col>
                         <Col span={12}>
                             <FormItem name="nien_khoa" label="Niên khóa" hidden={isStudent ? false : true}>
-                                <Select>
+                                <Select disabled={viewOnly} >
                                     <Option value="2020-2024"></Option>
                                     <Option value="2021-2025"></Option>
                                     <Option value="2022-2026"></Option>
@@ -661,7 +680,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="ma_cvht" label="Mã cố vấn học tập" hidden={isStudent ? false : true}>
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                         <Col span={12}>
@@ -680,6 +699,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                     }
                                     options={supervisorOptions}
+                                    disabled={viewOnly}
                                 />
                             </FormItem>
                         </Col>
@@ -688,7 +708,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="email_cvht" label="Email cố vấn học tập" hidden={isStudent ? false : true}>
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                         <Col span={12}>
@@ -697,14 +717,14 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 label="Điện thoại cố vấn học tập"
                                 hidden={isStudent ? false : true}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="ma_cvht_ng2" label="Mã cố vấn học tập 2" hidden={isStudent ? false : true}>
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                         <Col span={12}>
@@ -713,7 +733,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 label="Họ tên cố vấn học tập 2"
                                 hidden={isStudent ? false : true}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -724,7 +744,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 label="Email cố vấn học tập 2"
                                 hidden={isStudent ? false : true}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                         <Col span={12}>
@@ -733,7 +753,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 label="Điện thoại cố vấn học tập 2"
                                 hidden={isStudent ? false : true}
                             >
-                                <Input />
+                                <Input disabled={viewOnly} />
                             </FormItem>
                         </Col>
                     </Row>
@@ -753,7 +773,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Row gutter={16}>
                         <Col span={12}>
                             <FormItem name="hoc_vi" label="Học vị (giảng viên)" hidden={isStudent ? true : false}>
-                                <Select>
+                                <Select disabled={viewOnly} >
                                     <Option value="ThS">Thạc sĩ</Option>
                                     <Option value="NCS">Nghiên cứu sinh</Option>
                                     <Option value="TS">Tiến sĩ</Option>
@@ -765,7 +785,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                         <Col span={12}>
                             <Col span={12}>
                                 <FormItem name="isActive" valuePropName="checked" label="isActive">
-                                    <Checkbox>Active</Checkbox>
+                                    <Checkbox disabled={!viewOnly} >Active</Checkbox>
                                 </FormItem>
                             </Col>
                         </Col>
@@ -779,6 +799,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
         <Update
             title={title}
             isUpdate={isUpdate}
+            isViewOnly={viewOnly}
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}

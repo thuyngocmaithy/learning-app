@@ -37,23 +37,34 @@ function DiemTotNghiep() {
 
     // Handle input changes
     const calculateResults = useCallback(() => {
-        const gradePointsA = creditsA * 4.0;
-        const gradePointsB = creditsB * 3.0;
-        const gradePointsC = creditsC * 2.0;
-        const gradePointsD = creditsD * 1.0;
+        const currentCreditsNum = Number(currentCredits);
+        const improvedCreditsNum = Number(improvedCredits) || 0;
+        const creditsANum = Number(creditsA) || 0;
+        const creditsBNum = Number(creditsB) || 0;
+        const creditsCNum = Number(creditsC) || 0;
+        const creditsDNum = Number(creditsD) || 0;
+        const totalCreditsNum = Number(totalCredits);
+
+        const gradePointsA = creditsANum * 4.0;
+        const gradePointsB = creditsBNum * 3.0;
+        const gradePointsC = creditsCNum * 2.0;
+        const gradePointsD = creditsDNum * 1.0;
 
         const totalGradePoints = gradePointsA + gradePointsB + gradePointsC + gradePointsD;
-        const totalscientificResearchedCredits = creditsA + creditsB + creditsC + creditsD;
+        const totalscientificResearchedCredits = creditsANum + creditsBNum + creditsCNum + creditsDNum;
 
-        const newGPA = parseFloat((
-            (currentGPA * (currentCredits - improvedCredits) + totalGradePoints) /
-            (currentCredits - improvedCredits + totalscientificResearchedCredits)
-        ).toFixed(2));
+        let newGPA = 0 || currentGPA;
+        if ((currentCreditsNum - improvedCreditsNum + totalscientificResearchedCredits) !== 0) {
+            newGPA = parseFloat((
+                (currentGPA * (currentCreditsNum - improvedCreditsNum) + totalGradePoints) /
+                (currentCreditsNum - improvedCreditsNum + totalscientificResearchedCredits)
+            ).toFixed(2));
+        }
 
-        const remainingCredits = totalCredits - (currentCredits - improvedCredits);
+        const remainingCredits = totalCreditsNum - (currentCreditsNum - improvedCreditsNum);
 
-        setCalculatedGPA(newGPA);
-        setRemainingCredits(remainingCredits);
+        setCalculatedGPA(isNaN(newGPA) ? 0 : newGPA);
+        setRemainingCredits(isNaN(remainingCredits) ? 0 : remainingCredits);
         setTotalscientificResearchedCredits(totalscientificResearchedCredits);
 
         if (newGPA >= 3.6) setGraduationType('Xuất sắc');
@@ -76,15 +87,15 @@ function DiemTotNghiep() {
     };
 
     const handleCurrentCreditsChange = useCallback((credits) => {
-        setCurrentCredits(parseInt(credits));
+        setCurrentCredits(Number(credits) || 0);
     }, []);
 
     const handleImprovedCreditsChange = useCallback((credits) => {
-        setImprovedCredits(parseInt(credits));
+        setImprovedCredits(Number(credits) || 0);
     }, []);
 
     const handleInputChange = useCallback((setter) => (value) => {
-        setter(value);
+        setter(Number(value) || 0);
     }, []);
 
     return (
@@ -200,25 +211,25 @@ function DiemTotNghiep() {
                     <div className={cx('info-right')}>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Số tín chỉ còn lại:</span>
-                            <span className={cx('value-info')}>{remainingCredits}</span>
+                            <span className={cx('value-info')}>{remainingCredits || 0}</span>
                         </div>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Tổng số tín chỉ dự kiến đang nhập:</span>
-                            <span className={cx('value-info')}>{totalscientificResearchedCredits}</span>
+                            <span className={cx('value-info')}>{totalscientificResearchedCredits || 0}</span>
                         </div>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Số tín chỉ cần nhập lại:</span>
-                            <span className={cx('value-info')}>{remainingCredits - totalscientificResearchedCredits}</span>
+                            <span className={cx('value-info')}>{(remainingCredits - totalscientificResearchedCredits) || 0}</span>
                         </div>
                     </div>
                     <div className={cx('result-right')}>
                         <div className={cx('result-item')}>
                             <span className={cx('title-result')}>Điểm chung bình tích lũy:</span>
-                            <span className={cx('value-result')}>{calculatedGPA}</span>
+                            <span className={cx('value-result')}>{calculatedGPA || 0}</span>
                         </div>
                         <div className={cx('result-item')}>
                             <span className={cx('title-result')}>Bằng tốt nghiệp:</span>
-                            <span className={cx('value-result')}>{graduationType}</span>
+                            <span className={cx('value-result')}>{graduationType || ''}</span>
                         </div>
                     </div>
                 </div>

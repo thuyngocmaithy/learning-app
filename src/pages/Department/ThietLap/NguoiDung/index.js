@@ -5,7 +5,7 @@ import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
@@ -22,6 +22,7 @@ function NguoiDung() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
+    const [viewOnly, setViewOnly] = useState(false);
 
     const columns = (showModal) => [
         {
@@ -47,14 +48,14 @@ function NguoiDung() {
             },
         },
         {
-            title: 'Khoa',
-            dataIndex: 'faculty',
-            key: 'faculty',
+            title: 'Ngành',
+            dataIndex: ['faculty', 'facultyName'],
+            key: 'facultyName',
         },
         {
             title: 'Chuyên ngành',
-            dataIndex: 'major',
-            key: 'major',
+            dataIndex: ['major', 'majorName'],
+            key: 'majorName',
         },
         {
             title: 'Năm học',
@@ -75,12 +76,14 @@ function NguoiDung() {
                 <div className={cx('action-item')}>
                     <ButtonCustom
                         className={cx('btnDetail')}
-                        leftIcon={<EditOutlined />}
+                        leftIcon={<EyeOutlined />}
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModalDetail(record);  // Pass the record to show details
-                            setIsUpdate(false);  // Set readonly mode
+                            setShowModal(record);
+                            setIsUpdate(true);
+                            setViewOnly(true)
+                            setShowModalDetail(true);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -90,13 +93,16 @@ function NguoiDung() {
                         primary
                         verysmall
                         onClick={() => {
-                            setShowModal(record);  // Pass the record to edit
-                            setIsUpdate(true);  // Set edit mode
+                            setShowModal(record);
+                            setIsUpdate(true);
+                            setViewOnly(false);
+                            setShowModalDetail(false);
                         }}>
                         Sửa
                     </ButtonCustom>
                 </div>
-            ),
+            )
+            ,
         }
     ];
 
@@ -113,8 +119,14 @@ function NguoiDung() {
                 email: user.email,
                 isStudent: user.isStudent,
                 class: user.class || "",
-                faculty: user.faculty ? user.faculty.facultyName : "",
-                major: user.major ? user.major.majorName : "",
+                faculty: user.faculty ? {
+                    facultyId: user.faculty.facultyId,
+                    facultyName: user.faculty.facultyName
+                } : null,
+                major: user.major ? {
+                    majorId: user.major.majorId,
+                    majorName: user.major.majorName
+                } : null,
                 stillStudy: user.stillStudy,
                 firstAcademicYear: user.firstAcademicYear,
                 lastAcademicYear: user.lastAcademicYear,
@@ -193,6 +205,7 @@ function NguoiDung() {
                 showModal={showModal}
                 setShowModal={setShowModal}
                 reLoad={fetchData}
+                viewOnly={viewOnly}
             />
         );
     }, [showModal, isUpdate]);
@@ -212,6 +225,7 @@ function NguoiDung() {
                         onClick={() => {
                             setShowModal(true);
                             setIsUpdate(false);
+                            setViewOnly(false);
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('người dùng', handleDelete)} />

@@ -27,6 +27,33 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const [originalGrades, setOriginalGrades] = useState({});
     const didMountRef = useRef(false);
 
+
+    const calculateTotalCredits = useCallback((scores) => {
+        // Lấy danh sách môn bị loại trừ
+        const excludedSubjectIds = frameComponents
+            .filter(frame => frame.frameComponentId === "GDDC_TC")
+            .flatMap(frame => frame.subjectInfo.map(subject => subject.subjectId));
+
+        let totalCredits = 0;
+
+        scores.forEach(score => {
+            if (score.subject && score.subject.creditHour) {
+                const isExcludedSubject =
+                    excludedSubjectIds.includes(score.subject.subjectId) ||
+                    score.subject.subjectName.includes("Giáo dục quốc phòng") ||
+                    score.subject.subjectName.includes("Giáo dục thể chất") ||
+                    score.finalScoreLetter.includes("R") ||
+                    score.result == false;
+
+                if (!isExcludedSubject) {
+                    totalCredits += score.subject.creditHour;
+                }
+            }
+        });
+
+        return totalCredits;
+    }, [frameComponents]);
+
     const fetchData = useCallback(async () => {
         if (didMountRef.current) return;
         didMountRef.current = true;
@@ -37,15 +64,12 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                 listSubjectToFrame(userId),
                 getScoreByStudentId(userId)
             ]);
-            console.log(frameComponentsResponse);
 
-            if (frameComponentsResponse && Array.isArray(frameComponentsResponse)) {
-                setFrameComponents(frameComponentsResponse);
-            }
+            setFrameComponents(frameComponentsResponse);
+
+
             if (scoresResponse && Array.isArray(scoresResponse)) {
                 setScores(scoresResponse);
-                const totalCredits = calculateTotalCredits(scoresResponse);
-                onCurrentCreditsChange(totalCredits);
 
                 const origGrades = {};
                 scoresResponse.forEach(score => {
@@ -61,27 +85,21 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         setIsLoading(false);
     }, [userId]);
 
+
+    useEffect(() => {
+        if (frameComponents.length > 0 && scores.length > 0) {
+            const totalCredits = calculateTotalCredits(scores);
+            onCurrentCreditsChange(totalCredits);
+        }
+    }, [frameComponents, scores, calculateTotalCredits, onCurrentCreditsChange]);
+
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    const calculateTotalCredits = useCallback((scores) => {
-        return scores.reduce((total, score) => {
-            if (score.subject && score.subject.creditHour && score.subject.frameComponent && score.subject.frameComponent.frameComponentId) {
-                console.log(score.subject);
 
-                const isExcludedSubject =
-                    score.subject.subjectName.includes("Giáo dục quốc phòng") ||
-                    score.subject.subjectName.includes("Giáo dục thể chất") ||
-                    score.finalScoreLetter.includes("R");
 
-                if (score.subject.frameComponent.frameComponentId !== 'GDDC_TC' && !isExcludedSubject) {
-                    return total + score.subject.creditHour;
-                }
-            }
-            return total;
-        }, 0);
-    }, []);
+
 
     const handleChange = useCallback((value, subjectId, creditHour) => {
         setSelectedGrades(prevGrades => {
