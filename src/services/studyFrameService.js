@@ -46,4 +46,15 @@ export const listSubjectToFrameDepartment = async (startYear, facultyId, cycleId
         console.error('[study-frames - listSubjectToFrame - error]:', error);
         throw error;
     }
-};  
+};
+
+
+export const getAllStudyFrameComponent = async () => {
+    try {
+        const response = await api.get('/study-frames/components');
+        return response.data;
+    } catch (error) {
+        console.error('[study-frames  - getAllStudyFrameComponent - error ]', error);
+        throw error;
+    }
+}

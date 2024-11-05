@@ -43,7 +43,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                     score.subject.subjectName.includes("Giáo dục quốc phòng") ||
                     score.subject.subjectName.includes("Giáo dục thể chất") ||
                     score.finalScoreLetter.includes("R") ||
-                    score.result == false;
+                    score.result === false;
 
                 if (!isExcludedSubject) {
                     totalCredits += score.subject.creditHour;

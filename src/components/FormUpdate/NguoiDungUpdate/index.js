@@ -47,7 +47,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
     const [permissionOptions, setStatusOptions] = useState([]);
     const [selectedPermisison, setSelectedPermisison] = useState(null);
     const [isStudent, setIsStudent] = useState(true);
-    const [isActive, setIsActive] = useState(false);
 
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -180,7 +179,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     useEffect(() => {
         if (showModal && isUpdate && form) {
-
+            console.log(showModal);
             // Set selected values for dropdowns
             if (showModal.faculty) {
                 const facultyId = showModal.faculty;
@@ -258,8 +257,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleFacultySelect = (value) => {
         setSelectedFaculty(value);
-        setSelectedMajor(null); // Reset selected major
-        form.setFieldValue('majorId', null); // Reset major field in form
+        setSelectedMajor(null);
+        form.setFieldValue('majorId', null);
     };
 
     const handleChangeSupervisor = (value) => {
@@ -386,7 +385,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             }
         } catch (error) {
             console.error(
-                `[ NguoiDung - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `,
+                `[ NguoiDung - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} NguoiDung `,
                 error,
             );
         }

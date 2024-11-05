@@ -172,7 +172,7 @@ export const createUser = async (userData) => {
     const response = await api.post('/users', userData);
     return response.data;
   } catch (error) {
-    console.error(error);
+    console.error('[userServive - createUser - error] : ', error);
     throw error;
   }
 };
