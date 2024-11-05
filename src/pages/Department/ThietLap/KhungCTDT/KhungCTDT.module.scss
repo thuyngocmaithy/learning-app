@@ -1,49 +1,85 @@
-.info {
+// .info {
+//     display: flex;
+//     margin-bottom: 30px;
+//     justify-content: space-between;
+
+//     .container-title {
+//         display: flex;
+//     }
+// }
+
+// .title {
+//     margin-left: 15px;
+//     font-weight: 700;
+//     display: flex;
+//     align-items: center;
+// }
+
+// .icon {
+//     display: flex;
+//     width: 30px;
+//     color: var(--primary);
+// }
+
+// .title-namhoc-sapxep {
+//     margin: 25px 0;
+//     background-color: #f6ffed;
+//     padding: 20px 50px;
+//     color: #389e0d;
+//     letter-spacing: 0.5px;
+//     font-weight: 500;
+//     font-size: 21px;
+//     text-align: center;
+//     box-shadow: var(--box-shadow-3);
+// }
+
+// // BUTTON SAVE
+// .footer-frame {
+//     display: flow-root;
+
+//     .btnSave {
+//         display: flex;
+//         float: right;
+//         margin-top: 10px;
+//         margin-bottom: 20px;
+//         background-color: #ff9f9f;
+//         color: var(--blue-900);
+//         border-color: #ff9f9f;
+//     }
+// }
+
+.container-header {
     display: flex;
-    margin-bottom: 30px;
     justify-content: space-between;
+    margin-bottom: 30px;
 
-    .container-title {
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            max-width: 900px;
+            line-height: 2;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+
+    .wrapper-toolbar {
         display: flex;
     }
+
 }
 
-.title {
-    margin-left: 15px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-}
-
-.icon {
-    display: flex;
-    width: 30px;
-    color: var(--primary);
-}
-
-.title-namhoc-sapxep {
-    margin: 25px 0;
-    background-color: #f6ffed;
-    padding: 20px 50px;
-    color: #389e0d;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-    font-size: 21px;
-    text-align: center;
-    box-shadow: var(--box-shadow-3);
-}
-
-// BUTTON SAVE
-.footer-frame {
-    display: flow-root;
-
-    .btnSave {
-        display: flex;
-        float: right;
-        margin-top: 10px;
-        margin-bottom: 20px;
-        background-color: #ff9f9f;
-        color: var(--blue-900);
-        border-color: #ff9f9f;
-    }
+.btnStructure,
+.btnApply {
+    margin-right: 7px;
 }

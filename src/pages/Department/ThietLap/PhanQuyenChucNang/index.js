@@ -245,6 +245,7 @@ function PhanQuyenChucNang() {
                     height="550px"
                     setSelectedRowKeys={setSelectedPermission}
                     keyIdChange={"permissionId"}
+                    loading={isLoadingPermission}
                 />
             ),
         },
@@ -264,11 +265,7 @@ function PhanQuyenChucNang() {
     ];
 
 
-    return isLoadingPermission ? (
-        <div className={cx('container-loading')} style={{ height: heightContainerLoadingRef.current }}>
-            <Spin size="large" />
-        </div>
-    ) : (
+    return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
                 <div className={cx('info')}>

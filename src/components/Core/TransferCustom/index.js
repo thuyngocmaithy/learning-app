@@ -1,9 +1,9 @@
 import { Transfer, Table, Flex } from 'antd';
 import { useState } from 'react';
 
-function TransferCustom({ data, columns }) {
+function TransferCustom({ data, columns, targetKeys, setTargetKeys, ...props }) {
     // Sử dụng state để quản lý các khóa mục tiêu (target keys)
-    const [targetKeys, setTargetKeys] = useState([]);
+    // const [targetKeys, setTargetKeys] = useState([]);
 
     // Hàm lọc cho Transfer => Tìm kiếm các mục dựa trên input
     const filterOption = (input, item) => item.title?.includes(input) || item.tag?.includes(input);
@@ -63,7 +63,7 @@ function TransferCustom({ data, columns }) {
     );
 
     return (
-        <Flex flexdirection="column" alignitems="flex-start" gap="1rem" style={{ justifyContent: 'space-around' }}>
+        <Flex flexdirection="column" alignitems="flex-start" gap="1rem" style={{ justifyContent: 'space-around', display: 'block' }}>
             <TableTransfer
                 dataSource={data}
                 targetKeys={targetKeys}
@@ -72,6 +72,7 @@ function TransferCustom({ data, columns }) {
                 filterOption={filterOption}
                 leftColumns={columns}
                 rightColumns={columns}
+                {...props}
             />
         </Flex>
     );

@@ -9,23 +9,29 @@ import { SocketNotificationProvider } from './context/SocketNotificationContext'
 import { SocketMessagesProvider } from './context/SocketMessagesContext';
 import { PermissionDetailProvider } from './context/PermissionDetailContext';
 import { SRAndThesisJoinProvider } from './context/SRAndThesisJoinContext';
+import { MenuProvider } from './context/MenuContext';
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>
     <ThemeProvider>
         <GlobalStyles>
-            <AccountLoginProvider>
-                <PermissionDetailProvider>
-                    <SRAndThesisJoinProvider>
-                        <SocketNotificationProvider>
-                            <SocketMessagesProvider>
-                                <App />
-                            </SocketMessagesProvider>
-                        </SocketNotificationProvider>
-                    </SRAndThesisJoinProvider>
-                </PermissionDetailProvider>
-            </AccountLoginProvider>
+            <BrowserRouter>
+                <AccountLoginProvider>
+                    <PermissionDetailProvider>
+                        <MenuProvider>
+                            <SRAndThesisJoinProvider>
+                                <SocketNotificationProvider>
+                                    <SocketMessagesProvider>
+                                        <App />
+                                    </SocketMessagesProvider>
+                                </SocketNotificationProvider>
+                            </SRAndThesisJoinProvider>
+                        </MenuProvider>
+                    </PermissionDetailProvider>
+                </AccountLoginProvider>
+            </BrowserRouter>
         </GlobalStyles>
     </ThemeProvider>,
     // </React.StrictMode>,
