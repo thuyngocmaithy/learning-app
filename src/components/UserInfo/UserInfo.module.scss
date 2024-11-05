@@ -1,0 +1,40 @@
+.wrapper-info-student,
+.wrapper-info-teacher {
+    padding: 20px;
+}
+
+.container-info-user {
+    display: flex;
+    align-items: center;
+}
+
+:global(.modal-user-info .ant-form-item) {
+    margin-bottom: 10px;
+}
+
+:global(.modal-user-info .ant-form-item .ant-form-item-label) {
+    margin-right: 10px;
+
+    label {
+        height: -webkit-fill-available;
+    }
+
+    label span {
+        font-weight: 600;
+    }
+}
+
+.image-avt {
+    width: 150px;
+    height: 200px;
+    border-radius: 10px;
+}
+
+.wrapper-info-teacher .container-info-user {
+    justify-content: space-around;
+
+    .image-avt {
+        color: var(--primary);
+    }
+
+}
