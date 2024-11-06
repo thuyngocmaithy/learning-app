@@ -3,7 +3,7 @@ import { api } from '../utils/apiConfig';
 export const getAll = async () => {
     try {
         const response = await api.get('/majors');
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -17,6 +17,36 @@ export const getWhere = async (conditions) => {
         const response = await api.get(url);
         return response;
     } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteMajorById = async (params) => {
+    try {
+        const response = await api.delete('/majors/', { params });
+        return response.data;
+    } catch (error) {
+        console.error('[majorService - deleteMajorById - error] : ', error);
+        throw error;
+    }
+};
+
+export const createMajor = async (majorData) => {
+    try {
+        const response = await api.post('/majors', majorData);
+        return response.data;
+    } catch (error) {
+        console.error('[majorService - createmajor - error] : ', error);
+        throw error;
+    }
+};
+
+export const updateMajorById = async (majorId, majorData) => {
+    try {
+        const response = await api.put(`/majors/${majorId}`, majorData);
+        return response.data;
+    } catch (error) {
+        console.error('[majorService - updateMajorById - error] : ', error);
         throw error;
     }
 };
