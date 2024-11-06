@@ -141,7 +141,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-    const layoutFrom = {
+    const layoutForm = {
         labelCol: {
             span: 9,
         },
@@ -161,7 +161,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             form={form}
         >
             <Form
-                {...layoutFrom}
+                {...layoutForm}
                 form={form}>
                 <FormItem
                     name="scientificResearchGroupName"

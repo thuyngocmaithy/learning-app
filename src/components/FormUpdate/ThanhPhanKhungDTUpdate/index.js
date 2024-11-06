@@ -238,7 +238,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         setMaxCreditHour(totalCreditHours);
     }, [listSubjectSelected]);
 
-    const layoutFrom = {
+    const layoutForm = {
         labelCol: {
             span: 4,
         },
@@ -256,7 +256,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             onUpdate={handleSubmit}
             width='1300px'
         >
-            <Form {...layoutFrom} form={form}>
+            <Form {...layoutForm} form={form}>
                 <FormItem
                     name="frameComponentId"
                     label="Mã thành phần khung"
