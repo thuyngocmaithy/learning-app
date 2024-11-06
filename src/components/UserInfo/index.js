@@ -57,7 +57,6 @@ function UserInfo({ showModal, onClose }) {
         footer={null}
         width={permission === "SINHVIEN" ? "900px" : "600px"}
     >
-        {console.log(permission)}
         {permission === "SINHVIEN"
             ? <div className={cx('wrapper-info-student')}>
                 <Divider orientation="left">

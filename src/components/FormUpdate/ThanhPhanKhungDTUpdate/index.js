@@ -8,9 +8,9 @@ import classNames from 'classnames/bind';
 import styles from "./ThanhPhanKhungDTUpdate.module.scss"
 import TransferCustom from '../../Core/TransferCustom';
 import { getAll as getAllSubject } from '../../../services/subjectService';
-import { createSSMByListSubject, getWhereSubject_StudyFrameComp_Major } from '../../../services/subject_studyFrameComp_majorService';
+import { createSSMByListSubject, getWheresubject_studyFrameComp, updateSSMByListSubject } from '../../../services/subject_studyFrameCompService';
 import { getAll } from '../../../services/majorService';
-import { createStudyFrameComponent } from '../../../services/studyFrameCompService';
+import { createStudyFrameComponent, updateStudyFrameComponent } from '../../../services/studyFrameCompService';
 
 
 const cx = classNames.bind(styles)
@@ -50,7 +50,12 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
     const [form] = useForm();
     const [listSubject, setListSubject] = useState([]);
     const [listSubjectSelected, setListSubjectSelected] = useState([]);
-    const [majorOptions, setMajorOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([
+        {
+            value: "",
+            label: ""
+        }
+    ]);
     const [maxCreditHour, setMaxCreditHour] = useState(0); // Lưu số tín chỉ tối đa được nhập
 
 
@@ -64,7 +69,10 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                         value: major.majorId,
                         label: major.majorId + " - " + major.majorName,
                     }));
-                    setMajorOptions(options);
+                    setMajorOptions([
+                        { value: "", label: "" },  // Phần tử trống được thêm vào đầu
+                        ...options
+                    ]);
                 }
             } catch (error) {
                 console.error('HocKyUpdate - fetchMajor - error:', error);
@@ -104,11 +112,11 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         // fetch danh sách các môn học thuộc thành phần khung
         const fetchSubjectOfFC = async () => {
             try {
-                const response = await getWhereSubject_StudyFrameComp_Major({ studyFrameComponent: showModal.frameComponentId })
+                const response = await getWheresubject_studyFrameComp({
+                    studyFrameComponent: showModal.frameComponentId,
+                })
+
                 if (response.status === 200) {
-                    setListSubjectSelected(response.data.data.map((item) => {
-                        return item.subject.subjectId;
-                    }));
                     setListSubjectSelected(response.data.data.map((item) => {
                         return {
                             key: item.subject.subjectId,
@@ -137,8 +145,8 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     frameComponentId: showModal.frameComponentId,
                     frameComponentName: showModal.frameComponentName,
                     description: showModal.description,
-                    requiredCreditHour: Number(showModal.creditHour.split('/')[0])
-                    // creditHour: showModal.creditHour,
+                    requiredCreditHour: listSubjectSelected.length === 0 ? 0 : Number(showModal.creditHour.split('/')[0]),
+                    major: showModal.majorId
                 });
             } else {
                 form.resetFields();
@@ -159,14 +167,26 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             let response;
 
             if (isUpdate) {
+                // Lưu entity studyFrame_component
                 let frameCompData = {
                     frameComponentName: values.frameComponentName,
                     description: values.description,
                     creditHour: values.requiredCreditHour + "/" + values.totalCreditHour,
+                    majorId: values.major?.value || null,
                 };
-                console.log(frameCompData);
+                response = await updateStudyFrameComponent(values.frameComponentId, frameCompData);
 
-                // response = await updateSemester(showModal.frameComponentId, frameCompData);
+                // Lưu entity subject_studyFrameComp
+                console.log(listSubjectSelected);
+
+                let SSMData = {
+                    listSubject: listSubjectSelected.map((subject) => {
+                        return subject.key;
+                    }),
+                    studyFrameComponentId: values.frameComponentId
+                }
+                response = await updateSSMByListSubject(SSMData);
+
             } else {
                 // Lưu entity studyFrame_component
                 let frameCompData = {
@@ -174,15 +194,15 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     frameComponentName: values.frameComponentName,
                     description: values.description,
                     creditHour: values.requiredCreditHour + "/" + values.totalCreditHour,
+                    majorId: values.major?.value,
                 };
                 response = await createStudyFrameComponent(frameCompData);
 
-                // Lưu entity subject_studyFrameComp_major
+                // Lưu entity subject_studyFrameComp
                 let SSMData = {
                     listSubject: listSubjectSelected.map((subject) => {
-                        return subject.subjectId;
+                        return subject.key;
                     }),
-                    majorId: values.major?.value,
                     studyFrameComponentId: values.frameComponentId
                 }
                 response = await createSSMByListSubject(SSMData);
@@ -195,7 +215,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             }
 
         } catch (error) {
-            if (error.errorFields.length === 0)
+            if (error.errorFields?.length === 0)
                 console.error(`[ ThanhPhanKhungDTUpdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} ThanhPhanKhungDTUpdate `, error);
         }
     };
@@ -216,7 +236,16 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         form.setFieldsValue({ totalCreditHour: totalCreditHours });
         // Set số tín chỉ tối đa được nhập cho ô tín chỉ tối thiểu
         setMaxCreditHour(totalCreditHours);
-    }, [listSubjectSelected, form]);
+    }, [listSubjectSelected]);
+
+    const layoutFrom = {
+        labelCol: {
+            span: 4,
+        },
+        wrapperCol: {
+            span: 20,
+        },
+    };
 
     return (
         <Update
@@ -227,7 +256,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             onUpdate={handleSubmit}
             width='1300px'
         >
-            <Form form={form}>
+            <Form {...layoutFrom} form={form}>
                 <FormItem
                     name="frameComponentId"
                     label="Mã thành phần khung"
@@ -245,6 +274,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                 <FormItem
                     name="description"
                     label="Mô tả"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả thành phần khung' }]}
                 >
                     <TextArea />
                 </FormItem>
@@ -271,13 +301,13 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                         <Form.Item
                             name="requiredCreditHour"
                             rules={[{ required: true, message: 'Vui lòng nhập số tín chỉ tối thiểu' }]}
-
                         >
                             <InputNumber
                                 min={0}
                                 max={maxCreditHour}
                                 step={1}
                                 parser={formatValue}
+                                disabled={listSubjectSelected.length === 0}
                             />
                         </Form.Item>
                         <span className={cx("key-creditHour")}>/</span>

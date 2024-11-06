@@ -34,6 +34,11 @@ function ThanhPhanKhungDT() {
             key: 'frameComponentName',
         },
         {
+            title: 'Chuyên ngành',
+            dataIndex: 'majorName',
+            key: 'majorName',
+        },
+        {
             title: 'Mô tả',
             dataIndex: 'description',
             key: 'description',
@@ -71,7 +76,14 @@ function ThanhPhanKhungDT() {
         try {
             const result = await getAllStudyFrameComponent();
             if (result.status === 200) {
-                setData(result.data.data);
+                setData(result.data.data.map(item => {
+                    return {
+                        ...item,
+                        majorId: item.major?.majorId,
+                        majorName: item.major?.majorName
+                    }
+                }
+                ));
             }
             setIsLoading(false);
         } catch (error) {
@@ -95,6 +107,8 @@ function ThanhPhanKhungDT() {
 
     const handleDelete = async () => {
         try {
+            console.log(selectedRowKeys);
+
             await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
@@ -142,12 +156,12 @@ function ThanhPhanKhungDT() {
 
             </div>
             <TableCustomAnt
-                height={'350px'}
+                height={'600px'}
                 columns={columns(setShowModal)}
                 data={data}
                 setSelectedRowKeys={setSelectedRowKeys}
+                selectedRowKeys={selectedRowKeys}
                 loading={isLoading}
-                keyIdChange={"studyFrameCompId"}
             />
             {thanhphankhungdtUpdateMemoized}
 
