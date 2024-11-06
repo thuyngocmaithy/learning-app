@@ -29,6 +29,17 @@ export const createSubject_StudyFrameComp_Major = async (data) => {
     }
 };
 
+export const createSSMByListSubject = async (data) => {
+    try {
+        const response = await api.post('/subject_studyFrameComp_majors/createByListSubject', data);
+        return response;
+    } catch (error) {
+        console.error('Create subject_studyFrameComp_majors ByListSubject error:', error);
+        throw error;
+    }
+};
+
+
 export const updateSubject_StudyFrameComp_Major = async (id, data) => {
     try {
         const response = await api.put(`/subject_studyFrameComp_majors/${id}`, data);

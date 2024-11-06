@@ -3,37 +3,37 @@ import { Input, Form, message, InputNumber, Space, Select } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { createSemester, updateSemester } from '../../../services/semesterService';
 import TextArea from 'antd/es/input/TextArea';
 import classNames from 'classnames/bind';
 import styles from "./ThanhPhanKhungDTUpdate.module.scss"
 import TransferCustom from '../../Core/TransferCustom';
 import { getAll as getAllSubject } from '../../../services/subjectService';
-import { getWhereSubject_StudyFrameComp_Major } from '../../../services/subject_studyFrameComp_majorService';
+import { createSSMByListSubject, getWhereSubject_StudyFrameComp_Major } from '../../../services/subject_studyFrameComp_majorService';
 import { getAll } from '../../../services/majorService';
+import { createStudyFrameComponent } from '../../../services/studyFrameCompService';
 
 
 const cx = classNames.bind(styles)
 
 const columns = [
     {
-        dataIndex: 'mahp',
+        dataIndex: 'subjectId',
         title: 'Mã HP',
         width: "70px",
         align: 'center'
     },
     {
-        dataIndex: 'tenhp',
+        dataIndex: 'subjectName',
         title: 'Tên học phần',
     },
     {
-        dataIndex: 'sotc',
+        dataIndex: 'creditHour',
         title: 'Số tín chỉ',
         width: "80px",
         align: 'center'
     },
     {
-        dataIndex: 'mahp_before',
+        dataIndex: 'subjectBeforeId',
         title: 'Mã HP trước',
         width: "100px",
         align: 'center'
@@ -49,9 +49,9 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
 }) {
     const [form] = useForm();
     const [listSubject, setListSubject] = useState([]);
-    const [listSubjectOfFrameComp, setListSubjectOfFrameComp] = useState([]);
     const [listSubjectSelected, setListSubjectSelected] = useState([]);
     const [majorOptions, setMajorOptions] = useState([]);
+    const [maxCreditHour, setMaxCreditHour] = useState(0); // Lưu số tín chỉ tối đa được nhập
 
 
     // Fetch danh sách chuyên ngành
@@ -83,10 +83,10 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                 if (response.status === 200) {
                     const subjects = response.data.data.map((subject) => ({
                         key: subject.subjectId,
-                        mahp: subject.subjectId,
-                        tenhp: subject.subjectName,
-                        sotc: subject.creditHour,
-                        mahp_before: subject.subjectBefore?.subjectId,
+                        subjectId: subject.subjectId,
+                        subjectName: subject.subjectName,
+                        creditHour: subject.creditHour,
+                        subjectBeforeId: subject.subjectBefore?.subjectId,
                     }));
                     setListSubject(subjects);
                 }
@@ -96,7 +96,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         };
         if (showModal) {
             fetchSubject();
-            setListSubjectOfFrameComp([])
+            setListSubjectSelected([])
         }
     }, [showModal]);
 
@@ -106,18 +106,18 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             try {
                 const response = await getWhereSubject_StudyFrameComp_Major({ studyFrameComponent: showModal.frameComponentId })
                 if (response.status === 200) {
-                    setListSubjectOfFrameComp(response.data.data.map((item) => {
+                    setListSubjectSelected(response.data.data.map((item) => {
                         return item.subject.subjectId;
                     }));
                     setListSubjectSelected(response.data.data.map((item) => {
                         return {
-                            subjectId: item.subject.subjectId,
+                            key: item.subject.subjectId,
                             creditHour: item.subject.creditHour
                         };
                     }));
                 }
                 else {
-                    setListSubjectOfFrameComp([])
+                    setListSubjectSelected([])
                 }
             } catch (error) {
                 console.log('ThanhPhanKhungDTUpdate - fetchSubjectOfFC - error:', error);
@@ -137,6 +137,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     frameComponentId: showModal.frameComponentId,
                     frameComponentName: showModal.frameComponentName,
                     description: showModal.description,
+                    requiredCreditHour: Number(showModal.creditHour.split('/')[0])
                     // creditHour: showModal.creditHour,
                 });
             } else {
@@ -174,16 +175,17 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     description: values.description,
                     creditHour: values.requiredCreditHour + "/" + values.totalCreditHour,
                 };
-                console.log(frameCompData);
+                response = await createStudyFrameComponent(frameCompData);
 
                 // Lưu entity subject_studyFrameComp_major
                 let SSMData = {
-                    listSubject: listSubjectOfFrameComp,
-                    major: values.major?.value,
-                    studyFrameComponent: values.frameComponentId
+                    listSubject: listSubjectSelected.map((subject) => {
+                        return subject.subjectId;
+                    }),
+                    majorId: values.major?.value,
+                    studyFrameComponentId: values.frameComponentId
                 }
-                console.log(SSMData)
-                // response = await createSemester(frameCompData);
+                response = await createSSMByListSubject(SSMData);
             }
 
             if (response && response.data) {
@@ -204,26 +206,17 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         return value.replace(/[^0-9]/g, '');
     };
 
-    // useEffect(() => {
-    //     // Tổng hợp giá trị creditHour cho các môn học có subjectId nằm trong listSubjectOfFrameComp
-    //     // Sử dụng `filter` để lấy các phần tử có `subjectId` nằm trong `listSubjectOfFrameComp`
-    //     const selectedSubjects = listSubjectSelected.filter((subject) => {
-    //         console.log(subject);
+    useEffect(() => {
+        // Tính tổng creditHour của các môn học đã chọn
+        const totalCreditHours = listSubjectSelected.reduce((sum, subject) => {
+            return sum + (subject.creditHour || 0);
+        }, 0);
 
-    //         return listSubjectOfFrameComp.includes(subject);
-    //     });
-
-    //     // Kiểm tra các môn học đã chọn
-    //     console.log("Các môn học đã chọn:", selectedSubjects);
-
-    //     // Tính tổng creditHour của các môn học đã chọn
-    //     const totalCreditHours = selectedSubjects.reduce((sum, subject) => {
-    //         return sum + (subject.creditHour || 0);
-    //     }, 0);
-
-    //     // Cập nhật lại totalCreditHour khi listSubjectOfFrameComp thay đổi
-    //     form.setFieldsValue({ totalCreditHour: totalCreditHours });
-    // }, [listSubjectOfFrameComp, form]);
+        // Cập nhật lại totalCreditHour khi listSubjectSelected thay đổi
+        form.setFieldsValue({ totalCreditHour: totalCreditHours });
+        // Set số tín chỉ tối đa được nhập cho ô tín chỉ tối thiểu
+        setMaxCreditHour(totalCreditHours);
+    }, [listSubjectSelected, form]);
 
     return (
         <Update
@@ -240,7 +233,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     label="Mã thành phần khung"
                     rules={[{ required: true, message: 'Vui lòng nhập mã thành phần khung' }]}
                 >
-                    <Input />
+                    <Input disabled={isUpdate} />
                 </FormItem>
                 <FormItem
                     name="frameComponentName"
@@ -277,10 +270,12 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     <Space.Compact>
                         <Form.Item
                             name="requiredCreditHour"
+                            rules={[{ required: true, message: 'Vui lòng nhập số tín chỉ tối thiểu' }]}
+
                         >
                             <InputNumber
                                 min={0}
-                                max={listSubjectOfFrameComp.length}
+                                max={maxCreditHour}
                                 step={1}
                                 parser={formatValue}
                             />
@@ -288,7 +283,6 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                         <span className={cx("key-creditHour")}>/</span>
                         <Form.Item
                             name="totalCreditHour"
-                            initialValue={listSubjectOfFrameComp.length}
                         >
                             <InputNumber
                                 disabled
@@ -300,8 +294,8 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                 <TransferCustom
                     data={listSubject}
                     columns={columns}
-                    targetKeys={listSubjectOfFrameComp}
-                    setTargetKeys={setListSubjectOfFrameComp}
+                    targetObjects={listSubjectSelected}
+                    setTargetObjects={setListSubjectSelected}
                     titles={['Tất cả học phần', 'Học phần thuộc thành phần khung']}
                 />
             </Form>
