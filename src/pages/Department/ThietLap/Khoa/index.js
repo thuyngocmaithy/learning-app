@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './Khoa.module.scss';
-import { message, Tag } from 'antd';
+import { message } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';

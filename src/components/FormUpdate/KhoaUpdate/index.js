@@ -86,7 +86,7 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
                 <FormItem
                     name="facultyName"
                     label="Tên khoa/ngành"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên môn khoa/ngành' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập tên khoa/ngành' }]}
                 >
                     <Input disabled={viewOnly} />
                 </FormItem>
