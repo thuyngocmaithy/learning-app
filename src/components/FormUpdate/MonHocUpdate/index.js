@@ -30,6 +30,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
     const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [selectedMajor, setSelectedMajor] = useState(null);
     const [selectedFrameComponent, setSelectedFrameComponent] = useState();
+
     useEffect(() => {
         if (!showModal) {
             form.resetFields();
@@ -37,7 +38,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
     }, [showModal, form]);
 
 
-    // danh sách khung môn học
+    // danh sách khoa - ngành 
     useEffect(() => {
         const fetchFaculties = async () => {
             try {

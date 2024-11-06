@@ -25,6 +25,8 @@ import NguoiDung_Department from '../pages/Department/ThietLap/NguoiDung';
 import HocKy_Department from '../pages/Department/ThietLap/HocKy';
 import ChuKy_Department from '../pages/Department/ThietLap/ChuKy';
 import MonHoc from '../pages/Department/ThietLap/MonHoc';
+import Khoa from '../pages/Department/ThietLap/Khoa';
+import ChuyenNganh from '../pages/Department/ThietLap/ChuyenNganh';
 
 // COMMON
 import LoginForm from '../pages/Shared/Login';
@@ -65,6 +67,10 @@ const privateRoutes = [
     { path: config.routes.HocKy, component: HocKy_Department, layout: DepartmentLayout },
     { path: config.routes.ChuKy, component: ChuKy_Department, layout: DepartmentLayout },
     { path: config.routes.MonHoc, component: MonHoc, layout: DepartmentLayout },
+    { path: config.routes.Khoa, component: Khoa, layout: DepartmentLayout },
+    { path: config.routes.ChuyenNganh, component: ChuyenNganh, layout: DepartmentLayout },
+
+
 
 ];
 

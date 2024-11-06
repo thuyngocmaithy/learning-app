@@ -27,9 +27,9 @@ function MonHoc() {
     const fetchData = async () => {
         try {
             const result = await getAllSubjectDetail();
-            console.log(result); // Kiểm tra cấu trúc của result
+            console.log(result);
 
-            // Kiểm tra nếu `result.data[0]` là mảng
+
             let listSubject = Array.isArray(result.data[0])
                 ? result.data[0].map(subject => ({
                     subjectId: subject.subjectId,
