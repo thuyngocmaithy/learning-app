@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
-import { GetSubjectByMajor } from '../../services/studyFrameService';
+import { GetSubjectByMajorm, listSubjectToFrame } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
 import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
@@ -33,11 +33,12 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
             const lastYear = userData.data.lastAcademicYear;
 
             const [frameComponentsResponse, scoresResponse, registeredSubjectsResponse] = await Promise.all([
-                GetSubjectByMajor(userId),
+                listSubjectToFrame(userId),
                 getScoreByStudentId(userId),
                 getUserRegisteredSubjects(userId)
             ]);
 
+            console.log(frameComponents);
             if (frameComponentsResponse && Array.isArray(frameComponentsResponse)) {
                 setFrameComponents(frameComponentsResponse);
             }
@@ -73,13 +74,12 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     }, []);
 
 
-    // Update selection changes
     useEffect(() => {
         if (onSelectionChange)
             onSelectionChange(selectedSubjects);
     }, [selectedSubjects, onSelectionChange]);
 
-    // Helper function to get semester index
+
     const getSemesterIndex = useCallback((semesterId) => {
         if (!studentInfo) return -1;
         const year = parseInt(semesterId.substring(0, 4));
@@ -104,17 +104,14 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         });
     }, []);
 
-    // Check if frameComponent exists
     const frameComponentExists = useCallback((frameComponentId) => {
         return frameComponents.some(frameComponent => frameComponent.id === frameComponentId);
     }, [frameComponents]);
 
-    // Get all frameComponents by parent ID
     const getFrameComponentsByParentId = useCallback((parentId = null) => {
         return frameComponents.filter(frameComponent => frameComponent.parentframeComponentId === parentId);
     }, [frameComponents]);
 
-    // Get orphaned frameComponents (frameComponents with non-existent parent)
     const getOrphanedFrameComponents = useCallback(() => {
         return frameComponents.filter(frameComponent =>
             frameComponent.parentframeComponentId && !frameComponentExists(frameComponent.parentframeComponentId)
@@ -128,7 +125,6 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         const isRegistered = !!registeredInfo;
         const registeredIndex = isRegistered ? getSemesterIndex(registeredInfo.semesterId) : -1;
 
-        // Check if the subject has a score in any semester
         const hasScoreInAnySemester = scores.some(score =>
             score.subject.subjectId === subject.subjectId && score.finalScore10 !== undefined
         );
@@ -183,8 +179,6 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     }, [department, repeatHK, registeredSubjects, selectedSubjects, getSemesterIndex, handleSelectSubject, scores]);
 
 
-
-    // Render frameComponent and its content
     const renderFrameComponent = useCallback((frameComponent, level = 0) => {
         if (!frameComponent) return [];
 
@@ -226,7 +220,7 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         return rows;
     }, [repeatHK, renderSubjectRow, getFrameComponentsByParentId]);
 
-    // Render all table rows
+
     const renderTableRows = useCallback(() => {
         const rows = [];
 
@@ -262,7 +256,6 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
         return rows;
     }, [getFrameComponentsByParentId, getOrphanedFrameComponents, renderFrameComponent, repeatHK]);
 
-    // Define table columns
     const columns = [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
