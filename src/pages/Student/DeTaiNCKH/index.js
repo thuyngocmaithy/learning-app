@@ -31,8 +31,6 @@ function DeTaiNCKH() {
     const { deleteNotification } = useSocketNotification();
     const navigate = useNavigate();
     const location = useLocation();
-    const urlPreviousLevel1 = location.state?.from;
-    const urlPreviousLevel2 = location.state?.urlPrevious;
 
     // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
@@ -62,13 +60,7 @@ function DeTaiNCKH() {
         }
 
         // Cập nhật URL với params mới        
-        navigate(`${currentUrl.pathname}?${params.toString()}`,
-            {
-                state: {
-                    urlPrevious: urlPreviousLevel2,
-                    from: urlPreviousLevel1
-                }
-            });
+        navigate(`${currentUrl.pathname}?${params.toString()}`);
 
         setTabActive(tabId);
     };
@@ -280,14 +272,7 @@ function DeTaiNCKH() {
                                             }
                                             else {
                                                 // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
-                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`,
-                                                    {
-                                                        state: {
-                                                            urlPrevious: urlPreviousLevel1,
-                                                            from: `${location.pathname + location.search + "_active"}`
-                                                        }
-                                                    }
-                                                );
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`);
                                             }
                                         }}
                                     >
@@ -311,9 +296,7 @@ function DeTaiNCKH() {
     return (
         <div className={cx('wrapper')}>
             {
-                (urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH}_active`
-                    || urlPreviousLevel2 === `${config.routes.NhomDeTaiNCKH}_active`
-                ) &&
+                SRGIdFromUrl &&
                 <Breadcrumb
                     className={cx('breadcrumb')}
                     items={[
@@ -334,7 +317,7 @@ function DeTaiNCKH() {
 
                 <h3 className={cx('title')}>
                     {
-                        urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH}_active`
+                        SRGIdFromUrl
                             ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
                             : 'Danh sách đề tài nghiên cứu khoa học'
                     }

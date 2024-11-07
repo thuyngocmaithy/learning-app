@@ -4,6 +4,7 @@ import styles from './Toolbar.module.scss';
 import {
     DeleteOutlined,
     ExportOutlined,
+    FilterOutlined,
     ImportOutlined,
     PlusOutlined,
     SaveOutlined,
@@ -15,7 +16,9 @@ const cx = classNames.bind(styles);
 
 function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3', isVisible, fileInputRef = null }) {
     let icon = null;
-    if (type === 'Xóa') {
+    if (type === 'Bộ lọc') {
+        icon = <FilterOutlined />;
+    } else if (type === 'Xóa') {
         icon = <DeleteOutlined />;
     } else if (type === 'Nhập file Excel') {
         icon = <ImportOutlined />;
@@ -52,9 +55,17 @@ function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3', isVisible, fileI
     };
 
     return (
-        <div className={cx('wrapper-toolbar')} >
+        <div className={cx('wrapper-toolbar')}
+            style={{
+                display: (isVisible !== undefined && !isVisible) ? "none" : "block"
+            }}>
             <Tooltip title={type}>
-                <button hidden={isVisible !== undefined && !isVisible} className={cx('wrapper-button')} onClick={handleClick} style={{ backgroundColor: backgroundCustom }}>
+                <button
+                    // hidden={isVisible !== undefined && !isVisible}
+                    className={cx('wrapper-button')}
+                    onClick={handleClick}
+                    style={{ backgroundColor: backgroundCustom }}
+                >
                     <span className={cx('icon')}>{icon}</span>
                 </button>
             </Tooltip>

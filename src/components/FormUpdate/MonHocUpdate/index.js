@@ -14,7 +14,6 @@ import { getAllFaculty } from '../../../services/facultyService';
 import { getWhere } from '../../../services/majorService';
 import classNames from 'classnames/bind';
 import styles from './MonHocUpdate.module.scss';
-import { getAllStudyFrameComponent } from '../../../services/studyFrameService';
 
 const cx = classNames.bind(styles);
 
@@ -25,11 +24,9 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
     const [form] = Form.useForm();
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [majorOptions, setMajorOptions] = useState([]);
-    const [frameComponentOptions, setFrameComponentOptions] = useState([]);
 
     const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [selectedMajor, setSelectedMajor] = useState(null);
-    const [selectedFrameComponent, setSelectedFrameComponent] = useState();
 
     useEffect(() => {
         if (!showModal) {
@@ -95,37 +92,6 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
         fetchMajor();
     }, [selectedFaculty, showModal, form]);
 
-
-    // danh sách khung môn học
-    useEffect(() => {
-        const fetchFrameComponent = async () => {
-            try {
-                const response = await getAllStudyFrameComponent();
-                if (response) {
-                    const options = response.map((frameComponent) => ({
-                        value: frameComponent.frameComponentId,
-                        label: frameComponent.description,
-                    }));
-                    setFrameComponentOptions(options);
-
-                    if (showModal?.frameComponentName) {
-                        const matchedOption = options.find(
-                            option => option.value === showModal.frameComponentName
-                        );
-
-                        if (matchedOption) {
-                            setSelectedFrameComponent(matchedOption.value);
-                            form.setFieldValue('frameComponentName', matchedOption.value);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching frame comp:', error);
-            }
-        };
-        fetchFrameComponent();
-    }, [showModal, form]);
-
     useEffect(() => {
         if (showModal && isUpdate && form) {
 
@@ -148,7 +114,6 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                 subjectName: showModal.subjectName,
                 creditHour: showModal.creditHour,
                 subjectBefore: showModal.subjectBefore,
-                frameComponentName: showModal.frameComponentName,
                 isCompulsory: showModal.isCompulsory === 1 ? true : false
             });
         }
@@ -172,12 +137,6 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
         form.setFieldValue('majorId', value);
     };
 
-
-    const handleFrameComponentSelect = (value) => {
-        setSelectedFrameComponent(value);
-        form.setFieldValue('frameComponentName', value);
-    };
-
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
@@ -188,7 +147,6 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                 facultyId: values.facultyId,
                 majorId: values.majorId,
                 subjectBefore: values.subjectBefore || null,
-                frameComponentName: values.frameComponentName,
                 isCompulsory: values.isCompulsory,
                 createUser: CreateUserId || 'admin',
                 lastModifyUser: CreateUserId || 'admin',
@@ -209,6 +167,15 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
         }
     };
 
+    const layoutForm = {
+        labelCol: {
+            span: 4,
+        },
+        wrapperCol: {
+            span: 20,
+        },
+    };
+
     return (
         <Update
             title={title}
@@ -219,7 +186,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
             onUpdate={handleSubmit}
             width="800px"
         >
-            <Form form={form}>
+            <Form {...layoutForm} form={form}>
                 <FormItem
                     name="subjectId"
                     label="Mã môn học"
@@ -282,23 +249,6 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                     label="Môn học trước"
                 >
                     <Input disabled={viewOnly} />
-                </FormItem>
-                <FormItem
-                    name="frameComponentName"
-                    label="Khung môn học"
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn khung"
-                        optionFilterProp="children"
-                        onChange={handleFrameComponentSelect}
-                        value={selectedFrameComponent}
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={frameComponentOptions}
-                        disabled={viewOnly}
-                    />
                 </FormItem>
                 <FormItem
                     name="isCompulsory"

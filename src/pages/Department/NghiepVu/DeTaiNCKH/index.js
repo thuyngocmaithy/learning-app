@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb, Input } from 'antd';
+import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Col, Select, Checkbox } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -17,6 +17,9 @@ import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from '../../../../components/Core/FormItem';
+import { getStatusByType } from '../../../../services/statusService';
 
 const cx = classNames.bind(styles);
 
@@ -36,8 +39,23 @@ function DeTaiNCKH() {
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
-    const urlPreviousLevel1 = location.state?.from;
-    const urlPreviousLevel2 = location.state?.urlPrevious;
+    const [showFilter, setShowFilter] = useState(false);
+    const [statusOptions, setStatusOptions] = useState([]);
+
+    const statusType = 'Tiến độ đề tài NCKH';
+
+    const levelOptions = [
+        { value: 'Cơ sở', label: 'Cơ sở' },
+        { value: 'Thành phố', label: 'Thành phố' },
+        { value: 'Bộ', label: 'Bộ' },
+        { value: 'Quốc gia', label: 'Quốc gia' },
+        { value: 'Quốc tế', label: 'Quốc tế' }
+    ]
+
+    const levelDisable = [
+        { value: '0', label: 'Hiển thị' },
+        { value: '1', label: 'Không hiển thị' },
+    ]
 
     // Lấy keyRoute tương ứng từ URL
     const currentPath = location.pathname;
@@ -74,13 +92,13 @@ function DeTaiNCKH() {
         }
 
         // Cập nhật URL với params mới        
-        navigate(`${currentUrl.pathname}?${params.toString()}`, { state: { from: urlPreviousLevel1 } });
+        navigate(`${currentUrl.pathname}?${params.toString()}`);
 
         setTabActive(tabId);
     };
 
     // Xử lý lấy SRGId    
-    const SRGIdFromUrl = queryParams.get('SRGId');
+    const SRGIdFromUrl = queryParams.get('SRGId') || undefined;
 
     const columns = (showModalUpdate) => [
         {
@@ -102,6 +120,11 @@ function DeTaiNCKH() {
             title: 'SL thành viên',
             dataIndex: 'numberOfMember',
             key: 'numberOfMember',
+        },
+        {
+            title: 'Cấp',
+            dataIndex: 'level',
+            key: 'level',
         },
         {
             title: 'Trạng thái',
@@ -175,7 +198,7 @@ function DeTaiNCKH() {
     ];
     const listRegisterscientificResearchJoined = async () => {
         try {
-            const response = await getWhere({ instructor: userId, scientificResearchGroup: SRGIdFromUrl });
+            const response = await getWhere({ instructorId: userId, scientificResearchGroup: SRGIdFromUrl });
             if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
@@ -226,20 +249,161 @@ function DeTaiNCKH() {
         }
     }, [isChangeStatus]);
 
+    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
+    useEffect(() => {
+        const fetchStatusByType = async () => {
+            try {
+                const response = await getStatusByType(statusType);
+                if (response) {
+                    const options = response.map((status) => ({
+                        value: status.statusId,
+                        label: status.statusName,
+                    }));
+                    setStatusOptions(options);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchStatusByType();
+    }, [statusType]);
+
+    // Tạo field cho bộ lọc
+    const getFilterFields = () => {
+        return (
+            <>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'scientificResearchId'}
+                        label={'Mã đề tài'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'scientificResearchName'}
+                        label={'Tên đề tài'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'instructorName'}
+                        label={'Chủ nhiệm đề tài'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'level'}
+                        label={'Cấp'}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            options={levelOptions}
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                        />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'status'}
+                        label={'Trạng thái'}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={statusOptions}
+                            labelInValue
+                        />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'isDisable'}
+                        label={'Hiển thị'}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            options={levelDisable}
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                        />
+                    </FormItem>
+                </Col>
+
+            </>
+        )
+    };
+
+    const onSearch = async (values) => {
+        setIsLoading(true)
+        try {
+            values.faculty = values.faculty?.value || undefined;
+            values.status = values.status?.value || undefined;
+
+            const response = await getWhere(values);
+
+            if (response.status === 200) {
+                const scientificResearchs = await Promise.all((response.data.data).map(async (data) => {
+                    // lấy số sinh viên đăng ký
+                    const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
+
+                    return {
+                        ...data,
+                        numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
+                    };
+                }));
+                setData(scientificResearchs);
+            }
+            if (response.status === 204) {
+                setData([]);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        finally {
+            setIsLoading(false)
+        }
+    };
+
     const ITEM_TABS = [
         {
             id: 1,
             title: 'Danh sách đề tài',
             children: (
-                <TableCustomAnt
-                    height={'400px'}
-                    columns={columns(setShowModalUpdate)}
-                    data={data}
-                    setSelectedRowKeys={setSelectedRowKeys}
-                    selectedRowKeys={selectedRowKeys}
-                    keyIdChange='scientificResearchId'
-                    loading={isLoading}
-                />
+                <>
+                    <div className={`slide ${showFilter ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={getFilterFields}
+                            onSearch={onSearch}
+                            onReset={fetchData}
+                        />
+                        <Divider />
+                    </div>
+                    <TableCustomAnt
+                        height={'600px'}
+                        columns={columns(setShowModalUpdate)}
+                        data={data}
+                        setSelectedRowKeys={setSelectedRowKeys}
+                        selectedRowKeys={selectedRowKeys}
+                        keyIdChange='scientificResearchId'
+                        loading={isLoading}
+                    />
+                </>
             ),
         },
         {
@@ -247,6 +411,9 @@ function DeTaiNCKH() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
+                    {listScientificResearchJoined.length === 0 &&
+                        <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    }
                     {listScientificResearchJoined.map((item, index) => {
                         let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
@@ -260,14 +427,9 @@ function DeTaiNCKH() {
                                         primary
                                         verysmall
                                         onClick={() => {
-                                            navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`,
-                                                {
-                                                    state: {
-                                                        urlPrevious: urlPreviousLevel1,
-                                                        from: `${location.pathname + location.search + "_active"}`
-                                                    }
-                                                }
-                                            );
+                                            SRGIdFromUrl ?
+                                                navigate(`${config.routes.DeTaiNCKHThamGia_Department}?SRG=${SRGIdFromUrl}&scientificResearch=${item.scientificResearchId}`) :
+                                                navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`);
                                         }}
                                     >
                                         Chi tiết
@@ -278,10 +440,10 @@ function DeTaiNCKH() {
                                 <Tag color={color} className={cx('tag-status')}>
                                     {item.status.statusName}
                                 </Tag>
-                            </Card>
+                            </Card >
                         );
                     })}
-                </div>
+                </div >
             ),
         },
     ];
@@ -345,7 +507,7 @@ function DeTaiNCKH() {
                 SRGId={SRGIdFromUrl}
             />
         );
-    }, [showModalUpdate, isUpdate, SRGIdFromUrl]);
+    }, [showModalUpdate, isUpdate, SRGIdFromUrl])
 
     const DeTaiNCKHListRegisterMemoized = useMemo(() => {
         return (
@@ -371,9 +533,7 @@ function DeTaiNCKH() {
             <div className={cx('wrapper')}>
                 {
                     // Nếu url trước đó là NhomDeTaiNCKH_Department thì hiển thị Breadcrumb
-                    (urlPreviousLevel1 === `${config.routes.NhomDeTaiNCKH_Department}_active`
-                        || urlPreviousLevel2 === `${config.routes.NhomDeTaiNCKH_Department}_active`
-                    ) &&
+                    SRGIdFromUrl &&
                     <Breadcrumb
                         className={cx('breadcrumb')}
                         items={[
@@ -395,6 +555,12 @@ function DeTaiNCKH() {
                     </div>
                     {tabActive === 1 ? (
                         <div className={cx('wrapper-toolbar')}>
+                            <Toolbar
+                                type={'Bộ lọc'}
+                                onClick={() => {
+                                    setShowFilter(!showFilter);
+                                }}
+                            />
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {

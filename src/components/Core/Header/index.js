@@ -6,28 +6,39 @@ import Menu from '../../Popper/Menu';
 import { BellIcon, SupportIcon, UserIcon } from '../../../assets/icons';
 import Notification from '../../Popper/Notification';
 import Support from '../../Popper/Support';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { useEffect, useState } from 'react';
-import { Badge } from 'antd';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { Avatar, Badge } from 'antd';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import config from '../../../config';
+import UserInfo from '../../UserInfo';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const { avatar, updateUserInfo } = useContext(AccountLoginContext)
     const { notifications } = useSocketNotification();
     const [countNotRead, setCountNotRead] = useState(0);
+    const [showModalInfo, setShowModalInfo] = useState(false);
 
-    const navigate = useNavigate();
     // LOGOUT
     function logout() {
         localStorage.removeItem('userLogin');
-        navigate('/Login');
+        localStorage.removeItem('token');
+        updateUserInfo();
+        // Redirect to login page
+        <Navigate to={config.routes.Login} replace />
+    }
+    const handleShowInfo = () => {
+        setShowModalInfo(true);
     }
 
     const MENU_ITEMS = [
         {
             icon: <FontAwesomeIcon icon={faCircleInfo} />,
-            title: 'View profile',
+            title: 'Thông tin cá nhân',
+            onClick: handleShowInfo,
         },
         {
             icon: <FontAwesomeIcon icon={faMoon} />,
@@ -35,7 +46,7 @@ function Header() {
         },
         {
             icon: <FontAwesomeIcon icon={faArrowRightFromBracket} />,
-            title: 'Log out',
+            title: 'Đăng xuất',
             onClick: logout,
             separate: true,
         },
@@ -57,6 +68,14 @@ function Header() {
         fetchNotifications();
     }, [notifications]);
 
+    const UserInfoMemoized = useMemo(() => (
+        <UserInfo
+            showModal={showModalInfo}
+            onClose={() => {
+                setShowModalInfo(false);
+            }}
+        />
+    ), [showModalInfo]);
 
     return (
         <div className={cx('wrapper')}>
@@ -80,11 +99,14 @@ function Header() {
                 <span>
                     <Menu items={MENU_ITEMS} onChange={handleMenuChange}>
                         <span>
-                            <UserIcon className={cx('icon', 'user-icon')} />
+                            {avatar ?
+                                <Avatar className={cx('icon', 'user-icon')} src={`data:image/jpeg;base64,${avatar}`} />
+                                : <UserIcon className={cx('icon', 'user-icon')} />}
                         </span>
                     </Menu>
                 </span>
             </div>
+            {UserInfoMemoized}
         </div>
     );
 }

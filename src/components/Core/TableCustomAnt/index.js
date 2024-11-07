@@ -9,13 +9,13 @@ function TableCustomAnt({
     columns,
     data,
     width = '100%',
-    isOutline = false,
     setSelectedRowKeys,
     selectedRowKeys,
     keyIdChange,
     loading,
     isHaveRowSelection = true,
     isPagination = true,
+    isHideSTT = false
 }) {
     const onSelectChange = (newSelectedRowKeys, selectedRows) => {
         // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
@@ -34,12 +34,17 @@ function TableCustomAnt({
     };
 
     const columnsWithSTT = [
-        {
-            title: 'STT',
-            dataIndex: 'index',
-            key: 'stt',
-            render: (text, record, index) => index + 1,
-        },
+        ...(isHideSTT
+            ? []
+            : [
+                {
+                    title: 'STT',
+                    dataIndex: 'index',
+                    key: 'stt',
+                    width: '70px',
+                    render: (text, record, index) => index + 1,
+                },
+            ]),
         ...columns // Các cột khác
     ];
 
@@ -48,12 +53,8 @@ function TableCustomAnt({
             className={cx('container-crud')}
             style={{
                 width: width,
-                border: isOutline ? '2.5px solid var(--blue-100)' : 'none',
-                boxShadow: isOutline ? 'var(--box-shadow-1)' : 'none',
             }}
         >
-            {isOutline ? <h2>Danh sách năm học</h2> : null}
-
             <Table
                 rowSelection={isHaveRowSelection ? rowSelection : null}
                 columns={columnsWithSTT}

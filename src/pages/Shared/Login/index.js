@@ -13,6 +13,7 @@ import { SRAndThesisJoinContext } from '../../../context/SRAndThesisJoinContext'
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
+
     const { updateUserInfo } = useContext(AccountLoginContext);
     const { updateSRAndThesisJoin } = useContext(SRAndThesisJoinContext);
     const navigate = useNavigate();
@@ -29,7 +30,8 @@ const LoginForm = () => {
                     userId: response.data.user.userId,
                     token: response.data.accessToken,
                     permission: response.data.user.roles,
-                    facultyId: response.data.user.faculty
+                    facultyId: response.data.user.faculty,
+                    avatar: response.data.user.avatar
                 }));
                 await updateUserInfo();
                 await updateSRAndThesisJoin();

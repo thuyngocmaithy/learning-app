@@ -141,6 +141,15 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
+    const layoutForm = {
+        labelCol: {
+            span: 9,
+        },
+        wrapperCol: {
+            span: 16,
+        },
+    };
+
 
     return (
         <Update
@@ -151,7 +160,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             onUpdate={handleSubmit}
             form={form}
         >
-            <Form form={form}>
+            <Form
+                {...layoutForm}
+                form={form}>
                 <FormItem
                     name="scientificResearchGroupName"
                     label="Tên nhóm đề tài"

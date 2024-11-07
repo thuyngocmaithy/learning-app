@@ -16,6 +16,7 @@ function Button({
     verysmall = false,
     small = false,
     large = false,
+    colorRed = false,
     children,
     className, //thêm prop className dùng để đặt className => custom riêng
     leftIcon,
@@ -70,6 +71,7 @@ function Button({
         verysmall,
         small,
         large,
+        colorRed
     });
 
     return (

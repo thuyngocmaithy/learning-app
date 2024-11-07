@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiNCKH.module.scss';
-import { Card, message, Tabs, Tag } from 'antd';
+import { Card, Col, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -9,12 +9,16 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, getAllSRGroup } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, getAllSRGroup, getWhere } from '../../../../services/scientificResearchGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from '../../../../components/Core/FormItem';
+import { getAllFaculty } from '../../../../services/facultyService';
+import { getStatusByType } from '../../../../services/statusService';
 
 const cx = classNames.bind(styles);
 
@@ -25,12 +29,16 @@ function NhomDeTaiNCKH() {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-    const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
+    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [statusOptions, setStatusOptions] = useState([]);
+    const [showFilter, setShowFilter] = useState(false);
+
+
 
     // Lấy keyRoute tương ứng từ URL
     const currentPath = location.pathname;
@@ -71,7 +79,6 @@ function NhomDeTaiNCKH() {
         // Cập nhật URL với params mới
         navigate(`${currentUrl.pathname}?${params.toString()}`);
     };
-
     // =================
     const columns = () => [
         {
@@ -117,6 +124,7 @@ function NhomDeTaiNCKH() {
             render: (_, record) => (
                 <div className={cx('action-item')}>
                     <ButtonCustom
+                        disabled={permissionDetails["DeTaiNCKH_Department"] === undefined ? true : false}
                         className={cx('btnDetail')}
                         outline
                         verysmall
@@ -146,7 +154,9 @@ function NhomDeTaiNCKH() {
         }
     ];
 
+    // Lấy dữ liệu nhóm đề tài NCKH
     const fetchData = async () => {
+        setIsLoading(true);
         try {
             const result = await getAllSRGroup()
             setData(result.data);
@@ -158,32 +168,26 @@ function NhomDeTaiNCKH() {
         }
     };
 
-    const listRegisterscientificResearchJoined = async () => {
+    // Lấy danh sách đề tài làm người hướng dẫn => Giảng viên
+    const listSRJoined = async () => {
         try {
-            const response = await getWhereSR({ instructor: userId });
+            const response = await getWhereSR({ instructorId: userId });
             if (response.status === 200 && response.data.data) {
                 setListscientificResearchJoined(response.data.data);
             }
 
         } catch (error) {
-            console.error('Error fetching registered scientificResearchs:', error);
+            console.error('Error fetching listSRJoined:', error);
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
         fetchData();
-        listRegisterscientificResearchJoined();
+        listSRJoined();
     }, []);
 
-    useEffect(() => {
-        if (isChangeStatus) {
-            fetchData();
-            setIsChangeStatus(false);
-        }
-    }, [isChangeStatus]);
-
-
+    // Xóa nhóm đề tài NCKH
     const handleDelete = async () => {
         try {
             await deleteScientificResearchGroups(selectedRowKeys);
@@ -209,19 +213,164 @@ function NhomDeTaiNCKH() {
         );
     }, [showModalUpdate, isUpdate]);
 
+    //lấy danh sách các khoa ra ngoài thẻ select
+    useEffect(() => {
+        const fetchFaculties = async () => {
+            try {
+                const response = await getAllFaculty();
+                if (response && response.data) {
+                    const options = response.data.map((faculty) => ({
+                        value: faculty.facultyId,
+                        label: faculty.facultyName,
+                    }));
+                    setFacultyOptions(options);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchFaculties();
+    }, []);
+
+    const statusType = 'Tiến độ nhóm đề tài NCKH';
+
+    // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài nghiên cứu"
+    useEffect(() => {
+        const fetchStatusByType = async () => {
+            try {
+                const response = await getStatusByType(statusType);
+                if (response) {
+                    const options = response.map((status) => ({
+                        value: status.statusId,
+                        label: status.statusName,
+                    }));
+                    setStatusOptions(options);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchStatusByType();
+    }, [statusType]);
+
+    // Tạo field cho bộ lọc
+    const getFilterFields = () => {
+        return (
+            <>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'scientificResearchGroupId'}
+                        label={'Mã nhóm đề tài'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'scientificResearchGroupName'}
+                        label={'Tên nhóm đề tài'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'startYear'}
+                        label={'Năm thực hiện'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'finishYear'}
+                        label={'Năm kết thúc'}
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'faculty'}
+                        label={'Khoa'}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={facultyOptions}
+                            labelInValue
+                        />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                    <FormItem
+                        name={'status'}
+                        label={'Trạng thái'}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={statusOptions}
+                            labelInValue
+                        />
+                    </FormItem>
+                </Col>
+
+            </>
+        )
+    };
+
+    const onSearch = async (values) => {
+        try {
+            // Lấy value ID của khoa từ select
+            values.faculty = values.faculty?.value || undefined;
+
+            const response = await getWhere(values);
+
+            if (response.status === 200) {
+                setData(response.data.data);
+            }
+            if (response.status === 204) {
+                setData([]);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const ITEM_TABS = [
         {
             id: 1,
             title: 'Nhóm đề tài NCKH',
             children: (
-                <TableCustomAnt
-                    height={'350px'}
-                    columns={columns(setShowModalUpdate)}
-                    data={data}
-                    setSelectedRowKeys={setSelectedRowKeys}
-                    keyIdChange='scientificResearchGroupId'
-                    loading={isLoading}
-                />
+                <>
+                    <div className={`slide ${showFilter ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={getFilterFields}
+                            onSearch={onSearch}
+                            onReset={fetchData}
+                        />
+                        <Divider />
+                    </div>
+                    <TableCustomAnt
+                        height={'350px'}
+                        columns={columns(setShowModalUpdate)}
+                        data={data}
+                        setSelectedRowKeys={setSelectedRowKeys}
+                        keyIdChange='scientificResearchGroupId'
+                        loading={isLoading}
+                    />
+                </>
             ),
         },
         {
@@ -229,6 +378,9 @@ function NhomDeTaiNCKH() {
             title: 'Tất cả đề tài tham gia',
             children: (
                 <div>
+                    {listScientificResearchJoined.length === 0 &&
+                        <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    }
                     {listScientificResearchJoined.map((item, index) => {
                         let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
@@ -271,8 +423,16 @@ function NhomDeTaiNCKH() {
                     </span>
                     <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
                 </div>
+                {console.log(permissionDetailData)
+                }
                 {tabActive === 1 && (
                     <div className={cx('wrapper-toolbar')}>
+                        <Toolbar
+                            type={'Bộ lọc'}
+                            onClick={() => {
+                                setShowFilter(!showFilter);
+                            }}
+                        />
                         <Toolbar
                             type={'Tạo mới'}
                             onClick={() => {
@@ -290,7 +450,6 @@ function NhomDeTaiNCKH() {
                     </div>
                 )}
             </div>
-
             <Tabs
                 activeKey={tabActive}
                 onChange={handleTabChange}
@@ -303,9 +462,6 @@ function NhomDeTaiNCKH() {
                     };
                 })}
             />
-
-
-
 
             {NhomDeTaiNCKHUpdateMemoized}
         </div>

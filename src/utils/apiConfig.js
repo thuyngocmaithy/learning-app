@@ -1,15 +1,26 @@
 import axios from 'axios';
+import { useContext } from 'react';
+import { AccountLoginContext } from '../context/AccountLoginContext';
+import config from '../config';
+import { Navigate } from 'react-router-dom';
 
 const api = axios.create({
   baseURL: 'http://localhost:5000/api',
 });
 
 
-const handleLogout = () => {
-  localStorage.removeItem('userLogin');
-  localStorage.removeItem('token');
-  // Redirect to login page
-  window.location.href = 'http://localhost:3000/Login';
+const useLogout = () => {
+  const { updateUserInfo } = useContext(AccountLoginContext);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userLogin');
+    localStorage.removeItem('token');
+    updateUserInfo();
+    // Redirect to login page
+    <Navigate to={config.routes.Login} replace />
+  };
+
+  return handleLogout;
 };
 
 api.interceptors.request.use(
@@ -30,7 +41,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       console.error('Token expired or invalid. Logging out.');
-      handleLogout();
+      useLogout();
     }
     return Promise.reject(error);
   }

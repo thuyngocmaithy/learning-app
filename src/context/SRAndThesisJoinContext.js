@@ -13,7 +13,6 @@ function SRAndThesisJoinProvider({ children }) {
     const updateSRAndThesisJoin = useCallback(async () => {
         try {
             const response = await getFollowersByUserId(userId);
-            console.log(response);
 
             if (response.status === 200 && response.data.data) {
                 setListSRAndThesisIdJoin(response.data.data);

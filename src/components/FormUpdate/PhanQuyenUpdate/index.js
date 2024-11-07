@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { message } from 'antd';
 import Update from '../../Core/Update';
 import TableCustomAnt from '../../Core/TableCustomAnt';
@@ -9,6 +9,9 @@ import {
 } from '../../../services/permissionFeatureService';
 import styles from "./PhanQuyenUpdate.module.scss"
 import classNames from 'classnames/bind';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
+import { MenuContext } from '../../../context/MenuContext';
 
 const cx = classNames.bind(styles)
 
@@ -17,8 +20,12 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
     showModal,
     setShowModal,
 }) {
-
     const [dataFeature, setDataFeature] = useState([]);
+    const { permission } = useContext(AccountLoginContext);
+    const { fetchDataMenu } = useContext(MenuContext);
+    const [listFeature, setListFeature] = useState([]);
+    const { updatePermissionDetails } = useContext(PermissionDetailContext);
+
 
     const getFeature = async () => {
         try {
@@ -140,6 +147,32 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
         // Đợi tất cả các promise hoàn thành
         await Promise.all(updatePromises);
         message.success('Lưu phân quyền thành công');
+
+        // Load lại phân quyền
+        await handleReLoadPerrmission();
+        // Load lại menu
+        fetchDataMenu();
+    };
+
+    const handleReLoadPerrmission = async () => {
+        try {
+            const response = await getWhere({ permission: permission });
+            if (response.status === 200) {
+                const features = response.data.data.map((item) => ({
+                    feature: item.feature,
+                    permissionDetail: item.permissionDetail,
+                }));
+                setListFeature((prevListFeature) => [
+                    ...prevListFeature,
+                    ...features
+                ]);
+
+                updatePermissionDetails(features);
+
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleChangeCheckbox = (event) => {
@@ -209,26 +242,49 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
     const columns = useCallback(
         () => [
             {
-                title: 'Mã chức năng',
-                dataIndex: 'featureId',
-                key: 'featureId',
-                render: (_, record) => {
+                title: 'STT',
+                dataIndex: 'index',
+                key: 'stt',
+                width: '80px',
+                render: (_, record, index) => {
                     const permissionDetail = record.permissionDetail;
                     const allChecked = Object.keys(permissionDetail).length > 0
                         && Object.keys(permissionDetail).every((key) => permissionDetail[key]);
 
                     return (
-                        <div>
+                        <div className={cx('container-stt')}>
                             <input
                                 type="checkbox"
                                 onChange={() => handleSelectRow(record)}
                                 checked={allChecked}
                             />
-                            {record.featureId}
+                            {index}
                         </div>
                     );
                 },
                 align: 'center',
+            },
+            {
+                title: 'Mã chức năng',
+                dataIndex: 'featureId',
+                key: 'featureId',
+                // render: (_, record) => {
+                //     const permissionDetail = record.permissionDetail;
+                //     const allChecked = Object.keys(permissionDetail).length > 0
+                //         && Object.keys(permissionDetail).every((key) => permissionDetail[key]);
+
+                //     return (
+                //         <div className={cx('container-featureId')}>
+                //             <input
+                //                 type="checkbox"
+                //                 onChange={() => handleSelectRow(record)}
+                //                 checked={allChecked}
+                //             />
+                //             {record.featureId}
+                //         </div>
+                //     );
+                // },
+                // align: 'center',
             },
             {
                 title: 'Tên chức năng',
@@ -253,6 +309,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isView",
                 key: "isView",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isView ?? false; // Sử dụng giá trị mặc định là false nếu không có dữ liệu
                     return record.keyRoute && (
@@ -290,6 +347,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isAdd",
                 key: "isAdd",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isAdd ?? false; // Giá trị mặc định
                     return record.keyRoute && (
@@ -327,6 +385,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isEdit",
                 key: "isEdit",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isEdit ?? false; // Giá trị mặc định
                     return record.keyRoute && (
@@ -364,6 +423,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 ),
                 dataIndex: "isDelete",
                 key: "isDelete",
+                width: '100px',
                 render: (_, record) => {
                     const isChecked = record.permissionDetail?.isDelete ?? false; // Giá trị mặc định
                     return record.keyRoute && (
@@ -407,6 +467,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 height="400px"
                 isHaveRowSelection={false}
                 isPagination={false}
+                isHideSTT={true}
             />
         </Update>
     );

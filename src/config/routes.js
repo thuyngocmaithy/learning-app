@@ -1,6 +1,6 @@
 const routes = {
     // SHARED
-    Login: '/Login',
+    Login: '/',
 
     // STUDENT
     Dashboard: '/Dashboard',
@@ -30,6 +30,7 @@ const routes = {
 
     // THIẾT LẬP
     KhungCTDT: '/Department/ThietLap/KhungCTDT',
+    ThanhPhanKhungDT: '/Department/ThietLap/ThanhPhanKhungDT',
     PhanQuyenChucNang: '/Department/ThietLap/PhanQuyenChucNang',
     TaiKhoan: '/Department/ThietLap/TaiKhoan',
     NguoiDung: '/Department/ThietLap/NguoiDung',

@@ -40,7 +40,7 @@ export const listSubjectToFrameDepartment = async (startYear, facultyId, cycleId
             ...(cycleId && { cycleId }) // Chỉ thêm cycleId nếu nó có giá trị
         };
 
-        const response = await api.get('/subjects/listSubjectToFrameDepartment', { params });
+        const response = await api.get('/study-frames/listSubjectToFrameDepartment', { params });
         return response.data;
     } catch (error) {
         console.error('[study-frames - listSubjectToFrame - error]:', error);

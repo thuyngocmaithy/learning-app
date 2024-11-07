@@ -50,3 +50,15 @@ export const updateScientificResearchGroupById = async (scientificResearchGroupI
         throw error;
     }
 }
+
+export const getWhere = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/scientificResearchGroups/getWhere?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
