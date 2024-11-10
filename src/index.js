@@ -22,11 +22,11 @@ root.render(
                     <PermissionDetailProvider>
                         <MenuProvider>
                             <SRAndThesisJoinProvider>
-                                <SocketNotificationProvider>
-                                    <SocketMessagesProvider>
-                                        <App />
-                                    </SocketMessagesProvider>
-                                </SocketNotificationProvider>
+                                {/* <SocketNotificationProvider> */}
+                                {/* <SocketMessagesProvider> */}
+                                <App />
+                                {/* </SocketMessagesProvider> */}
+                                {/* </SocketNotificationProvider> */}
                             </SRAndThesisJoinProvider>
                         </MenuProvider>
                     </PermissionDetailProvider>
