@@ -1,268 +1,266 @@
-import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio, Checkbox } from '@mui/material';
 import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
+import { unstable_batchedUpdates } from 'react-dom';
 import styles from './Table.module.scss';
-import { GetSubjectByMajor } from '../../services/studyFrameService';
+import { GetSubjectByMajor, listSubjectToFrame } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
 import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
-const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
-    const { userId } = useContext(AccountLoginContext)
+const useTableLogic = (userId, department, onSelectionChange) => {
     const [frameComponents, setFrameComponents] = useState([]);
     const [scores, setScores] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [registeredSubjects, setRegisteredSubjects] = useState({});
     const [selectedSubjects, setSelectedSubjects] = useState({});
     const [studentInfo, setStudentInfo] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const firstYear = studentInfo?.firstAcademicYear || 2020; // Mặc định là 2020 nếu không có
-    const lastYear = studentInfo?.lastAcademicYear || 2024; // Mặc định là 2024 nếu không có
-    const repeatHK = department ? 3 : (lastYear - firstYear + 1) * 3; // Số học kỳ cần hiển thị (3 kỳ mỗi năm)
+    const firstYear = studentInfo?.firstAcademicYear || 2020;
+    const lastYear = studentInfo?.lastAcademicYear || 2024;
+    const repeatHK = department ? 3 : (lastYear - firstYear + 1) * 3;
 
+    const getSemesterIndex = useCallback((semesterId) => {
+        if (!semesterId) return -1;
+        const year = parseInt(semesterId.substring(0, 4));
+        const semester = parseInt(semesterId.substring(4));
+        return ((year - firstYear) * 3) + (semester - 1);
+    }, [firstYear]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
             const userData = await getUserById(userId);
-            const firstYear = userData.data.firstAcademicYear;
-            const lastYear = userData.data.lastAcademicYear;
-
-            const [frameComponentsResponse, scoresResponse, registeredSubjectsResponse] = await Promise.all([
-                GetSubjectByMajor(userId),
+            const [frameComponentsRes, scoresRes, registeredSubjectsRes] = await Promise.all([
+                listSubjectToFrame(userId),
                 getScoreByStudentId(userId),
                 getUserRegisteredSubjects(userId)
             ]);
 
-            if (frameComponentsResponse && Array.isArray(frameComponentsResponse)) {
-                setFrameComponents(frameComponentsResponse);
-            }
+            unstable_batchedUpdates(() => {
+                setFrameComponents(frameComponentsRes || []);
+                setScores(scoresRes || []);
 
-            if (scoresResponse && Array.isArray(scoresResponse)) {
-                setScores(scoresResponse);
-            }
-
-            if (registeredSubjectsResponse && Array.isArray(registeredSubjectsResponse)) {
                 const registeredMap = {};
-                registeredSubjectsResponse.forEach(registration => {
-                    registeredMap[registration.subject.subjectId] = {
-                        semesterId: registration.semester.semesterId,
-                        registerDate: registration.registerDate
-                    };
-                });
+                if (registeredSubjectsRes?.length) {
+                    registeredSubjectsRes.forEach(registration => {
+                        const semesterIndex = getSemesterIndex(registration.semester.semesterId);
+                        registeredMap[registration.subject.subjectId] = {
+                            semesterIndex,
+                            semesterId: registration.semester.semesterId,
+                            registerDate: registration.registerDate
+                        };
+                    });
+                }
                 setRegisteredSubjects(registeredMap);
-            }
 
-            if (scoresResponse.length > 0) {
-                setStudentInfo({ ...scoresResponse[0].student, firstAcademicYear: firstYear, lastAcademicYear: lastYear });
-            }
+                if (scoresRes?.length) {
+                    setStudentInfo({
+                        ...scoresRes[0].student,
+                        firstAcademicYear: userData.data.firstAcademicYear,
+                        lastAcademicYear: userData.data.lastAcademicYear
+                    });
+                }
+            });
         } catch (error) {
             console.error('Error fetching data:', error);
             message.error('Failed to load data');
         }
         setIsLoading(false);
-    };
+    }, [userId, getSemesterIndex]);
 
+    const handleSelectSubject = useCallback((subjectId, frameComponentId, semesterIndex) => {
+        if (registeredSubjects[subjectId]) return;
+
+        setSelectedSubjects(prev => {
+            if (prev[subjectId]?.semesterIndex === semesterIndex) {
+                if (Object.keys(prev).length === 1) return {};
+                const { [subjectId]: _, ...rest } = prev;
+                return rest;
+            }
+            return {
+                ...prev,
+                [subjectId]: { frameComponentId, semesterIndex }
+            };
+        });
+    }, [registeredSubjects]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
-
-    // Update selection changes
     useEffect(() => {
-        if (onSelectionChange)
+        if (onSelectionChange) {
             onSelectionChange(selectedSubjects);
+        }
     }, [selectedSubjects, onSelectionChange]);
 
-    // Helper function to get semester index
-    const getSemesterIndex = useCallback((semesterId) => {
-        if (!studentInfo) return -1;
-        const year = parseInt(semesterId.substring(0, 4));
-        const semester = parseInt(semesterId.substring(4));
-        const firstYear = studentInfo.firstAcademicYear;
+    return {
+        frameComponents,
+        scores,
+        registeredSubjects,
+        selectedSubjects,
+        studentInfo,
+        isLoading,
+        repeatHK,
+        getSemesterIndex,
+        handleSelectSubject
+    };
+};
 
-        return (year - firstYear) * 3 + (semester - 1);
-    }, [studentInfo]);
+const SubjectCell = React.memo(({
+    subject,
+    semesterIndex,
+    department,
+    registeredInfo,
+    scoreInfo,
+    selectedSubjects,
+    onSelectSubject
+}) => {
+    const cellState = useMemo(() => {
+        const isSelected = selectedSubjects[subject.subjectId]?.semesterIndex === semesterIndex;
+        const isRegistered = registeredInfo?.semesterIndex === semesterIndex;
+        const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
+        return { isSelected, isRegistered, hasScore };
+    }, [selectedSubjects, subject.subjectId, semesterIndex, registeredInfo, scoreInfo]);
 
+    const handleChange = useCallback(() => {
+        onSelectSubject(subject.subjectId, subject.studyFrameComponentId, semesterIndex);
+    }, [subject.subjectId, subject.studyFrameComponentId, semesterIndex, onSelectSubject]);
 
+    const { isSelected, isRegistered, hasScore } = cellState;
 
-    // Handle subject selection
-    const handleSelectSubject = useCallback((subjectId, frameComponentId, semesterIndex) => {
-        setSelectedSubjects(prev => {
-            const newSelection = { ...prev };
-            if (newSelection[subjectId] && newSelection[subjectId].semesterIndex === semesterIndex) {
-                delete newSelection[subjectId];
-            } else {
-                newSelection[subjectId] = { frameComponentId, semesterIndex };
-            }
-            return newSelection;
+    return (
+        <TableCell align="center">
+            {department ? (
+                <Checkbox
+                    checked={isRegistered || isSelected}
+                    onChange={handleChange}
+                    disabled={hasScore || isRegistered}
+                    size="small"
+                />
+            ) : (
+                <Radio
+                    checked={isRegistered || isSelected}
+                    onChange={handleChange}
+                    disabled={hasScore || isRegistered}
+                    size="small"
+                />
+            )}
+            {hasScore && <span>{scoreInfo.finalScore10}</span>}
+            {isRegistered && !hasScore && (
+                <span>Đăng ký: {new Date(registeredInfo.registerDate).toLocaleDateString()}</span>
+            )}
+        </TableCell>
+    );
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.selectedSubjects[prevProps.subject.subjectId]?.semesterIndex ===
+        nextProps.selectedSubjects[nextProps.subject.subjectId]?.semesterIndex &&
+        prevProps.registeredInfo === nextProps.registeredInfo &&
+        prevProps.scoreInfo === nextProps.scoreInfo
+    );
+});
+
+const SubjectRow = React.memo(({
+    subject,
+    index,
+    repeatHK,
+    registeredSubjects,
+    scores,
+    selectedSubjects,
+    department,
+    onSelectSubject,
+    getSemesterIndex
+}) => {
+    const registeredInfo = registeredSubjects[subject?.subjectId];
+
+    const semesterCells = useMemo(() => {
+        if (!subject) return null; // Handle the case where subject is undefined here
+
+        return Array.from({ length: repeatHK }).map((_, i) => {
+            const scoreInfo = scores.find(score =>
+                score.subject.subjectId === subject.subjectId &&
+                getSemesterIndex(score.semester.semesterId) === i
+            );
+            return (
+                <SubjectCell
+                    key={`cell-${subject.subjectId}-${i}`}
+                    subject={subject}
+                    semesterIndex={i}
+                    department={department}
+                    registeredInfo={registeredInfo}
+                    scoreInfo={scoreInfo}
+                    selectedSubjects={selectedSubjects}
+                    onSelectSubject={onSelectSubject}
+                />
+            );
         });
-    }, []);
+    }, [subject, repeatHK, registeredInfo, scores, department, selectedSubjects, onSelectSubject, getSemesterIndex]);
 
-    // Check if frameComponent exists
-    const frameComponentExists = useCallback((frameComponentId) => {
-        return frameComponents.some(frameComponent => frameComponent.frameComponentId === frameComponentId);
-    }, [frameComponents]);
+    if (!subject) return null;
 
-    // Get all frameComponents by parent ID
-    const getFrameComponentsByParentId = useCallback((parentId = null) => {
-        return frameComponents.filter(frameComponent => frameComponent.studyFrameComponentParentId === parentId);
-    }, [frameComponents]);
-
-    // Get orphaned frameComponents (frameComponents with non-existent parent)
-    const getOrphanedFrameComponents = useCallback(() => {
-        return frameComponents.filter(frameComponent =>
-            frameComponent.studyFrameComponentParentId && !frameComponentExists(frameComponent.studyFrameComponentParentId)
-        );
-    }, [frameComponents, frameComponentExists]);
-
-    const renderSubjectRow = useCallback((subject, index, paddingLeft) => {
-        if (!subject) return null;
-
-        const registeredInfo = registeredSubjects[subject.subjectId];
-        const isRegistered = !!registeredInfo;
-        const registeredIndex = isRegistered ? getSemesterIndex(registeredInfo.semesterId) : -1;
-
-        // Check if the subject has a score in any semester
-        const hasScoreInAnySemester = scores.some(score =>
-            score.subject.subjectId === subject.subjectId && score.finalScore10 !== undefined
-        );
-
-        return (
-            <TableRow key={`subject-${subject.subjectId}-${index}`}>
-                <TableCell align="center">{index + 1}</TableCell>
-                <TableCell align="center">{subject.subjectId}</TableCell>
-                <TableCell align="left">
-                    {subject.subjectName}
-                </TableCell>
-                <TableCell align="center">{subject.creditHour}</TableCell>
-                <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
-                {Array.from({ length: repeatHK }).map((_, i) => {
-                    const isSelected = selectedSubjects[subject.subjectId]?.semesterIndex === i;
-                    const isThisSemesterRegistered = registeredIndex === i;
-
-                    const scoreInfo = scores.find(score =>
-                        score.subject.subjectId === subject.subjectId &&
-                        getSemesterIndex(score.semester.semesterId) === i
-                    );
-                    const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
-
-                    return (
-                        <TableCell key={`semester-${i}`} align="center">
-                            {department ? (
-                                <Checkbox
-                                    checked={isThisSemesterRegistered || isSelected}
-                                    onChange={() => handleSelectSubject(subject.subjectId, subject.studyFrameComponentId, i)}
-                                    disabled={hasScore}
-                                    size="small"
-                                />
-                            ) : (
-                                <Radio
-                                    checked={isThisSemesterRegistered || isSelected}
-                                    onChange={() => handleSelectSubject(subject.subjectId, subject.studyFrameComponentId, i)}
-                                    disabled={hasScore}
-                                    size="small"
-                                />
-                            )}
-                            {hasScore && (
-                                <span>{scoreInfo.finalScore10} ({scoreInfo.finalScoreLetter})</span>
-                            )}
-                            {isThisSemesterRegistered && !hasScore && (
-                                <span>Registered: {new Date(registeredInfo.registerDate).toLocaleDateString()}</span>
-                            )}
-                        </TableCell>
-                    );
-                })}
-            </TableRow>
-        );
-    }, [department, repeatHK, registeredSubjects, selectedSubjects, getSemesterIndex, handleSelectSubject, scores]);
+    return (
+        <TableRow>
+            <TableCell align="center">{index + 1}</TableCell>
+            <TableCell align="center">{subject.subjectId}</TableCell>
+            <TableCell align="left">{subject.subjectName}</TableCell>
+            <TableCell align="center">{subject.creditHour}</TableCell>
+            <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
+            {semesterCells}
+        </TableRow>
+    );
+});
 
 
 
-    // Render frameComponent and its content
-    const renderFrameComponent = useCallback((frameComponent, level = 0) => {
-        if (!frameComponent) return [];
+const FrameComponentRow = React.memo(({
+    frameComponent,
+    level,
+    repeatHK,
+    renderSubjectRow
+}) => {
+    const paddingLeft = 50 + (level * 50);
 
-        const rows = [];
-        const initialPaddingLeft = 50;
-        const paddingLeft = initialPaddingLeft + (level * 50);
-
-        // Render frameComponent header
-        rows.push(
-            <TableRow key={`frameComponent-${frameComponent.frameComponentId}`}>
+    return (
+        <>
+            <TableRow>
                 <TableCell
                     className={cx('title')}
                     align="left"
                     colSpan={5}
                     style={{ paddingLeft: `${paddingLeft}px` }}
                 >
-                    {frameComponent.frameComponentName} {frameComponent.creditHour ? `(${frameComponent.creditHour})` : ''}
+                    {frameComponent.frameComponentName}
+                    {frameComponent.creditHour ? ` (${frameComponent.creditHour})` : ''}
                     {frameComponent.majorName ? ` - ${frameComponent.majorName}` : ''}
                 </TableCell>
                 <TableCell align="center" colSpan={repeatHK}></TableCell>
             </TableRow>
-        );
+            {frameComponent.subjectInfo?.map((subject, index) =>
+                renderSubjectRow(subject, index)
+            )}
+        </>
+    );
+});
 
-        // Render subjects
-        if (frameComponent.subjectInfo && Array.isArray(frameComponent.subjectInfo)) {
-            frameComponent.subjectInfo.forEach((subject, index) => {
-                if (subject) {
-                    rows.push(renderSubjectRow(subject, index, paddingLeft));
-                }
-            });
-        }
+const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
+    const { userId } = useContext(AccountLoginContext);
+    const {
+        frameComponents,
+        scores,
+        registeredSubjects,
+        selectedSubjects,
+        isLoading,
+        repeatHK,
+        getSemesterIndex,
+        handleSelectSubject
+    } = useTableLogic(userId, department, onSelectionChange);
 
-        // Render child frameComponents
-        const childFrameComponents = getFrameComponentsByParentId(frameComponent.frameComponentId);
-        childFrameComponents.forEach(childFrameComponent => {
-            rows.push(...renderFrameComponent(childFrameComponent, level + 1));
-        });
-
-        return rows;
-    }, [repeatHK, renderSubjectRow, getFrameComponentsByParentId]);
-
-    // Render all table rows
-    const renderTableRows = useCallback(() => {
-        const rows = [];
-
-        // Render root frameComponents
-        const rootFrameComponents = getFrameComponentsByParentId(null);
-        rootFrameComponents.forEach(frameComponent => {
-            rows.push(...renderFrameComponent(frameComponent));
-        });
-
-        // Render orphaned frameComponents
-        const orphanedFrameComponents = getOrphanedFrameComponents();
-        if (orphanedFrameComponents.length > 0) {
-            // Add separator for orphaned frameComponents
-            rows.push(
-                <TableRow key="orphaned-separator">
-                    <TableCell
-                        className={cx('title')}
-                        align="left"
-                        colSpan={5 + repeatHK}
-                        style={{ backgroundColor: '#f5f5f5' }}
-                    >
-                        Chương trình đào tạo chuyên ngành
-                    </TableCell>
-                </TableRow>
-            );
-
-            // Render each orphaned frameComponent
-            orphanedFrameComponents.forEach(frameComponent => {
-                rows.push(...renderFrameComponent(frameComponent));
-            });
-        }
-
-        return rows;
-    }, [getFrameComponentsByParentId, getOrphanedFrameComponents, renderFrameComponent, repeatHK]);
-
-    // Define table columns
-    const columns = [
+    const columns = useMemo(() => [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
         { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
@@ -274,7 +272,22 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
             minWidth: 50,
             align: 'center',
         })),
-    ];
+    ], [repeatHK]);
+
+    const renderSubjectRow = useCallback((subject, index) => (
+        <SubjectRow
+            key={`subject-${subject?.subjectId}-${index}`}
+            subject={subject}
+            index={index}
+            repeatHK={repeatHK}
+            registeredSubjects={registeredSubjects}
+            scores={scores}
+            selectedSubjects={selectedSubjects}
+            department={department}
+            onSelectSubject={handleSelectSubject}
+            getSemesterIndex={getSemesterIndex}
+        />
+    ), [repeatHK, registeredSubjects, scores, selectedSubjects, department, handleSelectSubject, getSemesterIndex]);
 
     if (isLoading) {
         return (
@@ -291,15 +304,19 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
                     <TableHead>
                         <TableRow>
                             <TableCell align="center" colSpan={5}></TableCell>
-                            <TableCell className={cx('title')} align="center" colSpan={repeatHK}>
+                            <TableCell
+                                className={cx('title')}
+                                align="center"
+                                colSpan={repeatHK}
+                            >
                                 Học kỳ thực hiện
                             </TableCell>
                         </TableRow>
                         <TableRow>
                             {columns.map((column) => (
                                 <TableCell
+                                    key={`${column.id}-title`}
                                     className={cx('title')}
-                                    key={column.id + '-title'}
                                     align={column.align}
                                     style={{ top: 48, minWidth: column.minWidth }}
                                 >
@@ -308,11 +325,21 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
                             ))}
                         </TableRow>
                     </TableHead>
-                    <TableBody>{renderTableRows()}</TableBody>
+                    <TableBody>
+                        {frameComponents.map((frameComponent, index) => (
+                            <FrameComponentRow
+                                key={`frame-${frameComponent.frameComponentId}`}
+                                frameComponent={frameComponent}
+                                level={0}
+                                repeatHK={repeatHK}
+                                renderSubjectRow={renderSubjectRow}
+                            />
+                        ))}
+                    </TableBody>
                 </Table>
             </TableContainer>
         </Paper>
     );
 };
 
-export default ColumnGroupingTable;
+export default React.memo(ColumnGroupingTable);
