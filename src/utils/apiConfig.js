@@ -5,7 +5,7 @@ import config from '../config';
 import { Navigate } from 'react-router-dom';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://learning-app-nodejs.vercel.app//api',
 });
 
 

@@ -18,7 +18,7 @@ export const SocketNotificationProvider = ({ children }) => {
 
         if (userId !== 0) {
             // Tạo kết nối socket cho thông báo
-            socketIo = io('http://localhost:5000/notifications', {
+            socketIo = io('https://learning-app-nodejs.vercel.app//notifications', {
                 transports: ['websocket'], // Chỉ sử dụng WebSocket
                 path: '/socket.io'
             });

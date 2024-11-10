@@ -178,7 +178,7 @@ function ThanhPhanKhungDT() {
 
             </div>
             <TableCustomAnt
-                height={'600px'}
+                height={'450px'}
                 columns={columns(setShowModalUpdate)}
                 data={data}
                 setSelectedRowKeys={setSelectedRowKeys}

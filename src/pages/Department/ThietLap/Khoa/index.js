@@ -156,7 +156,7 @@ function Khoa() {
 
             </div>
             <TableCustomAnt
-                height={'600px'}
+                height={'450px'}
                 columns={columns(setShowModal)}
                 data={data}
                 selectedRowKeys={selectedRowKeys}

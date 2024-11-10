@@ -17,7 +17,7 @@ export const SocketProvider = ({ children }) => {
 
         if (userId !== 0) {
             // Create socket connection
-            socketIo = io('http://localhost:5000');
+            socketIo = io('https://learning-app-nodejs.vercel.app/');
 
             // Handle errors
             socketIo.on('connect_error', (err) => {
