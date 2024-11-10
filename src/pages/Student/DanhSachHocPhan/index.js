@@ -4,18 +4,28 @@ import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
 import { ListCourseActiveIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
-import { registerSubject, deleteUserRegisteredSubject, getUserRegisteredSubjects } from '../../../services/userService';
+import {
+    registerSubject,
+    deleteUserRegisteredSubject,
+    getUserRegisteredSubjects,
+    getUseridFromLocalStorage
+} from '../../../services/userService';
 import { message } from 'antd';
-import { getUseridFromLocalStorage } from '../../../services/userService';
 
 const cx = classNames.bind(styles);
 
 function DanhSachHocPhan() {
     const [selectedSubjects, setSelectedSubjects] = useState({});
-    const [registeredSubjects, setRegisteredSubjects] = useState({}); // Track registered subjects
+    const [registeredSubjects, setRegisteredSubjects] = useState({});
+    const [tableKey, setTableKey] = useState(0); // Add a key to force table reload
 
     const handleSelectionChange = useCallback((newSelection) => {
         setSelectedSubjects(newSelection);
+    }, []);
+
+    const resetTable = useCallback(() => {
+        setTableKey(prevKey => prevKey + 1); // Increment key to force remount
+        setSelectedSubjects({}); // Clear selections
     }, []);
 
     const handleSave = async () => {
@@ -42,19 +52,22 @@ function DanhSachHocPhan() {
             const successCount = results.filter(result => result?.data?.success).length;
 
             if (successCount === registrationPromises.length) {
-                message.success('All subjects registered successfully');
+                message.success('Tất cả các môn được đăng ký thành công');
             } else if (successCount > 0) {
-                message.warning(`${successCount} out of ${registrationPromises.length} subjects registered successfully`);
+                message.warning(`${successCount} trong số ${registrationPromises.length} các môn được đăng ký thành công`);
             } else {
-                message.error('Failed to register subjects');
+                message.error('Đăng ký thất bại');
             }
 
-            setSelectedSubjects({});
+            // Reset the table after successful save
+            resetTable();
+
+            // Update registered subjects
             const newRegisteredSubjects = await getUserRegisteredSubjects(userId);
-            setRegisteredSubjects(newRegisteredSubjects); // Refresh the registered subjects state
+            setRegisteredSubjects(newRegisteredSubjects);
         } catch (error) {
             console.error('Error registering subjects:', error);
-            message.error('An error occurred while registering subjects');
+            message.error('Có lỗi xảy ra khi đằng ký môn học');
         }
     };
 
@@ -72,7 +85,11 @@ function DanhSachHocPhan() {
                 </Button>
             </div>
 
-            <Table department={false} onSelectionChange={handleSelectionChange} />
+            <Table
+                key={tableKey}
+                department={false}
+                onSelectionChange={handleSelectionChange}
+            />
         </div>
     );
 }

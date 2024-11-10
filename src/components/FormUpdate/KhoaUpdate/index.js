@@ -24,12 +24,8 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
         }
     }, [showModal, form]);
 
-
     useEffect(() => {
         if (showModal && isUpdate && form) {
-
-            console.log(showModal);
-
             form.setFieldsValue({
                 facultyId: showModal.facultyId,
                 facultyName: showModal.facultyName,
@@ -37,13 +33,12 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
         }
     }, [showModal, isUpdate, form]);
 
-
     const handleCloseModal = () => {
         setShowModal(false);
         form.resetFields();
     };
 
-    const handleSubmit = async () => {
+    const handleSubmitAndContinue = async () => {
         try {
             const values = await form.validateFields();
             const facultyData = {
@@ -57,7 +52,29 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
 
             if (response?.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thành công!`);
-                handleCloseModal();
+                form.resetFields(); // Reset form sau khi lưu thành công
+                if (reLoad) reLoad();
+            }
+        } catch (error) {
+            console.error(`Failed to ${isUpdate ? 'update' : 'create'} faculty:`, error);
+            message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thất bại!`);
+        }
+    };
+
+    const handleSubmitAndCopy = async () => {
+        try {
+            const values = await form.validateFields();
+            const facultyData = {
+                facultyId: values.facultyId,
+                facultyName: values.facultyName
+            };
+
+            const response = isUpdate
+                ? await updateFacultyById(showModal.facultyId, facultyData)
+                : await createFaculty(facultyData);
+
+            if (response?.data) {
+                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thành công!`);
                 if (reLoad) reLoad();
             }
         } catch (error) {
@@ -73,7 +90,8 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             isViewOnly={viewOnly}
             showModal={showModal !== false}
             onClose={handleCloseModal}
-            onUpdate={handleSubmit}
+            onUpdate={handleSubmitAndCopy} // Default action for "Lưu & Sao chép"
+            handleSubmitAndContinue={handleSubmitAndContinue} // Action for "Lưu & Nhập tiếp"
             width="auto">
             <Form form={form}>
                 <FormItem

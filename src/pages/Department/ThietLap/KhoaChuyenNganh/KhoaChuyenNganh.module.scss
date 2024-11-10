@@ -1,0 +1,90 @@
+.wrapper {
+    padding: 15px;
+}
+
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+}
+
+.content-wrapper {
+    position: relative;
+    padding-top: 45px; // Space for toolbar
+}
+
+.tabs-wrapper {
+    :global {
+        .ant-tabs {
+            .ant-tabs-nav {
+                .ant-tabs-nav-wrap {
+                    justify-content: center !important;
+                }
+            }
+        }
+
+        .ant-tabs-nav-wrap {
+            justify-content: center;
+        }
+
+        .ant-tabs-nav-list {
+            width: auto;
+        }
+
+        .ant-tabs-tab {
+            font-weight: 600;
+            font-size: 16px;
+            padding: 8px 16px;
+
+            &.ant-tabs-tab-active {
+                .ant-tabs-tab-btn {
+                    color: var(--primary);
+                }
+            }
+        }
+    }
+}
+
+.toolbar-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 8px;
+}
+
+.container-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.action-item {
+    display: grid;
+
+    .btnDetail {
+        margin-bottom: 5px;
+    }
+}

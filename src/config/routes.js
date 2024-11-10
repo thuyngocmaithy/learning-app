@@ -38,7 +38,8 @@ const routes = {
     ChuKy: '/Department/ThietLap/ChuKy',
     MonHoc: '/Department/ThietLap/MonHoc',
     Khoa: '/Department/ThietLap/Khoa',
-    ChuyenNganh: '/Department/ThietLap/ChuyenNganh'
+    ChuyenNganh: '/Department/ThietLap/ChuyenNganh',
+    KhoaChuyenNganh: '/Department/ThietLap/KhoaChuyenNganh',
 
 };
 
