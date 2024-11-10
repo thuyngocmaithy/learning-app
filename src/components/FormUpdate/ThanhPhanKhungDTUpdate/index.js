@@ -65,22 +65,24 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             try {
                 const response = await getAll();
                 if (response) {
-                    const options = response.data.data.map((major) => ({
+                    const options = response.data?.map((major) => ({
                         value: major.majorId,
                         label: major.majorId + " - " + major.majorName,
                     }));
+
                     setMajorOptions([
-                        { value: "", label: "" },  // Phần tử trống được thêm vào đầu
+                        ...majorOptions,  // Phần tử trống được thêm vào đầu
                         ...options
                     ]);
                 }
             } catch (error) {
-                console.error('HocKyUpdate - fetchMajor - error:', error);
+                console.error('ThanhPhanKhungDTUpdate - fetchMajor - error:', error);
             }
         };
-
-        fetchMajor();
-    }, []);
+        if (showModal) {
+            fetchMajor();
+        }
+    }, [showModal]);
 
 
     useEffect(() => {
@@ -123,6 +125,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                             creditHour: item.subject.creditHour
                         };
                     }));
+
                 }
                 else {
                     setListSubjectSelected([])
@@ -141,18 +144,24 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         if (form && showModal) {
             if (isUpdate) {
                 form.resetFields();
+                // Cập nhật lại requiredCreditHour và totalCreditHour khi listSubjectSelected thay đổi
                 form.setFieldsValue({
                     frameComponentId: showModal.frameComponentId,
                     frameComponentName: showModal.frameComponentName,
                     description: showModal.description,
                     requiredCreditHour: listSubjectSelected.length === 0 ? 0 : Number(showModal.creditHour.split('/')[0]),
-                    major: showModal.majorId
+                    totalCreditHour: maxCreditHour,
+                    major: showModal.majorId ?
+                        {
+                            value: showModal.majorId,
+                            label: showModal.majorId + " - " + showModal.majorName
+                        } : null
                 });
             } else {
                 form.resetFields();
             }
         }
-    }, [showModal, isUpdate]);
+    }, [showModal, isUpdate, form, listSubjectSelected, maxCreditHour]);
 
     // Hàm để đóng modal và cập nhật quyền hệ thống showModalAdd thành false
     const handleCloseModal = () => {
@@ -177,8 +186,6 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                 response = await updateStudyFrameComponent(values.frameComponentId, frameCompData);
 
                 // Lưu entity subject_studyFrameComp
-                console.log(listSubjectSelected);
-
                 let SSMData = {
                     listSubject: listSubjectSelected.map((subject) => {
                         return subject.key;
@@ -231,12 +238,9 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         const totalCreditHours = listSubjectSelected.reduce((sum, subject) => {
             return sum + (subject.creditHour || 0);
         }, 0);
-
-        // Cập nhật lại totalCreditHour khi listSubjectSelected thay đổi
-        form.setFieldsValue({ totalCreditHour: totalCreditHours });
         // Set số tín chỉ tối đa được nhập cho ô tín chỉ tối thiểu
         setMaxCreditHour(totalCreditHours);
-    }, [listSubjectSelected]);
+    }, [listSubjectSelected, form]);
 
     const layoutForm = {
         labelCol: {
@@ -257,77 +261,81 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             width='1300px'
         >
             <Form {...layoutForm} form={form}>
-                <FormItem
-                    name="frameComponentId"
-                    label="Mã thành phần khung"
-                    rules={[{ required: true, message: 'Vui lòng nhập mã thành phần khung' }]}
-                >
-                    <Input disabled={isUpdate} />
-                </FormItem>
-                <FormItem
-                    name="frameComponentName"
-                    label="Tên thành phần khung"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên thành phần khung' }]}
-                >
-                    <Input />
-                </FormItem>
-                <FormItem
-                    name="description"
-                    label="Mô tả"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả thành phần khung' }]}
-                >
-                    <TextArea />
-                </FormItem>
-                <FormItem
-                    name="major"
-                    label="Chuyên ngành"
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn chuyên ngành"
-                        optionFilterProp="children"
-                        labelInValue // Hiển thị label trên input
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={majorOptions}
-                    />
-                </FormItem>
-                <FormItem
-                    name="creditHour"
-                    label="Số tín chỉ"
-                >
-                    <Space.Compact>
-                        <Form.Item
-                            name="requiredCreditHour"
-                            rules={[{ required: true, message: 'Vui lòng nhập số tín chỉ tối thiểu' }]}
+                {form && (
+                    <>
+                        <FormItem
+                            name="frameComponentId"
+                            label="Mã thành phần khung"
+                            rules={[{ required: true, message: 'Vui lòng nhập mã thành phần khung' }]}
                         >
-                            <InputNumber
-                                min={0}
-                                max={maxCreditHour}
-                                step={1}
-                                parser={formatValue}
-                                disabled={listSubjectSelected.length === 0}
-                            />
-                        </Form.Item>
-                        <span className={cx("key-creditHour")}>/</span>
-                        <Form.Item
-                            name="totalCreditHour"
+                            <Input disabled={isUpdate} />
+                        </FormItem>
+                        <FormItem
+                            name="frameComponentName"
+                            label="Tên thành phần khung"
+                            rules={[{ required: true, message: 'Vui lòng nhập tên thành phần khung' }]}
                         >
-                            <InputNumber
-                                disabled
-                                style={{ backgroundColor: '#eeffee' }}
+                            <Input />
+                        </FormItem>
+                        <FormItem
+                            name="description"
+                            label="Mô tả"
+                            rules={[{ required: true, message: 'Vui lòng nhập mô tả thành phần khung' }]}
+                        >
+                            <TextArea />
+                        </FormItem>
+                        <FormItem
+                            name="major"
+                            label="Chuyên ngành"
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Chọn chuyên ngành"
+                                optionFilterProp="children"
+                                labelInValue // Hiển thị label trên input
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={majorOptions}
                             />
-                        </Form.Item>
-                    </Space.Compact>
-                </FormItem>
-                <TransferCustom
-                    data={listSubject}
-                    columns={columns}
-                    targetObjects={listSubjectSelected}
-                    setTargetObjects={setListSubjectSelected}
-                    titles={['Tất cả học phần', 'Học phần thuộc thành phần khung']}
-                />
+                        </FormItem>
+                        <FormItem
+                            name="creditHour"
+                            label="Số tín chỉ"
+                        >
+                            <Space.Compact>
+                                <Form.Item
+                                    name="requiredCreditHour"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số tín chỉ tối thiểu' }]}
+                                >
+                                    <InputNumber
+                                        min={0}
+                                        max={maxCreditHour}
+                                        step={1}
+                                        parser={formatValue}
+                                        disabled={listSubjectSelected.length === 0}
+                                    />
+                                </Form.Item>
+                                <span className={cx("key-creditHour")}>/</span>
+                                <Form.Item
+                                    name="totalCreditHour"
+                                >
+                                    <InputNumber
+                                        disabled
+                                        style={{ backgroundColor: '#eeffee' }}
+                                    />
+                                </Form.Item>
+                            </Space.Compact>
+                        </FormItem>
+                        <TransferCustom
+                            data={listSubject}
+                            columns={columns}
+                            targetObjects={listSubjectSelected}
+                            setTargetObjects={setListSubjectSelected}
+                            titles={['Tất cả học phần', 'Học phần thuộc thành phần khung']}
+                        />
+                    </>
+                )}
             </Form>
         </Update>
     );

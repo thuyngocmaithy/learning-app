@@ -15,7 +15,8 @@ function TableCustomAnt({
     loading,
     isHaveRowSelection = true,
     isPagination = true,
-    isHideSTT = false
+    isHideSTT = false,
+    ...props
 }) {
     const onSelectChange = (newSelectedRowKeys, selectedRows) => {
         // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
@@ -73,6 +74,7 @@ function TableCustomAnt({
                 }}
                 loading={loading}
                 pagination={isPagination}
+                {...props}
             />
         </div>
     );

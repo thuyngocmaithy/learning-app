@@ -5,7 +5,7 @@ import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createSR, updateSRById } from '../../../services/scientificResearchService';
+import { createSR, getSRById, updateSRById } from '../../../services/scientificResearchService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { useLocation } from 'react-router-dom';
@@ -24,13 +24,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 }) {
     const [form] = useForm(); // Sử dụng hook useForm    
     const [instructorOptions, setInstructorOptions] = useState([]);
-    const [selectedInstructor, setSelectedInstructor] = useState(null);
     const [statusOptions, setStatusOptions] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState(null);
-    const [selectedMemberCount, setSelectedMemberCount] = useState(null);
     const [selectedLevel, setSelectedLevel] = useState(null);
     const [srgroupOptions, setSRGroupOptions] = useState([]);
-    const [selectedSRGroup, setSelectedSRGroup] = useState(null);
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
     const location = useLocation();
@@ -51,14 +47,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 label: `${SRG.scientificResearchGroupName}`,
             }));
             setSRGroupOptions(options);
-
-            // Nếu selectedSRGroup đã có giá trị, cập nhật lại giá trị đó
-            if (selectedSRGroup) {
-                const selectedOption = options.find((option) => option.value === selectedSRGroup);
-                if (selectedOption) {
-                    setSelectedInstructor(selectedOption.value);
-                }
-            }
         }
     };
 
@@ -72,14 +60,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 label: `${user.fullname}`,
             }));
             setInstructorOptions(options);
-
-            // Nếu selectedInstructor đã có giá trị, cập nhật lại giá trị đó
-            if (selectedInstructor) {
-                const selectedOption = options.find((option) => option.value === selectedInstructor);
-                if (selectedOption) {
-                    setSelectedInstructor(selectedOption.value);
-                }
-            }
         }
     };
 
@@ -107,10 +87,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         label: status.statusName,
                     }));
                     setStatusOptions(options);
-                    // Nếu có giá trị đã chọn, set lại giá trị đó
-                    if (selectedStatus) {
-                        setSelectedStatus(selectedStatus);
-                    }
                 }
             } catch (error) {
                 console.error(' [ Khoaluanupdate - fetchStatusByType - Error ] :', error);
@@ -118,7 +94,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         };
 
         fetchStatusByType();
-    }, [statusType, selectedStatus]);
+    }, [statusType]);
 
     const levelsOptions = [
         { value: 'Cơ sở', label: 'Cơ sở' },
@@ -129,19 +105,42 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     ]
 
     useEffect(() => {
-        if (showModal && isUpdate) {
+        const setDataInitial = async () => {
+            // Nếu không có scientificResearchGroup => Tìm trong db
+            let scientificResearchGroup = null;
+            if (showModal.scientificResearchGroup === undefined) {
+                const response = await getSRById(showModal.scientificResearchId);
+                scientificResearchGroup = {
+                    value: response.data.scientificResearchGroup.scientificResearchGroupId,
+                    label: response.data.scientificResearchGroup.scientificResearchGroupName
+                };
+            }
+            else {
+                scientificResearchGroup = {
+                    value: showModal.scientificResearchGroup.scientificResearchGroupId,
+                    label: showModal.scientificResearchGroup.scientificResearchGroupName
+                };
+            }
+
+            // Set value cho form
             form.setFieldsValue({
                 scientificResearchName: showModal.scientificResearchName,
-                srgroup: showModal.scientificResearchGroup.scientificResearchGroupName,
+                srgroup: scientificResearchGroup,
                 description: showModal.description,
-                instructor: showModal.instructor.fullname,
-                status: showModal.status.statusId,
+                instructor: {
+                    value: showModal.instructor.userId,
+                    label: showModal.instructor.fullname
+                },
                 numberOfMember: showModal.numberOfMember,
                 level: showModal.level,
+                status: {
+                    value: showModal.status.statusId,
+                    label: showModal.status.statusName
+                }
             });
-            setSelectedInstructor(showModal.instructor.userId);
-            setSelectedStatus(showModal.status.statusId);
-            setSelectedMemberCount(showModal.numberOfMember);
+        }
+        if (showModal && isUpdate) {
+            setDataInitial()
         }
     }, [showModal, isUpdate, form]);
 
@@ -152,13 +151,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-
-    const handleChangeInstructor = (value) => {
-        setSelectedInstructor(value);
-    };
-
     const handleChangeSRGroup = (value) => {
-        setSelectedSRGroup(value);
         fetchInstructors(value);
     };
 
@@ -176,12 +169,14 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             let scientificResearchData = {
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
-                instructorId: selectedInstructor,
-                statusId: selectedStatus,
+                instructorId: values.instructor.value,
+                statusId: values.status.value,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
-                scientificResearchGroup: SRGId || values.srgroup,
+                scientificResearchGroup: SRGId || values.srgroup.value,
             };
+
+            console.log(scientificResearchData);
 
             let response;
             if (isUpdate) {
@@ -268,11 +263,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         placeholder="Chọn nhóm đề tài NCKH"
                         optionFilterProp="children"
                         onChange={handleChangeSRGroup}
-                        value={selectedSRGroup}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
                         options={srgroupOptions}
+                        labelInValue
                     />
                 </FormItem>
                 <FormItem
@@ -287,8 +282,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         showSearch
                         placeholder="Chọn chủ nhiệm"
                         optionFilterProp="children"
-                        onChange={handleChangeInstructor}
-                        value={selectedInstructor}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
@@ -322,8 +315,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         min={1}
                         max={10}
                         step={1}
-                        value={selectedMemberCount}
-                        onChange={(value) => setSelectedMemberCount(value)}
+                        onChange={(value) => {
+                            form.setFieldsValue({ numberOfMember: value });
+                        }}
                         parser={formatValue}
                         formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                     />
@@ -337,8 +331,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         showSearch
                         placeholder="Chọn trạng thái"
                         optionFilterProp="children"
-                        value={selectedStatus}
-                        onChange={(value) => setSelectedStatus(value)}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }

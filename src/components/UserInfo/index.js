@@ -11,17 +11,17 @@ import teacher from "../../assets/images/teacher.png"
 
 const cx = classNames.bind(styles);
 
-function UserInfo({ showModal, onClose }) {
+function UserInfo({ showModal, onClose, showInfoStudent = false }) {
     const [open, setOpen] = useState(false);
     const { userId, permission } = useContext(AccountLoginContext)
     const [userInfo, setUserInfo] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
 
     useEffect(() => {
         if (showModal !== open) {
             setOpen(showModal);
         }
-        console.log(open);
     }, [showModal]);
 
     const handleCancel = useCallback(() => {
@@ -33,14 +33,16 @@ function UserInfo({ showModal, onClose }) {
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                const response = await getUserById(userId);
-                console.log(response);
+                const response = await getUserById(showInfoStudent ? showModal : userId);
                 if (response.message === "success") {
                     setUserInfo(response.data);
                 }
 
             } catch (error) {
-
+                console.log(error);
+            }
+            finally {
+                setIsLoading(false)
             }
         }
         if (userId) {
@@ -55,9 +57,10 @@ function UserInfo({ showModal, onClose }) {
         title={'Thông tin người dùng'}
         onCancel={handleCancel}
         footer={null}
-        width={permission === "SINHVIEN" ? "900px" : "600px"}
+        width={(permission === "SINHVIEN" || showInfoStudent) ? "900px" : "600px"}
+        loading={isLoading}
     >
-        {permission === "SINHVIEN"
+        {permission === "SINHVIEN" || showInfoStudent
             ? <div className={cx('wrapper-info-student')}>
                 <Divider orientation="left">
                     Thông tin sinh viên

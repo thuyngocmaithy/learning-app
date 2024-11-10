@@ -1,80 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Tree } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Empty, List, Tree } from 'antd';
 import classNames from 'classnames/bind';
 import styles from "./TreeFrame.module.scss"
-import Button from '../Core/Button';
-import { EditOutlined } from '@ant-design/icons';
-import ChucNangUpdate from '../FormUpdate/ChucNangUpdate';
-import { getAllFrameStructure } from '../../services/frameStructureService';
+
 
 const cx = classNames.bind(styles)
 
-const TreeFrame = ({ treeData, setTreeData, setSelectedFrame, reLoad, setShowModalDetail }) => {
-    const [expandedKeys, setExpandedKeys] = useState([]);
-    const [showModalFrame, setShowModalFrame] = useState(false);
-    const [isUpdateFrame, setIsUpdateFrame] = useState(false);
-    const [isLoadingFrame, setIsLoadingFrame] = useState(true);
-
-    const buildTreeData = (list, parentId = null) => {
-        return list
-            .filter(item => item.studyFrameComponentParent?.frameComponentId === parentId || (!item.studyFrameComponentParent && parentId === null))
-            .sort((a, b) => a.orderNo - b.orderNo)
-            .map(item => ({
-                title: <div className={cx("item-feature")}>
-                    <p>{item.studyFrameComponent?.frameComponentName}</p>
-                    <div className={cx("option")}>
-                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall onClick={() => { setShowModalDetail(item) }}>
-                            Chi tiết
-                        </Button>
-                        <Button
-                            className={cx('btnEdit')}
-                            leftIcon={<EditOutlined />}
-                            primary
-                            verysmall
-                            onClick={() => {
-                                setShowModalFrame({
-                                    studyFrameComponentId: item.studyFrameComponent?.frameComponentId,
-                                    tudyFrameComponentParentId: item.studyFrameComponentParent?.frameComponentId,
-                                });
-                                setIsUpdateFrame(true);
-                            }}
-                        >
-                            Sửa
-                        </Button>
-                    </div>
-                </div>,
-                key: item.id,
-                orderNo: item.orderNo,
-                studyFrameComponentId: item.studyFrameComponent?.frameComponentId,
-                studyFrameComponentParentId: item.studyFrameComponentParent?.frameComponentId,
-                children: buildTreeData(list, item.studyFrameComponent?.frameComponentId),
-            }));
-    };
-    const fetchData = async () => {
-        try {
-            const response = await getAllFrameStructure();
-            console.log(response);
-
-            if (response.status === 200) {
-                const tree = buildTreeData(response.data.data);
-                setTreeData(tree);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-        finally {
-            setIsLoadingFrame(false)
-        }
-    };
-    useEffect(() => {
-        if (reLoad) {
-            fetchData();
-        }
-    }, [reLoad]);
-
-    useEffect(() => {
-        fetchData();
-    }, []);
+const TreeFrame = ({
+    treeData, // Dữ liệu cấu trúc cây
+    setTreeData, // Set dữ liệu cấu trúc cây
+    expandedKeys // Key để mở rộng thành phần khung
+}) => {
 
 
     const onDrop = (info) => {
@@ -140,7 +76,7 @@ const TreeFrame = ({ treeData, setTreeData, setSelectedFrame, reLoad, setShowMod
             items.forEach(item => {
                 item.studyFrameComponentParentId = parentId;
                 if (item.children && item.children.length > 0) {
-                    updateParentFrameId(item.children, item.key); // Đệ quy cho các phần tử con
+                    updateParentFrameId(item.children, item.studyFrameComponentId); // Đệ quy cho các phần tử con
                 }
             });
         };
@@ -151,38 +87,24 @@ const TreeFrame = ({ treeData, setTreeData, setSelectedFrame, reLoad, setShowMod
         setTreeData(data);
     };
 
-    const chucNangUpdateMemoized = useMemo(() => {
-        return (
-            <ChucNangUpdate
-                title={'chức năng'}
-                isUpdate={isUpdateFrame}
-                showModal={showModalFrame}
-                setShowModal={setShowModalFrame}
-                reLoad={fetchData}
-            />
-        );
-    }, [showModalFrame, isUpdateFrame]);
-
-    const onCheck = (checkedKeys) => {
-        setSelectedFrame(checkedKeys)
-    };
 
     return (
         <>
-            <Tree
-                checkable
-                checkStrictly
-                className="draggable-tree"
-                expandedKeys={expandedKeys}
-                draggable
-                blockNode
-                onDrop={onDrop}
-                treeData={treeData}
-                onExpand={keys => setExpandedKeys(keys)}
-                loadData={isLoadingFrame}
-                onCheck={onCheck}
-            />
-            {chucNangUpdateMemoized}
+            {(treeData.length === 0)
+                ? <Empty className={cx("empty")} description="Không có dữ liệu" />
+                : <>
+                    <Tree
+                        checkStrictly
+                        className="draggable-tree"
+                        expandedKeys={expandedKeys}
+                        draggable
+                        blockNode
+                        onDrop={onDrop}
+                        treeData={treeData}
+                    // loadData={isLoadingFrame}
+                    />
+                </>
+            }
         </>
     );
 };

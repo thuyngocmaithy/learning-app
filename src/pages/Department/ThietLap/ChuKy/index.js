@@ -70,7 +70,7 @@ function ChuKy() {
         try {
             const result = await getAll();
             if (result.status === 200) {
-                setData(result.data.data);
+                setData(result.data.data)
             }
             setIsLoading(false);
         } catch (error) {
@@ -107,7 +107,7 @@ function ChuKy() {
     };
 
 
-    const hockyUpdateMemoized = useMemo(() => {
+    const chuKyUpdateMemoized = useMemo(() => {
         return (
             <ChuKyUpdate
                 title={'chu kỳ'}
@@ -146,8 +146,9 @@ function ChuKy() {
                 data={data}
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
+                keyIdChange={"cycleId"}
             />
-            {hockyUpdateMemoized}
+            {chuKyUpdateMemoized}
 
         </div>
     );

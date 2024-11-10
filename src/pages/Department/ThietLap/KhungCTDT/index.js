@@ -12,6 +12,8 @@ import KhungCTDTUpdate from '../../../../components/FormUpdate/KhungCTDTUpdate';
 import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
 import { getAll } from '../../../../services/studyFrameService';
 import DungKhungCTDTUpdate from '../../../../components/FormUpdate/DungKhungCTDTUpdate';
+import ApDungKhungCTDTUpdate from '../../../../components/FormUpdate/ApDungKhungCTDTUpdate';
+import Button from '../../../../components/Core/Button';
 
 const cx = classNames.bind(styles);
 
@@ -19,6 +21,7 @@ function KhungCTDT() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [showModalBuildFrame, setShowModalBuildFrame] = useState(false); // hiển thị model dựng khung
+    const [showModalApplyFrame, setShowModalApplyFrame] = useState(false); // hiển thị model áp dụng khung
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
@@ -60,7 +63,7 @@ function KhungCTDT() {
                         colorRed
                         verysmall
                         onClick={() => {
-                            // showModal(record);
+                            setShowModalApplyFrame(record);
                         }}
                     >
                         Áp dụng khung
@@ -129,14 +132,29 @@ function KhungCTDT() {
 
     const dungKhungCTDTMemoized = useMemo(() => {
         return (
-            <DungKhungCTDTUpdate
-                title={'Dựng khung đào tạo'}
-                showModal={showModalBuildFrame}
-                setShowModal={setShowModalBuildFrame}
-            // reLoad={fetchData}
-            />
+            <div>
+                {showModalBuildFrame ? <DungKhungCTDTUpdate
+                    showModal={showModalBuildFrame}
+                    setShowModal={setShowModalBuildFrame}
+                // reLoad={fetchData}
+                /> : null}
+            </div>
+
         );
     }, [showModalBuildFrame]);
+
+    const apDungKhungCTDTMemoized = useMemo(() => {
+        return (
+            <div>
+                {showModalApplyFrame ?
+                    <ApDungKhungCTDTUpdate
+                        showModal={showModalApplyFrame}
+                        setShowModal={setShowModalApplyFrame}
+                    /> : null}
+            </div>
+
+        );
+    }, [showModalApplyFrame]);
 
     return (
         <div className={cx('wrapper')}>
@@ -169,6 +187,7 @@ function KhungCTDT() {
             />
             {khungCTDTUpdateMemoized}
             {dungKhungCTDTMemoized}
+            {apDungKhungCTDTMemoized}
 
         </div>
     );

@@ -6,7 +6,7 @@ import config from "../../../../config"
 import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
@@ -174,7 +174,7 @@ function DeTaiNCKH() {
                 <div className={cx('action-item')}>
                     <ButtonCustom
                         className={cx('btnDetail')}
-                        leftIcon={<EditOutlined />}
+                        leftIcon={<EyeOutlined />}
                         outline
                         verysmall
                         onClick={() => setShowModalDetail(record)}>

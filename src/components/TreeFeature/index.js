@@ -4,7 +4,7 @@ import { getAll } from '../../services/featureService';
 import classNames from 'classnames/bind';
 import styles from "./TreeFeature.module.scss"
 import Button from '../Core/Button';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import ChucNangUpdate from '../FormUpdate/ChucNangUpdate';
 
 const cx = classNames.bind(styles)
@@ -23,7 +23,7 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
                 title: <div className={cx("item-feature")}>
                     <p>{item.featureName}</p>
                     <div className={cx("option")}>
-                        <Button className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall onClick={() => { setShowModalDetail(item) }}>
+                        <Button className={cx('btnDetail')} leftIcon={<EyeOutlined />} outline verysmall onClick={() => { setShowModalDetail(item) }}>
                             Chi tiết
                         </Button>
                         <Button
