@@ -8,12 +8,42 @@ import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';
 import { PermissionDetailContext } from './context/PermissionDetailContext';
+import axios from 'axios';
 
 function App() {
     const { userId, permission } = useContext(AccountLoginContext);
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
+    const [loading, setLoading] = useState(true);
+    const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        const checkDatabaseStatus = async () => {
+            try {
+                const response = await axios.get('https://learning-app-nodejs.vercel.app/status');
+                setStatus(response.data.status);
+            } catch (error) {
+                console.error('Error checking database status:', error);
+                setStatus('error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkDatabaseStatus();
+    }, []);
+
+    if (loading) {
+        return <div className='loading-container'>
+            <Spin size="large" />
+        </div>;
+    }
+
+    if (status === 'error') {
+        return <div className='loading-container'>Vui lòng tải lại trang</div>;
+    }
+
 
     const findKeyByValue = (obj, value) => {
         return Object.keys(obj).find(key => obj[key] === value);
