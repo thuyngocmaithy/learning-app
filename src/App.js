@@ -60,10 +60,8 @@ function App() {
     };
 
     useEffect(() => {
-        if (permission) {
-            setIsLoading(true);
-            getListFeature();
-        }
+        setIsLoading(true);
+        getListFeature();
     }, [permission]);
 
     if (loading) {
