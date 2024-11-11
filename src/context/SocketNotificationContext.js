@@ -36,6 +36,7 @@ export const SocketNotificationProvider = ({ children }) => {
             // Xử lý lỗi kết nối
             socketIo.on('connect_error', (err) => {
                 console.error('Lỗi kết nối socket:', err);
+                setSocket(null); // Xóa socket nếu không kết nối được
             });
 
             // Tham gia vào một room dựa trên userId

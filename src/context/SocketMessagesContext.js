@@ -54,6 +54,7 @@ export const SocketMessagesProvider = ({ children }) => {
             // Xử lý lỗi kết nối
             socketIo.on('connect_error', (err) => {
                 console.error('Socket connection error:', err);
+                setSocket(null); // Xóa socket nếu không kết nối được
             });
 
             // Set socket instance in state
