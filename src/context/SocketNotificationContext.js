@@ -20,7 +20,8 @@ export const SocketNotificationProvider = ({ children }) => {
             // Tạo kết nối socket cho thông báo
             socketIo = io('https://learning-app-nodejs.vercel.app/notifications', {
                 transports: ['polling'],
-                path: '/socket.io'
+                path: '/socket.io',
+                timeout: 10000
             });
 
             // Xử lý kết nối thành công
