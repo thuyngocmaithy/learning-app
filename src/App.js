@@ -8,7 +8,7 @@ import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';
 import { PermissionDetailContext } from './context/PermissionDetailContext';
-import axios from 'axios';
+import { api } from './utils/apiConfig';
 
 function App() {
     const { userId, permission } = useContext(AccountLoginContext);
@@ -18,19 +18,7 @@ function App() {
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        const checkDatabaseStatus = async () => {
-            try {
-                const response = await axios.get('https://learning-app-nodejs.vercel.app/statusConnection');
-                setStatus(response.data.status);
-            } catch (error) {
-                console.error('Error checking database status:', error);
-                setStatus('error');
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        checkDatabaseStatus();
     }, []);
 
 
@@ -60,7 +48,20 @@ function App() {
 
     useEffect(() => {
         setIsLoading(true);
-        getListFeature();
+        const checkDatabaseStatus = async () => {
+            try {
+                const response = await api.get('https://learning-app-nodejs.vercel.app/statusConnection');
+                setStatus(response.data.status);
+            } catch (error) {
+                console.error('Error checking database status:', error);
+                setStatus('error');
+            } finally {
+                // Lấy danh sách chức năng sau khi connect success db
+                getListFeature();
+            }
+        };
+
+        checkDatabaseStatus();
     }, [permission]);
 
     const findKeyByValue = (obj, value) => {
