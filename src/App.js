@@ -21,7 +21,7 @@ function App() {
     useEffect(() => {
         const checkDatabaseStatus = async () => {
             try {
-                const response = await axios.get('https://learning-app-nodejs.vercel.app/status');
+                const response = await axios.get('https://learning-app-nodejs.vercel.app/statusConnection');
                 setStatus(response.data.status);
             } catch (error) {
                 console.error('Error checking database status:', error);
@@ -33,21 +33,6 @@ function App() {
 
         checkDatabaseStatus();
     }, []);
-
-    if (loading) {
-        return <div className='loading-container'>
-            <Spin size="large" />
-        </div>;
-    }
-
-    if (status === 'error') {
-        return <div className='loading-container'>Vui lòng tải lại trang</div>;
-    }
-
-
-    const findKeyByValue = (obj, value) => {
-        return Object.keys(obj).find(key => obj[key] === value);
-    };
 
 
     const getListFeature = async () => {
@@ -75,9 +60,27 @@ function App() {
     };
 
     useEffect(() => {
-        setIsLoading(true);
-        getListFeature();
+        if (permission) {
+            setIsLoading(true);
+            getListFeature();
+        }
     }, [permission]);
+
+    if (loading) {
+        return <div className='loading-container'>
+            <Spin size="large" />
+        </div>;
+    }
+
+    if (status === 'error') {
+        return <div className='loading-container'>Vui lòng tải lại trang</div>;
+    }
+
+
+    const findKeyByValue = (obj, value) => {
+        return Object.keys(obj).find(key => obj[key] === value);
+    };
+
 
     return isLoading ? (
         <div className={('container-loading')}>
