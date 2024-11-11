@@ -20,7 +20,7 @@ export const SocketProvider = ({ children }) => {
             socketIo = io('https://learning-app-nodejs.vercel.app', {
                 transports: ['polling'],
                 path: '/socket.io',
-                timeout: 10000
+                requestTimeout: 10000
             });
 
             // Handle errors

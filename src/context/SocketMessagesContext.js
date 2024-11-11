@@ -23,7 +23,7 @@ export const SocketMessagesProvider = ({ children }) => {
             socketIo = io('https://learning-app-nodejs.vercel.app/messages', {
                 transports: ['polling'],
                 path: '/socket.io',
-                timeout: 10000
+                requestTimeout: 10000
             });
 
             // Xử lý kết nối thành công
