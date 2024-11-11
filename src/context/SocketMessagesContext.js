@@ -21,7 +21,7 @@ export const SocketMessagesProvider = ({ children }) => {
         if (userId !== null && listSRAndThesisIdJoin.length > 0) {
             // Tạo kết nối socket cho for messages
             socketIo = io('https://learning-app-nodejs.vercel.app/messages', {
-                transports: ['websocket', 'polling'], // Chỉ sử dụng WebSocket, không cần polling
+                transports: ['polling'],
                 path: '/socket.io'
             });
 
