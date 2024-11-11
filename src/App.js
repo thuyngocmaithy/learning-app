@@ -15,7 +15,6 @@ function App() {
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
-    const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
@@ -27,7 +26,7 @@ function App() {
                 console.error('Error checking database status:', error);
                 setStatus('error');
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
 
@@ -64,21 +63,13 @@ function App() {
         getListFeature();
     }, [permission]);
 
-    if (loading) {
-        return <div className='loading-container'>
-            <Spin size="large" />
-        </div>;
-    }
-
-    if (status === 'error') {
-        return <div className='loading-container'>Vui lòng tải lại trang</div>;
-    }
-
-
     const findKeyByValue = (obj, value) => {
         return Object.keys(obj).find(key => obj[key] === value);
     };
 
+    if (status === 'error') {
+        return <div className='container-loading'>Vui lòng tải lại trang</div>;
+    }
 
     return isLoading ? (
         <div className={('container-loading')}>
