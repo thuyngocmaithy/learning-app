@@ -17,7 +17,7 @@ export const SocketProvider = ({ children }) => {
 
         if (userId !== 0) {
             // Create socket connection
-            socketIo = io('https://learning-app-nodejs.vercel.app', {
+            socketIo = io('http://14.225.212.147:5000', {
                 transports: ['polling'],
                 path: '/socket.io',
                 requestTimeout: 10000

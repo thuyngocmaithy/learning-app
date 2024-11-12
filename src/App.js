@@ -50,7 +50,7 @@ function App() {
         setIsLoading(true);
         const checkDatabaseStatus = async () => {
             try {
-                const response = await api.get('https://learning-app-nodejs.vercel.app/statusConnection');
+                const response = await api.get('http://14.225.212.147:5000/statusConnection');
                 setStatus(response.data.status);
             } catch (error) {
                 console.error('Error checking database status:', error);

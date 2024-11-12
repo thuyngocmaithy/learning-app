@@ -2,7 +2,7 @@
     "name": "learning-app",
     "version": "0.1.0",
     "private": true,
-    "proxy": "https://learning-app-nodejs.vercel.app",
+    "proxy": "http://14.225.212.147:5000",
     "dependencies": {
         "@ant-design/icons": "^5.3.7",
         "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
