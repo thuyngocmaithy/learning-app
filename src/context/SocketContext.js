@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
         if (userId !== 0) {
             // Create socket connection
             socketIo = io('http://14.225.212.147:5000', {
-                transports: ['polling'],
+                transports: ['websocket'],
                 path: '/socket.io',
                 requestTimeout: 10000
             });
