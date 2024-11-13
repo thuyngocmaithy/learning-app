@@ -10,6 +10,7 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import { getAllFaculty, deleteFacultyById } from '../../../../services/facultyService';
 import { KhoaUpdate } from '../../../../components/FormUpdate/KhoaUpdate';
+import { KhoaDetail } from '../../../../components/FormDetail/KhoaDetail';
 
 const cx = classNames.bind(styles);
 
@@ -81,6 +82,14 @@ function Khoa() {
         );
     }, [showModal, isUpdate]);
 
+    const KhoaDetailMemoized = useMemo(() => (
+        <KhoaDetail
+            title={'Khoa'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
     const columns = (showModal) => [
         {
             title: 'Mã Khoa-Ngành',
@@ -105,10 +114,7 @@ function Khoa() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModal(record);
-                            setIsUpdate(true);
-                            setViewOnly(true)
-                            setShowModalDetail(true);
+                            setShowModalDetail(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -131,6 +137,7 @@ function Khoa() {
         }
     ];
 
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -141,6 +148,7 @@ function Khoa() {
                     <h3 className={cx('title')}>Khoa</h3>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
+                    <Toolbar type={'Bộ lọc'} />
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
@@ -165,6 +173,7 @@ function Khoa() {
                 keyIdChange="facultyId"
             />
             {KhoaUpdateMemorized}
+            {KhoaDetailMemoized}
 
         </div>
     );

@@ -10,6 +10,7 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import { deleteSubjectById, getAllSubjectDetail } from '../../../../services/subjectService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
+import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 
 const cx = classNames.bind(styles);
 
@@ -99,6 +100,15 @@ function MonHoc() {
         );
     }, [showModal, isUpdate]);
 
+
+    const MonHocDetailMemoized = useMemo(() => (
+        <MonHocDetail
+            title={'môn học'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
     const columns = (showModal) => [
         {
             title: 'Mã môn học',
@@ -155,10 +165,7 @@ function MonHoc() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModal(record);
-                            setIsUpdate(true);
-                            setViewOnly(true)
-                            setShowModalDetail(true);
+                            setShowModalDetail(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -215,7 +222,7 @@ function MonHoc() {
                 keyIdChange="subjectId"
             />
             {MonHocUpdateMemorized}
-
+            {MonHocDetailMemoized}
         </div>
     );
 }

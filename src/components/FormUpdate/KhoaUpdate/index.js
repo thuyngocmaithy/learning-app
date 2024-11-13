@@ -38,30 +38,7 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
         form.resetFields();
     };
 
-    const handleSubmitAndContinue = async () => {
-        try {
-            const values = await form.validateFields();
-            const facultyData = {
-                facultyId: values.facultyId,
-                facultyName: values.facultyName
-            };
-
-            const response = isUpdate
-                ? await updateFacultyById(showModal.facultyId, facultyData)
-                : await createFaculty(facultyData);
-
-            if (response?.data) {
-                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thành công!`);
-                form.resetFields(); // Reset form sau khi lưu thành công
-                if (reLoad) reLoad();
-            }
-        } catch (error) {
-            console.error(`Failed to ${isUpdate ? 'update' : 'create'} faculty:`, error);
-            message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thất bại!`);
-        }
-    };
-
-    const handleSubmitAndCopy = async () => {
+    const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
             const facultyData = {
@@ -82,6 +59,8 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thất bại!`);
         }
     };
+
+
 
     return (
         <Update
@@ -90,16 +69,17 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             isViewOnly={viewOnly}
             showModal={showModal !== false}
             onClose={handleCloseModal}
-            onUpdate={handleSubmitAndCopy} // Default action for "Lưu & Sao chép"
-            handleSubmitAndContinue={handleSubmitAndContinue} // Action for "Lưu & Nhập tiếp"
-            width="auto">
+            onUpdate={handleSubmit}
+            width="auto"
+            form={form}
+        >
             <Form form={form}>
                 <FormItem
                     name="facultyId"
                     label="Mã khoa/ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập mã khoa/ngành' }]}
                 >
-                    <Input disabled={viewOnly} />
+                    <Input disabled={viewOnly || isUpdate} />
                 </FormItem>
                 <FormItem
                     name="facultyName"

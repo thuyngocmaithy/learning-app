@@ -158,7 +158,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
 
             if (response?.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} môn học thành công!`);
-                handleCloseModal();
+                // handleCloseModal();
                 if (reLoad) reLoad();
             }
         } catch (error) {
@@ -185,6 +185,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
             width="800px"
+            form={form}
         >
             <Form {...layoutForm} form={form}>
                 <FormItem
