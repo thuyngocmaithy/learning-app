@@ -5,24 +5,26 @@ import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import ThanhPhanKhungDTUpdate from '../../../../components/FormUpdate/ThanhPhanKhungDTUpdate';
 import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
 import { getAllStudyFrameComponent } from '../../../../services/studyFrameCompService';
+import ThanhPhanKhungDTDetail from '../../../../components/FormDetail/ThanhPhanKhungDTDetail';
 
 const cx = classNames.bind(styles);
 
 function ThanhPhanKhungDT() {
     const [isUpdate, setIsUpdate] = useState(false);
-    const [showModal, setShowModal] = useState(false); // hiển thị model updated
+    const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
+    const [showModalDetail, setShowModalDetail] = useState(false); // hiển thị model detail
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
 
-    const columns = (showModal) => [
+    const columns = (showModalUpdate) => [
         {
             title: 'Mã thành phần khung đào tạo',
             dataIndex: 'frameComponentId',
@@ -52,16 +54,27 @@ function ThanhPhanKhungDT() {
             title: 'Action',
             key: 'action',
             align: 'center',
-            width: '120px',
+            width: '130px',
             render: (_, record) => (
                 <div className={cx('action-item')}>
+                    <ButtonCustom
+                        className={cx('btnDetail')}
+                        leftIcon={<EyeOutlined />}
+                        outline
+                        verysmall
+                        onClick={() => {
+                            setShowModalDetail(record);
+                        }}
+                    >
+                        Chi tiết
+                    </ButtonCustom>
                     <ButtonCustom
                         className={cx('btnEdit')}
                         leftIcon={<EditOutlined />}
                         primary
                         verysmall
                         onClick={() => {
-                            showModal(record);
+                            showModalUpdate(record);
                             setIsUpdate(true);
                         }}
                     >
@@ -121,18 +134,27 @@ function ThanhPhanKhungDT() {
         }
     };
 
+    const thanhphankhungdtDetailMemoized = useMemo(() => {
+        return (
+            <ThanhPhanKhungDTDetail
+                title={'thành phần khung đào tạo'}
+                showModal={showModalDetail}
+                setShowModal={setShowModalDetail}
+            />
+        );
+    }, [showModalDetail]);
 
     const thanhphankhungdtUpdateMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTUpdate
                 title={'thành phần khung đào tạo'}
                 isUpdate={isUpdate}
-                showModal={showModal}
-                setShowModal={setShowModal}
+                showModal={showModalUpdate}
+                setShowModal={setShowModalUpdate}
                 reLoad={fetchData}
             />
         );
-    }, [showModal, isUpdate]);
+    }, [showModalUpdate, isUpdate]);
 
     return (
         <div className={cx('wrapper')}>
@@ -147,7 +169,7 @@ function ThanhPhanKhungDT() {
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
-                            setShowModal(true);
+                            setShowModalUpdate(true);
                             setIsUpdate(false);
                         }}
                     />
@@ -156,14 +178,15 @@ function ThanhPhanKhungDT() {
 
             </div>
             <TableCustomAnt
-                height={'600px'}
-                columns={columns(setShowModal)}
+                height={'450px'}
+                columns={columns(setShowModalUpdate)}
                 data={data}
                 setSelectedRowKeys={setSelectedRowKeys}
                 selectedRowKeys={selectedRowKeys}
                 loading={isLoading}
             />
             {thanhphankhungdtUpdateMemoized}
+            {thanhphankhungdtDetailMemoized}
 
         </div>
     );

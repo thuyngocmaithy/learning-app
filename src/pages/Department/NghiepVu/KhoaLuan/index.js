@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import config from '../../../../config';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import KhoaLuanUpdate from '../../../../components/FormUpdate/KhoaLuanUpdate';
@@ -91,7 +91,7 @@ function KhoaLuan() {
             key: 'action',
             render: (_, record) => (
                 <div className={cx('action-item')}>
-                    <ButtonCustom className={cx('btnDetail')} leftIcon={<EditOutlined />} outline verysmall>
+                    <ButtonCustom className={cx('btnDetail')} leftIcon={<EyeOutlined />} outline verysmall>
                         Chi tiết
                     </ButtonCustom>
                     <ButtonCustom

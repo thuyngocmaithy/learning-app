@@ -1,15 +1,35 @@
-.title-column-table {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    input {
-        margin-left: 15px;
-    }
-}
-
-.container-stt {
+.toolbar {
     display: flex;
     justify-content: space-between;
-    margin: 0 5px;
+    align-items: center;
+}
+
+.container-header-frame-subject,
+.item-frame-no-subject {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btnDetail {
+    margin-right: 5px;
+}
+
+.item-subject,
+.title-frame {
+    display: flex;
+}
+
+.dash {
+    margin: 0 8px;
+}
+
+.description {
+    font-weight: 300;
+    font-size: 15px;
+}
+
+.creditHour {
+    margin-left: 8px;
+    color: var(--primary);
 }

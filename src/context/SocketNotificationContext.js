@@ -18,9 +18,10 @@ export const SocketNotificationProvider = ({ children }) => {
 
         if (userId !== 0) {
             // Tạo kết nối socket cho thông báo
-            socketIo = io('http://localhost:5000/notifications', {
-                transports: ['websocket'], // Chỉ sử dụng WebSocket
-                path: '/socket.io'
+            socketIo = io('http://14.225.212.147:5000/notifications', {
+                transports: ['websocket'],
+                path: '/socket.io',
+                requestTimeout: 10000
             });
 
             // Xử lý kết nối thành công
@@ -35,6 +36,7 @@ export const SocketNotificationProvider = ({ children }) => {
             // Xử lý lỗi kết nối
             socketIo.on('connect_error', (err) => {
                 console.error('Lỗi kết nối socket:', err);
+                setSocket(null); // Xóa socket nếu không kết nối được
             });
 
             // Tham gia vào một room dựa trên userId

@@ -1,10 +1,11 @@
-.item-feature {
+.title-frame-subject,
+.item-frame-no-subject {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .btnDetail {
-    margin-right: 5px;
+    margin-left: 15px;
 
 }

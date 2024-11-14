@@ -10,6 +10,45 @@ export const getAll = async () => {
     }
 };
 
+export const getById = async (id) => {
+    try {
+        const response = await api.get(`/study-frames/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+export const createStudyFrame = async (data) => {
+    try {
+        const response = await api.post('/study-frames', data);
+        return response;
+    } catch (error) {
+        console.error('Create study-frames error:', error);
+        throw error;
+    }
+};
+
+export const updateStudyFrame = async (id, data) => {
+    try {
+        const response = await api.put(`/study-frames/${id}`, data);
+        return response;
+    } catch (error) {
+        console.error('Update study-frames error:', error);
+        throw error;
+    }
+};
+
+export const deleteStudyFrames = async (ids) => {
+    try {
+        const response = await api.delete(`/study-frames?ids=${ids}`);
+        return response;
+    } catch (error) {
+        console.error('Delete study-frames error:', error);
+        throw error;
+    }
+};
 
 export const GetSubjectByMajor = async (userId) => {
     try {
@@ -58,3 +97,4 @@ export const getAllStudyFrameComponent = async () => {
         throw error;
     }
 }
+

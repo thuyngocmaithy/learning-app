@@ -20,9 +20,10 @@ export const SocketMessagesProvider = ({ children }) => {
 
         if (userId !== null && listSRAndThesisIdJoin.length > 0) {
             // Tạo kết nối socket cho for messages
-            socketIo = io('http://localhost:5000/messages', {
-                transports: ['websocket'], // Chỉ sử dụng WebSocket, không cần polling
-                path: '/socket.io'
+            socketIo = io('http://14.225.212.147:5000/messages', {
+                transports: ['websocket'],
+                path: '/socket.io',
+                requestTimeout: 10000
             });
 
             // Xử lý kết nối thành công
@@ -53,6 +54,7 @@ export const SocketMessagesProvider = ({ children }) => {
             // Xử lý lỗi kết nối
             socketIo.on('connect_error', (err) => {
                 console.error('Socket connection error:', err);
+                setSocket(null); // Xóa socket nếu không kết nối được
             });
 
             // Set socket instance in state

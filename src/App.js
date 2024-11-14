@@ -8,16 +8,18 @@ import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';
 import { PermissionDetailContext } from './context/PermissionDetailContext';
+import { api } from './utils/apiConfig';
 
 function App() {
     const { userId, permission } = useContext(AccountLoginContext);
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
+    const [status, setStatus] = useState('');
 
-    const findKeyByValue = (obj, value) => {
-        return Object.keys(obj).find(key => obj[key] === value);
-    };
+    useEffect(() => {
+
+    }, []);
 
 
     const getListFeature = async () => {
@@ -46,8 +48,29 @@ function App() {
 
     useEffect(() => {
         setIsLoading(true);
-        getListFeature();
+        const checkDatabaseStatus = async () => {
+            try {
+                const response = await api.get('http://14.225.212.147:5000/statusConnection');
+                setStatus(response.data.status);
+            } catch (error) {
+                console.error('Error checking database status:', error);
+                setStatus('error');
+            } finally {
+                // Lấy danh sách chức năng sau khi connect success db
+                getListFeature();
+            }
+        };
+
+        checkDatabaseStatus();
     }, [permission]);
+
+    const findKeyByValue = (obj, value) => {
+        return Object.keys(obj).find(key => obj[key] === value);
+    };
+
+    if (status === 'error') {
+        return <div className='container-loading'>Vui lòng tải lại trang</div>;
+    }
 
     return isLoading ? (
         <div className={('container-loading')}>

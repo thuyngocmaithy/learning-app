@@ -17,7 +17,7 @@ const routes = {
     ChuanDauRa: '/ChuanDauRa',
 
     // NGHIỆP VỤ
-    ThietLap: '/ThietLap',
+
     NghiepVu: '/NghiepVu',
     Dashboard_Department: '/Department/Dashboard',
     MoHocPhan: '/Department/NghiepVu/MoHocPhan',
@@ -29,6 +29,9 @@ const routes = {
     NhomDeTaiNCKH_Department: '/Department/NghiepVu/NhomDeTaiNCKH',
 
     // THIẾT LẬP
+    ThietLap: '/ThietLap',
+    KhaiBao: '/ThietLap/KhaiBao',
+    HeThong: '/ThietLap/HeThong',
     KhungCTDT: '/Department/ThietLap/KhungCTDT',
     ThanhPhanKhungDT: '/Department/ThietLap/ThanhPhanKhungDT',
     PhanQuyenChucNang: '/Department/ThietLap/PhanQuyenChucNang',

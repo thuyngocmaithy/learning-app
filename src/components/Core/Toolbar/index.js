@@ -50,7 +50,7 @@ function Toolbar({ type, onClick, backgroundCustom = '#a5bbf3', isVisible, fileI
         if (type === 'Upload' && fileInputRef.current) {
             fileInputRef.current.click(); // Kích hoạt click vào input file            ;
         } else {
-            onClick(); // Gọi onClick nếu không phải là type Upload
+            if (onClick) onClick(); // Gọi onClick nếu không phải là type Upload
         }
     };
 

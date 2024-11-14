@@ -48,3 +48,5 @@ export const deleteStudyFrameComponents = async (ids) => {
         throw error;
     }
 };
+
+

@@ -5,6 +5,7 @@ import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import classNames from 'classnames/bind';
 import styles from "./KhungCTDTUpdate.module.scss"
+import { createStudyFrame, updateStudyFrame } from '../../../services/studyFrameService';
 
 const cx = classNames.bind(styles)
 
@@ -45,19 +46,15 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
 
             if (isUpdate) {
                 let frameData = {
-                    frameComponentName: values.frameComponentName,
+                    frameName: values.frameName,
                 };
-                console.log(frameData);
-
-                // response = await updateSemester(showModal.frameComponentId, frameData);
+                response = await updateStudyFrame(showModal.frameId, frameData);
             } else {
                 let frameData = {
-                    frameComponentId: values.frameComponentId,
-                    frameComponentName: values.frameComponentName,
+                    frameId: values.frameId,
+                    frameName: values.frameName,
                 };
-                console.log(frameData);
-
-                // response = await createSemester(frameData);
+                response = await createStudyFrame(frameData);
             }
 
             if (response && response.data) {
@@ -79,17 +76,18 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
+            width='800px'
         >
             <Form form={form}>
                 <FormItem
-                    name="frameComponentId"
+                    name="frameId"
                     label="Mã khung chương trình đào tạo"
                     rules={[{ required: true, message: 'Vui lòng nhập mã khung' }]}
                 >
                     <Input disabled={isUpdate ? true : false} />
                 </FormItem>
                 <FormItem
-                    name="frameComponentName"
+                    name="frameName"
                     label="Tên khung chương trình đào tạo"
                     rules={[{ required: true, message: 'Vui lòng nhập tên khung' }]}
                 >

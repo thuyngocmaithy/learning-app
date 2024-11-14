@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useRef, useState } from 'react';
+import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHListRegister.module.scss';
 import ListRegister from '../../Core/ListRegister';
@@ -11,6 +11,7 @@ import { useSocketNotification } from '../../../context/SocketNotificationContex
 import { cancelRegisterConfirm } from '../../Core/Delete';
 import notifications from '../../../config/notifications';
 import { deleteFollowerDetailBySRIdAndUserId } from '../../../services/followerDetailService';
+import UserInfo from '../../UserInfo';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +23,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
 }) {
     const [listPersonal, setListPersonal] = useState([]);
     const [listGroup, setListGroup] = useState([]);
+    const [showModalInfo, setShowModalInfo] = useState(false);
     const [typeApprove, setTypeApprove] = useState('personal');
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification, deleteNotification } = useSocketNotification();
@@ -74,7 +76,14 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                             renderItem={(item) => (
                                 <List.Item
                                     actions={[
-                                        <Button verysmall outline key="list-loadmore-edit">Thông tin sinh viên</Button>,
+                                        <Button
+                                            verysmall
+                                            outline
+                                            key="list-loadmore-edit"
+                                            onClick={() => {
+                                                setShowModalInfo(item.user.userId)
+                                            }}
+                                        >Thông tin sinh viên</Button>,
                                     ]}
                                 >
                                     <Skeleton avatar title={false} loading={item.loading} active>
@@ -239,7 +248,16 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                     renderItem={(item) => (
                         <List.Item
                             actions={[
-                                <Button verysmall outline key="list-loadmore-edit">Thông tin sinh viên</Button>,
+                                <Button
+                                    verysmall
+                                    outline
+                                    key="list-loadmore-edit"
+                                    onClick={() => {
+                                        setShowModalInfo(item.user.userId)
+                                    }}
+                                >
+                                    Thông tin sinh viên
+                                </Button>,
                                 item.isApprove ?
                                     <Button className={cx("btn-cancel")} verysmall outline key="list-loadmore-more" onClick={() => {
                                         scientificResearchCancelApproveRef.current = item;
@@ -279,6 +297,17 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
         }
     };
 
+    const studentInfoMemoized = useMemo(() => {
+        return (
+            showModalInfo &&
+            <UserInfo
+                showModal={showModalInfo}
+                onClose={() => setShowModalInfo(false)}
+                showInfoStudent
+            />
+        );
+    }, [showModalInfo]);
+
     return (
         <ListRegister
             title={title}
@@ -297,6 +326,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                     };
                 })}
             />
+            {studentInfoMemoized}
         </ListRegister>
     );
 });
