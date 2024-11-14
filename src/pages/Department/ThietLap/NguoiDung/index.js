@@ -9,6 +9,7 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
+import { NguoiDungDetail } from '../../../../components/FormDetail/NguoiDungDetail';
 import { deleteUserById } from '../../../../services/userService';
 import { getAllUser } from '../../../../services/userService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
@@ -84,10 +85,7 @@ function NguoiDung() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModal(record);
-                            setIsUpdate(true);
-                            setViewOnly(true)
-                            setShowModalDetail(true);
+                            setShowModalDetail(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -214,6 +212,14 @@ function NguoiDung() {
         );
     }, [showModal, isUpdate]);
 
+    const NguoiDungDetailMemoized = useMemo(() => (
+        <NguoiDungDetail
+            title={'người dùng'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -248,6 +254,7 @@ function NguoiDung() {
                 keyIdChange="userId"
             />
             {NguoiDungUpdateMemoized}
+            {NguoiDungDetailMemoized}
             <ImportExcel
                 title={'người dùng'}
                 showModal={showModalImport}
