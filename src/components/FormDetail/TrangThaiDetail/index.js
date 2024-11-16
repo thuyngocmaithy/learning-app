@@ -2,12 +2,12 @@ import React, { memo } from 'react';
 import FormItem from '../../Core/FormItem';
 import Detail from '../../Core/Detail';
 import classNames from 'classnames/bind';
-import styles from './KhoaDetail.module.scss';
+import styles from './TrangThaiDetail.module.scss';
 import { Form } from 'antd';
 
 const cx = classNames.bind(styles);
 
-export const KhoaDetail = memo(function KhoaDetail({
+export const TrangThaiDetail = memo(function TrangThaiDetail({
     title,
     showModal,
     setShowModal
@@ -28,15 +28,16 @@ export const KhoaDetail = memo(function KhoaDetail({
             onClose={handleCloseModal}
             className={cx('wrapper-modal-detail')}>
             <Form className={cx('container-detail')}>
-                <FormItem label={'Mã khoa/ngành'} name="facultyId">
-                    <p>{showModal?.facultyId || ''}</p>
+                <FormItem label={'Mã trạng thái'} name="statusId">
+                    <p>{showModal?.statusId || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên khoa/ngành'} name="facultyName">
-                    <p>{showModal?.facultyName || ''}</p>
+                <FormItem label={'Tên khoa/ngành'} name="statusName">
+                    <p>{showModal?.statusName || ''}</p>
+                </FormItem>
+                <FormItem label={'Loại trạng thái'} name="type">
+                    <p>{showModal?.type || ''}</p>
                 </FormItem>
             </Form>
         </Detail>
     );
 });
-
-

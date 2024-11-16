@@ -803,6 +803,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
             width="auto"
+            form={form}
         >
             <Steps current={currentStep}>
                 {steps.map((item) => (

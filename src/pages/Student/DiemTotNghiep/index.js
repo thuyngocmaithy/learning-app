@@ -211,24 +211,61 @@ function DiemTotNghiep() {
                     <div className={cx('info-right')}>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Số tín chỉ còn lại:</span>
-                            <span className={cx('value-info')}>{remainingCredits || 0}</span>
+                            <span className={cx('value-info')}>{Math.abs(remainingCredits) || 0}</span>
                         </div>
                         <div className={cx('info-item')}>
                             <span className={cx('title-info')}>Tổng số tín chỉ dự kiến đang nhập:</span>
-                            <span className={cx('value-info')}>{totalscientificResearchedCredits || 0}</span>
+                            <span className={cx('value-info')}>{Math.abs(totalscientificResearchedCredits) || 0}</span>
                         </div>
                         <div className={cx('info-item')}>
-                            <span className={cx('title-info')}>Số tín chỉ cần nhập lại:</span>
-                            <span className={cx('value-info')}>{(remainingCredits - totalscientificResearchedCredits) || 0}</span>
+                            <span className={cx('title-info')}>Số tín chỉ cần chọn lại:</span>
+                            <span className={cx('value-info')}>{Math.abs(remainingCredits - totalscientificResearchedCredits) || 0}</span>
                         </div>
+                        <div className={cx('infomation')}>
+                            <div className={cx('sort')}>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Loại A: Từ 8.5 trở lên</span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Loại B: Từ 7.0 đến 8.4</span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Loại C: Từ 5.5 đến 6.9</span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Loại D: Từ 4.0 đến 5.4</span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Loại F: Dưới 4.0</span>
+                                </div>
+                            </div>
+                            <div className={cx('sort')}>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Xếp loại xuất sắc: Đạt từ 3.6 đến 4.0 </span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Xếp loại giỏi: Đạt từ 3.2 đến 3.59 </span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Xếp loại khá: Đạt từ 2.5 đến 3.19</span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Xếp loại trung bình: Đạt từ 2.0 đến 2.49</span>
+                                </div>
+                                <div className={cx('info-item')}>
+                                    <span className={cx('title-info')}>Không được xét tốt nghiệp: Đạt dưới 2.0</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     <div className={cx('result-right')}>
                         <div className={cx('result-item')}>
-                            <span className={cx('title-result')}>Điểm chung bình tích lũy:</span>
+                            <span className={cx('title-result')}>Điểm chung bình tích lũy dự kiến:</span>
                             <span className={cx('value-result')}>{calculatedGPA || 0}</span>
                         </div>
                         <div className={cx('result-item')}>
-                            <span className={cx('title-result')}>Bằng tốt nghiệp:</span>
+                            <span className={cx('title-result')}>Xếp loại tốt nghiệp:</span>
                             <span className={cx('value-result')}>{graduationType || ''}</span>
                         </div>
                     </div>

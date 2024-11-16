@@ -24,8 +24,8 @@ function DanhSachHocPhan() {
     }, []);
 
     const resetTable = useCallback(() => {
-        setTableKey(prevKey => prevKey + 1); // Increment key to force remount
-        setSelectedSubjects({}); // Clear selections
+        setTableKey(prevKey => prevKey + 1);
+        setSelectedSubjects({});
     }, []);
 
     const handleSave = async () => {

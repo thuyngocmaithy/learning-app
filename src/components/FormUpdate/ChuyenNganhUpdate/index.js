@@ -55,21 +55,13 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
 
     useEffect(() => {
         if (showModal && isUpdate && form) {
-
-            console.log(showModal);
-
-            // if (showModal.faculty) {
-            //     const facultyId = showModal.faculty;
-            //     setSelectedFaculty(facultyId);
-            //     form.setFieldValue('facultyId', facultyId);
-            // }
-
             form.setFieldsValue({
                 majorId: showModal.majorId,
                 majorName: showModal.majorName,
                 facultyId: showModal.facultyId,
                 facultyName: showModal.facultyName,
             });
+            setSelectedFaculty(showModal.facultyId);
         }
     }, [showModal, isUpdate, form]);
 
@@ -98,7 +90,6 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
 
             if (response?.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} chuyên ngành thành công!`);
-                handleCloseModal();
                 if (reLoad) reLoad();
             }
         } catch (error) {
@@ -120,14 +111,15 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
             showModal={showModal !== false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
-            width="auto">
+            width="auto"
+            form={form}>
             <Form form={form}>
                 <FormItem
                     name="majorId"
                     label="Mã chuyên ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập mã chuyên ngành' }]}
                 >
-                    <Input disabled={viewOnly} />
+                    <Input disabled={viewOnly || isUpdate} />
                 </FormItem>
                 <FormItem
                     name="majorName"

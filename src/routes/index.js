@@ -29,6 +29,7 @@ import ChuyenNganh from '../pages/Department/ThietLap/ChuyenNganh';
 import KhungCTDT from '../pages/Department/ThietLap/KhungCTDT';
 import ThanhPhanKhungDT from '../pages/Department/ThietLap/ThanhPhanKhungDT';
 import KhoaChuyenNganh from '../pages/Department/ThietLap/KhoaChuyenNganh';
+import TrangThai from '../pages/Department/ThietLap/TrangThai';
 
 // COMMON
 import LoginForm from '../pages/Shared/Login';
@@ -73,6 +74,8 @@ const privateRoutes = [
     { path: config.routes.ChuyenNganh, component: ChuyenNganh, layout: DepartmentLayout },
     { path: config.routes.ThanhPhanKhungDT, component: ThanhPhanKhungDT, layout: DepartmentLayout },
     { path: config.routes.KhoaChuyenNganh, component: KhoaChuyenNganh, layout: DepartmentLayout },
+    { path: config.routes.TrangThai, component: TrangThai, layout: DepartmentLayout },
+
 ];
 
 //Không đăng nhập vẫn vào được

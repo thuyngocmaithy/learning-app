@@ -10,6 +10,7 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import { getAll, deleteMajorById } from '../../../../services/majorService';
 import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganhUpdate';
+import { ChuyenNganhDetail } from '../../../../components/FormDetail/ChuyenNganhDetail';
 
 const cx = classNames.bind(styles);
 
@@ -83,6 +84,14 @@ function ChuyenNganh() {
         );
     }, [showModal, isUpdate]);
 
+    const ChuyenNganhDetailMemoized = useMemo(() => (
+        <ChuyenNganhDetail
+            title={'Chuyên ngành'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
     const columns = (showModal) => [
         {
             title: 'Mã chuyên ngành',
@@ -112,10 +121,7 @@ function ChuyenNganh() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModal(record);
-                            setIsUpdate(true);
-                            setViewOnly(true)
-                            setShowModalDetail(true);
+                            setShowModalDetail(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -172,6 +178,7 @@ function ChuyenNganh() {
                 keyIdChange="majorId"
             />
             {ChuyenNganhUpdateMemorized}
+            {ChuyenNganhDetailMemoized}
 
         </div>
     );

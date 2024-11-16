@@ -12,7 +12,8 @@ import { getAllFaculty, deleteFacultyById } from '../../../../services/facultySe
 import { getAll as getAllMajors, deleteMajorById } from '../../../../services/majorService';
 import { KhoaUpdate } from '../../../../components/FormUpdate/KhoaUpdate';
 import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganhUpdate';
-
+import { KhoaDetail } from '../../../../components/FormDetail/KhoaDetail';
+import { ChuyenNganhDetail } from '../../../../components/FormDetail/ChuyenNganhDetail';
 const cx = classNames.bind(styles);
 
 const { TabPane } = Tabs;
@@ -20,6 +21,8 @@ const { TabPane } = Tabs;
 function KhoaChuyenNganh() {
     // Shared states
     const [activeTab, setActiveTab] = useState('1');
+    const [showModalDetail, setShowModalDetail] = useState(false);
+
 
     // Khoa states
     const [khoaData, setKhoaData] = useState([]);
@@ -126,9 +129,7 @@ function KhoaChuyenNganh() {
                         outline
                         verysmall
                         onClick={() => {
-                            setKhoaShowModal(record);
-                            setKhoaIsUpdate(true);
-                            setKhoaViewOnly(true);
+                            setShowModalDetail(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -178,9 +179,7 @@ function KhoaChuyenNganh() {
                         outline
                         verysmall
                         onClick={() => {
-                            setMajorShowModal(record);
-                            setMajorIsUpdate(true);
-                            setMajorViewOnly(true);
+                            setShowModalDetail(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -224,6 +223,22 @@ function KhoaChuyenNganh() {
         />
     ), [majorShowModal, majorIsUpdate, majorViewOnly]);
 
+    const KhoaDetailMemoized = useMemo(() => (
+        <KhoaDetail
+            title={'Khoa'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
+    const ChuyenNganhDetailMemoized = useMemo(() => (
+        <ChuyenNganhDetail
+            title={'Chuyên ngành'}
+            showModal={showModalDetail}
+            setShowModal={setShowModalDetail}
+        />
+    ), [showModalDetail]);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -254,6 +269,7 @@ function KhoaChuyenNganh() {
                                 keyIdChange="facultyId"
                             />
                             {KhoaUpdateMemo}
+                            {KhoaDetailMemoized}
                         </TabPane>
 
                         <TabPane tab="Chuyên ngành" key="2">
@@ -267,6 +283,7 @@ function KhoaChuyenNganh() {
                                 keyIdChange="majorId"
                             />
                             {ChuyenNganhUpdateMemo}
+                            {ChuyenNganhDetailMemoized}
                         </TabPane>
                     </Tabs>
                 </div>

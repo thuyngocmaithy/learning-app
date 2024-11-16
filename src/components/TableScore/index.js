@@ -174,8 +174,9 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                         <TableRow key={`${frameComponent.frameComponentId}-subject-${subject.subjectId}`}>
                             <TableCell align="center">{index + 1}</TableCell>
                             <TableCell align="center">{subject.subjectId}</TableCell>
-                            <TableCell align="left">{subject.subjectName}</TableCell>
+                            <TableCell align="center">{subject.subjectName}</TableCell>
                             <TableCell align="center">{subject.creditHour}</TableCell>
+                            <TableCell align="center">{score?.finalScore10 || ''}</TableCell>
                             <TableCell align="center">
                                 <Select
                                     onChange={(value) => handleChange(value, subject.subjectId, subject.creditHour)}
@@ -219,7 +220,8 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
         { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
         { id: 'tinchi', label: 'Số tín chỉ', minWidth: 50, align: 'center' },
-        { id: 'score', label: 'Điểm dự kiến', minWidth: 100, align: 'center' },
+        { id: 'score10', label: 'Điểm hệ 10', minWidth: 100, align: 'center' },
+        { id: 'score', label: 'Tín chỉ dự kiến', minWidth: 100, align: 'center' },
         { id: 'improvement', label: 'Cải thiện', minWidth: 100, align: 'center' },
     ];
 
