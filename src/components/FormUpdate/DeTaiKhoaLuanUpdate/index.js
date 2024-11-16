@@ -5,11 +5,11 @@ import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createSR, getSRById, updateSRById } from '../../../services/scientificResearchService';
+import { createThesis, getThesisById, updateThesisById } from '../../../services/thesisService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { useLocation } from 'react-router-dom';
-import { getScientificResearchGroupById, getWhere } from '../../../services/scientificResearchGroupService';
+import { getThesisGroupById, getWhere } from '../../../services/thesisGroupService';
 import notifications from '../../../config/notifications';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -18,45 +18,45 @@ const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 dayjs.extend(utc);
 
-const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
+const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     title,
     isUpdate,
     showModal,
     setShowModal,
     reLoad,
-    SRGId
+    ThesisGroupId
 }) {
     const [form] = useForm(); // Sử dụng hook useForm    
     const [instructorOptions, setInstructorOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
-    const [srgroupOptions, setSRGroupOptions] = useState([]);
+    const [thesisgroupOptions, setThesisGroupOptions] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
 
-    const statusType = 'Tiến độ đề tài NCKH';
+    const statusType = 'Tiến độ đề tài khóa luận';
 
 
-    // Xử lý lấy SRGId    
-    const SRGIdFromUrl = queryParams.get('SRGId');
+    // Xử lý lấy ThesisGroupId    
+    const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId');
 
-    //lấy danh sách nhóm đề tài NCKH
-    const fetchSRGroups = async () => {
+    //lấy danh sách nhóm đề tài KhoaLuan
+    const fetchThesisGroups = async () => {
         const response = await getWhere({ stillValue: true });
         if (response.status === 200) {
-            const options = response.data.data.map((SRG) => ({
-                value: SRG.scientificResearchGroupId,
-                label: `${SRG.scientificResearchGroupName}`,
+            const options = response.data.data.map((ThesisGroup) => ({
+                value: ThesisGroup.thesisGroupId,
+                label: `${ThesisGroup.thesisGroupName}`,
             }));
-            setSRGroupOptions(options);
+            setThesisGroupOptions(options);
         }
     };
 
     //lấy danh sách giảng viên theo khoa
-    const fetchInstructors = async (SRGIdInput) => {
-        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput);
-        const response = await getUsersByFaculty(SRG.data.faculty?.facultyId);
+    const fetchInstructors = async (ThesisGroupIdInput) => {
+        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput);
+        const response = await getUsersByFaculty(ThesisGroup.data.data.faculty?.facultyId);
         if (response && response.data) {
             const options = response.data.map((user) => ({
                 value: user.userId,
@@ -68,15 +68,15 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     useEffect(() => {
         if (showModal) {
-            if (SRGIdFromUrl) {
+            if (ThesisGroupIdFromUrl) {
                 fetchInstructors();
             }
             else {
-                fetchSRGroups();
+                fetchThesisGroups();
             }
         }
 
-    }, [showModal, SRGIdFromUrl]);
+    }, [showModal, ThesisGroupIdFromUrl]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -92,36 +92,28 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     setStatusOptions(options);
                 }
             } catch (error) {
-                console.error(' [ DeTaiNCKHUpdate - fetchStatusByType - Error ] :', error);
+                console.error(' [ DeTaiKhoaLuanUpdate - fetchStatusByType - Error ] :', error);
             }
         };
 
         fetchStatusByType();
     }, [statusType]);
 
-    const levelsOptions = [
-        { value: 'Cơ sở', label: 'Cơ sở' },
-        { value: 'Thành phố', label: 'Thành phố' },
-        { value: 'Bộ', label: 'Bộ' },
-        { value: 'Quốc gia', label: 'Quốc gia' },
-        { value: 'Quốc tế', label: 'Quốc tế' },
-    ]
-
     useEffect(() => {
         const setDataInitial = async () => {
-            // Nếu không có scientificResearchGroup => Tìm trong db
-            let scientificResearchGroup = null;
-            if (showModal.scientificResearchGroup === undefined) {
-                const response = await getSRById(showModal.scientificResearchId);
-                scientificResearchGroup = {
-                    value: response.data.scientificResearchGroup.scientificResearchGroupId,
-                    label: response.data.scientificResearchGroup.scientificResearchGroupName
+            // Nếu không có thesisGroup => Tìm trong db
+            let thesisGroup = null;
+            if (showModal.thesisGroup === undefined) {
+                const response = await getThesisById(showModal.thesisId);
+                thesisGroup = {
+                    value: response.data.thesisGroup.thesisGroupId,
+                    label: response.data.thesisGroup.thesisGroupName
                 };
             }
             else {
-                scientificResearchGroup = {
-                    value: showModal.scientificResearchGroup.scientificResearchGroupId,
-                    label: showModal.scientificResearchGroup.scientificResearchGroupName
+                thesisGroup = {
+                    value: showModal.thesisGroup.thesisGroupId,
+                    label: showModal.thesisGroup.thesisGroupName
                 };
             }
             const startDate = showModal.startDate ? dayjs.utc(showModal.startDate).local() : '';
@@ -129,23 +121,22 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             // Set value cho form
             form.setFieldsValue({
-                scientificResearchName: showModal.scientificResearchName,
-                srgroup: scientificResearchGroup,
+                thesisName: showModal.thesisName,
+                thesisgroup: thesisGroup,
                 description: showModal.description,
                 instructor: {
                     value: showModal.instructor.userId,
                     label: showModal.instructor.fullname
                 },
                 numberOfMember: showModal.numberOfMember,
-                level: showModal.level,
                 status: {
                     value: showModal.status.statusId,
                     label: showModal.status.statusName
                 },
                 ...(showModal.startDate && showModal.finishDate) ? {
-                    srDate: [startDate, finishDate]
+                    thesisDate: [startDate, finishDate]
                 } : {
-                    srDate: []
+                    thesisDate: []
                 }
             });
         }
@@ -161,7 +152,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-    const handleChangeSRGroup = (value) => {
+    const handleChangeThesisGroup = (value) => {
         fetchInstructors(value);
     };
 
@@ -176,37 +167,36 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            let scientificResearchData = {
-                scientificResearchName: values.scientificResearchName,
+            let thesisData = {
+                thesisName: values.thesisName,
                 description: values.description,
                 instructorId: values.instructor.value,
                 statusId: values.status.value,
                 numberOfMember: values.numberOfMember,
-                level: values.level,
-                scientificResearchGroup: SRGId || values.srgroup.value,
-                startDate: new Date(values.srDate[0].format('YYYY-MM-DD HH:mm')),
-                finishDate: new Date(values.srDate[1].format('YYYY-MM-DD HH:mm')),
+                thesisGroup: ThesisGroupId || values.thesisgroup.value,
+                startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),
+                finishDate: new Date(values.thesisDate[1].format('YYYY-MM-DD HH:mm')),
             };
 
             let response;
             if (isUpdate) {
-                response = await updateSRById(showModal.scientificResearchId, scientificResearchData);
+                response = await updateThesisById(showModal.thesisId, thesisData);
                 handleCloseModal();
             } else {
                 const createUserResponse = await getUserById(userId);
                 const createUserId = createUserResponse.data;
-                scientificResearchData = {
-                    ...scientificResearchData,
+                thesisData = {
+                    ...thesisData,
                     createUserId: createUserId,
                     lastModifyUserId: null
                 }
 
-                response = await createSR(scientificResearchData);
+                response = await createThesis(thesisData);
             }
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} đề tài thành công!`);
-                if (isUpdate) handleSendNotification(response.data);
+                if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
 
@@ -215,12 +205,13 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-    const handleSendNotification = async (scientificResearchData) => {
+    const handleSendNotification = async (thesisData) => {
         try {
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('create', scientificResearchData, user.data);
+            const ListNotification = await notifications.getKhoaLuanNotification('create', thesisData, user.data);
+            console.log(ListNotification);
 
-            ListNotification.forEach(async (itemNoti) => {
+            ListNotification?.forEach(async (itemNoti) => {
                 await sendNotification(itemNoti.toUser, itemNoti);
             })
 
@@ -253,30 +244,30 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 form={form}
             >
                 <FormItem
-                    name="scientificResearchName"
+                    name="thesisName"
                     label="Tên đề tài"
                     rules={[{ required: true, message: 'Vui lòng nhập tên đề tài!' }]}
                 >
                     <Input />
                 </FormItem>
                 <FormItem
-                    hidden={SRGIdFromUrl}
-                    name="srgroup"
-                    label="Nhóm đề tài NCKH"
-                    rules={SRGIdFromUrl ? [] : [
-                        { required: true, message: 'Vui lòng chọn nhóm đề tài NCKH!' },
-                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài NCKH không được để trống!') }
+                    hidden={ThesisGroupIdFromUrl}
+                    name="thesisgroup"
+                    label="Nhóm đề tài KhoaLuan"
+                    rules={ThesisGroupIdFromUrl ? [] : [
+                        { required: true, message: 'Vui lòng chọn nhóm đề tài KhoaLuan!' },
+                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài KhoaLuan không được để trống!') }
                     ]}
                 >
                     <Select
                         showSearch
-                        placeholder="Chọn nhóm đề tài NCKH"
+                        placeholder="Chọn nhóm đề tài KhoaLuan"
                         optionFilterProp="children"
-                        onChange={handleChangeSRGroup}
+                        onChange={handleChangeThesisGroup}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
-                        options={srgroupOptions}
+                        options={thesisgroupOptions}
                         labelInValue
                     />
                 </FormItem>
@@ -296,21 +287,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
                         options={instructorOptions}
-                    />
-                </FormItem>
-                <FormItem
-                    name="level"
-                    label="Cấp"
-                    rules={[{ required: true, message: 'Vui lòng cấp đề tài!' }]}
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn cấp"
-                        optionFilterProp="children"
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={levelsOptions}
                     />
                 </FormItem>
                 <FormItem
@@ -346,7 +322,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     />
                 </FormItem>
                 <FormItem
-                    name="srDate"
+                    name="thesisDate"
                     label="Thời gian thực hiện"
                     rules={[{ type: 'array', required: true, message: 'Vui lòng chọn thời gian thực hiện!' }]}
 
@@ -374,4 +350,4 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     );
 });
 
-export default DeTaiNCKHUpdate;
+export default DeTaiKhoaLuanUpdate;

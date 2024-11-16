@@ -39,15 +39,32 @@ export const SocketMessagesProvider = ({ children }) => {
 
             // Lắng nghe tin nhắn mới
             socketIo.on('receiveMessage', (message) => {
-                const SRId = message.scientificResearch.scientificResearchId;
+                const SRId = message.scientificResearch?.scientificResearchId;
+                const thesisId = message.thesis?.thesisId;
 
-                setMessagesMap((prevMessagesMap) => ({
-                    ...prevMessagesMap,
-                    [SRId]: [
-                        ...(prevMessagesMap[SRId] || []), // Giữ lại các tin nhắn trước đó (nếu có)
-                        message // Thêm tin nhắn mới vào
-                    ]
-                }));
+                setMessagesMap((prevMessagesMap) => {
+
+                    // Tạo bản sao map hiện tại
+                    const updatedMap = { ...prevMessagesMap };
+
+                    // Thêm message vào SRId nếu SRId tồn tại
+                    if (SRId) {
+                        updatedMap[SRId] = [
+                            ...(prevMessagesMap[SRId] || []),
+                            message
+                        ];
+                    }
+
+                    // Thêm message vào thesisId nếu thesisId tồn tại
+                    if (thesisId) {
+                        updatedMap[thesisId] = [
+                            ...(prevMessagesMap[thesisId] || []),
+                            message
+                        ];
+                    }
+
+                    return updatedMap;
+                });
             });
 
 
@@ -72,10 +89,10 @@ export const SocketMessagesProvider = ({ children }) => {
 
 
     // Function để gửi message đến room
-    const sendMessage = (scientificResearchId, messageContent) => {
+    const sendMessage = (id, messageContent) => {
         return new Promise((resolve, reject) => {
             if (socket) {
-                const room = scientificResearchId;
+                const room = id;
                 socket.emit('sendMessage', { room, messageContent, senderId: userId }, (response) => {
                     resolve(response);
                 });
@@ -85,39 +102,52 @@ export const SocketMessagesProvider = ({ children }) => {
         });
     };
 
-    const getMessages = (socketIo, SRIdList) => {
+    const getMessages = (socketIo, IDList) => {
         return new Promise((resolve, reject) => {
-            let messagesMapTemp = {}; // Biến tạm để lưu tin nhắn của tất cả SRId
+            let messagesMapTemp = {}; // Biến tạm để lưu tin nhắn của tất cả Id
 
-            socketIo.on('messagesList', (SRIdReceice, messagesReceice) => {
-                // Cập nhật tin nhắn của từng SRId vào biến tạm
-                messagesMapTemp[SRIdReceice] = messagesReceice;
+            socketIo.on('messagesList', (IdReceice, messagesReceice) => {
+                // Cập nhật tin nhắn của từng Id vào biến tạm
+                messagesMapTemp[IdReceice] = messagesReceice;
 
-                // Kiểm tra nếu tất cả SRId đã nhận được tin nhắn
-                if (Object.keys(messagesMapTemp).length === SRIdList.length) {
+                // Kiểm tra nếu tất cả Id đã nhận được tin nhắn
+                if (Object.keys(messagesMapTemp).length === IDList.length) {
                     resolve(messagesMapTemp);
                 }
             });
 
-            // Gửi yêu cầu lấy tin nhắn cho từng SRId
-            SRIdList.forEach(SRId => {
-                socketIo.emit('getMessages', SRId);
+            // Gửi yêu cầu lấy tin nhắn cho từng Id
+            IDList.forEach(Id => {
+                socketIo.emit('getMessages', Id);
             });
         });
     };
 
     const fetchAllMessages = async (listSRAndThesisIdJoin, socketIo) => {
         try {
+
             // Tạo danh sách các SRId từ listSRAndThesisIdJoin
-            const SRIdList = listSRAndThesisIdJoin.map(element => element.scientificResearch.scientificResearchId);
+            const IdList = listSRAndThesisIdJoin.map(element =>
+                element.scientificResearch
+                    ? {
+                        key: 'srId',
+                        value: element.scientificResearch.scientificResearchId
+                    }
+                    : element.thesis
+                        ? {
+                            key: 'thesisId',
+                            value: element.thesis.thesisId
+                        }
+                        : null // Giá trị mặc định nếu cả hai đều không tồn tại
+            ).filter(id => id !== null); // Loại bỏ các giá trị null
 
             // Tham gia vào room cho mỗi SRId
-            SRIdList.forEach(SRId => {
-                socketIo.emit('joinRoom', SRId);
+            IdList.forEach(id => {
+                socketIo.emit('joinRoom', id.value);
             });
 
             // Gọi getMessages với danh sách SRId
-            const allMessages = await getMessages(socketIo, SRIdList);
+            const allMessages = await getMessages(socketIo, IdList);
 
             // Cập nhật toàn bộ tin nhắn vào state
             setMessagesMap((prevMessagesMap) => ({

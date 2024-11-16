@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './TrangThai.module.scss';
-import { message } from 'antd';
+import { message, Tag } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -23,19 +23,18 @@ function TrangThai() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
-    const [viewOnly, setViewOnly] = useState(false);
 
     const fetchData = async () => {
         try {
             const result = await getAllStatus();
-            console.log(result);
 
             let listStatus = Array.isArray(result.data)
                 ? result.data.map(status => ({
                     statusId: status.statusId,
                     statusName: status.statusName,
                     orderNo: status.orderNo,
-                    type: status.type
+                    type: status.type,
+                    color: status.color
                 })) : [];
 
             setData(listStatus);
@@ -72,12 +71,11 @@ function TrangThai() {
     const TrangThaiUpdateMemorized = useMemo(() => {
         return (
             <TrangThaiUpdate
-                title={'Trạng thái'}
+                title={'trạng thái'}
                 isUpdate={isUpdate}
                 showModal={showModal}
                 setShowModal={setShowModal}
                 reLoad={fetchData}
-                viewOnly={viewOnly}
             />
         );
     }, [showModal, isUpdate]);
@@ -90,7 +88,7 @@ function TrangThai() {
         />
     ), [showModalDetail]);
 
-    const columns = (showModal) => [
+    const columns = () => [
         {
             title: 'Mã trạng thái',
             dataIndex: 'statusId',
@@ -105,6 +103,47 @@ function TrangThai() {
             title: 'Loại trạng thái',
             dataIndex: 'type',
             key: 'type',
+            align: 'center',
+            render: (_, record) => {
+                let color;
+                if (record.type === 'Tiến độ đề tài NCKH') {
+                    color = 'green';
+                }
+                if (record.type === 'Tiến độ đề tài khóa luận') {
+                    color = 'cyan';
+                }
+                if (record.type === 'Tiến độ nhóm đề tài khóa luận') {
+                    color = 'red';
+                }
+                if (record.type === 'Tiến độ nhóm đề tài NCKH') {
+                    color = 'blue';
+                }
+                return (
+                    <Tag
+                        className={cx('tag-status')}
+                        color={color}
+                    >
+                        {record.type}
+                    </Tag >)
+            }
+        },
+        {
+            title: 'Màu sắc',
+            dataIndex: 'color',
+            key: 'color',
+            align: 'center',
+            render: (_, record) => (
+                <span
+                    className={'color-tag'}
+                    style={{ background: record.color }}
+                ></span>
+            )
+        },
+        {
+            title: 'Thứ tự hiển thị',
+            dataIndex: 'orderNo',
+            key: 'orderNo',
+            align: 'center',
         },
         {
             title: 'Action',
@@ -131,7 +170,6 @@ function TrangThai() {
                         onClick={() => {
                             setShowModal(record);
                             setIsUpdate(true);
-                            setViewOnly(false);
                             setShowModalDetail(false);
                         }}>
                         Sửa
@@ -158,7 +196,6 @@ function TrangThai() {
                         onClick={() => {
                             setShowModal(true);
                             setIsUpdate(false);
-                            setViewOnly(false);
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('trạng thái', handleDelete)} />

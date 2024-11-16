@@ -5,7 +5,7 @@ import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { getUserById } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
-import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
+import { createThesisGroup, updateThesisGroupById } from '../../../services/thesisGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getAllFaculty } from '../../../services/facultyService';
 import dayjs from 'dayjs';
@@ -14,7 +14,7 @@ import utc from 'dayjs/plugin/utc';
 const { RangePicker } = DatePicker;
 dayjs.extend(utc);
 
-const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
+const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     title,
     isUpdate,
     showModal,
@@ -28,9 +28,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [selectedFaculty, setSelectedFaculty] = useState(null);
 
-    const statusType = 'Tiến độ nhóm đề tài NCKH';
+    const statusType = 'Tiến độ nhóm đề tài khóa luận';
 
-    // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài nghiên cứu"
+    // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài khóa luận"
     useEffect(() => {
         const fetchStatusByType = async () => {
             try {
@@ -90,7 +90,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             const endCreateSRDate = showModal.endCreateSRDate ? dayjs.utc(showModal.endCreateSRDate).local() : '';
 
             form.setFieldsValue({
-                scientificResearchGroupName: showModal.scientificResearchGroupName,
+                thesisGroupName: showModal.thesisGroupName,
                 description: showModal.description,
                 faculty: showModal.faculty.facultyName,
                 status: showModal.status.statusId,
@@ -116,8 +116,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            let scientificResearchGroupData = {
-                scientificResearchGroupName: values.scientificResearchGroupName,
+            let thesisGroupData = {
+                thesisGroupName: values.thesisGroupName,
                 statusId: selectedStatus,
                 startYear: values.startYear,
                 finishYear: values.finishYear,
@@ -127,19 +127,19 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             };
 
             let response;
-            console.log(scientificResearchGroupData)
+            console.log(thesisGroupData)
             if (isUpdate) {
-                response = await updateScientificResearchGroupById(showModal.scientificResearchGroupId, scientificResearchGroupData);
+                response = await updateThesisGroupById(showModal.thesisGroupId, thesisGroupData);
                 handleCloseModal();
             } else {
                 const createUserResponse = await getUserById(userId);
                 const createUserId = createUserResponse.data;
-                scientificResearchGroupData = {
-                    ...scientificResearchGroupData,
+                thesisGroupData = {
+                    ...thesisGroupData,
                     createUserId: createUserId,
                     lastModifyUserId: createUserId
                 }
-                response = await createSRGroup(scientificResearchGroupData);
+                response = await createThesisGroup(thesisGroupData);
             }
 
             if (response && response.data) {
@@ -148,7 +148,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             }
 
         } catch (error) {
-            console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearchGroup `, error);
+            console.error(`[ DeTaiKhoaLuan - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesisGroup `, error);
         }
     };
 
@@ -179,7 +179,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 <Row gutter={24}>
                     <Col span={12}>
                         <FormItem
-                            name="scientificResearchGroupName"
+                            name="thesisGroupName"
                             label="Tên nhóm đề tài"
                             rules={[{ required: true, message: 'Vui lòng nhập tên nhóm đề tài!' }]}
                         >
@@ -251,4 +251,4 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     );
 });
 
-export default DeTaiNCKHUpdate;
+export default DeTaiKhoaLuanUpdate;

@@ -10,28 +10,44 @@ function ChatBox({ height = '150vh' }) {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const SRIdFromUrl = queryParams.get('scientificResearch');
+    const thesisIdFromUrl = queryParams.get('thesis');
     const [messagesList, setMessagesList] = useState([]);
 
     const fetchMessage = () => {
-        const messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
-
-            return {
-                text: message.content,
-                user: {
-                    id: message.sender.userId,
-                    name: message.sender.fullname,
-                    avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
-                },
-                createdAt: new Date(message.createDate)
-            }
-        });
+        let messagesListConvert;
+        if (SRIdFromUrl) {
+            messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
+                return {
+                    text: message.content,
+                    user: {
+                        id: message.sender.userId,
+                        name: message.sender.fullname,
+                        avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
+                    },
+                    createdAt: new Date(message.createDate)
+                }
+            });
+        }
+        if (thesisIdFromUrl) {
+            messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
+                return {
+                    text: message.content,
+                    user: {
+                        id: message.sender.userId,
+                        name: message.sender.fullname,
+                        avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
+                    },
+                    createdAt: new Date(message.createDate)
+                }
+            });
+        }
         setMessagesList(messagesListConvert);
     }
     useEffect(() => {
-        if (messagesMap && Object.keys(messagesMap).length !== 0 && SRIdFromUrl) {
+        if (messagesMap && Object.keys(messagesMap).length !== 0 && (SRIdFromUrl || thesisIdFromUrl)) {
             fetchMessage();
         }
-    }, [messagesMap, SRIdFromUrl])
+    }, [messagesMap, SRIdFromUrl, thesisIdFromUrl])
 
     return (
         <MinChatUiProvider theme="#6ea9d7">
@@ -44,7 +60,7 @@ function ChatBox({ height = '150vh' }) {
                     <MessageInput
                         placeholder="Type message here"
                         onSendMessage={async (e) => {
-                            sendMessage(SRIdFromUrl, e);
+                            sendMessage(SRIdFromUrl || thesisIdFromUrl, e);
                         }}
                     />
                 </MessageContainer>

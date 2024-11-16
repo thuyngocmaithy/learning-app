@@ -179,19 +179,39 @@ body {
         }
     }
 
-    .wrapper-info-detail {
-        .ant-tag {
-            font-size: 15px;
-            line-height: 20px;
-            align-items: center;
-            display: flex;
-            height: max-content;
-            padding: 10px;
-        }
-
+    // CUSTOM TAG
+    .ant-tag {
+        font-size: 15px;
+        padding: 5px 9px;
+        font-family: math;
     }
 
-    .wrapper-DeTaiNCKHThamGia {
+    .ant-tag.ant-tag-has-color.status-table {
+        color: rgba(0, 0, 0, 0.88);
+        width: -webkit-fill-available;
+        white-space: normal;
+        word-wrap: break-word;
+        text-align: center;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .ant-tag.ant-tag-has-color.status-detail {
+        width: auto;
+        font-size: 15px;
+        line-height: 20px;
+        align-items: center;
+        height: max-content;
+        padding: 10px;
+    }
+
+    .ant-tag.ant-tag-has-color {
+        color: #000;
+    }
+
+
+    .wrapper-DeTaiNCKHThamGia,
+    .wrapper-DeTaiKhoaLuanThamGia {
         .ant-list-item-meta-title {
             margin: 0;
         }
@@ -412,4 +432,14 @@ body {
         max-height: 300px;
         opacity: 1;
     }
+
+    // Color
+    .color-tag {
+        width: 140px;
+        height: 40px;
+        display: block;
+        margin: 0 auto;
+    }
+
+
 }

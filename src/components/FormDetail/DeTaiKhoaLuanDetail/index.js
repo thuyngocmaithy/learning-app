@@ -2,12 +2,12 @@ import React, { memo } from 'react';
 import FormItem from '../../Core/FormItem';
 import Detail from '../../Core/Detail';
 import classNames from 'classnames/bind';
-import styles from './DeTaiNCKHDetail.module.scss';
+import styles from './DeTaiKhoaLuanDetail.module.scss';
 import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
-const DeTaiNCKHDetail = memo(function DeTaiNCKHDetail({
+const DeTaiKhoaLuanDetail = memo(function DeTaiKhoaLuanDetail({
     title,
     showModal,
     setShowModal,
@@ -41,19 +41,16 @@ const DeTaiNCKHDetail = memo(function DeTaiNCKHDetail({
             <div className={cx('container-detail')}>
                 <div>
                     <FormItem label={'Mã đề tài'} className={cx("form-item")}>
-                        <p>{showModal.scientificResearchId}</p>
+                        <p>{showModal.thesisId}</p>
                     </FormItem>
                     <FormItem label={'Tên đề tài'}>
-                        <p>{showModal.scientificResearchName}</p>
+                        <p>{showModal.thesisName}</p>
                     </FormItem>
                     <FormItem label={'Chủ nhiệm đề tài'}>
                         <p>{showModal.instructor ? showModal.instructor.fullname : ''}</p>
                     </FormItem>
                 </div>
                 <div>
-                    <FormItem label={'Cấp'}>
-                        <p>{showModal.level}</p>
-                    </FormItem>
                     <FormItem label={'Thời điểm bắt đầu'}>
                         <p>{dayjs(showModal.startDate).format('DD/MM/YYYY HH:mm')}</p>
                     </FormItem>
@@ -78,4 +75,4 @@ const DeTaiNCKHDetail = memo(function DeTaiNCKHDetail({
     );
 });
 
-export default DeTaiNCKHDetail;
+export default DeTaiKhoaLuanDetail;

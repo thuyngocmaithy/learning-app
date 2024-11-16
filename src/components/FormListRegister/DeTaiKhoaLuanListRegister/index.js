@@ -1,21 +1,21 @@
 import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
-import styles from './DeTaiNCKHListRegister.module.scss';
+import styles from './DeTaiKhoaLuanListRegister.module.scss';
 import ListRegister from '../../Core/ListRegister';
 import { Avatar, Collapse, Empty, List, message, Skeleton, Tabs } from 'antd';
 import Button from '../../Core/Button';
 import { getUserById } from '../../../services/userService';
-import { updateSRUById } from '../../../services/scientificResearchUserService';
+import { updateThesisUserById } from '../../../services/thesisUserService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { cancelApproveConfirm } from '../../Core/Delete';
 import notifications from '../../../config/notifications';
-import { deleteFollowerDetailBySRIdAndUserId } from '../../../services/followerDetailService';
+import { deleteFollowerDetailByThesisIdAndUserId } from '../../../services/followerDetailService';
 import UserInfo from '../../UserInfo';
 
 const cx = classNames.bind(styles);
 
-const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
+const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
     title,
     showModal,
     setShowModal,
@@ -28,7 +28,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
     const [typeApprove, setTypeApprove] = useState('group');
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification, deleteNotification } = useSocketNotification();
-    const scientificResearchCancelApproveRef = useRef(null);
+    const thesisCancelApproveRef = useRef(null);
 
     useEffect(() => {
         if (showModal) {
@@ -86,7 +86,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                 onClick={(e) => {
                                     e.stopPropagation(); // Ngừng bọt sự kiện
                                     e.preventDefault();
-                                    scientificResearchCancelApproveRef.current = groupItems;
+                                    thesisCancelApproveRef.current = groupItems;
                                     setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                 }}
                             >
@@ -152,11 +152,11 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
             }
             let responseApprove = null;
             if (typeApprove === "personal") {
-                responseApprove = await updateSRUById([item.id], appoveData);
+                responseApprove = await updateThesisUserById([item.id], appoveData);
             }
             else {
                 const listIdUpdated = item.map((item) => item.id);
-                responseApprove = await updateSRUById(listIdUpdated, appoveData);
+                responseApprove = await updateThesisUserById(listIdUpdated, appoveData);
             }
             if (responseApprove) {
                 message.success('Duyệt thành công');
@@ -203,13 +203,13 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
         try {
             let listMember = [];
             if (item.group !== 0) {
-                listMember = item.map((SRU) => SRU.user);
+                listMember = item.map((ThesisUser) => ThesisUser.user);
             }
             else {
                 listMember.push(item.user);
             }
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('approve', showModal, user.data, listMember);
+            const ListNotification = await notifications.getKhoaLuanNotification('approve', showModal, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
                 await sendNotification(itemNoti.toUser, itemNoti);
@@ -221,14 +221,14 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
 
 
     const handleCancelApprove = async () => {
-        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
+        const thesisCancel = thesisCancelApproveRef.current;
         try {
             const appoveData = {
                 isApprove: false,
             }
-            const id = scientificResearchCancel.map((item) => item.id);
+            const id = thesisCancel.map((item) => item.id);
 
-            const responseApprove = await updateSRUById(id, appoveData);
+            const responseApprove = await updateThesisUserById(id, appoveData);
             if (responseApprove) {
                 message.success('Hủy duyệt thành công');
 
@@ -236,8 +236,8 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                 if (typeApprove === 'personal')
                     setListPersonal((prevList) =>
                         prevList.map((listItem) =>
-                            // Kiểm tra nếu id của listItem có trong mảng scientificResearchCancel
-                            scientificResearchCancel.some(item => item.id === listItem.id)
+                            // Kiểm tra nếu id của listItem có trong mảng thesisCancel
+                            thesisCancel.some(item => item.id === listItem.id)
                                 ? { ...listItem, isApprove: false }
                                 : listItem
                         )
@@ -252,7 +252,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                         // Lặp qua từng nhóm trong listGroup
                         Object.keys(updatedList).forEach((groupKey) => {
                             updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
-                                groupItem.id === scientificResearchCancel[0].id
+                                groupItem.id === thesisCancel[0].id
                                     ? { ...groupItem, isApprove: false } // Cập nhật isApprove cho item có id tương ứng
                                     : groupItem
                             );
@@ -263,12 +263,12 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                 }
 
                 // Xóa người theo dõi
-                scientificResearchCancel.forEach(async (item) => {
-                    await deleteFollowerDetailBySRIdAndUserId({ srId: item.scientificResearch.scientificResearchId, userId: item.user.userId })
+                thesisCancel.forEach(async (item) => {
+                    await deleteFollowerDetailByThesisIdAndUserId({ srId: item.thesis.thesisId, userId: item.user.userId })
                 })
 
                 // Hủy thông báo
-                scientificResearchCancel.forEach((item) => {
+                thesisCancel.forEach((item) => {
                     handleCancelNotification(item);
                 })
                 changeStatus(true);
@@ -280,17 +280,17 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
 
 
     const handleCancelNotification = async () => {
-        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
+        const thesisCancel = thesisCancelApproveRef.current;
         try {
             let listMember = [];
-            if (scientificResearchCancel.group !== 0) {
-                listMember = scientificResearchCancel.map((SRU) => SRU.user);
+            if (thesisCancel.group !== 0) {
+                listMember = thesisCancel.map((ThesisUser) => ThesisUser.user);
             }
             else {
-                listMember.push(scientificResearchCancel.user);
+                listMember.push(thesisCancel.user);
             }
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('approve', showModal, user.data, listMember);
+            const ListNotification = await notifications.getKhoaLuanNotification('approve', showModal, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
                 await deleteNotification(itemNoti.toUser, itemNoti);
@@ -350,7 +350,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                     </Button>,
                                     item.isApprove
                                         ? <Button className={cx("btn-cancel")} verysmall outline key="list-loadmore-more" onClick={() => {
-                                            scientificResearchCancelApproveRef.current = [item];
+                                            thesisCancelApproveRef.current = [item];
                                             setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                         }}>
                                             Hủy duyệt
@@ -429,4 +429,4 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
     );
 });
 
-export default DeTaiNCKHListRegister;
+export default DeTaiKhoaLuanListRegister;

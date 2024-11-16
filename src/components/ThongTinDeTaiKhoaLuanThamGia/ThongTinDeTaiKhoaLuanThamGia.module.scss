@@ -1,0 +1,34 @@
+.container-title {
+    display: flex;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+
+    h2 {
+        margin-right: 20px;
+
+    }
+
+    .title-SR {
+        flex: 1 1 500px;
+        text-wrap: pretty;
+    }
+}
+
+.container-info-detail {
+    display: flex;
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+.container-description {
+    margin-top: 30px;
+    box-shadow: var(--box-shadow-1);
+    border-radius: 17px;
+    padding: 20px;
+    font-size: 15px;
+
+    h4 {
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+}

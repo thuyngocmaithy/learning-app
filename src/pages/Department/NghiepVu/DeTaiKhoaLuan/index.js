@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
-import styles from './DeTaiNCKH.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Col, Select, Checkbox } from 'antd';
+import styles from './DeTaiKhoaLuan.module.scss';
+import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Col, Select } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -9,24 +9,24 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
-import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
-import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRByIds } from '../../../../services/scientificResearchService';
-import { getBySRId } from '../../../../services/scientificResearchUserService';
-import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
-import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
+import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
+import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds } from '../../../../services/thesisService';
+import { getByThesisId } from '../../../../services/thesisUserService';
+import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
+import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
-import { getScientificResearchGroupById } from '../../../../services/scientificResearchGroupService';
+import { getThesisGroupById } from '../../../../services/thesisGroupService';
 
 const cx = classNames.bind(styles);
 
 
 
-function DeTaiNCKH() {
+function DeTaiKhoaLuan() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
@@ -36,24 +36,16 @@ function DeTaiNCKH() {
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
     const { userId } = useContext(AccountLoginContext);
-    const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
+    const [listThesisJoined, setListthesisJoined] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     const [showFilter, setShowFilter] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
-    // khóa toolbar nhập liệu khi có SRGId trên url và SRGId là nhóm đề tài NCKH hết hạn nhập liệu
+    // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
     const [disableToolbar, setDisableToolbar] = useState(false);
 
-    const statusType = 'Tiến độ đề tài NCKH';
-
-    const levelOptions = [
-        { value: 'Cơ sở', label: 'Cơ sở' },
-        { value: 'Thành phố', label: 'Thành phố' },
-        { value: 'Bộ', label: 'Bộ' },
-        { value: 'Quốc gia', label: 'Quốc gia' },
-        { value: 'Quốc tế', label: 'Quốc tế' }
-    ]
+    const statusType = 'Tiến độ đề tài khóa luận';
 
     const levelDisable = [
         { value: '0', label: 'Hiển thị' },
@@ -100,20 +92,20 @@ function DeTaiNCKH() {
         setTabActive(tabId);
     };
 
-    // Xử lý lấy SRGId    
-    const SRGIdFromUrl = queryParams.get('SRGId') || undefined;
+    // Xử lý lấy ThesisGroupId    
+    const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId') || undefined;
 
     const columns = (showModalUpdate) => [
         {
             title: 'Mã đề tài',
-            dataIndex: 'scientificResearchId',
-            key: 'scientificResearchId',
+            dataIndex: 'thesisId',
+            key: 'thesisId',
             width: '140px'
         },
         {
             title: 'Tên đề tài',
-            dataIndex: 'scientificResearchName',
-            key: 'scientificResearchName',
+            dataIndex: 'thesisName',
+            key: 'thesisName',
             width: '200px'
         },
         {
@@ -125,12 +117,6 @@ function DeTaiNCKH() {
             title: 'SL thành viên',
             dataIndex: 'numberOfMember',
             key: 'numberOfMember',
-            align: 'center',
-        },
-        {
-            title: 'Cấp',
-            dataIndex: 'level',
-            key: 'level',
             align: 'center',
         },
         {
@@ -205,15 +191,15 @@ function DeTaiNCKH() {
             ),
         }
     ];
-    const listRegisterscientificResearchJoined = async () => {
+    const listRegisterthesisJoined = async () => {
         try {
-            const response = await getWhere({ instructorId: userId, scientificResearchGroup: SRGIdFromUrl });
+            const response = await getWhere({ instructorId: userId, thesisGroup: ThesisGroupIdFromUrl });
             if (response.status === 200 && response.data.data) {
-                setListscientificResearchJoined(response.data.data);
+                setListthesisJoined(response.data.data);
             }
 
         } catch (error) {
-            console.error('Error fetching registered scientificResearchs:', error);
+            console.error('Error fetching registered thesiss:', error);
             setIsLoading(false);
         }
     };
@@ -222,43 +208,43 @@ function DeTaiNCKH() {
         try {
             let result = null;
 
-            if (SRGIdFromUrl) {
-                // Kiểm tra SRG còn hạn tạo đề tài
-                const resultSRG = await getScientificResearchGroupById(SRGIdFromUrl)
-                if (resultSRG.status === 200) {
-                    const dataSRG = resultSRG.data.data;
+            if (ThesisGroupIdFromUrl) {
+                // Kiểm tra ThesisGroup còn hạn tạo đề tài
+                const resultThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
+                if (resultThesisGroup.status === 200) {
+                    const dataThesisGroup = resultThesisGroup.data.data;
 
                     const currentDate = new Date();
-                    const validDate = (dataSRG.startCreateSRDate === null && dataSRG.endCreateSRDate === null) ||
-                        (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate)
+                    const validDate = (dataThesisGroup.startCreateThesisDate === null && dataThesisGroup.endCreateThesisDate === null) ||
+                        (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate && new Date(dataThesisGroup.endCreateThesisDate) > currentDate)
                         ? true
                         : false
                     setDisableToolbar(!validDate);
                 }
 
                 //     if (validDate) {
-                //         result = await getBySRGId(SRGIdFromUrl);
+                //         result = await getByThesisGroupId(ThesisGroupIdFromUrl);
                 //     } else {
                 //         result = { status: 'NotValid' }
                 //     }
                 // }
-                result = await getBySRGId(SRGIdFromUrl);
+                result = await getByThesisGroupId(ThesisGroupIdFromUrl);
             }
             else {
-                result = await getAllSR();
+                result = await getAllThesis();
             }
 
             if (result.status === 200) {
-                const scientificResearchs = await Promise.all((result.data.data || result.data).map(async (data) => {
-                    // Kiểm tra SRG còn hạn tạo đề tài
+                const thesiss = await Promise.all((result.data.data || result.data).map(async (data) => {
+                    // Kiểm tra ThesisGroup còn hạn tạo đề tài
                     // const currentDate = new Date();
-                    // const dataSRG = data.scientificResearchGroup;
-                    // const validDate = (dataSRG.startCreateSRDate === null && dataSRG.endCreateSRDate === null) ||
-                    //     (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate)
+                    // const dataThesisGroup = data.thesisGroup;
+                    // const validDate = (dataThesisGroup.startCreateThesisDate === null && dataThesisGroup.endCreateThesisDate === null) ||
+                    //     (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate && new Date(dataThesisGroup.endCreateThesisDate) > currentDate)
                     //     ? true
                     //     : false
                     // lấy số sinh viên đăng ký
-                    const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
+                    const numberOfRegister = await getByThesisId({ thesis: data.thesisId });
 
                     return {
                         ...data,
@@ -266,7 +252,7 @@ function DeTaiNCKH() {
                         // validDate: validDate
                     };
                 }));
-                setData(scientificResearchs);
+                setData(thesiss);
             }
 
         } catch (error) {
@@ -279,7 +265,7 @@ function DeTaiNCKH() {
 
     useEffect(() => {
         fetchData();
-        listRegisterscientificResearchJoined();
+        listRegisterthesisJoined();
     }, []);
 
     useEffect(() => {
@@ -289,7 +275,7 @@ function DeTaiNCKH() {
         }
     }, [isChangeStatus]);
 
-    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
+    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài khóa luận"
     useEffect(() => {
         const fetchStatusByType = async () => {
             try {
@@ -315,7 +301,7 @@ function DeTaiNCKH() {
             <>
                 <Col className="gutter-row" span={6}>
                     <FormItem
-                        name={'scientificResearchId'}
+                        name={'thesisId'}
                         label={'Mã đề tài'}
                     >
                         <Input />
@@ -323,7 +309,7 @@ function DeTaiNCKH() {
                 </Col>
                 <Col className="gutter-row" span={6}>
                     <FormItem
-                        name={'scientificResearchName'}
+                        name={'thesisName'}
                         label={'Tên đề tài'}
                     >
                         <Input />
@@ -335,21 +321,6 @@ function DeTaiNCKH() {
                         label={'Chủ nhiệm đề tài'}
                     >
                         <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'level'}
-                        label={'Cấp'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            options={levelOptions}
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                        />
                     </FormItem>
                 </Col>
                 <Col className="gutter-row" span={6}>
@@ -398,16 +369,16 @@ function DeTaiNCKH() {
             const response = await getWhere(values);
 
             if (response.status === 200) {
-                const scientificResearchs = await Promise.all((response.data.data).map(async (data) => {
+                const thesiss = await Promise.all((response.data.data).map(async (data) => {
                     // lấy số sinh viên đăng ký
-                    const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
+                    const numberOfRegister = await getByThesisId({ thesis: data.thesisId });
 
                     return {
                         ...data,
                         numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
                     };
                 }));
-                setData(scientificResearchs);
+                setData(thesiss);
             }
             if (response.status === 204) {
                 setData([]);
@@ -440,7 +411,7 @@ function DeTaiNCKH() {
                         data={data}
                         setSelectedRowKeys={setSelectedRowKeys}
                         selectedRowKeys={selectedRowKeys}
-                        keyIdChange='scientificResearchId'
+                        keyIdChange='thesisId'
                         loading={isLoading}
                     />
                 </>
@@ -451,25 +422,25 @@ function DeTaiNCKH() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
-                    {listScientificResearchJoined.length === 0 &&
+                    {listThesisJoined.length === 0 &&
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
-                    {listScientificResearchJoined.map((item, index) => {
+                    {listThesisJoined.map((item, index) => {
                         let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
-                                className={cx('card-DeTaiNCKHThamGia')}
+                                className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearchName}
+                                title={item.thesisName}
                                 extra={
                                     <ButtonCustom
                                         primary
                                         verysmall
                                         onClick={() => {
-                                            SRGIdFromUrl ?
-                                                navigate(`${config.routes.DeTaiNCKHThamGia_Department}?SRG=${SRGIdFromUrl}&scientificResearch=${item.scientificResearchId}`) :
-                                                navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`);
+                                            ThesisGroupIdFromUrl ?
+                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia_Department}?ThesisGroup=${ThesisGroupIdFromUrl}&thesis=${item.thesisId}`) :
+                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia_Department}?thesis=${item.thesisId}`);
                                         }}
                                     >
                                         Chi tiết
@@ -490,68 +461,68 @@ function DeTaiNCKH() {
 
     const handleDelete = async () => {
         try {
-            await deleteSRs(selectedRowKeys);
+            await deleteThesiss(selectedRowKeys);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
-            listRegisterscientificResearchJoined();
+            listRegisterthesisJoined();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Xoá thành công');
         } catch (error) {
             message.error('Xoá thất bại');
-            console.error('Error [Nghiep vu - DeTaiNCKH - delete]:', error);
+            console.error('Error [Nghiep vu - DeTaiKhoaLuan - delete]:', error);
         }
     };
 
     const handleEnable = async () => {
         try {
-            let scientificResearchData = {
+            let thesisData = {
                 isDisable: false
             };
-            await updateSRByIds(selectedRowKeys, scientificResearchData);
+            await updateThesisByIds(selectedRowKeys, thesisData);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
-            listRegisterscientificResearchJoined();
+            listRegisterthesisJoined();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Hiển thị thành công');
         } catch (error) {
             message.error('Hiển thị thất bại');
-            console.error('Error [Nghiep vu - DeTaiNCKH - enable]:', error);
+            console.error('Error [Nghiep vu - DeTaiKhoaLuan - enable]:', error);
         }
     };
 
     const handleDisable = async () => {
         try {
-            let scientificResearchData = {
+            let thesisData = {
                 isDisable: true
             };
-            await updateSRByIds(selectedRowKeys, scientificResearchData);
+            await updateThesisByIds(selectedRowKeys, thesisData);
             // Refresh dữ liệu sau khi disable thành công
             fetchData();
-            listRegisterscientificResearchJoined();
+            listRegisterthesisJoined();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Ẩn thành công');
         } catch (error) {
             message.error('Ẩn thất bại');
-            console.error('Error [Nghiep vu - DeTaiNCKH - disable]:', error);
+            console.error('Error [Nghiep vu - DeTaiKhoaLuan - disable]:', error);
         }
     };
 
-    const DeTaiNCKHUpdateMemoized = useMemo(() => {
+    const DeTaiKhoaLuanUpdateMemoized = useMemo(() => {
         return (
-            <DeTaiNCKHUpdate
-                title={'đề tài nghiên cứu khoa học'}
+            <DeTaiKhoaLuanUpdate
+                title={'đề tài khóa luận'}
                 isUpdate={isUpdate}
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
                 reLoad={fetchData}
-                SRGId={SRGIdFromUrl}
+                ThesisGroupId={ThesisGroupIdFromUrl}
             />
         );
-    }, [showModalUpdate, isUpdate, SRGIdFromUrl])
+    }, [showModalUpdate, isUpdate, ThesisGroupIdFromUrl])
 
-    const DeTaiNCKHListRegisterMemoized = useMemo(() => {
+    const DeTaiKhoaLuanListRegisterMemoized = useMemo(() => {
         return (
-            <DeTaiNCKHListRegister
+            <DeTaiKhoaLuanListRegister
                 title={'Danh sách sinh viên đăng ký đề tài'}
                 showModal={showModalListRegister}
                 setShowModal={setShowModalListRegister}
@@ -560,9 +531,9 @@ function DeTaiNCKH() {
         );
     }, [showModalListRegister]);
 
-    const DeTaiNCKHDetailMemoized = useMemo(() => (
-        <DeTaiNCKHDetail
-            title={'Đề tài nghiên cứu khoa học'}
+    const DeTaiKhoaLuanDetailMemoized = useMemo(() => (
+        <DeTaiKhoaLuanDetail
+            title={'Đề tài khóa luận'}
             showModal={showModalDetail}
             setShowModal={setShowModalDetail}
         />
@@ -572,16 +543,16 @@ function DeTaiNCKH() {
         <>
             <div className={cx('wrapper')}>
                 {
-                    // Nếu url trước đó là NhomDeTaiNCKH_Department thì hiển thị Breadcrumb
-                    SRGIdFromUrl &&
+                    // Nếu url trước đó là NhomDeTaiKhoaLuan_Department thì hiển thị Breadcrumb
+                    ThesisGroupIdFromUrl &&
                     <Breadcrumb
                         className={cx('breadcrumb')}
                         items={[
                             {
-                                title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                                title: <Link to={config.routes.NhomDeTaiKhoaLuan_Department}>Nhóm đề tài khóa luận</Link>,
                             },
                             {
-                                title: 'Danh sách đề tài nghiên cứu khoa học',
+                                title: 'Danh sách đề tài khóa luận',
                             },
                         ]}
                     />
@@ -591,7 +562,7 @@ function DeTaiNCKH() {
                         <span className={cx('icon')}>
                             <ProjectIcon />
                         </span>
-                        <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
+                        <h3 className={cx('title')}>Danh sách đề tài khóa luận</h3>
                     </div>
                     {tabActive === 1 ? (
                         <div className={cx('wrapper-toolbar')}>
@@ -608,16 +579,16 @@ function DeTaiNCKH() {
                                         setShowModalUpdate(true);
                                         setIsUpdate(false);
                                     }}
-                                    isVisible={permissionDetailData.isAdd}
+                                    isVisible={permissionDetailData?.isAdd}
                                 />
                             }
                             <Toolbar
                                 type={'Xóa'}
-                                onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
-                                isVisible={permissionDetailData.isDelete}
+                                onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
+                                isVisible={permissionDetailData?.isDelete}
                             />
-                            <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài nghiên cứu', handleDisable)} />
-                            <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài nghiên cứu', handleEnable)} />
+                            <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài khóa luận', handleDisable)} />
+                            <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài khóa luận', handleEnable)} />
                             {!disableToolbar &&
                                 <Toolbar type={'Nhập file Excel'} />
                             }
@@ -642,11 +613,11 @@ function DeTaiNCKH() {
 
             </div>
 
-            {DeTaiNCKHUpdateMemoized}
-            {DeTaiNCKHListRegisterMemoized}
-            {DeTaiNCKHDetailMemoized}
+            {DeTaiKhoaLuanUpdateMemoized}
+            {DeTaiKhoaLuanListRegisterMemoized}
+            {DeTaiKhoaLuanDetailMemoized}
         </>
     );
 }
 
-export default DeTaiNCKH;
+export default DeTaiKhoaLuan;

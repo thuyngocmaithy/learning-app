@@ -3,9 +3,9 @@ import { api } from '../utils/apiConfig';
 export const getAllThesis = async () => {
     try {
         const response = await api.get('/thesis');
-        return response.data;
+        return response;
     } catch (error) {
-        console.error('[thesisServive - getAllThesis - error] : ', error)
+        console.error('[thesisServive - create - error] : ', error);
         throw error;
     }
 };
@@ -15,12 +15,12 @@ export const createThesis = async (thesisData) => {
         const response = await api.post('/thesis', thesisData);
         return response.data;
     } catch (error) {
-        console.error('[thesisServive - createThesis - error] : ', error);
+        console.error('[thesisServive - createthesis - error] : ', error);
         throw error;
     }
 };
 
-export const deleteThesis = async (ids) => {
+export const deleteThesiss = async (ids) => {
     try {
         const response = await api.delete(`/thesis?ids=${ids}`);
         return response;
@@ -30,12 +30,14 @@ export const deleteThesis = async (ids) => {
     }
 };
 
+
+
 export const getThesisById = async (id) => {
     try {
         const response = await api.get(`/thesis/${id}`);
         return response.data;
     } catch (error) {
-        console.error('[thesisServive - getThesisById - error] : ', error);
+        console.error('[thesisServive - getthesisById - error] : ', error);
         throw error;
     }
 };
@@ -46,8 +48,53 @@ export const updateThesisById = async (thesisId, thesisData) => {
         const response = await api.put(`/thesis/${thesisId}`, thesisData);
         return response.data;
     } catch (error) {
-        console.error('[thesisServive - updateThesIsById - error] : ', error);
+        console.error('[thesisServive - updatethesisById - error] : ', error);
         throw error;
     }
 }
 
+export const updateThesisByIds = async (thesisIds, thesisData) => {
+    try {
+        const response = await api.put(`/thesis/updateThesisMulti/${thesisIds}`, thesisData);
+        return response.data;
+    } catch (error) {
+        console.error('[thesisServive - updatethesisByIds - error] : ', error);
+        throw error;
+    }
+}
+
+
+export const getByThesisGroupId = async (thesisGroupId) => {
+    try {
+        const url = `/thesis/getByThesisGroupId?ThesisGroupId=${thesisGroupId}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getWhere = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/thesis/getWhere?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getByThesisGroupIdAndCheckApprove = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/thesis/getByThesisGroupIdAndCheckApprove?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

@@ -33,3 +33,16 @@ export const deleteFollowerDetailBySRIdAndUserId = async (querySRIdAndUserId) =>
         throw error;
     }
 };
+
+
+export const deleteFollowerDetailByThesisIdAndUserId = async (querySRIdAndUserId) => {
+    try {
+        const queryParams = new URLSearchParams(querySRIdAndUserId).toString();
+        const url = `/follower-details/deleteFollowerDetailByThesisIdAndUserId?${queryParams}`;
+
+        const response = await api.delete(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

@@ -16,7 +16,7 @@ export const SocketNotificationProvider = ({ children }) => {
     useEffect(() => {
         let socketIo;
 
-        if (userId !== 0) {
+        if (userId !== null) {
             // Tạo kết nối socket cho thông báo
             socketIo = io(`${process.env.REACT_APP_URL_API}/notifications`, {
                 transports: ['websocket'],

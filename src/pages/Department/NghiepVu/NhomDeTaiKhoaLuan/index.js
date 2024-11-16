@@ -1,5 +1,5 @@
 import classNames from 'classnames/bind';
-import styles from './NhomDeTaiNCKH.module.scss';
+import styles from './NhomDeTaiKhoaLuan.module.scss';
 import { Card, Col, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -8,11 +8,11 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
-import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds } from '../../../../services/scientificResearchGroupService';
+import NhomDeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/NhomDeTaiKhoaLuanUpdate';
+import { deleteThesisGroups, getAllThesisGroup, getWhere, updateThesisGroupByIds } from '../../../../services/thesisGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
-import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
+import { getWhere as getWhereThesis } from '../../../../services/thesisService';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -23,13 +23,13 @@ import { getStatusByType } from '../../../../services/statusService';
 const cx = classNames.bind(styles);
 
 
-function NhomDeTaiNCKH() {
+function NhomDeTaiKhoaLuan() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-    const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
+    const [listThesisJoined, setListThesisJoined] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -83,15 +83,15 @@ function NhomDeTaiNCKH() {
     const columns = () => [
         {
             title: 'Mã nhóm đề tài',
-            dataIndex: 'scientificResearchGroupId',
-            key: 'scientificResearchGroupId',
+            dataIndex: 'thesisGroupId',
+            key: 'thesisGroupId',
             align: 'center',
             width: '140px'
         },
         {
             title: 'Tên nhóm đề tài',
-            dataIndex: 'scientificResearchGroupName',
-            key: 'scientificResearchGroupName',
+            dataIndex: 'thesisGroupName',
+            key: 'thesisGroupName',
             align: 'center',
             width: '200px'
         },
@@ -148,7 +148,7 @@ function NhomDeTaiNCKH() {
                         disabled={
                             // không có quyền truy cập => khóa
                             (
-                                permissionDetails["DeTaiNCKH_Department"] === undefined
+                                permissionDetails["DeTaiKhoaLuan_Department"] === undefined
                             )
                                 ? true
                                 : false
@@ -157,8 +157,8 @@ function NhomDeTaiNCKH() {
                         outline
                         verysmall
                         onClick={() => {
-                            navigate(`${config.routes.DeTaiNCKH_Department}?SRGId=${record.scientificResearchGroupId}`,
-                                { state: { from: `${config.routes.NhomDeTaiNCKH_Department}_active` } });
+                            navigate(`${config.routes.DeTaiKhoaLuan_Department}?ThesisGroupId=${record.thesisGroupId}`,
+                                { state: { from: `${config.routes.NhomDeTaiKhoaLuan_Department}_active` } });
                         }}
                     >
                         Danh sách
@@ -184,21 +184,21 @@ function NhomDeTaiNCKH() {
         }
     ];
 
-    // Lấy dữ liệu nhóm đề tài NCKH
+    // Lấy dữ liệu nhóm đề tài KhoaLuan
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const result = await getAllSRGroup()
+            const result = await getAllThesisGroup()
             if (result.status === 200) {
                 var currentDate = new Date();
                 const resultData = result.data.data.map((item) => {
                     return {
                         ...item,
-                        // startCreateSRDate và endCreateSRDate đều null
-                        // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
+                        // startCreateThesisDate và endCreateThesisDate đều null
+                        // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh
-                        validDate: (item.startCreateSRDate === null && item.endCreateSRDate === null) ||
-                            (new Date(item.startCreateSRDate) <= currentDate && new Date(item.endCreateSRDate) > currentDate)
+                        validDate: (item.startCreateThesisDate === null && item.endCreateThesisDate === null) ||
+                            (new Date(item.startCreateThesisDate) <= currentDate && new Date(item.endCreateThesisDate) > currentDate)
                             ? true
                             : false
                     }
@@ -214,42 +214,42 @@ function NhomDeTaiNCKH() {
     };
 
     // Lấy danh sách đề tài làm người hướng dẫn => Giảng viên
-    const listSRJoined = async () => {
+    const fetchListThesisJoined = async () => {
         try {
-            const response = await getWhereSR({ instructorId: userId });
+            const response = await getWhereThesis({ instructorId: userId });
             if (response.status === 200 && response.data.data) {
-                setListscientificResearchJoined(response.data.data);
+                setListThesisJoined(response.data.data);
             }
 
         } catch (error) {
-            console.error('Error fetching listSRJoined:', error);
+            console.error('Error fetching listThesisJoined:', error);
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
         fetchData();
-        listSRJoined();
+        fetchListThesisJoined();
     }, []);
 
-    // Xóa nhóm đề tài NCKH
+    // Xóa nhóm đề tài KhoaLuan
     const handleDelete = async () => {
         try {
-            await deleteScientificResearchGroups(selectedRowKeys);
+            await deleteThesisGroups(selectedRowKeys);
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Xoá thành công');
         } catch (error) {
             message.error('Xoá thất bại');
-            console.error(' [Nghiep vu - NhomDeTaiNCKH_Department - deleted] - Error', error);
+            console.error(' [Nghiep vu - NhomDeTaiKhoaLuan_Department - deleted] - Error', error);
         }
     };
 
 
-    const NhomDeTaiNCKHUpdateMemoized = useMemo(() => {
+    const NhomDeTaiKhoaLuanUpdateMemoized = useMemo(() => {
         return (
-            <NhomDeTaiNCKHUpdate
-                title={'nhóm đề tài nghiên cứu'}
+            <NhomDeTaiKhoaLuanUpdate
+                title={'nhóm đề tài khóa luận'}
                 isUpdate={isUpdate}
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
@@ -278,9 +278,9 @@ function NhomDeTaiNCKH() {
         fetchFaculties();
     }, []);
 
-    const statusType = 'Tiến độ nhóm đề tài NCKH';
+    const statusType = 'Tiến độ nhóm đề tài khóa luận';
 
-    // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài nghiên cứu"
+    // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài khóa luận"
     useEffect(() => {
         const fetchStatusByType = async () => {
             try {
@@ -306,7 +306,7 @@ function NhomDeTaiNCKH() {
             <>
                 <Col className="gutter-row" span={6}>
                     <FormItem
-                        name={'scientificResearchGroupId'}
+                        name={'thesisGroupId'}
                         label={'Mã nhóm đề tài'}
                     >
                         <Input />
@@ -314,7 +314,7 @@ function NhomDeTaiNCKH() {
                 </Col>
                 <Col className="gutter-row" span={6}>
                     <FormItem
-                        name={'scientificResearchGroupName'}
+                        name={'thesisGroupName'}
                         label={'Tên nhóm đề tài'}
                     >
                         <Input />
@@ -395,40 +395,40 @@ function NhomDeTaiNCKH() {
 
     const handleEnable = async () => {
         try {
-            let scientificResearchData = {
+            let thesisData = {
                 isDisable: false
             };
-            await updateSRGByIds(selectedRowKeys, scientificResearchData);
+            await updateThesisGroupByIds(selectedRowKeys, thesisData);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Hiển thị thành công');
         } catch (error) {
             message.error('Hiển thị thất bại');
-            console.error('Error [Nghiep vu - NhomDeTaiNCKH - enable]:', error);
+            console.error('Error [Nghiep vu - NhomDeTaiKhoaLuan - enable]:', error);
         }
     };
 
     const handleDisable = async () => {
         try {
-            let scientificResearchData = {
+            let thesisData = {
                 isDisable: true
             };
-            await updateSRGByIds(selectedRowKeys, scientificResearchData);
+            await updateThesisGroupByIds(selectedRowKeys, thesisData);
             // Refresh dữ liệu sau khi disable thành công
             fetchData();
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Ẩn thành công');
         } catch (error) {
             message.error('Ẩn thất bại');
-            console.error('Error [Nghiep vu - NhomDeTaiNCKH - disable]:', error);
+            console.error('Error [Nghiep vu - NhomDeTaiKhoaLuan - disable]:', error);
         }
     };
 
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Nhóm đề tài NCKH',
+            title: 'Nhóm đề tài khóa luận',
             children: (
                 <>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
@@ -444,7 +444,7 @@ function NhomDeTaiNCKH() {
                         columns={columns(setShowModalUpdate)}
                         data={data}
                         setSelectedRowKeys={setSelectedRowKeys}
-                        keyIdChange='scientificResearchGroupId'
+                        keyIdChange='thesisGroupId'
                         loading={isLoading}
                     />
                 </>
@@ -455,24 +455,24 @@ function NhomDeTaiNCKH() {
             title: 'Tất cả đề tài tham gia',
             children: (
                 <div>
-                    {listScientificResearchJoined.length === 0 &&
+                    {listThesisJoined.length === 0 &&
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
-                    {listScientificResearchJoined.map((item, index) => {
+                    {listThesisJoined.map((item, index) => {
                         let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
                         return (
                             <Card
-                                className={cx('card-DeTaiNCKHThamGia')}
+                                className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearchName}
+                                title={item.thesisName}
                                 extra={
                                     <ButtonCustom
                                         primary
                                         verysmall
                                         onClick={() => {
-                                            navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}&all=true`,
-                                                { state: { from: `${config.routes.NhomDeTaiNCKH_Department}_active` } });
+                                            navigate(`${config.routes.DeTaiKhoaLuanThamGia_Department}?thesis=${item.thesisId}&all=true`,
+                                                { state: { from: `${config.routes.NhomDeTaiKhoaLuan_Department}_active` } });
                                         }}
                                     >
                                         Chi tiết
@@ -498,7 +498,7 @@ function NhomDeTaiNCKH() {
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
-                    <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
+                    <h3 className={cx('title')}>Nhóm đề tài khóa luận</h3>
                 </div>
                 {tabActive === 1 && (
                     <div className={cx('wrapper-toolbar')}>
@@ -518,10 +518,10 @@ function NhomDeTaiNCKH() {
                         />
                         <Toolbar
                             type={'Xóa'}
-                            onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
+                            onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
                             isVisible={permissionDetailData.isDelete} />
-                        <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài nghiên cứu', handleDisable)} />
-                        <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài nghiên cứu', handleEnable)} />
+                        <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài khóa luận', handleDisable)} />
+                        <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài khóa luận', handleEnable)} />
                         <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} />
                         <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
                     </div>
@@ -540,9 +540,9 @@ function NhomDeTaiNCKH() {
                 })}
             />
 
-            {NhomDeTaiNCKHUpdateMemoized}
+            {NhomDeTaiKhoaLuanUpdateMemoized}
         </div>
     );
 }
 
-export default NhomDeTaiNCKH;
+export default NhomDeTaiKhoaLuan;

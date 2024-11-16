@@ -6,7 +6,7 @@ import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Update({ form, title = '', fullTitle = null, children, isUpdate, isViewOnly, hideFooter = false, width = "auto", showModal, onClose, onUpdate, ...props }) {
+function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFooter = false, width = "auto", showModal, onClose, onUpdate, ...props }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -21,8 +21,6 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, isView
     }, [onClose]);
 
     const footer = useMemo(() => {
-        if (isViewOnly) return null;
-
         return isUpdate || fullTitle
             ? [
                 <ButtonCustom key={'save'} primary small onClick={onUpdate}>
@@ -47,13 +45,12 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, isView
                     Lưu & Sao chép
                 </ButtonCustom>,
             ];
-    }, [isViewOnly, isUpdate, onUpdate]);
+    }, [isUpdate, onUpdate]);
 
     const modalTitle = useMemo(() => {
         if (fullTitle) return fullTitle;
-        if (isViewOnly) return `Chi tiết ${title}`;
         return isUpdate ? `Cập nhật ${title}` : `Tạo mới ${title}`;
-    }, [isViewOnly, fullTitle, isUpdate, title]);
+    }, [fullTitle, isUpdate, title]);
 
     return (
         <Modal
@@ -62,7 +59,7 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, isView
             open={open}
             title={modalTitle}
             onCancel={handleCancel}
-            footer={hideFooter || isViewOnly ? null : footer}
+            footer={hideFooter || footer}
             width={width}
             {...props}
         >

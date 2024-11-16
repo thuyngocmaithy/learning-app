@@ -1,15 +1,15 @@
 import classNames from 'classnames/bind';
-import styles from './DeTaiNCKHThamGia.module.scss';
+import styles from './DeTaiKhoaLuanThamGia.module.scss';
 import { Breadcrumb, message, Spin, Tabs } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
 import ChatBox from '../../../components/Core/ChatBox';
-import ThongTinDeTaiNCKHThamGia from '../../../components/ThongTinDeTaiNCKHThamGia';
+import ThongTinDeTaiKhoaLuanThamGia from '../../../components/ThongTinDeTaiKhoaLuanThamGia';
 import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
-import { getSRById } from '../../../services/scientificResearchService';
+import { getThesisById } from '../../../services/thesisService';
 import { uploadFile, downloadFile } from '../../../services/megaService';
 import config from '../../../config';
 import Toolbar from '../../../components/Core/Toolbar';
@@ -19,15 +19,15 @@ import { ProjectIcon } from '../../../assets/icons';
 
 const cx = classNames.bind(styles);
 
-function DeTaiNCKHThamGia({ thesis = false }) {
+function DeTaiKhoaLuanThamGia() {
     const { userId } = useContext(AccountLoginContext);
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const SRIdFromUrl = queryParams.get('scientificResearch');
-    const SRGIdFromUrl = queryParams.get('SRG');
+    const ThesisIdFromUrl = queryParams.get('thesis');
+    const ThesisGroupIdFromUrl = queryParams.get('ThesisGroup');
     const isAll = queryParams.get('all');
     const [isLoading, setIsLoading] = useState(true);
-    const [scientificResearch, setScientificResearch] = useState(null);
+    const [thesis, setThesis] = useState(null);
     const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     const [dataFollower, setDataFollower] = useState([])
     const [dataAttach, setDataAttach] = useState([])
@@ -89,13 +89,14 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         setHeightContainerLoading(height);
     }, []);
 
-    const getInfoscientificResearch = async () => {
+    const getInfothesis = async () => {
         try {
-            if (SRIdFromUrl) {
-                const responsescientificResearchUser = await getSRById(SRIdFromUrl);
-                if (responsescientificResearchUser.status === "success") {
-                    setScientificResearch(responsescientificResearchUser.data)
-                    setDataFollower(responsescientificResearchUser.data.follower[0].followerDetails)
+            if (ThesisIdFromUrl) {
+                const responsethesisUser = await getThesisById(ThesisIdFromUrl);
+                if (responsethesisUser.status === "success") {
+
+                    setThesis(responsethesisUser.data)
+                    setDataFollower(responsethesisUser.data.follower[0].followerDetails)
                 }
             }
         } catch (error) {
@@ -105,8 +106,8 @@ function DeTaiNCKHThamGia({ thesis = false }) {
 
     const getAttach = async () => {
         try {
-            if (SRIdFromUrl) {
-                const response = await getWhere({ SRId: SRIdFromUrl });
+            if (ThesisIdFromUrl) {
+                const response = await getWhere({ thesisId: ThesisIdFromUrl });
                 if (response.status === 200) {
                     const dataAttach = response.data.data.map((data, index) => {
                         return {
@@ -131,7 +132,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
             setIsLoading(true); // Bắt đầu quá trình load
 
             try {
-                await Promise.all([getInfoscientificResearch(), getAttach()]); // Đợi cả 2 function hoàn thành
+                await Promise.all([getInfothesis(), getAttach()]); // Đợi cả 2 function hoàn thành
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu: " + error);
             } finally {
@@ -139,10 +140,10 @@ function DeTaiNCKHThamGia({ thesis = false }) {
             }
         };
 
-        if (SRIdFromUrl) {
+        if (ThesisIdFromUrl) {
             fetchData();
         }
-    }, [SRIdFromUrl]);
+    }, [ThesisIdFromUrl]);
 
 
 
@@ -155,7 +156,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         }
 
         try {
-            const response = await uploadFile(files, userId, SRIdFromUrl); // Gọi hàm upload file
+            const response = await uploadFile(files, userId, ThesisIdFromUrl); // Gọi hàm upload file
             console.log('Upload successful:', response);
             message.success('Tệp đã được tải lên thành công');
         } catch (error) {
@@ -181,17 +182,17 @@ function DeTaiNCKHThamGia({ thesis = false }) {
 
 
     const dataInfoSystem = useMemo(() => [
-        { title: 'Người tạo', description: scientificResearch ? scientificResearch.createUser.fullname : '' },
-        { title: 'Ngày tạo', description: scientificResearch ? format(scientificResearch.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
+        { title: 'Người tạo', description: thesis ? thesis.createUser.fullname : '' },
+        { title: 'Ngày tạo', description: thesis ? format(thesis.createDate, 'dd/MM/yyyy HH:mm:ss') : '' },
         {
-            title: 'Người chỉnh sửa', description: scientificResearch ?
-                scientificResearch.lastModifyUser ?
-                    scientificResearch.lastModifyUser.fullname :
-                    scientificResearch.createUser.fullname
+            title: 'Người chỉnh sửa', description: thesis ?
+                thesis.lastModifyUser ?
+                    thesis.lastModifyUser.fullname :
+                    thesis.createUser.fullname
                 : ''
         },
-        { title: 'Ngày chỉnh sửa', description: scientificResearch ? format(scientificResearch.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
-    ], [scientificResearch]);
+        { title: 'Ngày chỉnh sửa', description: thesis ? format(thesis.lastModifyDate, 'dd/MM/yyyy HH:mm:ss') : '' },
+    ], [thesis]);
 
     const columns = [
         {
@@ -231,7 +232,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         {
             id: 1,
             title: 'Chi tiết',
-            children: <ThongTinDeTaiNCKHThamGia scientificResearch={scientificResearch} />,
+            children: <ThongTinDeTaiKhoaLuanThamGia thesis={thesis} />,
         },
         {
             id: 2,
@@ -246,26 +247,26 @@ function DeTaiNCKHThamGia({ thesis = false }) {
         {
             id: 4,
             title: 'Hệ thống',
-            children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} reLoad={getInfoscientificResearch} />,
+            children: <System dataInfoSystem={dataInfoSystem} dataFollower={dataFollower} reLoad={getInfothesis} />,
         },
     ];
 
-    const urlNCKH = () => {
+    const urlKhoaLuan = () => {
         if (location.pathname.split('/')[1] === "Department") {
-            if (SRGIdFromUrl) {
-                return `${config.routes.DeTaiNCKH_Department}?SRGId=${SRGIdFromUrl}`
+            if (ThesisGroupIdFromUrl) {
+                return `${config.routes.DeTaiKhoaLuan_Department}?ThesisGroupId=${ThesisGroupIdFromUrl}`
             }
             else {
-                return `${config.routes.DeTaiNCKH_Department}?tabIndex=2`
+                return `${config.routes.DeTaiKhoaLuan_Department}?tabIndex=2`
             }
 
         }
         else {
-            if (SRGIdFromUrl) {
-                return `${config.routes.DeTaiNCKH}?SRGId=${SRGIdFromUrl}`
+            if (ThesisGroupIdFromUrl) {
+                return `${config.routes.DeTaiKhoaLuan}?ThesisGroupId=${ThesisGroupIdFromUrl}`
             }
             else {
-                return `${config.routes.DeTaiNCKH}?tabIndex=2`
+                return `${config.routes.DeTaiKhoaLuan}?tabIndex=2`
             }
         }
 
@@ -278,22 +279,22 @@ function DeTaiNCKHThamGia({ thesis = false }) {
             <Spin size="large" />
         </div>
     ) : (
-        < div className={cx('wrapper-DeTaiNCKHThamGia')} >
+        < div className={cx('wrapper-DeTaiKhoaLuanThamGia')} >
             <Breadcrumb
                 className={cx('breadcrumb')}
                 items={isAll !== "true" ?
                     [
-                        // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị
-                        ...(SRGIdFromUrl
+                        // Kiểm tra nếu urlPrevious từ NhomDeTaiKhoaLuan thì mới hiển thị
+                        ...(ThesisGroupIdFromUrl
                             ? [
                                 {
                                     title: <Link
                                         to={
                                             location.pathname.split('/')[1] === "Department"
-                                                ? config.routes.NhomDeTaiNCKH_Department
-                                                : config.routes.NhomDeTaiNCKH
+                                                ? config.routes.NhomDeTaiKhoaLuan_Department
+                                                : config.routes.NhomDeTaiKhoaLuan
                                         }>
-                                        Nhóm đề tài nghiên cứu khoa học
+                                        Nhóm đề tài khóa luận
                                     </Link>,
                                 }
                             ] : []),
@@ -301,15 +302,15 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                             title: <span
                                 className={cx('breadcrumb-item')}
                                 onClick={() => {
-                                    const url = urlNCKH();
+                                    const url = urlKhoaLuan();
                                     navigate(url);
                                 }}
                             >
-                                Danh sách đề tài nghiên cứu khoa học
+                                Danh sách đề tài khóa luận
                             </span>,
                         },
                         {
-                            title: "Thông tin đề tài nghiên cứu khoa học",
+                            title: "Thông tin đề tài khóa luận",
                         },
 
                     ]
@@ -318,14 +319,14 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                         {
                             title: <Link to={
                                 location.pathname.split('/')[1] === "Department"
-                                    ? config.routes.NhomDeTaiNCKH_Department
-                                    : config.routes.NhomDeTaiNCKH
+                                    ? config.routes.NhomDeTaiKhoaLuan_Department
+                                    : config.routes.NhomDeTaiKhoaLuan
                             } >
-                                Nhóm đề tài nghiên cứu khoa học
+                                Nhóm đề tài khóa luận
                             </Link>,
                         },
                         {
-                            title: "Thông tin đề tài nghiên cứu khoa học",
+                            title: "Thông tin đề tài khóa luận",
                         },
                     ]
                 }
@@ -336,7 +337,7 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                         <ProjectIcon />
                     </span>
                     <h3 className={cx('title')}>
-                        {thesis ? 'Thông tin khóa luận tốt nghiệp' : 'Thông tin đề tài nghiên cứu khoa học'}
+                        Thông tin đề tài khóa luận
                     </h3>
                 </div>
                 {isToolbar && (
@@ -366,5 +367,5 @@ function DeTaiNCKHThamGia({ thesis = false }) {
     );
 }
 
-export default DeTaiNCKHThamGia;
+export default DeTaiKhoaLuanThamGia;
 

@@ -7,13 +7,14 @@ import NhomDeTaiNCKH from '../pages/Student/NhomDeTaiNCKH';
 import DeTaiNCKH from '../pages/Student/DeTaiNCKH';
 import TienDoHocPhan from '../pages/Student/TienDoHocPhan';
 import DiemTotNghiep from '../pages/Student/DiemTotNghiep';
-import DeTaiNCKHThamGia from '../pages/Student/DeTaiNCKHThamGia';
-import KhoaLuan from '../pages/Student/KhoaLuan';
+import NhomDeTaiKhoaLuan from '../pages/Student/NhomDeTaiKhoaLuan';
+import DeTaiKhoaLuan from '../pages/Student/DeTaiKhoaLuan';
 import MoHocPhan from '../pages/Department/NghiepVu/MoHocPhan';
 
 // DEPARTMENT
 import Dashboard_Department from '../pages/Department/NghiepVu/Dashboard';
-import KhoaLuan_Department from '../pages/Department/NghiepVu/KhoaLuan';
+import NhomDeTaiKhoaLuan_Department from '../pages/Department/NghiepVu/NhomDeTaiKhoaLuan';
+import DeTaiKhoaLuan_Department from '../pages/Department/NghiepVu/DeTaiKhoaLuan';
 import NhomDeTaiNCKH_Department from '../pages/Department/NghiepVu/NhomDeTaiNCKH';
 import DeTaiNCKH_Department from '../pages/Department/NghiepVu/DeTaiNCKH';
 
@@ -24,8 +25,6 @@ import NguoiDung_Department from '../pages/Department/ThietLap/NguoiDung';
 import HocKy_Department from '../pages/Department/ThietLap/HocKy';
 import ChuKy_Department from '../pages/Department/ThietLap/ChuKy';
 import MonHoc from '../pages/Department/ThietLap/MonHoc';
-import Khoa from '../pages/Department/ThietLap/Khoa';
-import ChuyenNganh from '../pages/Department/ThietLap/ChuyenNganh';
 import KhungCTDT from '../pages/Department/ThietLap/KhungCTDT';
 import ThanhPhanKhungDT from '../pages/Department/ThietLap/ThanhPhanKhungDT';
 import KhoaChuyenNganh from '../pages/Department/ThietLap/KhoaChuyenNganh';
@@ -33,10 +32,11 @@ import TrangThai from '../pages/Department/ThietLap/TrangThai';
 
 // COMMON
 import LoginForm from '../pages/Shared/Login';
+import DeTaiNCKHThamGia from '../pages/Shared/DeTaiNCKHThamGia';
+import DeTaiKhoaLuanThamGia from '../pages/Shared/DeTaiKhoaLuanThamGia';
 
 // LAYOUT
 import { DepartmentLayout } from '../layouts';
-
 
 
 
@@ -50,17 +50,20 @@ const privateRoutes = [
     { path: config.routes.NhomDeTaiNCKH, component: NhomDeTaiNCKH },
     { path: config.routes.DeTaiNCKH, component: DeTaiNCKH, urlDepend: "NhomDeTaiNCKH" },
     { path: config.routes.DeTaiNCKHThamGia, component: DeTaiNCKHThamGia, urlDepend: "NhomDeTaiNCKH" },
-    { path: config.routes.KhoaLuanThamGia, component: DeTaiNCKHThamGia, thesis: true, urlDepend: "KhoaLuan" },
-    { path: config.routes.KhoaLuan, component: KhoaLuan },
+    { path: config.routes.KhoaLuanThamGia, component: DeTaiKhoaLuanThamGia, thesis: true, urlDepend: "KhoaLuan" },
+    { path: config.routes.NhomDeTaiKhoaLuan, component: NhomDeTaiKhoaLuan },
+    { path: config.routes.DeTaiKhoaLuan, component: DeTaiKhoaLuan, urlDepend: "NhomDeTaiKhoaLuan" },
+    { path: config.routes.DeTaiKhoaLuanThamGia, component: DeTaiKhoaLuanThamGia, urlDepend: "NhomDeTaiKhoaLuan" },
 
     // NGHIỆP VỤ
     { path: config.routes.Dashboard_Department, component: Dashboard_Department, layout: DepartmentLayout },
     { path: config.routes.MoHocPhan, component: MoHocPhan, layout: DepartmentLayout },
     { path: config.routes.DeTaiNCKHThamGia_Department, component: DeTaiNCKHThamGia, layout: DepartmentLayout, urlDepend: "NhomDeTaiNCKH_Department" },
     { path: config.routes.DeTaiNCKH_Department, component: DeTaiNCKH_Department, layout: DepartmentLayout, urlDepend: "NhomDeTaiNCKH_Department" },
-    { path: config.routes.KhoaLuanThamGia_Department, component: DeTaiNCKHThamGia, thesis: true, layout: DepartmentLayout },
-    { path: config.routes.KhoaLuan_Department, component: KhoaLuan_Department, layout: DepartmentLayout },
+    { path: config.routes.DeTaiKhoaLuanThamGia_Department, component: DeTaiKhoaLuanThamGia, layout: DepartmentLayout, urlDepend: "NhomDeTaiKhoaLuan_Department" },
+    { path: config.routes.DeTaiKhoaLuan_Department, component: DeTaiKhoaLuan_Department, layout: DepartmentLayout, urlDepend: "NhomDeTaiKhoaLuan_Department" },
     { path: config.routes.NhomDeTaiNCKH_Department, component: NhomDeTaiNCKH_Department, layout: DepartmentLayout },
+    { path: config.routes.NhomDeTaiKhoaLuan_Department, component: NhomDeTaiKhoaLuan_Department, layout: DepartmentLayout },
 
     // THIẾT LẬP
     { path: config.routes.KhungCTDT, component: KhungCTDT, layout: DepartmentLayout },
@@ -70,8 +73,6 @@ const privateRoutes = [
     { path: config.routes.HocKy, component: HocKy_Department, layout: DepartmentLayout },
     { path: config.routes.ChuKy, component: ChuKy_Department, layout: DepartmentLayout },
     { path: config.routes.MonHoc, component: MonHoc, layout: DepartmentLayout },
-    { path: config.routes.Khoa, component: Khoa, layout: DepartmentLayout },
-    { path: config.routes.ChuyenNganh, component: ChuyenNganh, layout: DepartmentLayout },
     { path: config.routes.ThanhPhanKhungDT, component: ThanhPhanKhungDT, layout: DepartmentLayout },
     { path: config.routes.KhoaChuyenNganh, component: KhoaChuyenNganh, layout: DepartmentLayout },
     { path: config.routes.TrangThai, component: TrangThai, layout: DepartmentLayout },

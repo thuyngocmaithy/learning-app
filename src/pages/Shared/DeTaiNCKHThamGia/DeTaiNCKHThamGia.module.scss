@@ -1,0 +1,46 @@
+.breadcrumb {
+    margin-bottom: 30px;
+}
+
+.container-header {
+    display: flex;
+    justify-content: space-between;
+
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .wrapper-toolbar {
+        display: flex;
+    }
+
+}
+
+.link-file {
+    margin-right: 20px;
+}
+
+.breadcrumb-item:hover {
+    color: rgba(0, 0, 0, 0.88);
+    background-color: rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+}
+
+.link-file:hover {
+    color: var(--primary);
+    cursor: pointer;
+}

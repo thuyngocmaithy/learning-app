@@ -1,6 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
 import { Table } from 'antd';
+import { useState } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -18,6 +19,12 @@ function TableCustomAnt({
     isHideSTT = false,
     ...props
 }) {
+    // State để lưu trạng thái phân trang
+    const [paginationState, setPaginationState] = useState({
+        current: 1,
+        pageSize: 10,
+    });
+
     const onSelectChange = (newSelectedRowKeys, selectedRows) => {
         // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
         if (keyIdChange) {
@@ -43,7 +50,10 @@ function TableCustomAnt({
                     dataIndex: 'index',
                     key: 'stt',
                     width: '70px',
-                    render: (text, record, index) => index + 1,
+                    render: (text, record, index) => {
+                        const { current, pageSize } = paginationState;
+                        return (current - 1) * pageSize + index + 1;
+                    },
                 },
             ]),
         ...columns // Các cột khác
@@ -73,7 +83,18 @@ function TableCustomAnt({
                     y: height,
                 }}
                 loading={loading}
-                pagination={isPagination}
+                pagination={
+                    isPagination
+                        ? {
+                            current: paginationState.current,
+                            pageSize: paginationState.pageSize,
+                            total: data.length, // Tổng số dòng
+                            onChange: (page, pageSize) => {
+                                setPaginationState({ current: page, pageSize });
+                            },
+                        }
+                        : false // Không phân trang nếu `isPagination` là false
+                }
                 {...props}
             />
         </div>

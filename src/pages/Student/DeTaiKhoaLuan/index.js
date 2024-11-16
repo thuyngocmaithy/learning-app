@@ -1,34 +1,34 @@
 import React, { useEffect, useMemo, useState, useContext, useRef } from 'react';
 import classNames from 'classnames/bind';
-import styles from './DeTaiNCKH.module.scss';
+import styles from './DeTaiKhoaLuan.module.scss';
 import { Breadcrumb, Card, List, message, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getBySRGIdAndCheckApprove } from '../../../services/scientificResearchService';
-import { deleteSRUByUserIdAndSRId, getWhere } from '../../../services/scientificResearchUserService';
-import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
-import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
+import { getByThesisGroupIdAndCheckApprove } from '../../../services/thesisService';
+import { deleteThesisUserByUserIdAndThesisId, getWhere } from '../../../services/thesisUserService';
+import DeTaiKhoaLuanDetail from '../../../components/FormDetail/DeTaiKhoaLuanDetail';
+import DeTaiKhoaLuanRegister from '../../../components/FormRegister/DeTaiKhoaLuanRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { cancelRegisterConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { getUserById } from '../../../services/userService';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
+import { getThesisGroupById } from '../../../services/thesisGroupService';
 import notifications from '../../../config/notifications';
 import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
-function DeTaiNCKH() {
+function DeTaiKhoaLuan() {
     const [list, setList] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
-    const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
-    const [SRGName, setSRGName] = useState();
-    const scientificResearchCancelRef = useRef(null);
+    const [listthesisRegister, setListthesisRegister] = useState([]);
+    const [ThesisGroupName, setThesisGroupName] = useState();
+    const thesisCancelRef = useRef(null);
     const { deleteNotification } = useSocketNotification();
     const navigate = useNavigate();
     const location = useLocation();
@@ -67,13 +67,13 @@ function DeTaiNCKH() {
     };
 
 
-    // Xử lý lấy SRGId    
-    const SRGIdFromUrl = queryParams.get('SRGId');
+    // Xử lý lấy ThesisGroupId    
+    const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId');
 
 
-    const fetchscientificResearchs = async () => {
+    const fetchthesiss = async () => {
         try {
-            const response = await getBySRGIdAndCheckApprove({ userId: userId, SRGId: SRGIdFromUrl });
+            const response = await getByThesisGroupIdAndCheckApprove({ userId: userId, ThesisGroupId: ThesisGroupIdFromUrl });
 
             if (response.status === 200) {
                 setList(response.data.data);
@@ -81,59 +81,59 @@ function DeTaiNCKH() {
 
             setIsLoading(false);
         } catch (error) {
-            console.error('Error fetching scientificResearchs:', error);
+            console.error('Error fetching thesiss:', error);
             setIsLoading(false);
         }
     };
 
-    const checkRegisterscientificResearch = async () => {
+    const checkRegisterthesis = async () => {
         try {
-            const response = await getWhere({ userId: userId, srgroupId: SRGIdFromUrl });
+            const response = await getWhere({ userId: userId, srgroupId: ThesisGroupIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
-            // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
-            setListscientificResearchRegister(response.data.data);
+            // const registeredthesiss = response.data.data.map(data => data.thesis.thesisId);
+            setListthesisRegister(response.data.data);
         } catch (error) {
-            console.error('Error fetching registered scientificResearchs:', error);
+            console.error('Error fetching registered thesiss:', error);
             setIsLoading(false);
         }
     };
 
-    const getSRGName = async () => {
+    const getThesisGroupName = async () => {
         try {
-            const SRG = await getScientificResearchGroupById(SRGIdFromUrl)
-            if (SRG.status === "success") {
-                setSRGName(SRG.data.scientificResearchGroupName);
+            const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
+            if (ThesisGroup.status === "success") {
+                setThesisGroupName(ThesisGroup.data.thesisGroupName);
             }
         } catch (error) {
-            console.error("Lỗi lấy tên SRG")
+            console.error("Lỗi lấy tên ThesisGroup")
         }
     }
     useEffect(() => {
-        if (SRGIdFromUrl) {
-            getSRGName();
+        if (ThesisGroupIdFromUrl) {
+            getThesisGroupName();
         }
-    }, [SRGIdFromUrl])
+    }, [ThesisGroupIdFromUrl])
 
     useEffect(() => {
-        checkRegisterscientificResearch();
-        fetchscientificResearchs();
+        checkRegisterthesis();
+        fetchthesiss();
     }, [showModalRegister]);
 
 
     const handleCancelNotification = async () => {
-        const scientificResearchCancel = scientificResearchCancelRef.current;
+        const thesisCancel = thesisCancelRef.current;
         try {
             let listMember = [];
-            const SRU = await getWhere({ userId: userId, srId: scientificResearchCancel.scientificResearchId });
+            const ThesisUser = await getWhere({ userId: userId, srId: thesisCancel.thesisId });
 
-            if (SRU.data.data[0].group !== 0) {
-                const listSRU = await getWhere({ group: SRU.data.data[0].group })
-                listMember = listSRU.data.data
-                    .filter((SRU) => SRU.user.userId !== userId)
-                    .map((SRU) => SRU.user);
+            if (ThesisUser.data.data[0].group !== 0) {
+                const listThesisUser = await getWhere({ group: ThesisUser.data.data[0].group })
+                listMember = listThesisUser.data.data
+                    .filter((ThesisUser) => ThesisUser.user.userId !== userId)
+                    .map((ThesisUser) => ThesisUser.user);
             }
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('register', scientificResearchCancel, user.data, listMember);
+            const ListNotification = await notifications.getKhoaLuanNotification('register', thesisCancel, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
                 await deleteNotification(itemNoti.toUser, itemNoti);
@@ -145,44 +145,44 @@ function DeTaiNCKH() {
 
     // Hàm xử lý hủy đăng ký đề tài với xác nhận
     const handleCancelWithConfirm = async () => {
-        if (scientificResearchCancelRef.current) {
+        if (thesisCancelRef.current) {
             try {
                 //xóa thông báo
                 await handleCancelNotification();
                 // Xóa danh sách đăng ký trong bảng SGU
-                const responseCancel = await deleteSRUByUserIdAndSRId({ scientificResearch: scientificResearchCancelRef.current.scientificResearchId, user: userId });
+                const responseCancel = await deleteThesisUserByUserIdAndThesisId({ thesis: thesisCancelRef.current.thesisId, user: userId });
                 if (responseCancel) {
                     message.success('Hủy đăng ký thành công');
                     // Cập nhật danh sách đề tài đã đăng ký
-                    await checkRegisterscientificResearch();
-                    await fetchscientificResearchs(); // Cập nhật danh sách đề tài
+                    await checkRegisterthesis();
+                    await fetchthesiss(); // Cập nhật danh sách đề tài
 
 
                 }
             } catch (error) {
                 message.error('Hủy đăng ký thất bại');
             } finally {
-                scientificResearchCancelRef.current = null // Reset scientificResearchCancel sau khi xử lý
+                thesisCancelRef.current = null // Reset thesisCancel sau khi xử lý
             }
         } else {
             message.error('đề tài không hợp lệ');
         }
     };
 
-    const DeTaiNCKHDetailMemoized = useMemo(() => (
-        <DeTaiNCKHDetail
-            title={'đề tài nghiên cứu'}
+    const DeTaiKhoaLuanDetailMemoized = useMemo(() => (
+        <DeTaiKhoaLuanDetail
+            title={'đề tài khóa luận'}
             showModal={showModalDetail}
             setShowModal={setShowModalDetail}
         />
     ), [showModalDetail]);
 
-    const DeTaiNCKHRegisterMemoized = useMemo(() => (
-        <DeTaiNCKHRegister
+    const DeTaiKhoaLuanRegisterMemoized = useMemo(() => (
+        <DeTaiKhoaLuanRegister
             title={
                 <>
-                    <p>Đăng ký đề tài nghiên cứu</p>
-                    <p className={cx("title-model-register")}>{showModalRegister.scientificResearchName}</p>
+                    <p>Đăng ký đề tài khóa luận</p>
+                    <p className={cx("title-model-register")}>{showModalRegister.thesisName}</p>
                 </>
             }
             showModal={showModalRegister}
@@ -213,14 +213,14 @@ function DeTaiNCKH() {
                                 <Button outline verysmall onClick={() => setShowModalDetail(item)}>
                                     Chi tiết
                                 </Button>,
-                                listscientificResearchRegister && listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
+                                listthesisRegister && listthesisRegister.some(thesisRegister => thesisRegister.thesis.thesisId === item.thesisId) ?
                                     <Button
                                         className={cx('btn-cancel')}
                                         outline
                                         verysmall
                                         onClick={() => {
-                                            scientificResearchCancelRef.current = item;
-                                            setTimeout(() => cancelRegisterConfirm('đề tài nghiên cứu', handleCancelWithConfirm), 0);
+                                            thesisCancelRef.current = item;
+                                            setTimeout(() => cancelRegisterConfirm('đề tài khóa luận', handleCancelWithConfirm), 0);
                                         }}
                                         disabled={item.approve}
                                     >
@@ -234,7 +234,7 @@ function DeTaiNCKH() {
                             <Skeleton avatar title={false} loading={isLoading} active>
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.scientificResearchName}</div>}
+                                    title={<div className={cx('name')}>{item.thesisName}</div>}
                                     description={<div>
                                         <p>Lượt đăng ký: {item.count} </p>
                                         <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
@@ -259,23 +259,23 @@ function DeTaiNCKH() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
-                    {listscientificResearchRegister && listscientificResearchRegister.map((item, index) => {
+                    {listthesisRegister && listthesisRegister.map((item, index) => {
                         return (
                             <Card
-                                className={cx('card-DeTaiNCKHThamGia')}
+                                className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearch.scientificResearchName}
+                                title={item.thesis.thesisName}
                                 extra={
                                     <Button primary verysmall
                                         onClick={() => {
                                             if (!item.isApprove) {
                                                 // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
-                                                setShowModalDetail(item.scientificResearch);
+                                                setShowModalDetail(item.thesis);
                                             }
                                             else {
-                                                // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
-                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`);
+                                                // Nếu đã được duyệt => Chuyển vào page DeTaiKhoaLuanThamGia
+                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesis.thesisId}`);
                                             }
                                         }}
                                     >
@@ -294,9 +294,9 @@ function DeTaiNCKH() {
                                 <div className={cx('container-detail')}>
                                     <p className={cx('label-detail')}>Trạng thái: </p>
                                     <Tag
-                                        color={item.isApprove ? item.scientificResearch.status.color : 'red'}
+                                        color={item.isApprove ? item.thesis.status.color : 'red'}
                                     >
-                                        {item.isApprove ? item.scientificResearch.status.statusName : 'Chờ duyệt'}
+                                        {item.isApprove ? item.thesis.status.statusName : 'Chờ duyệt'}
                                     </Tag>
                                 </div>
                             </Card>
@@ -310,15 +310,15 @@ function DeTaiNCKH() {
     return (
         <div className={cx('wrapper')}>
             {
-                SRGIdFromUrl &&
+                ThesisGroupIdFromUrl &&
                 <Breadcrumb
                     className={cx('breadcrumb')}
                     items={[
                         {
-                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                            title: <Link to={config.routes.NhomDeTaiKhoaLuan}>Nhóm đề tài khóa luận</Link>,
                         },
                         {
-                            title: 'Danh sách đề tài nghiên cứu khoa học',
+                            title: 'Danh sách đề tài khóa luận',
                         },
                     ]}
                 />
@@ -331,9 +331,9 @@ function DeTaiNCKH() {
 
                 <h3 className={cx('title')}>
                     {
-                        SRGIdFromUrl
-                            ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
-                            : 'Danh sách đề tài nghiên cứu khoa học'
+                        ThesisGroupIdFromUrl
+                            ? `Danh sách đề tài khóa luận nhóm: ${ThesisGroupName}`
+                            : 'Danh sách đề tài khóa luận'
                     }
 
                 </h3>
@@ -349,10 +349,10 @@ function DeTaiNCKH() {
                     children: item.children,
                 }))}
             />
-            {DeTaiNCKHDetailMemoized}
-            {DeTaiNCKHRegisterMemoized}
+            {DeTaiKhoaLuanDetailMemoized}
+            {DeTaiKhoaLuanRegisterMemoized}
         </div>
     );
 }
 
-export default DeTaiNCKH;
+export default DeTaiKhoaLuan;

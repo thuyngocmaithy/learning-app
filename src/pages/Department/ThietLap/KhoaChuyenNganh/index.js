@@ -248,6 +248,43 @@ function KhoaChuyenNganh() {
                     </span>
                     <h3 className={cx('title')}>Quản lý Khoa - Chuyên ngành</h3>
                 </div>
+                <div className={cx('wrapper-toolbar')}>
+                    {activeTab === '1' ? (
+                        <>
+                            <Toolbar
+                                type={'Tạo mới'}
+                                onClick={() => {
+                                    setKhoaShowModal(true);
+                                    setKhoaIsUpdate(false);
+                                    setKhoaViewOnly(false);
+                                }}
+                            />
+                            <Toolbar
+                                type={'Xóa'}
+                                onClick={() => deleteConfirm('khoa', handleKhoaDelete)}
+                            />
+                            <Toolbar type={'Nhập file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} />
+                        </>
+                    ) : (
+                        <>
+                            <Toolbar
+                                type={'Tạo mới'}
+                                onClick={() => {
+                                    setMajorShowModal(true);
+                                    setMajorIsUpdate(false);
+                                    setMajorViewOnly(false);
+                                }}
+                            />
+                            <Toolbar
+                                type={'Xóa'}
+                                onClick={() => deleteConfirm('chuyên ngành', handleMajorDelete)}
+                            />
+                            <Toolbar type={'Nhập file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} />
+                        </>
+                    )}
+                </div>
             </div>
 
             <div className={cx('content-wrapper')}>
@@ -288,43 +325,7 @@ function KhoaChuyenNganh() {
                     </Tabs>
                 </div>
 
-                <div className={cx('toolbar-wrapper')}>
-                    {activeTab === '1' ? (
-                        <div className={cx('toolbar-group')}>
-                            <Toolbar
-                                type={'Tạo mới'}
-                                onClick={() => {
-                                    setKhoaShowModal(true);
-                                    setKhoaIsUpdate(false);
-                                    setKhoaViewOnly(false);
-                                }}
-                            />
-                            <Toolbar
-                                type={'Xóa'}
-                                onClick={() => deleteConfirm('khoa', handleKhoaDelete)}
-                            />
-                            <Toolbar type={'Nhập file Excel'} />
-                            <Toolbar type={'Xuất file Excel'} />
-                        </div>
-                    ) : (
-                        <div className={cx('toolbar-group')}>
-                            <Toolbar
-                                type={'Tạo mới'}
-                                onClick={() => {
-                                    setMajorShowModal(true);
-                                    setMajorIsUpdate(false);
-                                    setMajorViewOnly(false);
-                                }}
-                            />
-                            <Toolbar
-                                type={'Xóa'}
-                                onClick={() => deleteConfirm('chuyên ngành', handleMajorDelete)}
-                            />
-                            <Toolbar type={'Nhập file Excel'} />
-                            <Toolbar type={'Xuất file Excel'} />
-                        </div>
-                    )}
-                </div>
+
             </div>
         </div>
     );
