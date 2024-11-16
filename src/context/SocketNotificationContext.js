@@ -18,7 +18,7 @@ export const SocketNotificationProvider = ({ children }) => {
 
         if (userId !== 0) {
             // Tạo kết nối socket cho thông báo
-            socketIo = io('http://14.225.212.147:5000/notifications', {
+            socketIo = io('http://localhost:5000/notifications', {
                 transports: ['websocket'],
                 path: '/socket.io',
                 requestTimeout: 10000

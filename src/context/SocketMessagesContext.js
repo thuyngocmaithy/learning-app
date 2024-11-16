@@ -20,7 +20,7 @@ export const SocketMessagesProvider = ({ children }) => {
 
         if (userId !== null && listSRAndThesisIdJoin.length > 0) {
             // Tạo kết nối socket cho for messages
-            socketIo = io('http://14.225.212.147:5000/messages', {
+            socketIo = io('http://localhost:5000/messages', {
                 transports: ['websocket'],
                 path: '/socket.io',
                 requestTimeout: 10000

@@ -17,6 +17,7 @@ export const getWhere = async (conditions) => {
         const response = await api.get(url);
         return response;
     } catch (error) {
+        console.error('[majorService - getWhere - error] : ', error);
         throw error;
     }
 };

@@ -1,14 +1,16 @@
 import classNames from 'classnames/bind';
 import styles from './TrangThai.module.scss';
-import { message } from 'antd';
+import { message, Divider, Input, Col, Select } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from 'antd/es/form/FormItem';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { getAllStatus, deleteStatusById } from '../../../../services/statusService';
+import { getAllStatus, deleteStatusById, getWhereStatus } from '../../../../services/statusService';
 import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpdate';
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
 
@@ -24,6 +26,7 @@ function TrangThai() {
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [viewOnly, setViewOnly] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -68,6 +71,91 @@ function TrangThai() {
             console.error('[ThietLap - TrangThai - handleDelete] : Error deleting status:', error);
         }
     };
+
+
+    const typeOptions = [
+        {
+            label: 'Tiến độ đề tài NCKH',
+            value: 'Tiến độ đề tài NCKH'
+        },
+        {
+            label: 'Tiến độ khóa luận',
+            value: 'Tiến độ khóa luận'
+        },
+        {
+            label: 'Tiến độ nhóm đề tài NCKH',
+            value: 'Tiến độ nhóm đề tài NCKH'
+        }
+    ];
+
+    const getFilterFieldsStatus = () => {
+        return (
+            <>
+                <Col className="gutter-row" span={7}>
+                    <FormItem
+                        name="statusId"
+                        label="Mã trạng thái"
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+
+                <Col className="gutter-row" span={8}>
+                    <FormItem
+                        name="statusName"
+                        label="Tên trạng thái"
+                    >
+                        <Input />
+                    </FormItem>
+                </Col>
+
+                <Col className="gutter-row" span={8}>
+                    <FormItem
+                        name="type"
+                        label="Loại trạng thái"
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            options={typeOptions}
+                            allowClear
+                            placeholder="Chọn loại trạng thái"
+                        />
+                    </FormItem>
+                </Col>
+            </>
+        );
+    };
+
+    const onSearchStatus = async (values) => {
+        try {
+            const searchParams = {
+                statusId: values.statusId?.trim() || undefined,
+                statusName: values.statusName?.trim() || undefined,
+                type: values.type || undefined
+            };
+
+            if (!searchParams.statusId && !searchParams.statusName && !searchParams.type) {
+                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
+                return;
+            }
+
+            const response = await getWhereStatus(searchParams);
+
+            if (response.status === 200) {
+                if (response.data.data.length === 0) {
+                    setData([]);
+                    message.info('Không tìm thấy kết quả phù hợp');
+                } else {
+                    setData(response.data.data);
+                }
+            }
+
+        } catch (error) {
+            console.error('[onSearch - error]: ', error);
+            message.error('Có lỗi xảy ra khi tìm kiếm');
+        }
+    };
+
 
     const TrangThaiUpdateMemorized = useMemo(() => {
         return (
@@ -152,7 +240,10 @@ function TrangThai() {
                     <h3 className={cx('title')}>Trạng thái</h3>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
-                    <Toolbar type={'Bộ lọc'} />
+                    <Toolbar type={'Bộ lọc'}
+                        onClick={() => {
+                            setShowFilter(!showFilter);
+                        }} />
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
@@ -165,6 +256,14 @@ function TrangThai() {
                     <Toolbar type={'Nhập file Excel'} />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>
+            </div>
+            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                <SearchForm
+                    getFields={getFilterFieldsStatus}
+                    onSearch={onSearchStatus}
+                    onReset={fetchData}
+                />
+                <Divider />
             </div>
             <TableCustomAnt
                 height={'600px'}

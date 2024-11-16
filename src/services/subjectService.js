@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getWhere } from './majorService';
 
 export const getAll = async () => {
   try {
@@ -47,6 +48,27 @@ export const getAllSubjectDetail = async () => {
     return response;
   } catch (error) {
     console.error('[subjectService - getAllSubjectDetail - error]:', error);
+    throw error;
+  }
+}
+
+export const getWhereSubject = async (params) => {
+  try {
+    const response = await api.get('/subjects/getWhere', {
+      params: {
+        subjectId: params?.subjectId || undefined,
+        subjectName: params?.subjectName || undefined,
+        creaditHour: params?.creaditHour || undefined,
+        isCompulsory: params?.isCompulsory,
+        subjectBeforeId: params?.subjectBeforeId,
+        majorId: params?.majorId,
+        facultyId: params?.facultyId,
+        frameComponentId: params?.frameComponentId,
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error('[SubjectService - getSubjectsWithDetails - error] : ', error);
     throw error;
   }
 }

@@ -5,7 +5,8 @@ import config from '../config';
 import { Navigate } from 'react-router-dom';
 
 const api = axios.create({
-  baseURL: 'http://14.225.212.147:5000/api',
+  // baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5000/api',
 });
 
 
