@@ -5,12 +5,12 @@ import { Card, List, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getSRUByUserIdAndSRGId, getWhere } from '../../../services/scientificResearchUserService';
+import { getSRUByUserIdAndSRGId, getWhere as getWhereSRU } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getAllSRGroup } from '../../../services/scientificResearchGroupService';
+import { getAllSRGroup, getWhere as getWhereSRG } from '../../../services/scientificResearchGroupService';
 
 const cx = classNames.bind(styles);
 
@@ -21,6 +21,8 @@ function NhomDeTaiNCKH() {
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10; // Số lượng mục trên mỗi trang
 
     // Xử lý active tab từ url
     const navigate = useNavigate();
@@ -48,18 +50,22 @@ function NhomDeTaiNCKH() {
 
     const fetchscientificResearchs = async () => {
         try {
-            const result = await getAllSRGroup()
-            setList(result.data);
-            setIsLoading(false);
+            const result = await getWhereSRG({ disabled: false })
+            if (result.status === 200) {
+                setList(result.data.data);
+            }
         } catch (error) {
             console.error('Error fetching scientificResearchs:', error);
+        }
+        finally {
             setIsLoading(false);
+
         }
     };
 
     const checkRegisterscientificResearch = async () => {
         try {
-            const response = await getWhere({ userId: userId });
+            const response = await getWhereSRU({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             setListscientificResearchRegister(response.data.data);
         } catch (error) {
@@ -82,6 +88,8 @@ function NhomDeTaiNCKH() {
                     pagination={{
                         position: 'bottom',
                         align: 'end',
+                        onChange: (page) => setCurrentPage(page), // Lưu số trang hiện tại
+                        pageSize: pageSize, // Số mục trong một trang
                     }}
                     dataSource={list}
                     renderItem={(item, index) => (
@@ -101,7 +109,7 @@ function NhomDeTaiNCKH() {
                         >
                             <Skeleton avatar title={false} loading={isLoading} active>
                                 <List.Item.Meta
-                                    avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
+                                    avatar={<h2 className={cx('stt')}>{(currentPage - 1) * pageSize + index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.scientificResearchGroupName}</div>}
                                     description={
                                         <div>

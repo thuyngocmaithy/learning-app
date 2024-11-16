@@ -5,15 +5,13 @@ import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { EditOutlined } from '@ant-design/icons';
+import { BuildOutlined, EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import KhungCTDTUpdate from '../../../../components/FormUpdate/KhungCTDTUpdate';
 import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
 import { getAll } from '../../../../services/studyFrameService';
 import DungKhungCTDTUpdate from '../../../../components/FormUpdate/DungKhungCTDTUpdate';
-import ApDungKhungCTDTUpdate from '../../../../components/FormUpdate/ApDungKhungCTDTUpdate';
-import Button from '../../../../components/Core/Button';
 
 const cx = classNames.bind(styles);
 
@@ -21,7 +19,6 @@ function KhungCTDT() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [showModalBuildFrame, setShowModalBuildFrame] = useState(false); // hiển thị model dựng khung
-    const [showModalApplyFrame, setShowModalApplyFrame] = useState(false); // hiển thị model áp dụng khung
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
@@ -42,12 +39,12 @@ function KhungCTDT() {
             title: 'Action',
             key: 'action',
             align: 'center',
-            width: '450px',
+            width: '300px',
             render: (_, record) => (
                 <div className={cx('action-item')}>
                     <ButtonCustom
                         className={cx('btnStructure')}
-                        leftIcon={<EditOutlined />}
+                        leftIcon={<BuildOutlined />}
                         outline
                         verysmall
                         onClick={() => {
@@ -55,18 +52,6 @@ function KhungCTDT() {
                         }}
                     >
                         Xây dựng khung
-                    </ButtonCustom>
-                    <ButtonCustom
-                        className={cx('btnApply')}
-                        leftIcon={<EditOutlined />}
-                        outline
-                        colorRed
-                        verysmall
-                        onClick={() => {
-                            setShowModalApplyFrame(record);
-                        }}
-                    >
-                        Áp dụng khung
                     </ButtonCustom>
                     <ButtonCustom
                         className={cx('btnEdit')}
@@ -143,19 +128,6 @@ function KhungCTDT() {
         );
     }, [showModalBuildFrame]);
 
-    const apDungKhungCTDTMemoized = useMemo(() => {
-        return (
-            <div>
-                {showModalApplyFrame ?
-                    <ApDungKhungCTDTUpdate
-                        showModal={showModalApplyFrame}
-                        setShowModal={setShowModalApplyFrame}
-                    /> : null}
-            </div>
-
-        );
-    }, [showModalApplyFrame]);
-
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -187,7 +159,6 @@ function KhungCTDT() {
             />
             {khungCTDTUpdateMemoized}
             {dungKhungCTDTMemoized}
-            {apDungKhungCTDTMemoized}
 
         </div>
     );

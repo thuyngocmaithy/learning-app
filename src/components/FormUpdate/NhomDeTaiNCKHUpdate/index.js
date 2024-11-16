@@ -1,5 +1,5 @@
 import React, { useState, memo, useEffect, useContext } from 'react';
-import { Input, InputNumber, Select, Form, message } from 'antd';
+import { Input, InputNumber, Select, Form, message, Col, DatePicker, Row } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -8,9 +8,9 @@ import { getStatusByType } from '../../../services/statusService';
 import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getAllFaculty } from '../../../services/facultyService';
-import { getWhere } from '../../../services/permissionFeatureService';
+import moment from 'moment';
 
-const { TextArea } = Input;
+const { RangePicker } = DatePicker;
 
 const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     title,
@@ -91,6 +91,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 status: showModal.status.statusId,
                 startYear: showModal.startYear,
                 finishYear: showModal.finishYear,
+                ...(showModal.startCreateSRDate && showModal.endCreateSRDate) && {
+                    createSRDate: [moment(showModal.startCreateSRDate), moment(showModal.endCreateSRDate)]
+                }
             });
             setSelectedFaculty(showModal.faculty.facultyId);
             setSelectedStatus(showModal.status.statusId);
@@ -114,9 +117,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 startYear: values.startYear,
                 finishYear: values.finishYear,
                 facultyId: selectedFaculty,
+                startCreateSRDate: new Date(values.createSRDate[0].$d),
+                endCreateSRDate: new Date(values.createSRDate[1].$d),
             };
 
             let response;
+            console.log(scientificResearchGroupData)
             if (isUpdate) {
                 response = await updateScientificResearchGroupById(showModal.scientificResearchGroupId, scientificResearchGroupData);
                 handleCloseModal();
@@ -159,66 +165,82 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
             form={form}
+            width='920px'
         >
             <Form
                 {...layoutForm}
-                form={form}>
-                <FormItem
-                    name="scientificResearchGroupName"
-                    label="Tên nhóm đề tài"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên nhóm đề tài!' }]}
-                >
-                    <Input />
-                </FormItem>
-                <FormItem
-                    name="faculty"
-                    label="Khoa"
-                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn khoa"
-                        optionFilterProp="children"
-                        onChange={handleFacultySelect}
-                        value={selectedFaculty}
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={facultyOptions}
-                    />
-                </FormItem>
+                form={form}
+            >
+                <Row gutter={24}>
+                    <Col span={12}>
+                        <FormItem
+                            name="scientificResearchGroupName"
+                            label="Tên nhóm đề tài"
+                            rules={[{ required: true, message: 'Vui lòng nhập tên nhóm đề tài!' }]}
+                        >
+                            <Input.TextArea />
+                        </FormItem>
+                        <FormItem
+                            name="faculty"
+                            label="Khoa"
+                            rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Chọn khoa"
+                                optionFilterProp="children"
+                                onChange={handleFacultySelect}
+                                value={selectedFaculty}
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={facultyOptions}
+                            />
+                        </FormItem>
 
-                <FormItem
-                    name="status"
-                    label="Trạng thái"
-                    rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-                >
-                    <Select
-                        showSearch
-                        placeholder="Chọn trạng thái"
-                        optionFilterProp="children"
-                        value={selectedStatus}
-                        onChange={(value) => setSelectedStatus(value)}
-                        filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={statusOptions}
-                    />
-                </FormItem>
-                <FormItem name="startYear" label={'Năm thực hiện'}>
-                    <InputNumber
-                        style={{ width: '100%' }}
-                        min={2000}
-                        step={1}
-                    />
-                </FormItem>
-                <FormItem name="finishYear" label={'Năm kết thúc'}>
-                    <InputNumber
-                        style={{ width: '100%' }}
-                        min={2000}
-                        step={1}
-                    />
-                </FormItem>
+                        <FormItem
+                            name="status"
+                            label="Trạng thái"
+                            rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Chọn trạng thái"
+                                optionFilterProp="children"
+                                value={selectedStatus}
+                                onChange={(value) => setSelectedStatus(value)}
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={statusOptions}
+                            />
+                        </FormItem>
+
+                    </Col>
+                    <Col span={12}>
+                        <FormItem name="startYear" label={'Năm thực hiện'}>
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                min={2000}
+                                step={1}
+                            />
+                        </FormItem>
+                        <FormItem name="finishYear" label={'Năm kết thúc'}>
+                            <InputNumber
+                                style={{ width: '100%' }}
+                                min={2000}
+                                step={1}
+                            />
+                        </FormItem>
+                        <FormItem
+                            name="createSRDate"
+                            label="Thời gian tạo đề tài"
+                            rules={[{ type: 'array', required: true, message: 'Vui lòng chọn thời gian tạo đề tài!' }]}
+                        >
+                            <RangePicker format="DD/MM/YYYY" />
+                        </FormItem>
+                    </Col>
+                </Row>
             </Form>
         </Update>
     );

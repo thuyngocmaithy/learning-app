@@ -20,6 +20,7 @@ import { PermissionDetailContext } from '../../../../context/PermissionDetailCon
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
+import { getScientificResearchGroupById } from '../../../../services/scientificResearchGroupService';
 
 const cx = classNames.bind(styles);
 
@@ -41,6 +42,8 @@ function DeTaiNCKH() {
     const { permissionDetails } = useContext(PermissionDetailContext);
     const [showFilter, setShowFilter] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
+    // khóa toolbar nhập liệu khi có SRGId trên url và SRGId là nhóm đề tài NCKH hết hạn nhập liệu
+    const [disableToolbar, setDisableToolbar] = useState(false);
 
     const statusType = 'Tiến độ đề tài NCKH';
 
@@ -189,6 +192,7 @@ function DeTaiNCKH() {
                             showModalUpdate(record);
                             setIsUpdate(true);
                         }}
+                    // disabled={record.validDate !== true}
                     >
                         Sửa
                     </ButtonCustom>
@@ -214,25 +218,56 @@ function DeTaiNCKH() {
             let result = null;
 
             if (SRGIdFromUrl) {
+                // Kiểm tra SRG còn hạn tạo đề tài
+                const resultSRG = await getScientificResearchGroupById(SRGIdFromUrl)
+                if (resultSRG.status === 200) {
+                    const dataSRG = resultSRG.data.data;
+
+                    const currentDate = new Date();
+                    const validDate = (dataSRG.startCreateSRDate === null && dataSRG.endCreateSRDate === null) ||
+                        (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate)
+                        ? true
+                        : false
+                    setDisableToolbar(!validDate);
+                }
+
+                //     if (validDate) {
+                //         result = await getBySRGId(SRGIdFromUrl);
+                //     } else {
+                //         result = { status: 'NotValid' }
+                //     }
+                // }
                 result = await getBySRGId(SRGIdFromUrl);
             }
             else {
                 result = await getAllSR();
             }
 
-            const scientificResearchs = await Promise.all((result.data.data || result.data).map(async (data) => {
-                // lấy số sinh viên đăng ký
-                const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
+            if (result.status === 200) {
+                const scientificResearchs = await Promise.all((result.data.data || result.data).map(async (data) => {
+                    // Kiểm tra SRG còn hạn tạo đề tài
+                    // const currentDate = new Date();
+                    // const dataSRG = data.scientificResearchGroup;
+                    // const validDate = (dataSRG.startCreateSRDate === null && dataSRG.endCreateSRDate === null) ||
+                    //     (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate)
+                    //     ? true
+                    //     : false
+                    // lấy số sinh viên đăng ký
+                    const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
 
-                return {
-                    ...data,
-                    numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
-                };
-            }));
-            setData(scientificResearchs);
-            setIsLoading(false);
+                    return {
+                        ...data,
+                        numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
+                        // validDate: validDate
+                    };
+                }));
+                setData(scientificResearchs);
+            }
+
         } catch (error) {
             console.error('Error fetching data:', error);
+        }
+        finally {
             setIsLoading(false);
         }
     };
@@ -561,14 +596,16 @@ function DeTaiNCKH() {
                                     setShowFilter(!showFilter);
                                 }}
                             />
-                            <Toolbar
-                                type={'Tạo mới'}
-                                onClick={() => {
-                                    setShowModalUpdate(true);
-                                    setIsUpdate(false);
-                                }}
-                                isVisible={permissionDetailData.isAdd}
-                            />
+                            {!disableToolbar &&
+                                <Toolbar
+                                    type={'Tạo mới'}
+                                    onClick={() => {
+                                        setShowModalUpdate(true);
+                                        setIsUpdate(false);
+                                    }}
+                                    isVisible={permissionDetailData.isAdd}
+                                />
+                            }
                             <Toolbar
                                 type={'Xóa'}
                                 onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
@@ -576,7 +613,9 @@ function DeTaiNCKH() {
                             />
                             <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài nghiên cứu', handleDisable)} />
                             <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài nghiên cứu', handleEnable)} />
-                            <Toolbar type={'Nhập file Excel'} />
+                            {!disableToolbar &&
+                                <Toolbar type={'Nhập file Excel'} />
+                            }
                             <Toolbar type={'Xuất file Excel'} />
                         </div>
                     ) : null}
@@ -594,6 +633,8 @@ function DeTaiNCKH() {
                         };
                     })}
                 />
+
+
             </div>
 
             {DeTaiNCKHUpdateMemoized}

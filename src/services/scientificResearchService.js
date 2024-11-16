@@ -3,7 +3,7 @@ import { api } from '../utils/apiConfig';
 export const getAllSR = async () => {
     try {
         const response = await api.get('/scientificResearchs');
-        return response.data;
+        return response;
     } catch (error) {
         console.error('[scientificResearchServive - create - error] : ', error);
         throw error;

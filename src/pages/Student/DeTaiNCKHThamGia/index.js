@@ -315,19 +315,15 @@ function DeTaiNCKHThamGia({ thesis = false }) {
                     ]
                     :
                     [
-                        // Kiểm tra nếu urlPrevious từ NhomDeTaiNCKH thì mới hiển thị
-                        ...(SRGIdFromUrl
-                            ? [
-                                {
-                                    title: <Link to={
-                                        location.pathname.split('/')[1] === "Department"
-                                            ? config.routes.NhomDeTaiNCKH_Department
-                                            : config.routes.NhomDeTaiNCKH
-                                    } >
-                                        Nhóm đề tài nghiên cứu khoa học
-                                    </Link>,
-                                }
-                            ] : []),
+                        {
+                            title: <Link to={
+                                location.pathname.split('/')[1] === "Department"
+                                    ? config.routes.NhomDeTaiNCKH_Department
+                                    : config.routes.NhomDeTaiNCKH
+                            } >
+                                Nhóm đề tài nghiên cứu khoa học
+                            </Link>,
+                        },
                         {
                             title: "Thông tin đề tài nghiên cứu khoa học",
                         },

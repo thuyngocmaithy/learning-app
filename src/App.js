@@ -50,7 +50,7 @@ function App() {
         setIsLoading(true);
         const checkDatabaseStatus = async () => {
             try {
-                const response = await api.get('http://14.225.212.147:5000/statusConnection');
+                const response = await api.get(`${process.env.REACT_APP_URL_API}/statusConnection`);
                 setStatus(response.data.status);
             } catch (error) {
                 console.error('Error checking database status:', error);

@@ -124,7 +124,7 @@ const FollowerUpdate = memo(function FollowerUpdate({
                 >
                     <Select
                         showSearch
-                        placeholder="Chọn sinh viên"
+                        placeholder="Chọn người dùng"
                         optionFilterProp="children"
                         value={selectedUser}
                         onChange={(value) => setSelectedUser(value)}

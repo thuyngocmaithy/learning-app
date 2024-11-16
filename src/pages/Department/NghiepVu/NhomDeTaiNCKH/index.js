@@ -7,9 +7,9 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
+import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, getAllSRGroup, getWhere } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds } from '../../../../services/scientificResearchGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
@@ -118,13 +118,30 @@ function NhomDeTaiNCKH() {
             ),
         },
         {
+            title: 'Ẩn',
+            key: 'isDisable',
+            dataIndex: 'isDisable',
+            align: 'center',
+            width: '100px',
+            render: (isDisable) => (
+                <Input type='checkbox' checked={isDisable} readOnly />
+            ),
+        },
+        {
             title: 'Action',
             key: 'action',
             align: 'center',
             render: (_, record) => (
                 <div className={cx('action-item')}>
                     <ButtonCustom
-                        disabled={permissionDetails["DeTaiNCKH_Department"] === undefined ? true : false}
+                        disabled={
+                            // không có quyền truy cập => khóa
+                            (
+                                permissionDetails["DeTaiNCKH_Department"] === undefined
+                            )
+                                ? true
+                                : false
+                        }
                         className={cx('btnDetail')}
                         outline
                         verysmall
@@ -135,8 +152,10 @@ function NhomDeTaiNCKH() {
                     >
                         Danh sách
                     </ButtonCustom>
-                    {permissionDetailData.isEdit &&
-                        <ButtonCustom
+                    {
+                        // có quyền edit
+                        permissionDetailData.isEdit
+                        && <ButtonCustom
                             className={cx('btnEdit')}
                             leftIcon={<EditOutlined />}
                             primary
@@ -159,7 +178,22 @@ function NhomDeTaiNCKH() {
         setIsLoading(true);
         try {
             const result = await getAllSRGroup()
-            setData(result.data);
+            if (result.status === 200) {
+                var currentDate = new Date();
+                const resultData = result.data.data.map((item) => {
+                    return {
+                        ...item,
+                        // startCreateSRDate và endCreateSRDate đều null
+                        // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
+                        // => Còn hạn thao tác cho nhóm đề tài nckh
+                        validDate: (item.startCreateSRDate === null && item.endCreateSRDate === null) ||
+                            (new Date(item.startCreateSRDate) <= currentDate && new Date(item.endCreateSRDate) > currentDate)
+                            ? true
+                            : false
+                    }
+                })
+                setData(resultData);
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -348,6 +382,38 @@ function NhomDeTaiNCKH() {
         }
     };
 
+    const handleEnable = async () => {
+        try {
+            let scientificResearchData = {
+                isDisable: false
+            };
+            await updateSRGByIds(selectedRowKeys, scientificResearchData);
+            // Refresh dữ liệu sau khi xóa thành công
+            fetchData();
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            message.success('Hiển thị thành công');
+        } catch (error) {
+            message.error('Hiển thị thất bại');
+            console.error('Error [Nghiep vu - NhomDeTaiNCKH - enable]:', error);
+        }
+    };
+
+    const handleDisable = async () => {
+        try {
+            let scientificResearchData = {
+                isDisable: true
+            };
+            await updateSRGByIds(selectedRowKeys, scientificResearchData);
+            // Refresh dữ liệu sau khi disable thành công
+            fetchData();
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            message.success('Ẩn thành công');
+        } catch (error) {
+            message.error('Ẩn thất bại');
+            console.error('Error [Nghiep vu - NhomDeTaiNCKH - disable]:', error);
+        }
+    };
+
     const ITEM_TABS = [
         {
             id: 1,
@@ -363,7 +429,7 @@ function NhomDeTaiNCKH() {
                         <Divider />
                     </div>
                     <TableCustomAnt
-                        height={'350px'}
+                        height={'550px'}
                         columns={columns(setShowModalUpdate)}
                         data={data}
                         setSelectedRowKeys={setSelectedRowKeys}
@@ -423,8 +489,6 @@ function NhomDeTaiNCKH() {
                     </span>
                     <h3 className={cx('title')}>Nhóm đề tài NCKH</h3>
                 </div>
-                {console.log(permissionDetailData)
-                }
                 {tabActive === 1 && (
                     <div className={cx('wrapper-toolbar')}>
                         <Toolbar
@@ -445,6 +509,8 @@ function NhomDeTaiNCKH() {
                             type={'Xóa'}
                             onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
                             isVisible={permissionDetailData.isDelete} />
+                        <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài nghiên cứu', handleDisable)} />
+                        <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài nghiên cứu', handleEnable)} />
                         <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} />
                         <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
                     </div>

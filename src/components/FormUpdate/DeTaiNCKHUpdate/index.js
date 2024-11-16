@@ -9,7 +9,7 @@ import { createSR, getSRById, updateSRById } from '../../../services/scientificR
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { useLocation } from 'react-router-dom';
-import { getAllSRGroup, getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
+import { getAllSRGroup, getScientificResearchGroupById, getWhere } from '../../../services/scientificResearchGroupService';
 import notifications from '../../../config/notifications';
 
 const { TextArea } = Input;
@@ -25,7 +25,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const [form] = useForm(); // Sử dụng hook useForm    
     const [instructorOptions, setInstructorOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
-    const [selectedLevel, setSelectedLevel] = useState(null);
     const [srgroupOptions, setSRGroupOptions] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
@@ -40,9 +39,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     //lấy danh sách nhóm đề tài NCKH
     const fetchSRGroups = async () => {
-        const response = await getAllSRGroup();
-        if (response && response.data) {
-            const options = response.data.map((SRG) => ({
+        const response = await getWhere({ stillValue: true });
+        if (response.status === 200) {
+            const options = response.data.data.map((SRG) => ({
                 value: SRG.scientificResearchGroupId,
                 label: `${SRG.scientificResearchGroupName}`,
             }));
@@ -89,7 +88,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     setStatusOptions(options);
                 }
             } catch (error) {
-                console.error(' [ Khoaluanupdate - fetchStatusByType - Error ] :', error);
+                console.error(' [ DeTaiNCKHUpdate - fetchStatusByType - Error ] :', error);
             }
         };
 
@@ -176,8 +175,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 scientificResearchGroup: SRGId || values.srgroup.value,
             };
 
-            console.log(scientificResearchData);
-
             let response;
             if (isUpdate) {
                 response = await updateSRById(showModal.scientificResearchId, scientificResearchData);
@@ -253,7 +250,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     hidden={SRGIdFromUrl}
                     name="srgroup"
                     label="Nhóm đề tài NCKH"
-                    rules={[
+                    rules={SRGIdFromUrl ? [] : [
                         { required: true, message: 'Vui lòng chọn nhóm đề tài NCKH!' },
                         { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài NCKH không được để trống!') }
                     ]}
@@ -297,8 +294,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         showSearch
                         placeholder="Chọn cấp"
                         optionFilterProp="children"
-                        value={selectedLevel}
-                        onChange={(value) => setSelectedLevel(value)}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
