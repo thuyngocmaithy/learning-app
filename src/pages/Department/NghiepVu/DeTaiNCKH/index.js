@@ -468,8 +468,8 @@ function DeTaiNCKH() {
                                         verysmall
                                         onClick={() => {
                                             SRGIdFromUrl ?
-                                                navigate(`${config.routes.DeTaiNCKHThamGia_Department}?SRG=${SRGIdFromUrl}&scientificResearch=${item.scientificResearchId}`) :
-                                                navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}`);
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?SRG=${SRGIdFromUrl}&scientificResearch=${item.scientificResearchId}`) :
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearchId}`);
                                         }}
                                     >
                                         Chi tiết

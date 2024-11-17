@@ -402,6 +402,14 @@ body {
         align-items: center;
         justify-content: center;
         gap: 16px;
+
+        .ant-form-item .ant-form-item-label {
+            width: 130px;
+            margin-right: 10px;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+
     }
 
     // UPLOAD

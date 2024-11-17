@@ -4,7 +4,7 @@ import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import { unstable_batchedUpdates } from 'react-dom';
 import styles from './Table.module.scss';
-import { GetSubjectByMajor, listSubjectToFrame } from '../../services/studyFrameService';
+import { listSubjectToFrame } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
 import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';

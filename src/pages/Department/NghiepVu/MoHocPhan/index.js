@@ -1,16 +1,19 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Empty, Form, InputNumber, Progress, Select } from 'antd';
+import { Empty, Form, InputNumber, message, Progress, Select } from 'antd';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableHP from '../../../../components/TableDepartment';
-import { useEffect, useState } from 'react'; //
-import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
+import { useCallback, useEffect, useState } from 'react'; //
 import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { useForm } from 'antd/es/form/Form';
-import { getAll } from '../../../../services/cycleService';
+import { getAll as getAllCycle } from '../../../../services/cycleService';
+import { findFrameDepartment } from '../../../../services/studyFrameService';
+import { deleteSubjectCourseOpening, getAll as getAllCourseOpening, getTeacherAssignmentsAndSemesters, saveMulti } from '../../../../services/subject_course_openingService';
+import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { deleteConfirm } from '../../../../components/Core/Delete';
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
@@ -19,37 +22,18 @@ function MoHocPhan() {
     const [cycleOptions, setCycleOptions] = useState([]);
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [dataArrange, setDataArrange] = useState(null);
-    const [showModalAdd, setShowModalAdd] = useState(false); //hiển thị model add
-    const [showModalUpdated, setShowModalUpdated] = useState(false); // hiển thị model updated
     const [minYear, setMinYear] = useState(0);
     const [maxYear, setMaxYear] = useState(5000);
     const [disableValidation, setDisableValidation] = useState(false);
+    const [selectedSemesters, setSelectedSemesters] = useState(new Set()); // Các học kỳ được chọn
+    const [teacherAssignments, setTeacherAssignments] = useState(new Map()); // Ghi thông tin giảng viên
+    const [dataCourseOpening, setDataCourseOpening] = useState([]);
+    const [isLoadingCourseOpening, setIsLoadingCourseOpening] = useState(true);
+    const [studyFrame, setStudyFrame] = useState();
 
-    // Trạng thái để lưu giá trị năm học nhập vào
-    const [inputValueNH, setInputValueNH] = useState('');
 
-    // Hàm xử lý thay đổi giá trị năm học
-    const handleInputChange = (e) => {
-        setInputValueNH(e.target.value);
-    };
 
-    // Hàm xử lý khi nhấn nút Reset
-    const handleReset = () => {
-        setInputValueNH('');
-    };
 
-    // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
-    const handleCloseModal = () => {
-        if (showModalAdd) {
-            setShowModalAdd(false);
-        }
-        if (showModalUpdated) {
-            setShowModalUpdated(false);
-        }
-    };
-    const handleChange = (value) => {
-        console.log(`selected ${value}`);
-    };
 
     //hàm chỉ cho phép nhập số 
     const formatValue = (value) => {
@@ -57,7 +41,32 @@ function MoHocPhan() {
         return value.replace(/[^0-9]/g, '');
     };
 
+    // Fetch danh sách năm học đã mở học phần
+    const fetchCourseOpening = async () => {
+        try {
+            const response = await getAllCourseOpening();
 
+            if (response.status === 200) {
+                setDataCourseOpening(response.data.data);
+            }
+        } catch (error) {
+            console.error('MoHocPhan - fetchCourseOpenning - error:', error);
+        }
+        finally {
+            setIsLoadingCourseOpening(false);
+        }
+    };
+
+    const fetchDataAssignment = useCallback(async () => {
+        try {
+            const { teacherAssignments, selectedSemesters } = await getTeacherAssignmentsAndSemesters();
+
+            setTeacherAssignments(new Map(teacherAssignments));
+            setSelectedSemesters(new Set(selectedSemesters));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }, [setSelectedSemesters, setTeacherAssignments]);
 
     useEffect(() => {
         // Lấy danh sách ngành
@@ -74,7 +83,7 @@ function MoHocPhan() {
         // Fetch danh sách chu kỳ
         const fetchCycle = async () => {
             try {
-                const response = await getAll();
+                const response = await getAllCycle();
                 if (response) {
                     const options = response.data.data.map((cycle) => ({
                         value: cycle.cycleId,
@@ -85,12 +94,13 @@ function MoHocPhan() {
                     setCycleOptions(options);
                 }
             } catch (error) {
-                console.error('HocKyUpdate - fetchCycle - error:', error);
+                console.error('MoHocPhan - fetchCycle - error:', error);
             }
         };
 
         fetchCycle();
         fetchFaculties();
+        fetchCourseOpening();
     }, []);
 
     const handleCycleChange = (value) => {
@@ -146,9 +156,19 @@ function MoHocPhan() {
                 startYear: values.academicYear,
                 facultyId: values.faculty.value
             }
-            console.log(data);
 
-            setDataArrange(data);
+            const response = await findFrameDepartment(data.startYear, data.facultyId, data.cycleId);
+            console.log(response);
+
+            if (response.status === 200 && response.data.data !== null) {
+                response.data.data.year = values.academicYear;
+                setStudyFrame(response.data.data.frameId)
+                setDataArrange(response.data.data);
+                fetchDataAssignment();
+            }
+            else {
+                setStudyFrame(null)
+            }
 
 
         } catch (error) {
@@ -156,6 +176,126 @@ function MoHocPhan() {
                 console.error(`[ MoHocPhan - handleArrange - error]: ${error}`);
         }
     }
+
+    const handleOpeningCourse = async () => {
+        const values = await form.validateFields()
+        const dataSave = [];
+
+        selectedSemesters.forEach((id) => {
+            const [semesterId, subjectId] = id.split('-');
+
+            // Lưu giảng viên cho subjectId và semesterId
+            const teacher = teacherAssignments.get(`${semesterId}-${subjectId}`) || '';  // Giảng viên mặc định là ''
+
+            // Thêm một đối tượng với cấu trúc { subject, semester, teacher }
+            dataSave.push({
+                subject: subjectId,
+                semester: semesterId,
+                instructor: teacher,
+                year: values.academicYear,
+                studyFrame: dataArrange.frameId
+            });
+        });
+
+        try {
+            const response = await saveMulti(dataSave);
+            if (response.status === 201) {
+                message.success('Mở học phần thành công');
+                fetchCourseOpening();
+            }
+        } catch (error) {
+            message.error('Mở học phần thất bại')
+            console.error(error);
+
+        }
+
+    };
+
+    // Xóa năm học đã sắp xếp
+    const handleDelete = async (year, studyFrameId) => {
+        try {
+            const response = await deleteSubjectCourseOpening(year, studyFrameId);
+            fetchCourseOpening();
+            handleArrange();
+
+            if (response.status === 200) {
+                message.success('Xoá thành công');
+            }
+        } catch (error) {
+            message.error('Xoá thất bại');
+            console.error(' [MoHocPhan - handleDelete - deleted] - Error', error);
+        }
+    };
+
+
+    const columnCourseOpening = useCallback(
+        () => [
+            {
+                title: 'Năm học',
+                dataIndex: 'year',
+                key: 'year',
+                width: '120px',
+                align: 'center'
+            },
+            {
+                title: 'Khung đào tạo',
+                dataIndex: 'studyFrameName',
+                key: 'studyFrameName',
+            },
+            {
+                title: 'Ngành',
+                dataIndex: 'facultyName',
+                key: 'facultyName',
+                width: '20%'
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                width: '260px',
+                render: (_, record) => (
+                    <div className={cx('action-item')}>
+                        <ButtonCustom
+                            className={cx('btnDelete')}
+                            leftIcon={<DeleteOutlined />}
+                            outline
+                            verysmall
+                            onClick={() => deleteConfirm('dữ liệu mở học phần', () => handleDelete(record.year, record.studyFrameId))}
+                        >
+                            Xóa
+                        </ButtonCustom>
+                        <ButtonCustom
+                            className={cx('btnEdit')}
+                            leftIcon={<EditOutlined />}
+                            primary
+                            verysmall
+                            onClick={() => {
+                                form.setFieldsValue({
+                                    cycle: {
+                                        value: record.cycleId,
+                                        label: record.cycleName
+                                    },
+                                    academicYear: record.year,
+                                    faculty: {
+                                        value: record.facultyId,
+                                        label: record.facultyName
+                                    },
+                                });
+                                handleArrange();
+                                window.scrollTo({
+                                    top: 0,
+                                    behavior: 'smooth'
+                                });
+                            }}
+                        >
+                            Sắp xếp
+                        </ButtonCustom>
+                    </div>
+                ),
+                align: 'center',
+            },
+        ],
+        [],
+    );
 
     return (
         <div className={cx('mohocphan-wrapper')}>
@@ -240,9 +380,20 @@ function MoHocPhan() {
                     {dataArrange ? (
                         <>
                             {/* Hiển thị bảng nếu có năm học */}
-                            <TableHP data={dataArrange} />
+                            <TableHP
+                                data={dataArrange}
+                                selectedSemesters={selectedSemesters}
+                                setSelectedSemesters={setSelectedSemesters}
+                                teacherAssignments={teacherAssignments}
+                                setTeacherAssignments={setTeacherAssignments}
+                            />
                             <div className={cx('footer-table')}>
-                                <ButtonCustom primary small className={cx('btnSave')}>
+                                <ButtonCustom
+                                    primary
+                                    small
+                                    className={cx('btnSave')}
+                                    onClick={handleOpeningCourse}
+                                >
                                     Lưu
                                 </ButtonCustom>
                             </div>
@@ -251,10 +402,19 @@ function MoHocPhan() {
                         // Hiển thị thông báo khi không chọn năm học
                         <Empty
                             className={cx("empty")}
-                            description="Bạn chưa chọn năm học sắp xếp"
+                            description={studyFrame ? 'Bạn chưa chọn năm học sắp xếp' : 'Chu kỳ này chưa có khung chương trình đào tạo'}
                         />
                     )}
                 </div>
+                <div className={cx('title-list-course-opening')}>
+                    <h3>Danh sách năm học đã sắp xếp</h3>
+                </div>
+                <TableCustomAnt
+                    columns={columnCourseOpening()}
+                    data={dataCourseOpening}
+                    height="550px"
+                    loading={isLoadingCourseOpening}
+                />
             </div>
         </div>
     );

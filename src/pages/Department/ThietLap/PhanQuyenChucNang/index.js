@@ -6,7 +6,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { deletePermissions, getAll as getAllPermission } from '../../../../services/permissionService';
 import { deleteFeatures, saveTreeFeature } from '../../../../services/featureService';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { message, Spin, Tabs } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
@@ -78,20 +78,6 @@ function PhanQuyenChucNang() {
 
     // =======================================QUẢN LÝ CHỨC NĂNG================================================
 
-    // Hàm đệ quy để tìm và xóa phần tử con
-    const deleteChildNode = (data, keyToRemove) => {
-        return data
-            .map(item => {
-                if (item.children) {
-                    // Xóa phần tử con trong danh sách children
-                    item.children = deleteChildNode(item.children, keyToRemove);
-                }
-                // Chỉ giữ lại phần tử không trùng key
-                return item.key !== keyToRemove ? item : null;
-            })
-            .filter(Boolean); // Loại bỏ các phần tử null
-    };
-
     // Hàm xử lý xóa các chức năng đã chọn
     const handleDeleteFeature = async () => {
         try {
@@ -161,7 +147,7 @@ function PhanQuyenChucNang() {
                     <div className={cx('action-item')}>
                         <Button
                             className={cx('btnDetail')}
-                            leftIcon={<EditOutlined />}
+                            leftIcon={<EyeOutlined />}
                             outline
                             verysmall
                             onClick={() => {

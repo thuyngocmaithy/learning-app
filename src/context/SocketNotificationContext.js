@@ -43,9 +43,24 @@ export const SocketNotificationProvider = ({ children }) => {
             socketIo.emit('joinRoom', `user-${userId}`);
 
             // Lắng nghe thông báo mới
-            socketIo.on('receiveNotification', (notification) => {
-                setNotifications((prevNotifications) => [...prevNotifications, notification]);
+            socketIo.on('receiveNotification', ({ newNotification, disabledNotifications }) => {
+                setNotifications((prevNotifications) => {
+                    // Lọc bỏ các thông báo đã bị ẩn khỏi danh sách cũ
+                    const updatedNotifications = prevNotifications.filter(notification => {
+                        // Kiểm tra nếu thông báo này không có trong danh sách các thông báo bị ẩn
+                        return !disabledNotifications.some(disabledNoti => disabledNoti.id === notification.id);
+                    });
+
+                    // Thêm thông báo mới vào danh sách, nhưng chỉ thêm nếu thông báo đó không bị ẩn
+                    if (newNotification && !disabledNotifications.some(disabledNoti => disabledNoti.id === newNotification.id)) {
+                        updatedNotifications.push(newNotification);
+                    }
+
+                    return updatedNotifications;
+                });
             });
+
+
 
             // Lắng nghe sự kiện 'notificationDeleted' từ server sau khi thông báo được xóa
             socketIo.on('notificationDeleted', (deletedNotificationId) => {

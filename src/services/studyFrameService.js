@@ -71,7 +71,7 @@ export const listSubjectToFrame = async (userId) => {
     }
 };
 
-export const listSubjectToFrameDepartment = async (startYear, facultyId, cycleId) => {
+export const findFrameDepartment = async (startYear, facultyId, cycleId) => {
     try {
         const params = {
             ...(startYear && { startYear }),
@@ -79,7 +79,18 @@ export const listSubjectToFrameDepartment = async (startYear, facultyId, cycleId
             ...(cycleId && { cycleId }) // Chỉ thêm cycleId nếu nó có giá trị
         };
 
-        const response = await api.get('/study-frames/listSubjectToFrameDepartment', { params });
+        const response = await api.get('/study-frames/findFrameDepartment', { params });
+        return response;
+    } catch (error) {
+        console.error('[study-frames - listSubjectToFrame - error]:', error);
+        throw error;
+    }
+};
+
+
+export const listSubjectToFrameDepartment = async (studyFrameId) => {
+    try {
+        const response = await api.get(`/study-frames/listSubjectToFrameDepartment?studyFrame=${studyFrameId}`);
         return response.data;
     } catch (error) {
         console.error('[study-frames - listSubjectToFrame - error]:', error);

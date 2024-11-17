@@ -439,8 +439,8 @@ function DeTaiKhoaLuan() {
                                         verysmall
                                         onClick={() => {
                                             ThesisGroupIdFromUrl ?
-                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia_Department}?ThesisGroup=${ThesisGroupIdFromUrl}&thesis=${item.thesisId}`) :
-                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia_Department}?thesis=${item.thesisId}`);
+                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?ThesisGroup=${ThesisGroupIdFromUrl}&thesis=${item.thesisId}`) :
+                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesisId}`);
                                         }}
                                     >
                                         Chi tiết

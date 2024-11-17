@@ -92,7 +92,6 @@ function NhomDeTaiKhoaLuan() {
             title: 'Tên nhóm đề tài',
             dataIndex: 'thesisGroupName',
             key: 'thesisGroupName',
-            align: 'center',
             width: '200px'
         },
         {
@@ -471,7 +470,7 @@ function NhomDeTaiKhoaLuan() {
                                         primary
                                         verysmall
                                         onClick={() => {
-                                            navigate(`${config.routes.DeTaiKhoaLuanThamGia_Department}?thesis=${item.thesisId}&all=true`,
+                                            navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesisId}&all=true`,
                                                 { state: { from: `${config.routes.NhomDeTaiKhoaLuan_Department}_active` } });
                                         }}
                                     >

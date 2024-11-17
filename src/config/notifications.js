@@ -16,6 +16,8 @@ const notifications = {
             approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài NCKH ${data.scientificResearchId}`,
             // Gửi thông báo add người theo dõi
             follow: `Bạn được thêm theo dõi đề tài NCKH ${data.scientificResearchId}`,
+            // Gửi thông báo ghi chú cho người theo dõi
+            note: `${fromUser.fullname} vừa ghi chú đề tài NCKH ${data.scientificResearchId}`
         };
 
         let notifications = [];
@@ -103,6 +105,29 @@ const notifications = {
                 });
                 break;
 
+            case 'note':
+                // Lọc bỏ người gửi ra khỏi danh sách người nhận
+                const filteredList = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+                // Thông báo cho sinh viên được duyệt
+                if (filteredList.length > 0) {
+                    const notificationsToAdd = await Promise.all(
+                        filteredList.map(async (member) => {
+                            const toUser = await getUserById(member.userId);
+                            return {
+                                content: messages.note,
+                                type: 'warning',
+                                url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}&tabIndex=2`,
+                                toUser: toUser.data,
+                                createUser: fromUser,
+                            };
+                        })
+                    );
+
+                    // Thêm tất cả thông báo vào danh sách notifications
+                    notifications.push(...notificationsToAdd);
+                }
+                break;
+
             default:
                 break;
         }
@@ -124,6 +149,8 @@ const notifications = {
             approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài khóa luận ${data.thesisId}`,
             // Gửi thông báo add người theo dõi
             follow: `Bạn được thêm theo dõi đề tài khóa luận ${data.thesisId}`,
+            // Gửi thông báo ghi chú cho người theo dõi
+            note: `${fromUser.fullname} vừa ghi chú đề tài khóa luận ${data.thesisId}`
         };
 
         let notifications = [];
@@ -171,7 +198,7 @@ const notifications = {
                 break;
 
             case 'approve':
-                // Thông báo cho sinh viên được duyệt
+                // Thông báo cho người theo dõi
                 if (listUserReceived.length > 0) {
                     const notificationsToAdd = await Promise.all(
                         listUserReceived.map(async (member) => {
@@ -209,6 +236,29 @@ const notifications = {
                     toUser: data.toUser,
                     createUser: fromUser,
                 });
+                break;
+
+            case 'note':
+                // Lọc bỏ người gửi ra khỏi danh sách người nhận
+                const filteredList = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+                // Thông báo cho người theo dõi
+                if (filteredList.length > 0) {
+                    const notificationsToAdd = await Promise.all(
+                        filteredList.map(async (member) => {
+                            const toUser = await getUserById(member.userId);
+                            return {
+                                content: messages.note,
+                                type: 'warning',
+                                url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}&tabIndex=2`,
+                                toUser: toUser.data,
+                                createUser: fromUser,
+                            };
+                        })
+                    );
+
+                    // Thêm tất cả thông báo vào danh sách notifications
+                    notifications.push(...notificationsToAdd);
+                }
                 break;
 
             default:

@@ -139,7 +139,11 @@ function App() {
                             }
                             else {
                                 // Kiểm tra điều kiện phụ thuộc URL
-                                const matchedFeature = route.urlDepend && listFeature.find(data => data.feature.keyRoute === route.urlDepend);
+                                const matchedFeature = route.urlDepend
+                                    && listFeature.find(data =>
+                                        Array.isArray(route.urlDepend)
+                                            ? route.urlDepend.some(url => data.feature.keyRoute === url)
+                                            : data.feature.keyRoute === route.urlDepend)
 
                                 if (matchedFeature) {
                                     // Nếu tìm thấy phần tử phù hợp, tạo phần tử Layout chứa Page

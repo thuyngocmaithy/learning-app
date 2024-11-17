@@ -92,7 +92,6 @@ function NhomDeTaiNCKH() {
             title: 'Tên nhóm đề tài',
             dataIndex: 'scientificResearchGroupName',
             key: 'scientificResearchGroupName',
-            align: 'center',
             width: '200px'
         },
         {
@@ -471,7 +470,7 @@ function NhomDeTaiNCKH() {
                                         primary
                                         verysmall
                                         onClick={() => {
-                                            navigate(`${config.routes.DeTaiNCKHThamGia_Department}?scientificResearch=${item.scientificResearchId}&all=true`,
+                                            navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearchId}&all=true`,
                                                 { state: { from: `${config.routes.NhomDeTaiNCKH_Department}_active` } });
                                         }}
                                     >
