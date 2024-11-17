@@ -53,7 +53,7 @@
     "scripts": {
         "api": "json-server db.json -p 3333",
         "start": "react-scripts start --allowed-hosts='all'",
-        "build": "NODE_OPTIONS='--max-old-space-size=4096' react-scripts build",
+        "build": "NODE_OPTIONS='--max-old-space-size=8192' react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
