@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Tabs, message } from 'antd';
+import { Tabs, message, Divider, Input, Col, Select } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './KhoaChuyenNganh.module.scss'
 import { ProjectIcon } from '../../../../assets/icons';
@@ -8,12 +8,15 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { getAllFaculty, deleteFacultyById } from '../../../../services/facultyService';
-import { getAll as getAllMajors, deleteMajorById } from '../../../../services/majorService';
+import { getAllFaculty, deleteFacultyById, getWhereFaculty } from '../../../../services/facultyService';
+import { getAll as getAllMajors, deleteMajorById, getWhere } from '../../../../services/majorService';
 import { KhoaUpdate } from '../../../../components/FormUpdate/KhoaUpdate';
 import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganhUpdate';
 import { KhoaDetail } from '../../../../components/FormDetail/KhoaDetail';
 import { ChuyenNganhDetail } from '../../../../components/FormDetail/ChuyenNganhDetail';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from 'antd/es/form/FormItem';
+
 const cx = classNames.bind(styles);
 
 const { TabPane } = Tabs;
@@ -40,16 +43,24 @@ function KhoaChuyenNganh() {
     const [majorIsUpdate, setMajorIsUpdate] = useState(false);
     const [majorViewOnly, setMajorViewOnly] = useState(false);
 
+    // Filter
+    const [showFilter, setShowFilter] = useState(false);
+    const [facultyOptions, setFacultyOptions] = useState([]);
+
+
     // Fetch Functions
     const fetchKhoaData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
                 ? result.data.map(faculty => ({
+                    value: faculty.facultyId,  // cần có value cho Select
+                    label: faculty.facultyName, // cần có label cho Select
                     facultyId: faculty.facultyId,
                     facultyName: faculty.facultyName
                 })) : [];
             setKhoaData(listFaculty);
+            setFacultyOptions(listFaculty);
             setKhoaIsLoading(false);
         } catch (error) {
             console.error('Error fetching khoa data:', error);
@@ -102,6 +113,127 @@ function KhoaChuyenNganh() {
         } catch (error) {
             message.error('Xoá chuyên ngành thất bại');
         }
+    };
+
+    // Search handlers
+    const onSearchFaculty = async (values) => {
+        try {
+            const searchParams = {
+                facultyId: values.facultyId?.trim() || undefined,
+                facultyName: values.facultyName?.trim() || undefined
+            };
+
+            if (!searchParams.facultyId && !searchParams.facultyName) {
+                // Có thể thêm thông báo yêu cầu nhập điều kiện tìm kiếm
+                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
+                return;
+            }
+
+            const response = await getWhereFaculty(searchParams);
+
+            if (response.status === 200) {
+                setKhoaData(response.data.data);
+            } else if (response.status === 204) {
+                setKhoaData([]);
+                message.info('Không tìm thấy kết quả phù hợp');
+            }
+        } catch (error) {
+            console.error('[onSearch - error]: ', error);
+            message.error('Có lỗi xảy ra khi tìm kiếm');
+            setKhoaData([]);
+        }
+    };
+
+    const onSearchMajor = async (values) => {
+        try {
+            const searchParams = {
+                majorId: values.majorId?.trim() || undefined,
+                majorName: values.majorName?.trim() || undefined,
+                facultyId: values.faculty?.value || undefined, // Lấy value từ Select
+            };
+
+            // Kiểm tra có ít nhất 1 điều kiện tìm kiếm
+            if (!searchParams.majorId && !searchParams.majorName && !searchParams.facultyId) {
+                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
+                return;
+            }
+
+            const response = await getWhere(searchParams)
+
+            if (response.status === 200) {
+                if (response.data.data.length === 0) {
+                    setMajorData([]);
+                    message.info('Không tìm thấy kết quả phù hợp');
+                } else {
+                    const formattedData = response.data.data.map(item => ({
+                        ...item,
+                        facultyName: item.faculty?.facultyName
+                    }));
+                    setMajorData(formattedData);
+                }
+            }
+
+        } catch (error) {
+            console.error('[onSearch - error]: ', error);
+            message.error('Có lỗi xảy ra khi tìm kiếm');
+        }
+    };
+
+    const getFilterFieldsFaculty = () => {
+        return (
+            <>
+                <Col className="gutter-row" span={8}>
+                    <FormItem name={'facultyId'}
+                        label={'Mã Khoa-Ngành'}>
+                        <Input />
+                    </FormItem>
+                </Col>
+
+                <Col className="gutter-row" span={8}>
+                    <FormItem name={'facultyName'}
+                        label={'Tên Khoa-Ngành'}>
+                        <Input />
+                    </FormItem>
+                </Col>
+            </>
+        );
+    };
+
+    const getFilterFieldsMajor = () => {
+        return (
+            <>
+                <Col className="gutter-row" span={7}>
+                    <FormItem name={'majorId'}
+                        label={'Mã chuyên ngành'}>
+                        <Input />
+                    </FormItem>
+                </Col>
+
+                <Col className="gutter-row" span={8}>
+                    <FormItem name={'majorName'}
+                        label={'Tên chuyên ngành'}>
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col className="gutter-row" span={8}>
+                    <FormItem
+                        name={'faculty'}
+                        label={'Khoa'}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={facultyOptions}
+                            labelInValue
+                        />
+                    </FormItem>
+                </Col>
+            </>
+        );
     };
 
     // Column definitions
@@ -200,7 +332,7 @@ function KhoaChuyenNganh() {
         }
     ];
 
-    // Memoized update components
+    // Update components
     const KhoaUpdateMemo = useMemo(() => (
         <KhoaUpdate
             title={'Khoa'}
@@ -223,6 +355,8 @@ function KhoaChuyenNganh() {
         />
     ), [majorShowModal, majorIsUpdate, majorViewOnly]);
 
+
+    // Detail components
     const KhoaDetailMemoized = useMemo(() => (
         <KhoaDetail
             title={'Khoa'}
@@ -296,6 +430,14 @@ function KhoaChuyenNganh() {
                         tabBarStyle={{ display: 'flex', justifyContent: 'center' }}
                     >
                         <TabPane tab="Khoa" key="1">
+                            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                                <SearchForm
+                                    getFields={getFilterFieldsFaculty}
+                                    onSearch={onSearchFaculty}
+                                    onReset={fetchKhoaData}
+                                />
+                                <Divider />
+                            </div>
                             <TableCustomAnt
                                 height={'600px'}
                                 columns={khoaColumns}
@@ -310,6 +452,14 @@ function KhoaChuyenNganh() {
                         </TabPane>
 
                         <TabPane tab="Chuyên ngành" key="2">
+                            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                                <SearchForm
+                                    getFields={getFilterFieldsMajor}
+                                    onSearch={onSearchMajor}
+                                    onReset={fetchMajorData}
+                                />
+                                <Divider />
+                            </div>
                             <TableCustomAnt
                                 height={'600px'}
                                 columns={majorColumns}
@@ -325,7 +475,49 @@ function KhoaChuyenNganh() {
                     </Tabs>
                 </div>
 
-
+                <div className={cx('toolbar-wrapper')}>
+                    {activeTab === '1' ? (
+                        <div className={cx('toolbar-group')}>
+                            <Toolbar
+                                type={'Bộ lọc'}
+                                onClick={() => {
+                                    setShowFilter(!showFilter);
+                                }}
+                            />
+                            <Toolbar
+                                type={'Tạo mới'}
+                                onClick={() => {
+                                    setKhoaShowModal(true);
+                                    setKhoaIsUpdate(false);
+                                    setKhoaViewOnly(false);
+                                }}
+                            />
+                            <Toolbar
+                                type={'Xóa'}
+                                onClick={() => deleteConfirm('khoa', handleKhoaDelete)}
+                            />
+                            <Toolbar type={'Nhập file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} />
+                        </div>
+                    ) : (
+                        <div className={cx('toolbar-group')}>
+                            <Toolbar
+                                type={'Tạo mới'}
+                                onClick={() => {
+                                    setMajorShowModal(true);
+                                    setMajorIsUpdate(false);
+                                    setMajorViewOnly(false);
+                                }}
+                            />
+                            <Toolbar
+                                type={'Xóa'}
+                                onClick={() => deleteConfirm('chuyên ngành', handleMajorDelete)}
+                            />
+                            <Toolbar type={'Nhập file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

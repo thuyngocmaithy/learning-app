@@ -50,7 +50,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
                         Clear
                     </Button>
                     <Button type="primary" htmlType="submit">
-                        Lọc
+                        Tìm kiếm
                     </Button>
                 </Space>
             </div>

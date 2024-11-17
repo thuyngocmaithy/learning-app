@@ -62,3 +62,20 @@ export const deleteStatusById = async (params) => {
         throw error;
     }
 };
+
+
+export const getWhereStatus = async (params) => {
+    try {
+        const response = await api.get('/statuses/getWhere', {
+            params: {
+                statusId: params?.statusId || undefined,
+                statusName: params?.statusName || undefined,
+                type: params?.type || undefined
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('[StatusService - getWhereMajor - error] : ', error);
+        throw error;
+    }
+};

@@ -52,3 +52,18 @@ export const updateFacultyById = async (facultyId, facultyData) => {
         throw error;
     }
 };
+
+export const getWhereFaculty = async (params) => {
+    try {
+        const response = await api.get('/faculties/getWhere', {
+            params: {
+                facultyId: params?.facultyId || undefined,
+                facultyName: params?.facultyName || undefined
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('[facultyService - getWhere - error] : ', error);
+        throw error;
+    }
+};
