@@ -67,6 +67,19 @@ export const SocketMessagesProvider = ({ children }) => {
                 });
             });
 
+            socketIo.on('messageDeleted', (messageId) => {
+                setMessagesMap((prevMessagesMap) => {
+                    const updatedMap = { ...prevMessagesMap };
+
+                    // Loại bỏ tin nhắn bị xóa từ các SRId và thesisId
+                    Object.keys(updatedMap).forEach(key => {
+                        updatedMap[key] = updatedMap[key].filter(message => message.id !== messageId);
+                    });
+
+                    return updatedMap;
+                });
+            });
+
 
             // Xử lý lỗi kết nối
             socketIo.on('connect_error', (err) => {
@@ -148,6 +161,7 @@ export const SocketMessagesProvider = ({ children }) => {
 
             // Gọi getMessages với danh sách SRId
             const allMessages = await getMessages(socketIo, IdList);
+            console.log(allMessages);
 
             // Cập nhật toàn bộ tin nhắn vào state
             setMessagesMap((prevMessagesMap) => ({
@@ -159,9 +173,21 @@ export const SocketMessagesProvider = ({ children }) => {
         }
     };
 
+    // Xóa tin nhắn
+    const deleteMessage = (messageId, roomId) => {
+        return new Promise((resolve, reject) => {
+            if (socket) {
+                socket.emit('deleteMessage', { messageId, roomId }, (response) => {
+                    resolve(response);
+                });
+            } else {
+                reject(new Error('Socket is not initialized'));
+            }
+        });
+    };
 
     return (
-        <SocketMessagesContext.Provider value={{ socket, messagesMap, getMessages, sendMessage }}>
+        <SocketMessagesContext.Provider value={{ socket, messagesMap, getMessages, sendMessage, deleteMessage }}>
             {children}
         </SocketMessagesContext.Provider>
     );

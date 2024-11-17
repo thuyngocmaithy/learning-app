@@ -10,8 +10,9 @@ function Support({ children }) {
     const renderResult = (attr) => (
         <div className={cx('wrapper-support')} {...attr}>
             <PopperWrapper className={cx('container-popper')}>
+                <h3 className={cx('title')}>Hỗ trợ đào tạo</h3>
                 <div className={cx('body')}>
-                    <ChatBox height="500px" />
+                    <ChatBox height="470px" type="support" />
                 </div>
             </PopperWrapper>
         </div>

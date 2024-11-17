@@ -15,7 +15,6 @@
         "@fortawesome/free-solid-svg-icons": "^6.4.2",
         "@fortawesome/react-fontawesome": "^0.2.0",
         "@mescius/wijmo.react.nav": "^5.20242.21",
-        "@minchat/react-chat-ui": "^0.16.2",
         "@mui/material": "^5.14.7",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
         "@testing-library/jest-dom": "^5.17.0",

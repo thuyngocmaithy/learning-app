@@ -455,7 +455,7 @@ function DeTaiNCKH() {
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
                     {listScientificResearchJoined.map((item, index) => {
-                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
+                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : item.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiNCKHThamGia')}

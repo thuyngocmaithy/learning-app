@@ -3,6 +3,15 @@
     // overflow-y: auto;    
 }
 
+.title {
+    padding: 5px;
+    background-color: rgb(243, 244, 246);
+    border-bottom: 1px solid rgb(190 214 234);
+}
+
 .body {
     height: 530px;
+    background-color: rgb(243, 244, 246);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
