@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { Checkbox, Input, Spin } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableDepartment.module.scss';
-import { listSubjectToFrameDepartment } from '../../services/studyFrameService';
+import { callKhungCTDT } from '../../services/studyFrameService';
 import { getWhere } from '../../services/semesterService';
 import { debounce } from 'lodash';  // Sử dụng lodash để debounce input
 
@@ -82,7 +82,7 @@ const TableDepartment = ({
     // Hàm tải dữ liệu cấu trúc chương trình
     const fetchFrameComponents = useCallback(async () => {
         try {
-            const response = await listSubjectToFrameDepartment(data.frameId);
+            const response = await callKhungCTDT(data.frameId);
             if (Array.isArray(response)) {
                 setFrameComponents(response);
             }

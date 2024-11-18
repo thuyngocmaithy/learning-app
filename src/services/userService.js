@@ -207,3 +207,13 @@ export const importUser = async (userData) => {
     throw error;
   }
 };
+
+export const saveRegisterSubjects = async (registrations) => {
+  try {
+    const response = await api.post('/user-register-subject/saveRegister', registrations);
+    return response;
+  } catch (error) {
+    console.error('[userService - bulkRegisterSubjects - error] : ', error);
+    throw error;
+  }
+};

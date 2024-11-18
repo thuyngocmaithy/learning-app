@@ -43,7 +43,7 @@ dayjs.locale('vi', {
     }
 });
 
-function ChatBox({ height = '60vh', type = '' }) {
+function ChatBox({ height = '60vh' }) {
     const [inputValue, setInputValue] = useState('');
     const { userId } = useContext(AccountLoginContext)
     const { messagesMap, sendMessage, deleteMessage } = useSocketMessages();
@@ -56,7 +56,7 @@ function ChatBox({ height = '60vh', type = '' }) {
 
     const fetchMessage = () => {
         let messagesListConvert;
-        if (SRIdFromUrl && type !== 'support') {
+        if (SRIdFromUrl) {
             messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
                 return {
                     id: message.id,
@@ -70,7 +70,7 @@ function ChatBox({ height = '60vh', type = '' }) {
                 }
             });
         }
-        if (thesisIdFromUrl && type !== 'support') {
+        if (thesisIdFromUrl) {
             messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
                 return {
                     id: message.id,
@@ -84,10 +84,8 @@ function ChatBox({ height = '60vh', type = '' }) {
                 }
             });
         }
-        // Tin nhắn hỗ trợ
-        if (type === 'support') {
+        console.log(messagesListConvert);
 
-        }
         setMessagesList(messagesListConvert);
     }
     useEffect(() => {

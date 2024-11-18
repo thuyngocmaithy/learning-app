@@ -5,8 +5,8 @@
 }
 
 .container-table {
-    box-shadow: var(--box-shadow-1);
-    border-radius: 17px;
+    box-shadow: var(--box-shadow-1) !important;
+    border-radius: 17px !important;
 }
 
 .radio-period {
@@ -36,4 +36,10 @@
 
 .ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after {
     border-color: rgb(0, 0, 0);
+}
+
+.radio-check {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

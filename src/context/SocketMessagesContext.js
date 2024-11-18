@@ -151,8 +151,16 @@ export const SocketMessagesProvider = ({ children }) => {
                             key: 'thesisId',
                             value: element.thesis.thesisId
                         }
-                        : null // Giá trị mặc định nếu cả hai đều không tồn tại
+                        : null // Giá trị mặc định nếu cả hai đều không tồn tại                
             ).filter(id => id !== null); // Loại bỏ các giá trị null
+
+            // Thêm Id support vào IdList
+            IdList.push({
+                key: 'support',
+                value: userId // Tk đang login => Lấy các message của người login
+            })
+            console.log(IdList);
+
 
             // Tham gia vào room cho mỗi SRId
             IdList.forEach(id => {
@@ -161,7 +169,6 @@ export const SocketMessagesProvider = ({ children }) => {
 
             // Gọi getMessages với danh sách SRId
             const allMessages = await getMessages(socketIo, IdList);
-            console.log(allMessages);
 
             // Cập nhật toàn bộ tin nhắn vào state
             setMessagesMap((prevMessagesMap) => ({
