@@ -67,3 +67,14 @@ export const getWhereFaculty = async (params) => {
         throw error;
     }
 };
+
+
+export const importFaculty = async (data) => {
+    try {
+        const response = await api.post('/faculties/import', data);
+        return response.data;
+    } catch (error) {
+        console.error('[FacultyService - importFaculty]:', error);
+        throw error;
+    }
+};

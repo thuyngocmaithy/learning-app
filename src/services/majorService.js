@@ -51,3 +51,15 @@ export const updateMajorById = async (majorId, majorData) => {
         throw error;
     }
 };
+
+
+export const importMajor = async (data) => {
+    try {
+        const response = await api.post('/majors/import', data);
+        return response.data;
+
+    } catch (error) {
+        console.error('[majorService - importMajor - error] : ', error);
+        throw error;
+    }
+};

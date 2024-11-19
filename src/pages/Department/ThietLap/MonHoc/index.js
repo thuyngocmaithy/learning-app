@@ -8,13 +8,15 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { deleteSubjectById, getAllSubjectDetail, getWhereSubject } from '../../../../services/subjectService';
-import { getAllFaculty } from '../../../../services/facultyService'
+import { deleteSubjectById, getAllSubjectDetail, getWhereSubject, importSubject } from '../../../../services/subjectService';
+import { getAllFaculty } from '../../../../services/facultyService';
 import { getAll as getAllMajors, getWhere } from '../../../../services/majorService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
 import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -34,6 +36,9 @@ function MonHoc() {
     const [showFilter, setShowFilter] = useState(false);
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [majorOptions, setMajorOptions] = useState([]);
+
+    // Import 
+    const [showModalImportSubject, setShowModalImportSubject] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -276,61 +281,20 @@ function MonHoc() {
 
     const getFilterFieldsSubject = () => {
         return (
-            <>
-                <Col className='gutter-row' span={10}>
-                    <Row gutter={8}>
-                        <FormItem
-                            name="subjectId"
-                            label="Mã môn học"
-                        >
-                            <Input />
-                        </FormItem>
-                    </Row>
-                    <Row gutter={8}>
-                        <FormItem
-                            name="subjectName"
-                            label="Tên môn học"
-                        >
-                            <Input />
-                        </FormItem>
-                    </Row>
+            <Row gutter={[16, 16]} align="middle">
+                {/* Dòng 1 */}
+                <Col span={6}>
+                    <FormItem name="subjectId" label="Mã môn học">
+                        <Input />
+                    </FormItem>
                 </Col>
-                <Col className='gutter-row' span={7}>
-                    <Row gutter={8}>
-                        <FormItem
-                            name="subjectBefore"
-                            label="Mã môn học trước"
-                        >
-                            <Input />
-                        </FormItem>
-                    </Row>
-                    <Row gutter={8}>
-                        <FormItem
-                            name="creditHour"
-                            label="Số tín chỉ"
-                        >
-                            <Input />
-                        </FormItem>
-                    </Row>
-                    <Row gutter={8}>
-                        <FormItem
-                            name="isCompulsory"
-                            label="Băt buộc"
-                        >
-                            <Select
-                                style={{ width: '100%' }}
-                                options={typeOptions}
-                                allowClear
-                                placeholder="Chọn loại trạng thái"
-                            />
-                        </FormItem>
-                    </Row>
+                <Col span={6}>
+                    <FormItem name="subjectBefore" label="Mã môn học trước">
+                        <Input />
+                    </FormItem>
                 </Col>
-                <Col className="gutter-row" span={8}>
-                    <FormItem
-                        name={'faculty'}
-                        label={'Khoa'}
-                    >
+                <Col span={6}>
+                    <FormItem name="faculty" label="Khoa">
                         <Select
                             style={{ width: '100%' }}
                             showSearch
@@ -342,16 +306,25 @@ function MonHoc() {
                             labelInValue
                             onChange={(selectedFaculty) => {
                                 fetchMajorData(selectedFaculty.value);
-                                form.setFieldsValue({ major: null });// Gọi API tải majors dựa vào facultyId
+                                form.setFieldsValue({ major: null });
                             }}
                         />
                     </FormItem>
                 </Col>
-                <Col className="gutter-row" span={8}>
-                    <FormItem
-                        name={'major'}
-                        label={'Chuyên ngành'}
-                    >
+
+                {/* Dòng 2 */}
+                <Col span={6}>
+                    <FormItem name="subjectName" label="Tên môn học">
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col span={6}>
+                    <FormItem name="creditHour" label="Số tín chỉ">
+                        <Input />
+                    </FormItem>
+                </Col>
+                <Col span={6}>
+                    <FormItem name="major" label="Chuyên ngành">
                         <Select
                             style={{ width: '100%' }}
                             showSearch
@@ -364,9 +337,23 @@ function MonHoc() {
                         />
                     </FormItem>
                 </Col>
-            </>
+
+                {/* Dòng 3 */}
+                <Col span={6}>
+                    <FormItem name="isCompulsory" label="Bắt buộc">
+                        <Select
+                            style={{ width: '100%' }}
+                            options={typeOptions}
+                            allowClear
+                            placeholder="Chọn loại trạng thái"
+                        />
+                    </FormItem>
+                </Col>
+            </Row>
         );
-    }
+    };
+
+
 
 
     return (
@@ -392,7 +379,7 @@ function MonHoc() {
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('môn học', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} />
+                    <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportSubject(true)} />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>
 
@@ -417,6 +404,14 @@ function MonHoc() {
             />
             {MonHocUpdateMemorized}
             {MonHocDetailMemoized}
+            <ImportExcel
+                title={'Môn học'}
+                showModal={showModalImportSubject}
+                setShowModal={setShowModalImportSubject}
+                reLoad={fetchData}
+                type={config.imports.SUBJECT}
+                onImport={importSubject}
+            />
         </div>
     );
 }

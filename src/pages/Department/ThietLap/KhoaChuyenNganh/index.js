@@ -8,22 +8,22 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { getAllFaculty, deleteFacultyById, getWhereFaculty } from '../../../../services/facultyService';
-import { getAll as getAllMajors, deleteMajorById, getWhere } from '../../../../services/majorService';
+import { getAllFaculty, deleteFacultyById, getWhereFaculty, importFaculty } from '../../../../services/facultyService';
+import { getAll as getAllMajors, deleteMajorById, getWhere, importMajor } from '../../../../services/majorService';
 import { KhoaUpdate } from '../../../../components/FormUpdate/KhoaUpdate';
 import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganhUpdate';
 import { KhoaDetail } from '../../../../components/FormDetail/KhoaDetail';
 import { ChuyenNganhDetail } from '../../../../components/FormDetail/ChuyenNganhDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
 function KhoaChuyenNganh() {
     // Shared states
     const [activeTab, setActiveTab] = useState(1);
-    const [showModalDetail, setShowModalDetail] = useState(false);
-
 
     // Khoa states
     const [khoaData, setKhoaData] = useState([]);
@@ -32,6 +32,8 @@ function KhoaChuyenNganh() {
     const [khoaShowModal, setKhoaShowModal] = useState(false);
     const [khoaIsUpdate, setKhoaIsUpdate] = useState(false);
     const [khoaViewOnly, setKhoaViewOnly] = useState(false);
+    const [showModalDetailKhoa, setShowModalDetailKhoa] = useState(false);
+
 
     // ChuyenNganh states
     const [majorData, setMajorData] = useState([]);
@@ -40,10 +42,18 @@ function KhoaChuyenNganh() {
     const [majorShowModal, setMajorShowModal] = useState(false);
     const [majorIsUpdate, setMajorIsUpdate] = useState(false);
     const [majorViewOnly, setMajorViewOnly] = useState(false);
+    const [showModalDetailChuyenNganh, setShowModalDetailChuyenNganh] = useState(false);
+
 
     // Filter
     const [showFilter, setShowFilter] = useState(false);
     const [facultyOptions, setFacultyOptions] = useState([]);
+
+
+    // Import 
+    const [showModalImportKhoa, setShowModalImportKhoa] = useState(false);
+    const [showModalImportChuyenNganh, setShowModalImportChuyenNganh] = useState(false);
+
 
 
     // Fetch Functions
@@ -265,7 +275,7 @@ function KhoaChuyenNganh() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModalDetail(record);
+                            setShowModalDetailKhoa(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -315,7 +325,7 @@ function KhoaChuyenNganh() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModalDetail(record);
+                            setShowModalDetailChuyenNganh(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -339,7 +349,7 @@ function KhoaChuyenNganh() {
     // Update components
     const KhoaUpdateMemo = useMemo(() => (
         <KhoaUpdate
-            title={'Khoa'}
+            title={'khoa'}
             isUpdate={khoaIsUpdate}
             showModal={khoaShowModal}
             setShowModal={setKhoaShowModal}
@@ -350,7 +360,7 @@ function KhoaChuyenNganh() {
 
     const ChuyenNganhUpdateMemo = useMemo(() => (
         <ChuyenNganhUpdate
-            title={'Chuyên ngành'}
+            title={'chuyên ngành'}
             isUpdate={majorIsUpdate}
             showModal={majorShowModal}
             setShowModal={setMajorShowModal}
@@ -363,19 +373,19 @@ function KhoaChuyenNganh() {
     // Detail components
     const KhoaDetailMemoized = useMemo(() => (
         <KhoaDetail
-            title={'Khoa'}
-            showModal={showModalDetail}
-            setShowModal={setShowModalDetail}
+            title={'khoa'}
+            showModal={showModalDetailKhoa}
+            setShowModal={setShowModalDetailKhoa}
         />
-    ), [showModalDetail]);
+    ), [showModalDetailKhoa]);
 
     const ChuyenNganhDetailMemoized = useMemo(() => (
         <ChuyenNganhDetail
-            title={'Chuyên ngành'}
-            showModal={showModalDetail}
-            setShowModal={setShowModalDetail}
+            title={'chuyên ngành'}
+            showModal={showModalDetailChuyenNganh}
+            setShowModal={setShowModalDetailChuyenNganh}
         />
-    ), [showModalDetail]);
+    ), [showModalDetailChuyenNganh]);
 
     const ITEM_TABS = [
         {
@@ -439,8 +449,9 @@ function KhoaChuyenNganh() {
                     </span>
                     <h3 className={cx('title')}>Quản lý Khoa - Chuyên ngành</h3>
                 </div>
+
                 <div className={cx('wrapper-toolbar')}>
-                    {activeTab === '1' ? (
+                    {activeTab === 1 ? (
                         <>
                             <Toolbar
                                 type={'Bộ lọc'}
@@ -460,7 +471,7 @@ function KhoaChuyenNganh() {
                                 type={'Xóa'}
                                 onClick={() => deleteConfirm('khoa', handleKhoaDelete)}
                             />
-                            <Toolbar type={'Nhập file Excel'} />
+                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportKhoa(true)} />
                             <Toolbar type={'Xuất file Excel'} />
                         </>
                     ) : (
@@ -483,7 +494,7 @@ function KhoaChuyenNganh() {
                                 type={'Xóa'}
                                 onClick={() => deleteConfirm('chuyên ngành', handleMajorDelete)}
                             />
-                            <Toolbar type={'Nhập file Excel'} />
+                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportChuyenNganh(true)} />
                             <Toolbar type={'Xuất file Excel'} />
                         </>
                     )}
@@ -506,10 +517,27 @@ function KhoaChuyenNganh() {
                     />
                 </div>
             </div>
+            <ImportExcel
+                title={'Khoa - Ngành'}
+                showModal={showModalImportKhoa}
+                setShowModal={setShowModalImportKhoa}
+                reLoad={fetchKhoaData}
+                type={config.imports.FACULTY}
+                onImport={importFaculty}
+            />
+            <ImportExcel
+                title={'Chuyên ngành'}
+                showModal={showModalImportChuyenNganh}
+                setShowModal={setShowModalImportChuyenNganh}
+                reLoad={fetchMajorData}
+                type={config.imports.MAJOR}
+                onImport={importMajor}
+            />
             {KhoaUpdateMemo}
             {KhoaDetailMemoized}
             {ChuyenNganhUpdateMemo}
             {ChuyenNganhDetailMemoized}
+
         </div>
     );
 

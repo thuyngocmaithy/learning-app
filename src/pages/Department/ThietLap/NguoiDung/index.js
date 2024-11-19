@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './NguoiDung.module.scss';
-import { message, Tag } from 'antd';
+import { message, Tag, Divider, Col, Row, Input, Select, Form } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -10,14 +10,21 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { NguoiDungDetail } from '../../../../components/FormDetail/NguoiDungDetail';
-import { deleteUserById } from '../../../../services/userService';
-import { getAllUser } from '../../../../services/userService';
+import { deleteUserById, importUser } from '../../../../services/userService';
+import { getAllUser, getWhereUser } from '../../../../services/userService';
+import { getAll as getAllMajors, getWhere } from '../../../../services/majorService';
+import { getAllFaculty } from '../../../../services/facultyService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import config from '../../../../config';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from 'antd/es/form/FormItem';
+
 
 const cx = classNames.bind(styles);
 
 function NguoiDung() {
+
+    const [form] = Form.useForm();
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
@@ -28,6 +35,10 @@ function NguoiDung() {
     const [viewOnly, setViewOnly] = useState(false);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
 
+    // Filter
+    const [showFilter, setShowFilter] = useState(false);
+    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([]);
 
     const columns = (showModal) => [
         {
@@ -171,6 +182,7 @@ function NguoiDung() {
 
     useEffect(() => {
         fetchData();
+        fetchKhoaData();
     }, []);
 
     useEffect(() => {
@@ -220,6 +232,196 @@ function NguoiDung() {
         />
     ), [showModalDetail]);
 
+
+    const typeUser = [
+        { label: 'Sinh viên', value: 1 },
+        { label: 'Giảng viên', value: 0 },
+    ];
+
+
+    const typeNienKhoa = [
+        {
+            label: "2020-2024",
+            value: "2020-2024"
+        },
+        {
+            label: "2021-2025",
+            value: "2021-2025"
+        },
+        {
+            label: "2022-2026",
+            value: "2022-2026"
+        },
+        {
+            label: "2023-2027",
+            value: "2023-2027"
+        },
+        {
+            label: "2024-2028",
+            value: "2024-2028"
+        },
+    ];
+
+
+    const fetchKhoaData = async () => {
+        try {
+            const result = await getAllFaculty();
+            let listFaculty = Array.isArray(result.data)
+                ? result.data.map(faculty => ({
+                    value: faculty.facultyId,
+                    label: faculty.facultyName,
+                })) : [];
+            setFacultyOptions(listFaculty);
+        } catch (error) {
+            console.error('Error fetching faculty data:', error);
+        }
+    };
+
+    const fetchMajorData = async (facultyId) => {
+        try {
+            const response = await getWhere({
+                facultyId: facultyId,
+            });
+            if (response?.data?.data && Array.isArray(response.data.data)) {
+                const options = response.data.data.map((major) => ({
+                    value: major.majorId,
+                    label: major.majorName,
+                }));
+                setMajorOptions(options); // Cập nhật majors dựa vào khoa
+            } else {
+                setMajorOptions([]); // Nếu không có dữ liệu, đặt mảng rỗng
+            }
+        } catch (error) {
+            console.error('Error fetching majors:', error);
+            setMajorOptions([]); // Đặt majors rỗng nếu lỗi
+        }
+    };
+
+    const onSearchUser = async (values) => {
+        try {
+
+            let searchParams = {
+                userId: values.userId?.trim() || undefined,
+                fullname: values.fullname?.trim() || undefined,
+                class: values.class?.trim() || undefined,
+                facultyId: values.faculty?.value || undefined,
+                majorId: values.major?.value || undefined,
+                isStudent: values.isStudent,
+                nien_khoa: values.nien_khoa,
+                firstAcademicYear: values.firstAcademicYear?.trim() || undefined,
+                lastAcademicYear: values.lastAcademicYear?.trim() || undefined
+            };
+
+            if (!searchParams) {
+                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
+                return;
+            }
+
+
+            const response = await getWhereUser(searchParams);
+            if (response.status === 200) {
+                if (response.data.data.length === 0) {
+                    setData([]);
+                    message.info('Không tìm thấy kết quả phù hợp');
+                } else {
+                    setData(response.data.data);
+                }
+            }
+        } catch (error) {
+            console.error('[onSearch - error]: ', error);
+            message.error('Có lỗi xảy ra khi tìm kiếm');
+        }
+    };
+
+    const getFilterFieldsUser = () => {
+        return (
+            <>
+                <Row gutter={[16, 16]} align="middle">
+                    <Col span={6}>
+                        <FormItem name="userId" label="Mã người dùng">
+                            <Input />
+                        </FormItem>
+                    </Col>
+                    <Col span={6}>
+                        <FormItem name="fullname" label="Họ tên">
+                            <Input />
+                        </FormItem>
+                    </Col>
+                    <Col span={6}>
+                        <FormItem name="class" label="Lớp">
+                            <Input />
+                        </FormItem>
+                    </Col>
+
+
+                    <Col span={6}>
+                        <FormItem name="faculty" label="Khoa">
+                            <Select
+                                style={{ width: '100%' }}
+                                showSearch
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={facultyOptions}
+                                labelInValue
+                                onChange={(selectedFaculty) => {
+                                    fetchMajorData(selectedFaculty.value);
+                                    form.setFieldsValue({ major: null });
+                                }}
+                            />
+                        </FormItem>
+                    </Col>
+                    <Col span={6}>
+                        <FormItem name="major" label="Chuyên ngành">
+                            <Select
+                                style={{ width: '100%' }}
+                                showSearch
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={majorOptions}
+                                labelInValue
+                            />
+                        </FormItem>
+                    </Col>
+                    <Col span={6}>
+                        <FormItem name="isStudent" label="Chức danh">
+                            <Select
+                                style={{ width: '100%' }}
+                                options={typeUser}
+                                allowClear
+                                placeholder="Chọn chức danh"
+                            />
+                        </FormItem>
+
+                    </Col>
+                    <Col span={6}>
+                        <FormItem name="nien_khoa" label="Niên khoá">
+                            <Select
+                                style={{ width: '100%' }}
+                                options={typeNienKhoa}
+                                allowClear
+                                placeholder="Chọn niên khoá"
+                            />
+                        </FormItem>
+                    </Col>
+                    <Col span={3}>
+                        <FormItem name="firstAcademicYear" label="Năm bắt đầu">
+                            <Input />
+                        </FormItem>
+                    </Col>
+                    <Col span={3}>
+                        <FormItem name="lastAcademicYear" label="Năm kết thúc">
+                            <Input />
+                        </FormItem>
+                    </Col>
+                </Row>
+            </>
+        )
+    }
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -230,6 +432,10 @@ function NguoiDung() {
                     <h3 className={cx('title')}>Người dùng</h3>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
+                    <Toolbar type={'Bộ lọc'}
+                        onClick={() => {
+                            setShowFilter(!showFilter);
+                        }} />
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
@@ -244,8 +450,17 @@ function NguoiDung() {
                 </div>
 
             </div>
+            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                <SearchForm
+                    form={form}
+                    getFields={getFilterFieldsUser}
+                    onSearch={onSearchUser}
+                    onReset={fetchData}
+                />
+                <Divider />
+            </div>
             <TableCustomAnt
-                height={'450px'}
+                height={'750px'}
                 columns={columns(setShowModal)}
                 data={data}
                 selectedRowKeys={selectedRowKeys}
@@ -261,6 +476,7 @@ function NguoiDung() {
                 setShowModal={setShowModalImport}
                 reLoad={fetchData}
                 type={config.imports.USER}
+                onImport={importUser}
             />
         </div>
     );
