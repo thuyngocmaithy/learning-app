@@ -4,24 +4,75 @@ import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import { unstable_batchedUpdates } from 'react-dom';
 import styles from './Table.module.scss';
-import { listSubjectToFrame } from '../../services/studyFrameService';
+import { callKhungCTDT } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
 import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
-const useTableLogic = (userId, department, onSelectionChange) => {
+const useTableLogic = (userId, frameId, registeredSubjects, setRegisteredSubjects) => {
     const [frameComponents, setFrameComponents] = useState([]);
     const [scores, setScores] = useState([]);
-    const [registeredSubjects, setRegisteredSubjects] = useState({});
-    const [selectedSubjects, setSelectedSubjects] = useState({});
     const [studentInfo, setStudentInfo] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const firstYear = studentInfo?.firstAcademicYear || 2020;
     const lastYear = studentInfo?.lastAcademicYear || 2024;
-    const repeatHK = department ? 3 : (lastYear - firstYear + 1) * 3;
+    const repeatHK = (lastYear - firstYear + 1) * 3;
+
+    const [semesterList, setSemesterList] = useState([]);
+    const [currentSemester, setCurrentSemester] = useState(1);
+
+    const calculateCurrentSemester = (startYear) => {
+        // Lấy năm hiện tại và tháng hiện tại
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // Tháng trong JS tính từ 0
+
+        // Tính số năm đã trôi qua từ startYear
+        const yearsPassed = currentYear - startYear;
+
+        // Tính số học kỳ đã trôi qua
+        let semestersPassed = yearsPassed * 3; // Mỗi năm có 3 học kỳ
+
+        // Xác định học kỳ của năm hiện tại dựa trên tháng
+        if (currentMonth >= 9 && currentMonth <= 12) {
+            // Tháng 9, 10, 11, 12 là học kỳ thứ 3 của năm
+            semestersPassed += 3;
+        } else if (currentMonth >= 5 && currentMonth <= 8) {
+            // Tháng 5, 6, 7, 8 là học kỳ thứ 2 của năm
+            semestersPassed += 2;
+        } else if (currentMonth >= 1 && currentMonth <= 4) {
+            // Tháng 1, 2, 3, 4 là học kỳ thứ 1 của năm
+            semestersPassed += 1;
+        }
+
+        return semestersPassed;
+    }
+
+
+    const generateSemesterMap = (firstYear, lastYear) => {
+        const semesterMap = {};
+        let counter = 1;
+
+        for (let year = firstYear; year <= lastYear; year++) {
+            for (let semester = 1; semester <= 3; semester++) {
+                semesterMap[counter] = `${year}${semester}`;
+                counter++;
+            }
+        }
+        return semesterMap;
+    };
+
+    useEffect(() => {
+        setCurrentSemester(calculateCurrentSemester(firstYear));
+        setSemesterList(generateSemesterMap(firstYear, lastYear))
+
+    }, [firstYear, lastYear])
+
+
+
 
     const getSemesterIndex = useCallback((semesterId) => {
         if (!semesterId) return -1;
@@ -35,7 +86,7 @@ const useTableLogic = (userId, department, onSelectionChange) => {
         try {
             const userData = await getUserById(userId);
             const [frameComponentsRes, scoresRes, registeredSubjectsRes] = await Promise.all([
-                listSubjectToFrame(userId),
+                callKhungCTDT(frameId),
                 getScoreByStudentId(userId),
                 getUserRegisteredSubjects(userId)
             ]);
@@ -70,42 +121,45 @@ const useTableLogic = (userId, department, onSelectionChange) => {
             message.error('Failed to load data');
         }
         setIsLoading(false);
-    }, [userId, getSemesterIndex]);
+    }, [userId, frameId, setRegisteredSubjects, getSemesterIndex]);
 
-    const handleSelectSubject = useCallback((subjectId, frameComponentId, semesterIndex) => {
-        if (registeredSubjects[subjectId]) return;
+    const handleSelectSubject = useCallback((subjectId, semesterIndex) => {
+        setRegisteredSubjects(prev => {
+            const updatedRegisteredSubjects = { ...prev };
 
-        setSelectedSubjects(prev => {
-            if (prev[subjectId]?.semesterIndex === semesterIndex) {
-                if (Object.keys(prev).length === 1) return {};
-                const { [subjectId]: _, ...rest } = prev;
-                return rest;
+            // Nếu môn học chưa có trong registeredSubjects, thêm vào
+            if (!updatedRegisteredSubjects[subjectId]) {
+                updatedRegisteredSubjects[subjectId] = {};
             }
-            return {
-                ...prev,
-                [subjectId]: { frameComponentId, semesterIndex }
+
+            // Cập nhật lại semesterIndex và semesterId cho môn học đã đăng ký
+            updatedRegisteredSubjects[subjectId] = {
+                ...updatedRegisteredSubjects[subjectId],
+                semesterIndex, // Cập nhật semesterIndex mới
+                semesterId: semesterList[semesterIndex + 1]    // Cập nhật semesterId mới
             };
+
+            return updatedRegisteredSubjects;
         });
-    }, [registeredSubjects]);
+    }, [setRegisteredSubjects]);
+
+
+
+
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    useEffect(() => {
-        if (onSelectionChange) {
-            onSelectionChange(selectedSubjects);
-        }
-    }, [selectedSubjects, onSelectionChange]);
 
     return {
         frameComponents,
         scores,
         registeredSubjects,
-        selectedSubjects,
         studentInfo,
         isLoading,
         repeatHK,
+        currentSemester,
         getSemesterIndex,
         handleSelectSubject
     };
@@ -114,56 +168,48 @@ const useTableLogic = (userId, department, onSelectionChange) => {
 const SubjectCell = React.memo(({
     subject,
     semesterIndex,
-    department,
     registeredInfo,
     scoreInfo,
-    selectedSubjects,
-    onSelectSubject
+    disableCheckbox,
+    handleChange
 }) => {
     const cellState = useMemo(() => {
-        const isSelected = selectedSubjects[subject.subjectId]?.semesterIndex === semesterIndex;
         const isRegistered = registeredInfo?.semesterIndex === semesterIndex;
         const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
-        return { isSelected, isRegistered, hasScore };
-    }, [selectedSubjects, subject.subjectId, semesterIndex, registeredInfo, scoreInfo]);
+        return { isRegistered, hasScore };
+    }, [semesterIndex, registeredInfo, scoreInfo]);
 
-    const handleChange = useCallback(() => {
-        onSelectSubject(subject.subjectId, subject.studyFrameComponentId, semesterIndex);
-    }, [subject.subjectId, subject.studyFrameComponentId, semesterIndex, onSelectSubject]);
-
-    const { isSelected, isRegistered, hasScore } = cellState;
+    const { isRegistered, hasScore } = cellState;
 
     return (
         <TableCell align="center">
-            {department ? (
-                <Checkbox
-                    checked={isRegistered || isSelected}
-                    onChange={handleChange}
-                    disabled={hasScore || isRegistered}
+            {hasScore
+                ? <div className={cx('radio-check')}>
+                    <Radio
+                        checked={hasScore || isRegistered} // Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
+                        onChange={() => handleChange(subject.subjectId, semesterIndex)}
+                        disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
+                        size="small"
+                    />
+                    <span>{scoreInfo.finalScore10}</span>
+                </div>
+                : <Radio
+                    checked={hasScore || isRegistered} // Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
+                    onChange={() => handleChange(subject.subjectId, semesterIndex)}
+                    disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
                     size="small"
                 />
-            ) : (
-                <Radio
-                    checked={isRegistered || isSelected}
-                    onChange={handleChange}
-                    disabled={hasScore || isRegistered}
-                    size="small"
-                />
-            )}
-            {hasScore && <span>{scoreInfo.finalScore10}</span>}
-            {isRegistered && !hasScore && (
-                <span>Đăng ký: {new Date(registeredInfo.registerDate).toLocaleDateString()}</span>
-            )}
+            }
         </TableCell>
     );
 }, (prevProps, nextProps) => {
     return (
-        prevProps.selectedSubjects[prevProps.subject.subjectId]?.semesterIndex ===
-        nextProps.selectedSubjects[nextProps.subject.subjectId]?.semesterIndex &&
         prevProps.registeredInfo === nextProps.registeredInfo &&
-        prevProps.scoreInfo === nextProps.scoreInfo
+        prevProps.scoreInfo === nextProps.scoreInfo &&
+        prevProps.disableCheckbox === nextProps.disableCheckbox
     );
 });
+
 
 const SubjectRow = React.memo(({
     subject,
@@ -171,40 +217,81 @@ const SubjectRow = React.memo(({
     repeatHK,
     registeredSubjects,
     scores,
-    selectedSubjects,
-    department,
-    onSelectSubject,
-    getSemesterIndex
+    currentSemester,
+    getSemesterIndex,
+    handleChangeCell
 }) => {
     const registeredInfo = registeredSubjects[subject?.subjectId];
 
+    // Kiểm tra xem có học kỳ nào đã có điểm trước học kỳ đăng ký không
+    const disableCheckboxIndexes = useMemo(() => {
+        const indexes = [];
+        let highlightRow = false;
+        let redRow = false;
+
+        for (let i = 0; i < repeatHK; i++) {
+            const scoreInfo = scores.find(score =>
+                score.subject.subjectId === subject.subjectId &&
+                getSemesterIndex(score.semester.semesterId) === i
+            );
+
+            if (scoreInfo && scoreInfo.finalScore10 !== undefined) {
+                // Đánh dấu tất cả các cột trước cột có điểm là cần disable
+                for (let j = 0; j <= i; j++) {
+                    indexes.push(j);
+                }
+
+                // Nếu có điểm, kiểm tra xem học kỳ đăng ký có nhỏ hơn học kỳ có điểm không
+                if (i >= registeredInfo?.semesterIndex) {
+                    highlightRow = true; // Đánh dấu dòng cần tô màu
+                }
+            }
+
+            // Tô đỏ chỉ khi học kỳ hiện tại lớn hơn học kỳ đăng ký
+            if (i < currentSemester && i > registeredInfo?.semesterIndex) {
+                console.log(i);
+
+                redRow = true; // Đánh dấu dòng cần tô màu đỏ
+            }
+        }
+
+        return { indexes, highlightRow, redRow }; // Trả về cả chỉ số cần disable và trạng thái cần tô màu
+    }, [subject, repeatHK, scores, currentSemester, getSemesterIndex, registeredInfo]);
+
     const semesterCells = useMemo(() => {
-        if (!subject) return null; // Handle the case where subject is undefined here
+        if (!subject) return null;
 
         return Array.from({ length: repeatHK }).map((_, i) => {
             const scoreInfo = scores.find(score =>
                 score.subject.subjectId === subject.subjectId &&
                 getSemesterIndex(score.semester.semesterId) === i
             );
+
             return (
                 <SubjectCell
                     key={`cell-${subject.subjectId}-${i}`}
                     subject={subject}
                     semesterIndex={i}
-                    department={department}
                     registeredInfo={registeredInfo}
                     scoreInfo={scoreInfo}
-                    selectedSubjects={selectedSubjects}
-                    onSelectSubject={onSelectSubject}
+                    disableCheckbox={disableCheckboxIndexes.indexes.includes(i)} // Vô hiệu hóa checkbox nếu nằm trong các cột có điểm hoặc trước cột đó
+                    handleChange={handleChangeCell}
                 />
             );
         });
-    }, [subject, repeatHK, registeredInfo, scores, department, selectedSubjects, onSelectSubject, getSemesterIndex]);
+    }, [subject, repeatHK, registeredInfo, scores, getSemesterIndex, disableCheckboxIndexes.indexes, handleChangeCell]);
 
     if (!subject) return null;
 
     return (
-        <TableRow>
+        <TableRow
+            style={{
+                backgroundColor: disableCheckboxIndexes.highlightRow
+                    ? '#e6fffb'
+                    : disableCheckboxIndexes.redRow
+                        ? '#fff1f0'
+                        : 'transparent'
+            }}>
             <TableCell align="center">{index + 1}</TableCell>
             <TableCell align="center">{subject.subjectId}</TableCell>
             <TableCell align="left">{subject.subjectName}</TableCell>
@@ -240,25 +327,26 @@ const FrameComponentRow = React.memo(({
                 </TableCell>
                 <TableCell align="center" colSpan={repeatHK}></TableCell>
             </TableRow>
-            {frameComponent.subjectInfo?.map((subject, index) =>
-                renderSubjectRow(subject, index)
+            {frameComponent.subjectInfo?.map((subject, index) => {
+                subject.studyFrameComponentId = frameComponent.frameComponentId;
+                return renderSubjectRow(subject, index)
+            }
             )}
         </>
     );
 });
 
-const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
+const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubjects }) => {
     const { userId } = useContext(AccountLoginContext);
     const {
         frameComponents,
         scores,
-        registeredSubjects,
-        selectedSubjects,
         isLoading,
         repeatHK,
+        currentSemester,
         getSemesterIndex,
         handleSelectSubject
-    } = useTableLogic(userId, department, onSelectionChange);
+    } = useTableLogic(userId, frameId, registeredSubjects, setRegisteredSubjects);
 
     const columns = useMemo(() => [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
@@ -282,12 +370,11 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
             repeatHK={repeatHK}
             registeredSubjects={registeredSubjects}
             scores={scores}
-            selectedSubjects={selectedSubjects}
-            department={department}
-            onSelectSubject={handleSelectSubject}
             getSemesterIndex={getSemesterIndex}
+            handleChangeCell={handleSelectSubject}
+            currentSemester={currentSemester}
         />
-    ), [repeatHK, registeredSubjects, scores, selectedSubjects, department, handleSelectSubject, getSemesterIndex]);
+    ), [repeatHK, registeredSubjects, scores, currentSemester, handleSelectSubject, getSemesterIndex]);
 
     if (isLoading) {
         return (
@@ -342,4 +429,4 @@ const ColumnGroupingTable = ({ department = false, onSelectionChange }) => {
     );
 };
 
-export default React.memo(ColumnGroupingTable);
+export default ColumnGroupingTable;

@@ -1,0 +1,123 @@
+.wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    margin-bottom: 50px;
+
+    .container {
+        height: 100%;
+    }
+}
+
+.list-message {
+    overflow-y: auto;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    max-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    /* Tạo thanh cuộn mỏng */
+    scrollbar-color: #bfd3e4 #e9ecef;
+    /* Màu thanh cuộn và màu nền thanh cuộn */
+    background-color: rgb(243, 244, 246);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding-bottom: 20px;
+}
+
+.container-item-message {
+    width: 100%;
+}
+
+
+.item-message {
+    width: max-content;
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+
+    .avatar {
+        margin: 0 10px;
+    }
+
+    .content {
+        background-color: rgb(190 214 234);
+        border-radius: 9px;
+        padding: 5px 7px;
+    }
+
+    .footer {
+        display: flex;
+        margin-top: 4px;
+    }
+
+    .date {
+        text-align: right;
+        vertical-align: text-top;
+        font-size: 12px;
+        margin-right: 2px;
+        margin-left: 20px;
+        align-self: flex-start;
+        color: rgb(75, 85, 99);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+}
+
+.message-mine {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+
+    .avatar {
+        display: none;
+    }
+
+    .content {
+        background: #6ea9d7;
+    }
+}
+
+
+.message-input {
+    background-color: rgb(243, 244, 246);
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.08) 0px -1px 0px;
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+
+    .input {
+        height: 40px;
+        width: 95%;
+        border-radius: 0.7rem;
+        background-color: rgb(190 214 234);
+        border: 1px solid rgb(236, 235, 235);
+    }
+
+    .btnSend {
+        border-radius: 0.7rem;
+        height: 40px;
+        width: 40px;
+        margin-left: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(190 214 234);
+        cursor: pointer;
+
+        .icon-send {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+    }
+}

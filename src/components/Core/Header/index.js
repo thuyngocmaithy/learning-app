@@ -3,16 +3,16 @@ import { faCircleInfo, faMoon, faArrowRightFromBracket } from '@fortawesome/free
 import classNames from 'classnames/bind';
 import styles from './Header.module.scss';
 import Menu from '../../Popper/Menu';
-import { BellIcon, SupportIcon, UserIcon } from '../../../assets/icons';
+import { BellIcon, UserIcon } from '../../../assets/icons';
 import Notification from '../../Popper/Notification';
-import Support from '../../Popper/Support';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge } from 'antd';
+import { Avatar, Badge, Switch } from 'antd';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import config from '../../../config';
 import UserInfo from '../../UserInfo';
+import { MoonFilled, MoonOutlined } from '@ant-design/icons';
 
 const cx = classNames.bind(styles);
 
@@ -81,11 +81,10 @@ function Header() {
         <div className={cx('wrapper')}>
             <div className={cx('actions')}>
                 <span>
-                    <Support>
-                        <span>
-                            <SupportIcon className={cx('icon')} />
-                        </span>
-                    </Support>
+                    <Switch
+                        checkedChildren={<MoonFilled />}
+                        unCheckedChildren={<MoonOutlined />}
+                    />
                 </span>
                 <span>
                     <Notification>

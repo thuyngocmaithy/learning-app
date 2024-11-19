@@ -67,6 +67,19 @@ export const SocketMessagesProvider = ({ children }) => {
                 });
             });
 
+            socketIo.on('messageDeleted', (messageId) => {
+                setMessagesMap((prevMessagesMap) => {
+                    const updatedMap = { ...prevMessagesMap };
+
+                    // Loại bỏ tin nhắn bị xóa từ các SRId và thesisId
+                    Object.keys(updatedMap).forEach(key => {
+                        updatedMap[key] = updatedMap[key].filter(message => message.id !== messageId);
+                    });
+
+                    return updatedMap;
+                });
+            });
+
 
             // Xử lý lỗi kết nối
             socketIo.on('connect_error', (err) => {
@@ -138,8 +151,16 @@ export const SocketMessagesProvider = ({ children }) => {
                             key: 'thesisId',
                             value: element.thesis.thesisId
                         }
-                        : null // Giá trị mặc định nếu cả hai đều không tồn tại
+                        : null // Giá trị mặc định nếu cả hai đều không tồn tại                
             ).filter(id => id !== null); // Loại bỏ các giá trị null
+
+            // Thêm Id support vào IdList
+            IdList.push({
+                key: 'support',
+                value: userId // Tk đang login => Lấy các message của người login
+            })
+            console.log(IdList);
+
 
             // Tham gia vào room cho mỗi SRId
             IdList.forEach(id => {
@@ -159,9 +180,21 @@ export const SocketMessagesProvider = ({ children }) => {
         }
     };
 
+    // Xóa tin nhắn
+    const deleteMessage = (messageId, roomId) => {
+        return new Promise((resolve, reject) => {
+            if (socket) {
+                socket.emit('deleteMessage', { messageId, roomId }, (response) => {
+                    resolve(response);
+                });
+            } else {
+                reject(new Error('Socket is not initialized'));
+            }
+        });
+    };
 
     return (
-        <SocketMessagesContext.Provider value={{ socket, messagesMap, getMessages, sendMessage }}>
+        <SocketMessagesContext.Provider value={{ socket, messagesMap, getMessages, sendMessage, deleteMessage }}>
             {children}
         </SocketMessagesContext.Provider>
     );

@@ -290,7 +290,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
                 listMember.push(thesisCancel.user);
             }
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getKhoaLuanNotification('approve', showModal, user.data, listMember);
+            const ListNotification = await notifications.getKhoaLuanNotification('approve', thesisCancel, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
                 await deleteNotification(itemNoti.toUser, itemNoti);

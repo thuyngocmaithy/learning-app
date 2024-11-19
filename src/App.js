@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Route, Routes, BrowserRouter as Router, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { privateRoutes, publicRoutes } from './routes';
 import MainLayout from './layouts';
 import { AccountLoginContext } from './context/AccountLoginContext';
@@ -16,11 +16,6 @@ function App() {
     const [isLoading, setIsLoading] = useState(true)
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
     const [status, setStatus] = useState('');
-
-    useEffect(() => {
-
-    }, []);
-
 
     const getListFeature = async () => {
         try {

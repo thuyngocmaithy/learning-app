@@ -61,17 +61,17 @@ export const GetSubjectByMajor = async (userId) => {
 };
 
 
-export const listSubjectToFrame = async (userId) => {
+export const findKhungCTDTByUserId = async (userId) => {
     try {
-        const response = await api.get(`/study-frames/listSubjectToFrame?userId=${userId}`);
-        return response.data;
+        const response = await api.get(`/study-frames/findKhungCTDTByUserId?userId=${userId}`);
+        return response;
     } catch (error) {
-        console.error('[study-frames - listSubjectToFrame - error]:', error);
+        console.error('[study-frames - findKhungCTDTByUserId - error]:', error);
         throw error;
     }
 };
 
-export const findFrameDepartment = async (startYear, facultyId, cycleId) => {
+export const findKhungCTDTDepartment = async (startYear, facultyId, cycleId) => {
     try {
         const params = {
             ...(startYear && { startYear }),
@@ -79,7 +79,7 @@ export const findFrameDepartment = async (startYear, facultyId, cycleId) => {
             ...(cycleId && { cycleId }) // Chỉ thêm cycleId nếu nó có giá trị
         };
 
-        const response = await api.get('/study-frames/findFrameDepartment', { params });
+        const response = await api.get('/study-frames/findKhungCTDTDepartment', { params });
         return response;
     } catch (error) {
         console.error('[study-frames - listSubjectToFrame - error]:', error);
@@ -88,12 +88,12 @@ export const findFrameDepartment = async (startYear, facultyId, cycleId) => {
 };
 
 
-export const listSubjectToFrameDepartment = async (studyFrameId) => {
+export const callKhungCTDT = async (studyFrameId) => {
     try {
-        const response = await api.get(`/study-frames/listSubjectToFrameDepartment?studyFrame=${studyFrameId}`);
+        const response = await api.get(`/study-frames/callKhungCTDT?studyFrame=${studyFrameId}`);
         return response.data;
     } catch (error) {
-        console.error('[study-frames - listSubjectToFrame - error]:', error);
+        console.error('[study-frames - callKhungCTDT - error]:', error);
         throw error;
     }
 };

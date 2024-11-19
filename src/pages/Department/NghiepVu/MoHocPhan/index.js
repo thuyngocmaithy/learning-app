@@ -9,7 +9,7 @@ import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { useForm } from 'antd/es/form/Form';
 import { getAll as getAllCycle } from '../../../../services/cycleService';
-import { findFrameDepartment } from '../../../../services/studyFrameService';
+import { findKhungCTDTDepartment } from '../../../../services/studyFrameService';
 import { deleteSubjectCourseOpening, getAll as getAllCourseOpening, getTeacherAssignmentsAndSemesters, saveMulti } from '../../../../services/subject_course_openingService';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
@@ -157,7 +157,7 @@ function MoHocPhan() {
                 facultyId: values.faculty.value
             }
 
-            const response = await findFrameDepartment(data.startYear, data.facultyId, data.cycleId);
+            const response = await findKhungCTDTDepartment(data.startYear, data.facultyId, data.cycleId);
             console.log(response);
 
             if (response.status === 200 && response.data.data !== null) {

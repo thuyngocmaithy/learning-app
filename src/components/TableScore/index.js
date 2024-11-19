@@ -4,7 +4,7 @@ import { Select, Spin, Input } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableScore.module.scss';
 import { getScoreByStudentId } from '../../services/scoreService';
-import { listSubjectToFrame } from '../../services/studyFrameService';
+import { callKhungCTDT, findKhungCTDTByUserId } from '../../services/studyFrameService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
@@ -66,11 +66,12 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const fetchData = useCallback(async () => {
         if (didMountRef.current) return;
         didMountRef.current = true;
-
+        const responseKhungCTDT = await findKhungCTDTByUserId(userId);
+        const frameId = responseKhungCTDT.data.data.frameId;
         setIsLoading(true);
         try {
             const [frameComponentsResponse, scoresResponse] = await Promise.all([
-                listSubjectToFrame(userId),
+                callKhungCTDT(frameId),
                 getScoreByStudentId(userId)
             ]);
 

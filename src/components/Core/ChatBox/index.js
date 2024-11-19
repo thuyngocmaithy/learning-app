@@ -1,4 +1,3 @@
-import { MinChatUiProvider, MainContainer, MessageInput, MessageContainer, MessageList } from '@minchat/react-chat-ui';
 import { useSocketMessages } from '../../../context/SocketMessagesContext';
 import { useLocation } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
@@ -8,10 +7,46 @@ import notifications from '../../../config/notifications';
 import { getSRById } from '../../../services/scientificResearchService';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { getThesisById } from '../../../services/thesisService';
+import classNames from 'classnames/bind';
+import styles from "./ChatBox.module.scss"
+import { Avatar, Input, Popconfirm } from 'antd';
+import { DeleteOutlined, SendOutlined } from '@ant-design/icons';
+import { UserIcon } from '../../../assets/icons';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/vi';
 
-function ChatBox({ height = '150vh' }) {
+const cx = classNames.bind(styles)
+
+// Kích hoạt plugin relativeTime
+dayjs.extend(relativeTime);
+
+// Cài đặt ngôn ngữ tiếng Việt cho dayjs
+dayjs.locale('vi');
+
+// Tùy chỉnh lại thông báo relativeTime của tiếng Việt
+dayjs.locale('vi', {
+    relativeTime: {
+        future: "vào %s",
+        past: "%s trước",
+        s: "vài giây",
+        m: "1 phút",
+        mm: "%d phút",
+        h: "1 giờ",
+        hh: "%d giờ",
+        d: "1 ngày",
+        dd: "%d ngày",
+        M: "1 tháng",
+        MM: "%d tháng",
+        y: "1 năm",
+        yy: "%d năm"
+    }
+});
+
+function ChatBox({ height = '60vh' }) {
+    const [inputValue, setInputValue] = useState('');
     const { userId } = useContext(AccountLoginContext)
-    const { messagesMap, sendMessage } = useSocketMessages();
+    const { messagesMap, sendMessage, deleteMessage } = useSocketMessages();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const SRIdFromUrl = queryParams.get('scientificResearch');
@@ -24,6 +59,7 @@ function ChatBox({ height = '150vh' }) {
         if (SRIdFromUrl) {
             messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
                 return {
+                    id: message.id,
                     text: message.content,
                     user: {
                         id: message.sender.userId,
@@ -37,6 +73,7 @@ function ChatBox({ height = '150vh' }) {
         if (thesisIdFromUrl) {
             messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
                 return {
+                    id: message.id,
                     text: message.content,
                     user: {
                         id: message.sender.userId,
@@ -47,6 +84,8 @@ function ChatBox({ height = '150vh' }) {
                 }
             });
         }
+        console.log(messagesListConvert);
+
         setMessagesList(messagesListConvert);
     }
     useEffect(() => {
@@ -103,24 +142,85 @@ function ChatBox({ height = '150vh' }) {
     };
 
 
+
+
+    const handleEnterPress = async (event) => {
+        if (event.key === 'Enter') {
+            sendMessage(SRIdFromUrl || thesisIdFromUrl, inputValue);
+            await handleSendNotificationNote();
+            setInputValue('')
+        }
+    };
+
+    const handleChange = (event) => {
+        setInputValue(event.target.value);
+    };
+
+
     return (
-        <MinChatUiProvider theme="#6ea9d7">
-            <MainContainer style={{ height: { height } }}>
-                <MessageContainer>
-                    <MessageList
-                        currentUserId={userId}
-                        messages={messagesList}
-                    />
-                    <MessageInput
-                        placeholder="Type message here"
-                        onSendMessage={async (e) => {
-                            sendMessage(SRIdFromUrl || thesisIdFromUrl, e);
-                            await handleSendNotificationNote();
-                        }}
-                    />
-                </MessageContainer>
-            </MainContainer>
-        </MinChatUiProvider>
+        <>
+            <div className={cx('wrapper')} style={{ height: height }}>
+                <div className={cx('container')}>
+                    <div className={cx('list-message')}>
+                        {messagesList?.map((item) => {
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={cx('container-item-message', item.user.id === userId && 'message-mine')}>
+                                    <div className={cx('item-message')}>
+                                        <div className={cx('avatar')}>
+                                            {item.user.avatar ?
+                                                <Avatar className={cx('icon', 'user-icon')} src={item.user.avatar} />
+                                                : <UserIcon className={cx('icon', 'user-icon')} />}
+                                        </div>
+                                        <div className={cx('content')}>
+                                            <div className={cx('text')}>
+                                                {item.text}
+                                            </div>
+                                            <div className={cx('footer')}>
+                                                {item.user.id === userId &&
+                                                    <Popconfirm
+                                                        title="Xóa tin nhắn"
+                                                        okText="Yes"
+                                                        cancelText="No"
+                                                        onConfirm={async () => {
+                                                            try {
+                                                                await deleteMessage(item.id, SRIdFromUrl || thesisIdFromUrl);
+                                                            } catch (error) {
+                                                                console.error('Lỗi khi xóa tin nhắn:', error);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <DeleteOutlined
+                                                            style={{ color: 'gainsboro', cursor: 'pointer' }}
+                                                        />
+                                                    </Popconfirm>
+                                                }
+                                                <p className={cx('date')}>
+                                                    {dayjs(item.createdAt).fromNow()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <div className={cx('message-input')}>
+                        <Input
+                            className={cx('input')}
+                            value={inputValue}
+                            onKeyDown={handleEnterPress}
+                            onChange={handleChange}
+                        />
+                        <div className={cx('btnSend')}>
+                            <SendOutlined className={cx('icon-send')} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </>
     );
 }
 export default ChatBox;

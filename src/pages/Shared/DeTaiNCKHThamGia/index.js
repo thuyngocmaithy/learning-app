@@ -95,7 +95,6 @@ function DeTaiNCKHThamGia() {
                 const responsescientificResearchUser = await getSRById(SRIdFromUrl);
                 if (responsescientificResearchUser.status === "success") {
                     setScientificResearch(responsescientificResearchUser.data)
-                    console.log(responsescientificResearchUser.data.follower[0].followerDetails);
 
                     setDataFollower(responsescientificResearchUser.data.follower[0].followerDetails)
                 }

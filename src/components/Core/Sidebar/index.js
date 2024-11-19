@@ -7,6 +7,7 @@ import Sider from 'antd/es/layout/Sider';
 import { MenuContext } from '../../../context/MenuContext';
 import routes from '../../../config/routes';
 import { useNavigate, useLocation } from 'react-router-dom';
+import config from '../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -17,6 +18,14 @@ function Sidebar() {
     let location = useLocation();
     const navigate = useNavigate();
     const [current, setCurrent] = useState();
+    console.log(location.pathname);
+
+    useEffect(() => {
+        if (location.pathname === config.routes.DeTaiKhoaLuanThamGia || location.pathname === config.routes.DeTaiNCKHThamGia) {
+            setCollapsed(true);
+        }
+    }, [location.pathname])
+
 
     const alwaysOpenKey = '/NghiepVu';
 
