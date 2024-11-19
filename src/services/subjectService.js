@@ -1,5 +1,6 @@
 import { api } from '../utils/apiConfig';
 import { getWhere } from './majorService';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAll = async () => {
   try {
@@ -69,6 +70,21 @@ export const getWhereSubject = async (params) => {
     return response;
   } catch (error) {
     console.error('[SubjectService - getSubjectsWithDetails - error] : ', error);
+    throw error;
+  }
+}
+
+
+export const importSubject = async (data) => {
+  try {
+    const createUserId = await getUseridFromLocalStorage();
+    const response = await api.post('/subjects/import', {
+      data,
+      createUserId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('[subjectService - importSubject - error]:', error);
     throw error;
   }
 }

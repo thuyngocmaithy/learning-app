@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllStatus = async () => {
     try {
@@ -76,6 +77,20 @@ export const getWhereStatus = async (params) => {
         return response;
     } catch (error) {
         console.error('[StatusService - getWhereMajor - error] : ', error);
+        throw error;
+    }
+};
+
+export const importStatus = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/statuses/import', {
+            data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[StatusService - importStatus - error]:', error);
         throw error;
     }
 };

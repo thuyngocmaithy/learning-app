@@ -207,3 +207,26 @@ export const importUser = async (userData) => {
     throw error;
   }
 };
+
+
+export const getWhereUser = async (params) => {
+  try {
+    const response = await api.get('/users/getwhere', {
+      params: {
+        userId: params?.userId || undefined,
+        fullname: params?.fullname || undefined,
+        class: params?.class || undefined,
+        facultyId: params?.facultyId || undefined,
+        majorId: params?.majorId || undefined,
+        isStudent: params?.isStudent,
+        nien_khoa: params?.nien_khoa || undefined,
+        firstAcademicYear: params?.firstAcademicYear || undefined,
+        lastAcademicYear: params?.lastAcademicYear || undefined
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error('[userServive - getWhereUser - error] : ', error);
+    throw error;
+  }
+};

@@ -10,9 +10,11 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { getAllStatus, deleteStatusById, getWhereStatus } from '../../../../services/statusService';
+import { getAllStatus, deleteStatusById, getWhereStatus, importStatus } from '../../../../services/statusService';
 import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpdate';
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
@@ -27,6 +29,10 @@ function TrangThai() {
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [viewOnly, setViewOnly] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
+
+    // Import 
+    const [showModalImportStatus, setShowModalImportStatus] = useState(false);
+
 
     const fetchData = async () => {
         try {
@@ -291,7 +297,7 @@ function TrangThai() {
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('trạng thái', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} />
+                    <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportStatus(true)} />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>
             </div>
@@ -314,6 +320,14 @@ function TrangThai() {
             />
             {TrangThaiUpdateMemorized}
             {TrangThaiDetailMemoized}
+            <ImportExcel
+                title={'Trạng thái'}
+                showModal={showModalImportStatus}
+                setShowModal={setShowModalImportStatus}
+                reLoad={fetchData}
+                type={config.imports.STATUS}
+                onImport={importStatus}
+            />
         </div>
     );
 };

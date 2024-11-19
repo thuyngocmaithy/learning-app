@@ -4,13 +4,12 @@ import { useState, useCallback } from 'react';
 import ExcelJS from 'exceljs';
 import { Button, message, Modal, Upload } from 'antd';
 import ButtonCustom from '../Button';
-import { importUser } from '../../../services/userService';
 import { downloadTemplate } from '../../../services/fileService';
 import { UploadOutlined } from '@ant-design/icons';
 
 const cx = classNames.bind(styles);
 
-function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose, ...props }) {
+function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose, onImport, reLoad, ...props }) {
     const [file, setFile] = useState(null);
 
     const handleCancel = useCallback(() => {
@@ -30,23 +29,30 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
             const data = [];
 
             firstSheet.eachRow((row, rowIndex) => {
-                if (rowIndex > 2) { // Bắt đầu từ dòng 3
-                    const rowData = row.values.slice(1); // Bỏ cột đầu tiên (vì row.values có một phần tử đầu tiên là undefined)
+                if (rowIndex > 2) { // Bỏ qua header
+                    const rowData = row.values.slice(1);
                     data.push(rowData);
                 }
             });
+
             console.log(data);
 
             try {
-                await importUser(data);
+                if (onImport) {
+                    await onImport(data); // Gọi hàm onImport để xử lý dữ liệu
+                }
                 message.success('Import thành công!');
+                if (reLoad) {
+                    reLoad(); // Gọi hàm reload để làm mới dữ liệu
+                }
+                setShowModal(false); // Đóng modal sau khi xử lý xong
             } catch (error) {
                 console.error('Lỗi khi import:', error);
                 message.error('Lỗi khi import!');
             }
         };
 
-        reader.readAsArrayBuffer(file); // Đọc file dưới dạng ArrayBuffer
+        reader.readAsArrayBuffer(file);
     };
 
     return (
@@ -61,18 +67,26 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
                     Lưu
                 </ButtonCustom>
             }
-            width={"500px"}
+            width="500px"
             {...props}
         >
             <div className={cx('container-import')}>
-                <ButtonCustom className={cx('btnDownloadTemplate')} outline colorRed small onClick={() => downloadTemplate(type)}>Tải xuống template</ButtonCustom>
+                <ButtonCustom
+                    className={cx('btnDownloadTemplate')}
+                    outline
+                    colorRed
+                    small
+                    onClick={() => downloadTemplate(type)}
+                >
+                    Tải xuống template
+                </ButtonCustom>
                 <Upload
-                    beforeUpload={() => false} // Không thực hiện api upload ở đây
+                    beforeUpload={() => false}
                     maxCount={1}
                     onChange={(e) => {
                         setFile(e.file);
                     }}
-                    style={{ width: "100%" }}
+                    style={{ width: '100%' }}
                 >
                     <Button icon={<UploadOutlined />}>Click to Upload</Button>
                 </Upload>
