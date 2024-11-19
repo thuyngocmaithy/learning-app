@@ -359,23 +359,33 @@ function MoHocPhan() {
                                 options={facultyOptions}
                             />
                         </FormItem>
-                        <ButtonCustom primary type="primary" onClick={handleArrange}>
+                        <ButtonCustom primary type="primary" onClick={handleArrange} small>
                             Sắp xếp
                         </ButtonCustom>
-                        <ButtonCustom outline onClick={onReset}>
+                        <ButtonCustom outline onClick={onReset} small>
                             Reset
                         </ButtonCustom>
                     </Form>
                 </div>
-                <Progress
-                    percent={80}
-                    percentposition={{
-                        align: 'start',
-                        type: 'outer',
-                    }}
-                    size={['100%', 15]}
-                    style={{ margin: "50px 0" }}
-                />
+                <div className={cx('status-save')}>
+                    <Progress
+                        percent={80}
+                        percentposition={{
+                            align: 'start',
+                            type: 'outer',
+                        }}
+                        size={['100%', 15]}
+                        style={{ margin: "50px 0" }}
+                    />
+                    <ButtonCustom
+                        outline
+                        colorRed
+                        className={cx('btnSave')}
+                        onClick={handleOpeningCourse}
+                    >
+                        Lưu
+                    </ButtonCustom>
+                </div>
                 <div className={cx('table-arrange')}>
                     {dataArrange ? (
                         <>
@@ -387,16 +397,6 @@ function MoHocPhan() {
                                 teacherAssignments={teacherAssignments}
                                 setTeacherAssignments={setTeacherAssignments}
                             />
-                            <div className={cx('footer-table')}>
-                                <ButtonCustom
-                                    primary
-                                    small
-                                    className={cx('btnSave')}
-                                    onClick={handleOpeningCourse}
-                                >
-                                    Lưu
-                                </ButtonCustom>
-                            </div>
                         </>
                     ) : (
                         // Hiển thị thông báo khi không chọn năm học

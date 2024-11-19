@@ -19,11 +19,9 @@ import FormItem from 'antd/es/form/FormItem';
 
 const cx = classNames.bind(styles);
 
-const { TabPane } = Tabs;
-
 function KhoaChuyenNganh() {
     // Shared states
-    const [activeTab, setActiveTab] = useState('1');
+    const [activeTab, setActiveTab] = useState(1);
     const [showModalDetail, setShowModalDetail] = useState(false);
 
 
@@ -57,7 +55,8 @@ function KhoaChuyenNganh() {
                     value: faculty.facultyId,  // cần có value cho Select
                     label: faculty.facultyName, // cần có label cho Select
                     facultyId: faculty.facultyId,
-                    facultyName: faculty.facultyName
+                    facultyName: faculty.facultyName,
+                    creditHourTotal: faculty.creditHourTotal
                 })) : [];
             setKhoaData(listFaculty);
             setFacultyOptions(listFaculty);
@@ -249,6 +248,11 @@ function KhoaChuyenNganh() {
             key: 'facultyName',
         },
         {
+            title: 'Số tín chỉ của ngành',
+            dataIndex: 'creditHourTotal',
+            key: 'creditHourTotal',
+        },
+        {
             title: 'Action',
             key: 'action',
             align: 'center',
@@ -373,6 +377,59 @@ function KhoaChuyenNganh() {
         />
     ), [showModalDetail]);
 
+    const ITEM_TABS = [
+        {
+            id: 1,
+            title: 'Khoa',
+            children: (
+                <div>
+                    <div className={`slide ${showFilter ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={getFilterFieldsFaculty}
+                            onSearch={onSearchFaculty}
+                            onReset={fetchKhoaData}
+                        />
+                        <Divider />
+                    </div>
+                    <TableCustomAnt
+                        height={'600px'}
+                        columns={khoaColumns}
+                        data={khoaData}
+                        selectedRowKeys={khoaSelectedKeys}
+                        setSelectedRowKeys={setKhoaSelectedKeys}
+                        loading={khoaIsLoading}
+                        keyIdChange="facultyId"
+                    />
+                </div>
+            ),
+        },
+        {
+            id: 2,
+            title: 'Chuyên ngành',
+            children: (
+                <div>
+                    <div className={`slide ${showFilter ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={getFilterFieldsMajor}
+                            onSearch={onSearchMajor}
+                            onReset={fetchMajorData}
+                        />
+                        <Divider />
+                    </div>
+                    <TableCustomAnt
+                        height={'600px'}
+                        columns={majorColumns}
+                        data={majorData}
+                        selectedRowKeys={majorSelectedKeys}
+                        setSelectedRowKeys={setMajorSelectedKeys}
+                        loading={majorIsLoading}
+                        keyIdChange="majorId"
+                    />
+                </div >
+            ),
+        },
+    ];
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -385,6 +442,12 @@ function KhoaChuyenNganh() {
                 <div className={cx('wrapper-toolbar')}>
                     {activeTab === '1' ? (
                         <>
+                            <Toolbar
+                                type={'Bộ lọc'}
+                                onClick={() => {
+                                    setShowFilter(!showFilter);
+                                }}
+                            />
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {
@@ -402,6 +465,12 @@ function KhoaChuyenNganh() {
                         </>
                     ) : (
                         <>
+                            <Toolbar
+                                type={'Bộ lọc'}
+                                onClick={() => {
+                                    setShowFilter(!showFilter);
+                                }}
+                            />
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {
@@ -426,99 +495,21 @@ function KhoaChuyenNganh() {
                     <Tabs
                         activeKey={activeTab}
                         onChange={setActiveTab}
-                        className={cx('custom-tabs')}
-                        tabBarStyle={{ display: 'flex', justifyContent: 'center' }}
-                    >
-                        <TabPane tab="Khoa" key="1">
-                            <div className={`slide ${showFilter ? 'open' : ''}`}>
-                                <SearchForm
-                                    getFields={getFilterFieldsFaculty}
-                                    onSearch={onSearchFaculty}
-                                    onReset={fetchKhoaData}
-                                />
-                                <Divider />
-                            </div>
-                            <TableCustomAnt
-                                height={'600px'}
-                                columns={khoaColumns}
-                                data={khoaData}
-                                selectedRowKeys={khoaSelectedKeys}
-                                setSelectedRowKeys={setKhoaSelectedKeys}
-                                loading={khoaIsLoading}
-                                keyIdChange="facultyId"
-                            />
-                            {KhoaUpdateMemo}
-                            {KhoaDetailMemoized}
-                        </TabPane>
-
-                        <TabPane tab="Chuyên ngành" key="2">
-                            <div className={`slide ${showFilter ? 'open' : ''}`}>
-                                <SearchForm
-                                    getFields={getFilterFieldsMajor}
-                                    onSearch={onSearchMajor}
-                                    onReset={fetchMajorData}
-                                />
-                                <Divider />
-                            </div>
-                            <TableCustomAnt
-                                height={'600px'}
-                                columns={majorColumns}
-                                data={majorData}
-                                selectedRowKeys={majorSelectedKeys}
-                                setSelectedRowKeys={setMajorSelectedKeys}
-                                loading={majorIsLoading}
-                                keyIdChange="majorId"
-                            />
-                            {ChuyenNganhUpdateMemo}
-                            {ChuyenNganhDetailMemoized}
-                        </TabPane>
-                    </Tabs>
-                </div>
-
-                <div className={cx('toolbar-wrapper')}>
-                    {activeTab === '1' ? (
-                        <div className={cx('toolbar-group')}>
-                            <Toolbar
-                                type={'Bộ lọc'}
-                                onClick={() => {
-                                    setShowFilter(!showFilter);
-                                }}
-                            />
-                            <Toolbar
-                                type={'Tạo mới'}
-                                onClick={() => {
-                                    setKhoaShowModal(true);
-                                    setKhoaIsUpdate(false);
-                                    setKhoaViewOnly(false);
-                                }}
-                            />
-                            <Toolbar
-                                type={'Xóa'}
-                                onClick={() => deleteConfirm('khoa', handleKhoaDelete)}
-                            />
-                            <Toolbar type={'Nhập file Excel'} />
-                            <Toolbar type={'Xuất file Excel'} />
-                        </div>
-                    ) : (
-                        <div className={cx('toolbar-group')}>
-                            <Toolbar
-                                type={'Tạo mới'}
-                                onClick={() => {
-                                    setMajorShowModal(true);
-                                    setMajorIsUpdate(false);
-                                    setMajorViewOnly(false);
-                                }}
-                            />
-                            <Toolbar
-                                type={'Xóa'}
-                                onClick={() => deleteConfirm('chuyên ngành', handleMajorDelete)}
-                            />
-                            <Toolbar type={'Nhập file Excel'} />
-                            <Toolbar type={'Xuất file Excel'} />
-                        </div>
-                    )}
+                        centered
+                        items={ITEM_TABS.map((item, index) => {
+                            return {
+                                label: item.title,
+                                key: index + 1,
+                                children: item.children,
+                            };
+                        })}
+                    />
                 </div>
             </div>
+            {KhoaUpdateMemo}
+            {KhoaDetailMemoized}
+            {ChuyenNganhUpdateMemo}
+            {ChuyenNganhDetailMemoized}
         </div>
     );
 

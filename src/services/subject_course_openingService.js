@@ -21,7 +21,6 @@ export const deleteSubjectCourseOpening = async (year, studyFrameId) => {
 };
 
 
-
 export const saveMulti = async (data) => {
     try {
         const response = await api.post('/subject_course_openings/saveMulti', data);
@@ -38,6 +37,18 @@ export const getTeacherAssignmentsAndSemesters = async () => {
         return response.data;
     } catch (error) {
         console.error('[API getTeacherAssignmentsAndSemesters Error]:', error);
+        throw error;
+    }
+};
+
+export const getWhere = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/subject_course_openings/getWhere?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
         throw error;
     }
 };

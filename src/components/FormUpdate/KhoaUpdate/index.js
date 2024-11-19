@@ -1,14 +1,12 @@
-import React, { useState, memo, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import {
     Input,
-    Select,
     Form,
     message,
-    Checkbox
+    InputNumber,
 } from 'antd';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getUseridFromLocalStorage } from '../../../services/userService';
 import { createFaculty, updateFacultyById, } from '../../../services/facultyService';
 import classNames from 'classnames/bind';
 import styles from './KhoaUpdate.module.scss'
@@ -29,6 +27,7 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             form.setFieldsValue({
                 facultyId: showModal.facultyId,
                 facultyName: showModal.facultyName,
+                creditHourTotal: showModal.creditHourTotal
             });
         }
     }, [showModal, isUpdate, form]);
@@ -43,9 +42,10 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             const values = await form.validateFields();
             const facultyData = {
                 facultyId: values.facultyId,
-                facultyName: values.facultyName
-            };
+                facultyName: values.facultyName,
+                creditHourTotal: values.creditHourTotal
 
+            };
             const response = isUpdate
                 ? await updateFacultyById(showModal.facultyId, facultyData)
                 : await createFaculty(facultyData);
@@ -53,6 +53,7 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             if (response?.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thành công!`);
                 if (reLoad) reLoad();
+                if (isUpdate) setShowModal(false)
             }
         } catch (error) {
             console.error(`Failed to ${isUpdate ? 'update' : 'create'} faculty:`, error);
@@ -87,6 +88,17 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
                     rules={[{ required: true, message: 'Vui lòng nhập tên khoa/ngành' }]}
                 >
                     <Input disabled={viewOnly} />
+                </FormItem>
+                <FormItem
+                    name="creditHourTotal"
+                    label="Số tín chỉ của ngành"
+                    rules={[{ required: true, message: 'Vui lòng nhập số tín chỉ của ngành' }]}
+                >
+                    <InputNumber
+                        style={{ width: '100%' }}
+                        min={0o0}
+                        step={1}
+                    />
                 </FormItem>
             </Form>
         </Update>

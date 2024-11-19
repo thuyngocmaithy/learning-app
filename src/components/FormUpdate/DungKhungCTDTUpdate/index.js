@@ -108,7 +108,6 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const handleSubmit = async () => {
         try {
             const treeDataSave = cleanTreeData(treeData);
-            console.log(treeDataSave);
 
             const response = await saveTreeFrameStructure(treeDataSave)
 

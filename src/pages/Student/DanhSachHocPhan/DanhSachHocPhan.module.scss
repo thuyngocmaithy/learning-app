@@ -6,6 +6,18 @@
     .container-title {
         display: flex;
     }
+
+    .toolbar {
+        display: flex;
+
+        :global .ant-radio-group.ant-radio-group-block {
+            display: block;
+        }
+    }
+
+    .btnSave {
+        margin-left: 15px;
+    }
 }
 
 .title {
@@ -19,4 +31,58 @@
     display: flex;
     width: 30px;
     color: var(--primary);
+}
+
+.description {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;
+
+    :global .ant-descriptions-row {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    :global .ant-descriptions-item-container {
+        align-items: center;
+        display: flex;
+    }
+
+    :global .ant-descriptions-item-label {
+        align-items: center;
+    }
+
+    :global .ant-descriptions-item-label::after {
+        content: none;
+    }
+
+    :global .ant-descriptions-item-content {
+        // color: white;
+        margin-left: 15px;
+
+    }
+}
+
+.color-tag {
+    width: 40px;
+    height: 40px;
+    display: block;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    // filter: brightness(0.95);
+
+    &.subject-correct {
+        background-color: var(--color-subject-correct);
+    }
+
+    &.subject-error {
+        background-color: var(--color-subject-error);
+    }
+
+    &.subject-open {
+        background-color: var(--color-subject-open);
+    }
 }

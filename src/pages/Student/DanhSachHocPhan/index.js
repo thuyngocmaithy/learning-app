@@ -7,7 +7,7 @@ import Button from '../../../components/Core/Button';
 import {
     saveRegisterSubjects
 } from '../../../services/userService';
-import { message, Spin } from 'antd';
+import { Descriptions, message, Radio, Spin, Switch } from 'antd';
 import { findKhungCTDTByUserId } from '../../../services/studyFrameService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
@@ -17,6 +17,7 @@ function DanhSachHocPhan() {
     const [registeredSubjects, setRegisteredSubjects] = useState({});
     const [frameId, setFrameId] = useState();
     const [isLoading, setIsLoading] = useState(true);
+    const [valueStatus, setValueSatus] = useState('Tất cả');
 
     useEffect(() => {
         const fetchKhungCTDT = async () => {
@@ -62,6 +63,43 @@ function DanhSachHocPhan() {
         );
     }
 
+    const items = [
+        {
+            key: '1',
+            label: <span className={cx('color-tag', 'subject-correct')}></span>,
+            children: 'Đúng tiến độ sắp xếp',
+        },
+        {
+            key: '2',
+            label: <span className={cx('color-tag', 'subject-error')}></span>,
+            children: 'Trễ tiến độ sắp xếp',
+        },
+        {
+            key: '3',
+            label: <span className={cx('color-tag', 'subject-open')}></span>,
+            children: 'Môn học được sắp xếp mở',
+        },
+    ];
+
+    const options = [
+        {
+            label: 'Chưa học',
+            value: 'Chưa học',
+        },
+        {
+            label: 'Đã học',
+            value: 'Đã học',
+        },
+        {
+            label: 'Tất cả',
+            value: 'Tất cả',
+        }
+    ]
+
+    const handleChange = (e) => {
+        setValueSatus(e.target.value); // Cập nhật giá trị khi chọn
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('info')}>
@@ -71,17 +109,21 @@ function DanhSachHocPhan() {
                     </span>
                     <h3 className={cx('title')}>Danh sách các học phần</h3>
                 </div>
-                <Button primary small onClick={handleSave}>
-                    Lưu
-                </Button>
+                <div className={cx('toolbar')}>
+                    <Radio.Group block options={options} defaultValue="Tất cả" optionType="button" onChange={handleChange} />
+                    <Button className={cx('btnSave')} primary small onClick={handleSave}>
+                        Lưu
+                    </Button>
+                </div>
             </div>
-
+            <Descriptions items={items} className={cx('description')} />
             <Table
                 frameId={frameId}
                 registeredSubjects={registeredSubjects}
                 setRegisteredSubjects={setRegisteredSubjects}
+                status={valueStatus}
             />
-        </div>
+        </div >
     );
 }
 

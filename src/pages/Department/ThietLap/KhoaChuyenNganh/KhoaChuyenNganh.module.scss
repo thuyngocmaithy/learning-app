@@ -39,37 +39,6 @@
     margin-top: 10px; // Space for toolbar
 }
 
-.tabs-wrapper {
-    :global {
-        .ant-tabs {
-            .ant-tabs-nav {
-                .ant-tabs-nav-wrap {
-                    justify-content: center !important;
-                }
-            }
-        }
-
-        .ant-tabs-nav-wrap {
-            justify-content: center;
-        }
-
-        .ant-tabs-nav-list {
-            width: auto;
-        }
-
-        .ant-tabs-tab {
-            font-weight: 600;
-            font-size: 16px;
-            padding: 8px 16px;
-
-            &.ant-tabs-tab-active {
-                .ant-tabs-tab-btn {
-                    color: var(--primary);
-                }
-            }
-        }
-    }
-}
 
 .container-loading {
     display: flex;
