@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
-import { InputNumber } from 'antd';
+import { InputNumber, message } from 'antd';
 import { GraduateActiveIcon } from '../../../assets/icons';
 import TableScore from '../../../components/TableScore';
 import ButtonCustom from '../../../components/Core/Button';
 import { getUserById } from '../../../services/userService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { createExpectedScore, deleteExpectedScoreBySubjectAndStudent, updateExpectedScore } from '../../../services/scoreService';
+
 const cx = classNames.bind(styles);
 
 function DiemTotNghiep() {
@@ -24,11 +26,16 @@ function DiemTotNghiep() {
     const [graduationType, setGraduationType] = useState('');
     const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
     const [currentCredits, setCurrentCredits] = useState(0);
+    const [expectedSubjects, setexpectedSubjects] = useState([]);
+
+    const [prevScores, setPrevScores] = useState([]);
 
     useEffect(() => {
         const fetchPoint = async () => {
             const userData = await getUserById(userId);
             const gpa = parseFloat(userData.data.GPA) || 0;
+            const totalCredits = parseInt(userData.data.faculty.creditHourTotal);
+            setTotalCredits(totalCredits);
             setCurrentGPA(gpa);
             setCalculatedGPA(gpa);
         }
@@ -78,25 +85,127 @@ function DiemTotNghiep() {
         calculateResults();
     }, [calculateResults]);
 
-    const handleGradesChange = (totals) => {
+    const handleGradesChange = useCallback((totals) => {
         setGradeTotals(totals);
         setCreditsA(totals.A || 0);
         setCreditsB(totals.B || 0);
         setCreditsC(totals.C || 0);
         setCreditsD(totals.D || 0);
-    };
+    }, []);
+
+
 
     const handleCurrentCreditsChange = useCallback((credits) => {
         setCurrentCredits(Number(credits) || 0);
     }, []);
 
-    const handleImprovedCreditsChange = useCallback((credits) => {
-        setImprovedCredits(Number(credits) || 0);
+    const handleImprovedCreditsChange = useCallback((newCredits) => {
+        setImprovedCredits(prevCredits => {
+            return typeof newCredits === 'function'
+                ? newCredits(prevCredits)
+                : Number(newCredits);
+        });
     }, []);
 
     const handleInputChange = useCallback((setter) => (value) => {
         setter(Number(value) || 0);
     }, []);
+
+
+
+    const handleSubjectModification = useCallback((subject) => {
+
+        setexpectedSubjects(prevModified => {
+            // Kiểm tra xem môn học đã tồn tại chưa
+            const existingSubjectIndex = prevModified.findIndex(
+                s => s.subjectId === subject.subjectId
+            );
+
+            if (existingSubjectIndex !== -1) {
+                // Nếu môn học đã tồn tại, cập nhật thông tin
+                const updatedModified = [...prevModified];
+                updatedModified[existingSubjectIndex] = {
+                    ...updatedModified[existingSubjectIndex],
+                    ...subject
+                };
+                return updatedModified;
+            }
+
+            // Nếu môn học chưa tồn tại, thêm mới
+            return [...prevModified, subject];
+        });
+    }, []);
+
+    const saveExpectedScore = async () => {
+        try {
+
+            const subjectsToCreate = [];
+            const subjectsToUpdate = [];
+            const subjectsToDelete = [];
+
+            console.log(expectedSubjects);
+
+            expectedSubjects.forEach(subject => {
+                const prevScore = prevScores.find(p => p.subjectId === subject.subjectId);
+                console.log(subject);
+                if (!prevScore) {
+                    // Nếu là môn học mới và có điểm dự kiến, thêm vào danh sách tạo mới
+                    if (subject.expectedScore10) {
+                        subjectsToCreate.push(subject);
+                    }
+                    if (!subject.expectedScore10 || subject.expectedScore10 == null) {
+                        // Nếu điểm dự kiến bị xóa, thêm vào danh sách xóa
+                        subjectsToDelete.push(subject.subjectId);
+                    }
+                } else if (subject.expectedScore10 !== prevScore.expectedScore10) {
+                    // Nếu điểm dự kiến bị thay đổi, thêm vào danh sách cập nhật
+                    subjectsToUpdate.push(subject);
+                }
+            });
+
+            console.log(subjectsToDelete)
+            // Gửi các yêu cầu đồng thời
+            await Promise.all([
+                // Xóa các điểm dự kiến
+                ...subjectsToDelete.map(subjectId =>
+                    deleteExpectedScoreBySubjectAndStudent(subjectId, userId)
+                ),
+                // Tạo mới các điểm dự kiến
+                ...subjectsToCreate.map(subject => {
+                    const expectedScoreData = {
+                        student: { userId },
+                        subject: { subjectId: subject.subjectId },
+                        expectedScore10: subject.expectedScore10,
+                        expectedScoreLetter: subject.expectedScoreLetter,
+                        expectedGPA: calculatedGPA,
+                        expectedCreditHourTotal: totalCredits,
+                        expectedCreditType: subject.expectedScoreLetter,
+                    };
+                    return createExpectedScore(expectedScoreData);
+                }),
+                // Cập nhật các điểm dự kiến
+                ...subjectsToUpdate.map(subject => {
+                    const expectedScoreData = {
+                        expectedScore10: subject.expectedScore10,
+                        expectedScoreLetter: subject.expectedScoreLetter,
+                        expectedGPA: calculatedGPA,
+                        expectedCreditHourTotal: totalCredits,
+                        expectedCreditType: subject.expectedScoreLetter,
+                    };
+                    return updateExpectedScore(subject.subjectId, userId, expectedScoreData);
+                }),
+            ]);
+
+            message.success('Cập nhật điểm dự kiến thành công');
+
+            // Cập nhật lại điểm trước đó
+            setPrevScores([...expectedSubjects]);
+        } catch (error) {
+            console.error('Error saving expected scores:', error);
+            message.error('Cập nhật điểm dự kiến thất bại');
+        }
+    };
+
 
     return (
         <div className={cx('wrapper-graduation')}>
@@ -113,9 +222,10 @@ function DiemTotNghiep() {
                 onGradesChange={handleGradesChange}
                 onCurrentCreditsChange={handleCurrentCreditsChange}
                 onImprovedCreditsChange={handleImprovedCreditsChange}
+                onSubjectModification={handleSubjectModification}
             />
             <div className={cx('footer-table')}>
-                <ButtonCustom primary small className={cx('btnSave')}>
+                <ButtonCustom key={'save'} primary small className={cx('btnSave')} onClick={saveExpectedScore}>
                     Lưu
                 </ButtonCustom>
             </div>
@@ -154,6 +264,7 @@ function DiemTotNghiep() {
                             max={158}
                             value={totalCredits}
                             onChange={handleInputChange(setTotalCredits)}
+                        // disabled
                         />
                     </div>
                     <div className={cx('content-left-item')}>
@@ -202,7 +313,7 @@ function DiemTotNghiep() {
                             id="outlined-number"
                             min={0}
                             max={150}
-                            value={improvedCredits}
+                            value={improvedCredits || 0}
                             disabled
                         />
                     </div>

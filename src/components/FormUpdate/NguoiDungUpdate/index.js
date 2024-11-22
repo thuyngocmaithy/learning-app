@@ -27,7 +27,7 @@ import classNames from 'classnames/bind';
 import styles from './NguoiDungUpdate.module.scss';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getMajorByFacultyId, getMajorByFacultyName, getWhere } from '../../../services/majorService';
-import locale from 'antd/es/locale/vi_VN'; // Import the Vietnamese locale for Antd
+import viVN from 'antd/es/locale/vi_VN'; // Import the Vietnamese locale for Antd
 import 'moment/locale/vi';
 import moment from 'moment';
 
@@ -36,6 +36,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 const { Step } = Steps;
 const { Dragger } = Upload;
+const locale = viVN;
 
 //khai báo user tạo
 const CreateUserId = getUseridFromLocalStorage();
@@ -123,8 +124,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 const response = await getUsersByFaculty(selectedFaculty);
                 if (response && response.data) {
                     const options = response.data.map((user) => ({
-                        value: user.id,
-                        label: `${user.fullname}`,
+                        value: user.userId,
+                        label: user.fullname,
                     }));
                     setSupervisorOptions(options);
 
@@ -263,6 +264,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleChangeSupervisor = (value) => {
         setSelectedSupervisor(value);
+        console.log(value);
     };
 
     const handleMajorSelect = (value) => {
@@ -463,13 +465,13 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             </FormItem>
                         </Col>
                         <Col span={12}>
-                            <ConfigProvider locale={locale}>
+                            <ConfigProvider>
                                 <FormItem
                                     name="dateOfBirth"
                                     label="Ngày sinh"
                                     rules={viewOnly ? [] : [{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
                                 >
-                                    <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} disabled={viewOnly} />
+                                    <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
                                 </FormItem>
                             </ConfigProvider>
                         </Col>

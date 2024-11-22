@@ -12,3 +12,16 @@
 .radio-period {
     cursor: pointer;
 }
+
+.action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .btnDetail {
+        margin-bottom: 5px;
+        width: fit-content;
+        border-radius: 20px;
+    }
+}
