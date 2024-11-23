@@ -11,11 +11,11 @@ import { GradeScoreContext } from '../../../context/GradeScoreContext';
 import { getFacultyById } from '../../../services/facultyService';
 import { getScore, getUserById } from '../../../services/userService';
 import { Spin } from 'antd';
+import { getExpectedScoreByStudentId } from '../../../services/scoreService';
 
 const cx = classNames.bind(styles);
 
 function Home() {
-    const { calculatedGPA } = useContext(GradeScoreContext);
     const { userId, access_token } = useContext(AccountLoginContext);
     const [scores, setScores] = useState();
     const [creditHourCurrent, setCreditHourCurrent] = useState(0);
@@ -25,6 +25,8 @@ function Home() {
     const [isLoadingChart, setIsLoadingChart] = useState(true)
     const [firstYear, setFirstYear] = useState(null);
     const [state, setState] = useState({});
+    const [expectedGPA, setExpectedGPA] = useState(0);
+
     const handleDataChart = useCallback(async (chartData) => {
         setState({
             series: chartData.series,
@@ -156,6 +158,8 @@ function Home() {
     // Tính Tiến độ hoàn thành
     const handleDataProgress = async () => {
         try {
+            const expectedScoreResponse = await getExpectedScoreByStudentId(userId);
+            setExpectedGPA(expectedScoreResponse[0].expectedGPA);
             const responseScore = await getScore(access_token);
             setScores(responseScore.data.ds_diem_hocky)
 
@@ -217,7 +221,7 @@ function Home() {
             <div className={cx('list-card')}>
                 <Card icon={<FontAwesomeIcon icon={faChartLine} />} title="Tiến độ hoàn thành" content={`${progress}%`} primary />
                 <Card icon={<FontAwesomeIcon icon={faBook} />} title="Số tín chỉ đã học" content={`${creditHourCurrent}/${creditHourTotal}`} />
-                <Card icon={<FontAwesomeIcon icon={faGraduationCap} />} title="Điểm tốt nghiệp dự kiến" content={calculatedGPA} />
+                <Card icon={<FontAwesomeIcon icon={faGraduationCap} />} title="Điểm tốt nghiệp dự kiến" content={expectedGPA} />
             </div>
             <div className={cx('chart')}>
                 <Chart options={state.options} series={state.series} type="bar" height={350} />

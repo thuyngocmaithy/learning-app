@@ -12,6 +12,7 @@ import classNames from 'classnames/bind';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
 import { MenuContext } from '../../../context/MenuContext';
+import TreeFeature from '../../TreeFeature';
 
 const cx = classNames.bind(styles)
 
@@ -24,6 +25,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
     const { permission } = useContext(AccountLoginContext);
     const { fetchDataMenu } = useContext(MenuContext);
     const [listFeature, setListFeature] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
 
 
@@ -35,30 +37,60 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 const promise = response.data.data.map(async (feature) => {
                     const responseAuthorization = await getWhere({ permission: showModal.permissionId, feature: feature.featureId })
 
-                    feature.permissionDetail = responseAuthorization.status === 200
-                        ? responseAuthorization.data.data[0].permissionDetail
-                        : {
-                            isAdd: false,
-                            isView: false,
-                            isEdit: false,
-                            isDelete: false
-                        };
+                    feature.permissionDetail =
+                        (responseAuthorization.status === 200 && responseAuthorization.data.data !== null)
+                            ? responseAuthorization.data.data[0].permissionDetail
+                            : {
+                                isAdd: false,
+                                isView: false,
+                                isEdit: false,
+                                isDelete: false
+                            };
                     feature.id = feature.featureId;
                     return feature;
                 })
                 const featureAuthorization = await Promise.all(promise);
-                setDataFeature(featureAuthorization)
+                // Nhóm tính năng theo cha, tạo một map với key là featureId của tính năng cha
+                const featureMap = new Map();
+                const rootFeatures = [];  // Danh sách tính năng gốc (không có cha)
+
+                featureAuthorization.forEach((feature) => {
+                    if (feature.parent) {
+                        // Nếu tính năng có cha, thêm vào danh sách con của cha
+                        if (!featureMap.has(feature.parent.featureId)) {
+                            featureMap.set(feature.parent.featureId, []);
+                        }
+                        featureMap.get(feature.parent.featureId).push(feature);
+                    } else {
+                        // Nếu không có cha, thêm vào danh sách tính năng gốc
+                        rootFeatures.push(feature);
+                    }
+                });
+
+                // Hàm đệ quy để gắn các tính năng con vào cha của chúng
+                const attachChildren = (features) => {
+                    features.forEach((feature) => {
+                        if (featureMap.has(feature.featureId)) {
+                            feature.children = featureMap.get(feature.featureId);
+                            attachChildren(feature.children);  // Đệ quy gắn con cho tất cả các cấp
+                        }
+                    });
+                };
+
+                // Gắn các tính năng con vào các tính năng gốc
+                attachChildren(rootFeatures);
+                setDataFeature(rootFeatures);  // Cập nhật dữ liệu tính năng có cấu trúc cha-con vào state
             }
         } catch (error) {
             console.error(error);
         } finally {
-            // setIsLoadingFeature(false);
+            setIsLoading(false);
         }
 
     }
 
     useEffect(() => {
-        if (showModal) {
+        if (showModal.permissionId) {
             getFeature();
         }
     }, [showModal]);
@@ -71,11 +103,11 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
 
     const handlePhanQuyen = async () => {
         // Lấy tất cả các hàng trong bảng
-        const rows = document.querySelectorAll('.ant-table-row');
+        const rows = document.querySelectorAll('.phanquyen-table .ant-table-row');
 
         const updatePromises = Array.from(rows).map(async (row) => {
             // Lấy các checkbox trong từng hàng
-            const checkboxes = row.querySelectorAll('.checkbox-permission-feature');
+            const checkboxes = row.querySelectorAll('input.checkbox-permission-feature');
             const permissionDetail = {
                 isView: false,
                 isAdd: false,
@@ -104,7 +136,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 try {
                     const response = await getWherePermissionFeature(conditions);
 
-                    if (response.status === 200) {
+                    if (response.status === 200 && response.data.data !== null) {
                         const existingData = response.data.data[0];
                         // Kiểm tra nếu tất cả các giá trị trong permissionDetail là false
                         const allFalse = Object.values(permissionDetail).every(value => value === false);
@@ -245,7 +277,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 title: 'STT',
                 dataIndex: 'index',
                 key: 'stt',
-                width: '80px',
+                width: '120px',
                 render: (_, record, index) => {
                     const permissionDetail = record.permissionDetail;
                     const allChecked = Object.keys(permissionDetail).length > 0
@@ -258,7 +290,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                                 onChange={() => handleSelectRow(record)}
                                 checked={allChecked}
                             />
-                            {index}
+                            {index + 1}
                         </div>
                     );
                 },
@@ -268,23 +300,6 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 title: 'Mã chức năng',
                 dataIndex: 'featureId',
                 key: 'featureId',
-                // render: (_, record) => {
-                //     const permissionDetail = record.permissionDetail;
-                //     const allChecked = Object.keys(permissionDetail).length > 0
-                //         && Object.keys(permissionDetail).every((key) => permissionDetail[key]);
-
-                //     return (
-                //         <div className={cx('container-featureId')}>
-                //             <input
-                //                 type="checkbox"
-                //                 onChange={() => handleSelectRow(record)}
-                //                 checked={allChecked}
-                //             />
-                //             {record.featureId}
-                //         </div>
-                //     );
-                // },
-                // align: 'center',
             },
             {
                 title: 'Tên chức năng',
@@ -461,14 +476,18 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
             onUpdate={handlePhanQuyen}
             width='1200px'
         >
-            <TableCustomAnt
-                columns={columns(setShowModal)}
-                data={dataFeature}
-                height="400px"
-                isHaveRowSelection={false}
-                isPagination={false}
-                isHideSTT={true}
-            />
+            <>
+                <TableCustomAnt
+                    className={cx('phanquyen-table')}
+                    columns={columns(setShowModal)}
+                    data={dataFeature}
+                    height="400px"
+                    isHaveRowSelection={false}
+                    isPagination={false}
+                    isHideSTT={true}
+                    loading={isLoading}
+                />
+            </>
         </Update>
     );
 });

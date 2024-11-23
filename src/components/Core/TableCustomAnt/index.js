@@ -79,9 +79,7 @@ function TableCustomAnt({
                 showSorterTooltip={{
                     target: 'sorter-icon',
                 }}
-                scroll={{
-                    y: height,
-                }}
+                scroll={height !== null ? { y: height } : null}
                 loading={loading}
                 pagination={
                     isPagination

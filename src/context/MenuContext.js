@@ -32,6 +32,7 @@ export const MenuProvider = ({ children }) => {
     const buildTreeData = async (list) => {
         const treeData = [];
         const parentCache = {}; // Cache để tránh gọi fetchParentData nhiều lần cho cùng một parentId    
+        const addedParents = new Set(); // Set để lưu các parent đã được thêm vào treeData, tránh trùng lặp
 
         // Sắp xếp danh sách theo orderNo
         const sortedList = list.sort((a, b) => a.feature.orderNo - b.feature.orderNo);
@@ -50,9 +51,9 @@ export const MenuProvider = ({ children }) => {
             }
             return null; // Không tìm thấy node với featureId
         }
+
         for (const item of sortedList) {
             const { feature } = item;
-
             const parentId = feature.parent?.featureId;
 
             if (parentId) {
@@ -64,24 +65,29 @@ export const MenuProvider = ({ children }) => {
                 }
 
                 if (parentFeature) {
-                    // Kiểm tra nếu đã có cha trong treeData
+                    // Kiểm tra nếu đã có cha trong treeData và tránh trùng lặp menu cha
                     let parentNode = findNodeByFeatureId(treeData, parentFeature.featureId);
 
                     const IconComponentParent = parentFeature.icon ? listIcon[parentFeature.icon] : null;
-                    if (!parentNode) { //Tạo object cha
-                        parentNode = {
-                            label: parentFeature.featureName,
-                            icon: parentFeature.icon ? <IconComponentParent /> : <MenuOutlined />,
-                            key: config.routes[parentFeature.keyRoute],
-                            featureid: parentFeature.featureId,
-                            orders: parentFeature.orderNo,
-                            children: [],
-                        };
-                        treeData.push(parentNode);
+
+                    // Nếu chưa có cha trong treeData thì thêm mới
+                    if (!parentNode) {
+                        if (!addedParents.has(parentFeature.featureId)) { // Kiểm tra nếu cha chưa được thêm vào
+                            parentNode = {
+                                label: parentFeature.featureName,
+                                icon: parentFeature.icon ? <IconComponentParent /> : <MenuOutlined />,
+                                key: config.routes[parentFeature.keyRoute],
+                                featureid: parentFeature.featureId,
+                                orders: parentFeature.orderNo,
+                                children: [],
+                            };
+                            treeData.push(parentNode);
+                            addedParents.add(parentFeature.featureId); // Đánh dấu cha đã được thêm
+                        }
                     }
 
-                    const IconComponentChildren = feature.icon ? listIcon[feature.icon] : null;
                     // Thêm chức năng con vào danh sách children của cha
+                    const IconComponentChildren = feature.icon ? listIcon[feature.icon] : null;
                     parentNode.children.push({
                         label: <Link to={config.routes[feature.keyRoute]} onClick={handleClickA}>{feature.featureName}</Link>,
                         key: config.routes[feature.keyRoute],
@@ -94,19 +100,26 @@ export const MenuProvider = ({ children }) => {
                 }
             } else {
                 const IconComponentFree = feature.icon ? listIcon[feature.icon] : null;
-                // Nếu không có cha, thêm vào treeData như là chức năng cấp cao nhất
-                treeData.push({
-                    key: config.routes[feature.keyRoute],
-                    featureid: feature.featureId,
-                    label: <Link to={config.routes[feature.keyRoute]} onClick={handleClickA}>{feature.featureName}</Link>,
-                    icon: feature.icon ? <IconComponentFree /> : <MenuOutlined />,
-                    orders: feature.orderNo,
-                    children: [],
-                });
 
+                // Kiểm tra xem menu cha đã có trong treeData chưa
+                const existNode = findNodeByFeatureId(treeData, feature.featureId);
+
+                // Nếu parent đã có trong treeData, thì không thêm menu cha vào cấp cao nhất
+                if (!existNode) {
+
+
+                    // Nếu không có cha hoặc cha chưa có trong treeData, thêm vào treeData như là chức năng cấp cao nhất
+                    treeData.push({
+                        key: config.routes[feature.keyRoute],
+                        featureid: feature.featureId,
+                        label: <Link to={config.routes[feature.keyRoute]} onClick={handleClickA}>{feature.featureName}</Link>,
+                        icon: feature.icon ? <IconComponentFree /> : <MenuOutlined />,
+                        orders: feature.orderNo,
+                        children: [],
+                    });
+                }
             }
         }
-
 
         function sortAndCleanTree(node) {
             // Sắp xếp children của nút hiện tại
@@ -132,6 +145,7 @@ export const MenuProvider = ({ children }) => {
 
         return treeData;
     };
+
 
     // Xử lý khi người dùng nhấn vào thẻ a trên menu
     const handleClickA = (e) => {

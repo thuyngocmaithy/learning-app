@@ -18,7 +18,6 @@ function Sidebar() {
     let location = useLocation();
     const navigate = useNavigate();
     const [current, setCurrent] = useState();
-    console.log(location.pathname);
 
     useEffect(() => {
         if (location.pathname === config.routes.DeTaiKhoaLuanThamGia || location.pathname === config.routes.DeTaiNCKHThamGia) {
@@ -29,7 +28,7 @@ function Sidebar() {
 
     const alwaysOpenKey = '/NghiepVu';
 
-    // Hàm này tìm tất cả các khóa cha của menu con
+    // Tìm tất cả các khóa cha của menu con
     const findParentKeys = (data, childKey, parentKeys = []) => {
         for (let item of data) {
             if (item.children) {

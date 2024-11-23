@@ -1,123 +1,301 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
-import { InputNumber } from 'antd';
+import { InputNumber, message } from 'antd';
 import { GraduateActiveIcon } from '../../../assets/icons';
 import TableScore from '../../../components/TableScore';
+import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import ButtonCustom from '../../../components/Core/Button';
-import { getUserById } from '../../../services/userService';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { createExpectedScore, deleteExpectedScoreBySubjectAndStudent, getExpectedScoreByStudentId, updateExpectedScore } from '../../../services/scoreService';
 import { GradeScoreContext } from '../../../context/GradeScoreContext';
+import { getScore, getUserById } from '../../../services/userService';
 
 const cx = classNames.bind(styles);
 
 function DiemTotNghiep() {
-    const { calculatedGPA,
-        currentGPA,
-        currentCredits,
-        totalCredits,
-        creditsA,
-        creditsB,
-        creditsC,
-        creditsD,
-        improvedCredits,
-        remainingCredits,
-        totalscientificResearchedCredits,
-        graduationType,
-        setGradeTotals,
-        setCreditsA,
-        setCreditsB,
-        setCreditsC,
-        setCreditsD,
-        setCurrentCredits,
-        setImprovedCredits,
-        setTotalCredits } = useContext(GradeScoreContext);
-    // const { userId } = useContext(AccountLoginContext);
-    // const [currentGPA, setCurrentGPA] = useState(0);
-    // const [totalCredits, setTotalCredits] = useState(0);
-    // const [creditsA, setCreditsA] = useState(0);
-    // const [creditsB, setCreditsB] = useState(0);
-    // const [creditsC, setCreditsC] = useState(0);
-    // const [creditsD, setCreditsD] = useState(0);
-    // const [improvedCredits, setImprovedCredits] = useState(0);
-    // const [calculatedGPA, setCalculatedGPA] = useState(0);
-    // const [remainingCredits, setRemainingCredits] = useState(0);
-    // const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
-    // const [graduationType, setGraduationType] = useState('');
-    // const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
-    // const [currentCredits, setCurrentCredits] = useState(0);
+    const { userId, access_token } = useContext(AccountLoginContext);
+    const [currentGPA, setCurrentGPA] = useState(0);
+    const [totalCredits, setTotalCredits] = useState(0);
+    const [creditsA, setCreditsA] = useState(0);
+    const [creditsB, setCreditsB] = useState(0);
+    const [creditsC, setCreditsC] = useState(0);
+    const [creditsD, setCreditsD] = useState(0);
+    const [improvedCredits, setImprovedCredits] = useState(0);
+    const [calculatedGPA, setCalculatedGPA] = useState(0);
+    const [remainingCredits, setRemainingCredits] = useState(0);
+    const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
+    const [graduationType, setGraduationType] = useState('');
+    const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
+    const [currentCredits, setCurrentCredits] = useState(0);
+    const [expectedSubjects, setexpectedSubjects] = useState([]);
+    const [prevScores, setPrevScores] = useState([]);
+    const [scores, setScores] = useState(); // ds điểm dùng cho dashboard
 
-    // useEffect(() => {
-    //     const fetchPoint = async () => {
-    //         const userData = await getUserById(userId);
-    //         const gpa = parseFloat(userData.data.GPA) || 0;
-    //         setCurrentGPA(gpa);
-    //         setCalculatedGPA(gpa);
-    //     }
-    //     if (userId) fetchPoint();
-    // }, [userId])
+    useEffect(() => {
+        const fetchPoint = async () => {
+            const userData = await getUserById(userId);
+            const gpa = parseFloat(userData.data.GPA) || 0;
+            const totalCredits = parseInt(userData.data.faculty.creditHourTotal);
+            setTotalCredits(totalCredits);
+            setCurrentGPA(gpa);
+            setCalculatedGPA(gpa);
+        }
+        if (userId) fetchPoint();
+    }, [userId])
 
-    // Handle input changes
-    // const calculateResults = useCallback(() => {
-    //     const currentCreditsNum = Number(currentCredits);
-    //     const improvedCreditsNum = Number(improvedCredits) || 0;
-    //     const creditsANum = Number(creditsA) || 0;
-    //     const creditsBNum = Number(creditsB) || 0;
-    //     const creditsCNum = Number(creditsC) || 0;
-    //     const creditsDNum = Number(creditsD) || 0;
-    //     const totalCreditsNum = Number(totalCredits);
+    useEffect(() => {
+        const fetchCurrentCreditHour = async () => {
+            try {
+                const responseScore = await getScore(access_token);
+                setScores(responseScore.data.ds_diem_hocky)
 
-    //     const gradePointsA = creditsANum * 4.0;
-    //     const gradePointsB = creditsBNum * 3.0;
-    //     const gradePointsC = creditsCNum * 2.0;
-    //     const gradePointsD = creditsDNum * 1.0;
+                if (responseScore.status === 'success') {
+                    for (let diem of responseScore.data.ds_diem_hocky) {
+                        if (diem.so_tin_chi_dat_tich_luy !== "") {
+                            setCurrentCredits(diem.so_tin_chi_dat_tich_luy); // set giá trị số tc hiện tại
+                            break; // thoát khỏi vòng lặp
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log("Lỗi lấy số tín chỉ hiện tại: " + error);
+            }
+        }
+        fetchCurrentCreditHour();
+    }, [access_token])
 
-    //     const totalGradePoints = gradePointsA + gradePointsB + gradePointsC + gradePointsD;
-    //     const totalscientificResearchedCredits = creditsANum + creditsBNum + creditsCNum + creditsDNum;
+    const calculateResults = useCallback(() => {
+        const currentCreditsNum = Number(currentCredits);
+        const improvedCreditsNum = Number(improvedCredits) || 0;
+        const creditsANum = Number(creditsA) || 0;
+        const creditsBNum = Number(creditsB) || 0;
+        const creditsCNum = Number(creditsC) || 0;
+        const creditsDNum = Number(creditsD) || 0;
+        const totalCreditsNum = Number(totalCredits);
 
-    //     let newGPA = 0 || currentGPA;
-    //     if ((currentCreditsNum - improvedCreditsNum + totalscientificResearchedCredits) !== 0) {
-    //         newGPA = parseFloat((
-    //             (currentGPA * (currentCreditsNum - improvedCreditsNum) + totalGradePoints) /
-    //             (currentCreditsNum - improvedCreditsNum + totalscientificResearchedCredits)
-    //         ).toFixed(2));
-    //     }
+        const gradePointsA = creditsANum * 4.0;
+        const gradePointsB = creditsBNum * 3.0;
+        const gradePointsC = creditsCNum * 2.0;
+        const gradePointsD = creditsDNum * 1.0;
 
-    //     const remainingCredits = totalCreditsNum - (currentCreditsNum - improvedCreditsNum);
+        const totalGradePoints = gradePointsA + gradePointsB + gradePointsC + gradePointsD;
+        const totalscientificResearchedCredits = creditsANum + creditsBNum + creditsCNum + creditsDNum;
 
-    //     setCalculatedGPA(isNaN(newGPA) ? 0 : newGPA);
-    //     setRemainingCredits(isNaN(remainingCredits) ? 0 : remainingCredits);
-    //     setTotalscientificResearchedCredits(totalscientificResearchedCredits);
+        let newGPA = 0 || currentGPA;
+        if ((currentCreditsNum - improvedCreditsNum + totalscientificResearchedCredits) !== 0) {
+            newGPA = parseFloat((
+                (currentGPA * (currentCreditsNum - improvedCreditsNum) + totalGradePoints) /
+                (currentCreditsNum - improvedCreditsNum + totalscientificResearchedCredits)
+            ).toFixed(2));
+        }
 
-    //     if (newGPA >= 3.6) setGraduationType('Xuất sắc');
-    //     else if (newGPA >= 3.2) setGraduationType('Giỏi');
-    //     else if (newGPA >= 2.5) setGraduationType('Khá');
-    //     else if (newGPA >= 2.0) setGraduationType('Trung bình');
-    //     else setGraduationType('Yếu');
-    // }, [currentGPA, currentCredits, totalCredits, creditsA, creditsB, creditsC, creditsD, improvedCredits]);
+        const remainingCredits = totalCreditsNum - (currentCreditsNum - improvedCreditsNum);
 
-    // useEffect(() => {
-    //     calculateResults();
-    // }, [calculateResults]);
+        setCalculatedGPA(isNaN(newGPA) ? 0 : newGPA);
+        setRemainingCredits(isNaN(remainingCredits) ? 0 : remainingCredits);
+        setTotalscientificResearchedCredits(totalscientificResearchedCredits);
 
-    const handleGradesChange = (totals) => {
+        if (newGPA >= 3.6) setGraduationType('Xuất sắc');
+        else if (newGPA >= 3.2) setGraduationType('Giỏi');
+        else if (newGPA >= 2.5) setGraduationType('Khá');
+        else if (newGPA >= 2.0) setGraduationType('Trung bình');
+        else setGraduationType('Yếu');
+    }, [currentGPA, currentCredits, totalCredits, creditsA, creditsB, creditsC, creditsD, improvedCredits]);
+
+    useEffect(() => {
+        calculateResults();
+    }, [calculateResults]);
+
+    const handleGradesChange = useCallback((totals) => {
         setGradeTotals(totals);
         setCreditsA(totals.A || 0);
         setCreditsB(totals.B || 0);
         setCreditsC(totals.C || 0);
         setCreditsD(totals.D || 0);
-    };
-
-    const handleCurrentCreditsChange = useCallback((credits) => {
-        setCurrentCredits(Number(credits) || 0);
     }, []);
 
-    const handleImprovedCreditsChange = useCallback((credits) => {
-        setImprovedCredits(Number(credits) || 0);
+    const handleImprovedCreditsChange = useCallback((newCredits) => {
+        setImprovedCredits(prevCredits => {
+            return typeof newCredits === 'function'
+                ? newCredits(prevCredits)
+                : Number(newCredits);
+        });
     }, []);
 
     const handleInputChange = useCallback((setter) => (value) => {
         setter(Number(value) || 0);
     }, []);
+
+
+
+    const handleSubjectModification = useCallback((subject) => {
+
+        setexpectedSubjects(prevModified => {
+            // Kiểm tra xem môn học đã tồn tại chưa
+            const existingSubjectIndex = prevModified.findIndex(
+                s => s.subjectId === subject.subjectId
+            );
+
+            if (existingSubjectIndex !== -1) {
+                // Nếu môn học đã tồn tại, cập nhật thông tin
+                const updatedModified = [...prevModified];
+                updatedModified[existingSubjectIndex] = {
+                    ...updatedModified[existingSubjectIndex],
+                    ...subject
+                };
+                return updatedModified;
+            }
+
+            // Nếu môn học chưa tồn tại, thêm mới
+            return [...prevModified, subject];
+        });
+    }, []);
+
+    const saveExpectedScore = async () => {
+        try {
+
+            const subjectsToCreate = [];
+            const subjectsToUpdate = [];
+            const subjectsToDelete = [];
+
+            console.log(expectedSubjects);
+
+            expectedSubjects.forEach(subject => {
+                const prevScore = prevScores.find(p => p.subjectId === subject.subjectId);
+                console.log(subject);
+                if (!prevScore) {
+                    // Nếu là môn học mới và có điểm dự kiến, thêm vào danh sách tạo mới
+                    if (subject.expectedScore10) {
+                        subjectsToCreate.push(subject);
+                    }
+                    if (!subject.expectedScore10 || subject.expectedScore10 == null) {
+                        // Nếu điểm dự kiến bị xóa, thêm vào danh sách xóa
+                        subjectsToDelete.push(subject.subjectId);
+                    }
+                } else if (subject.expectedScore10 !== prevScore.expectedScore10) {
+                    // Nếu điểm dự kiến bị thay đổi, thêm vào danh sách cập nhật
+                    subjectsToUpdate.push(subject);
+                }
+            });
+
+            console.log(subjectsToDelete)
+            // Gửi các yêu cầu đồng thời
+            await Promise.all([
+                // Xóa các điểm dự kiến
+                ...subjectsToDelete.map(subjectId =>
+                    deleteExpectedScoreBySubjectAndStudent(subjectId, userId)
+                ),
+                // Tạo mới các điểm dự kiến
+                ...subjectsToCreate.map(subject => {
+                    const expectedScoreData = {
+                        student: { userId },
+                        subject: { subjectId: subject.subjectId },
+                        expectedScore10: subject.expectedScore10,
+                        expectedScoreLetter: subject.expectedScoreLetter,
+                        expectedGPA: calculatedGPA,
+                        expectedCreditHourTotal: totalCredits,
+                        expectedCreditType: subject.expectedScoreLetter,
+                    };
+                    return createExpectedScore(expectedScoreData);
+                }),
+                // Cập nhật các điểm dự kiến
+                ...subjectsToUpdate.map(subject => {
+                    const expectedScoreData = {
+                        expectedScore10: subject.expectedScore10,
+                        expectedScoreLetter: subject.expectedScoreLetter,
+                        expectedGPA: calculatedGPA,
+                        expectedCreditHourTotal: totalCredits,
+                        expectedCreditType: subject.expectedScoreLetter,
+                    };
+                    return updateExpectedScore(subject.subjectId, userId, expectedScoreData);
+                }),
+            ]);
+
+            message.success('Cập nhật điểm dự kiến thành công');
+
+            // Cập nhật lại điểm trước đó
+            setPrevScores([...expectedSubjects]);
+        } catch (error) {
+            console.error('Error saving expected scores:', error);
+            message.error('Cập nhật điểm dự kiến thất bại');
+        }
+    };
+
+
+    const columnsSubject = [
+        {
+            dataIndex: 'diemhe10',
+            title: 'Điểm hệ 10',
+            align: 'center'
+        },
+        {
+            dataIndex: 'diemchu',
+            title: 'Điểm chữ',
+            align: 'center'
+        },
+        {
+            dataIndex: 'diemhe4',
+            title: 'Điểm hệ 4',
+            align: 'center'
+        },
+    ];
+    const dataSubject = [
+        {
+            diemhe10: 'Dưới 4.0',
+            diemchu: 'F',
+            diemhe4: '0'
+        },
+        {
+            diemhe10: '4.0 đến 5.4',
+            diemchu: 'D',
+            diemhe4: '1'
+        },
+        {
+            diemhe10: '5.5 đến 6.9',
+            diemchu: 'C',
+            diemhe4: '2'
+        },
+        {
+            diemhe10: '7.0 đến 8.4',
+            diemchu: 'B',
+            diemhe4: '3'
+        },
+        {
+            diemhe10: '8.5 đến 10',
+            diemchu: 'A',
+            diemhe4: '4'
+        }
+    ]
+
+    const columnsGrade = [
+        {
+            dataIndex: 'gpa',
+            title: 'Múc điểm trung bình tích lũy toàn khóa học',
+        },
+        {
+            dataIndex: 'grade',
+            title: 'Hạng tốt nghiệp',
+        },
+    ];
+    const dataGrade = [
+        {
+            gpa: '2.00 đến 2.49',
+            grade: 'Loại trung bình',
+        },
+        {
+            gpa: '2.50 đến 3.19',
+            grade: 'Loại khá',
+        },
+        {
+            gpa: '3.20 đến 3.59',
+            grade: 'Loại giỏi',
+        },
+        {
+            gpa: '3.60 đến 4.00',
+            grade: 'Loại xuất sắc',
+        },
+    ]
 
     return (
         <div className={cx('wrapper-graduation')}>
@@ -132,11 +310,11 @@ function DiemTotNghiep() {
             </div>
             <TableScore
                 onGradesChange={handleGradesChange}
-                onCurrentCreditsChange={handleCurrentCreditsChange}
                 onImprovedCreditsChange={handleImprovedCreditsChange}
+                onSubjectModification={handleSubjectModification}
             />
             <div className={cx('footer-table')}>
-                <ButtonCustom primary small className={cx('btnSave')}>
+                <ButtonCustom key={'save'} primary small className={cx('btnSave')} onClick={saveExpectedScore}>
                     Lưu
                 </ButtonCustom>
             </div>
@@ -223,7 +401,7 @@ function DiemTotNghiep() {
                             id="outlined-number"
                             min={0}
                             max={150}
-                            value={improvedCredits}
+                            value={improvedCredits || 0}
                             disabled
                         />
                     </div>
@@ -242,43 +420,6 @@ function DiemTotNghiep() {
                             <span className={cx('title-info')}>Số tín chỉ cần chọn lại:</span>
                             <span className={cx('value-info')}>{Math.abs(remainingCredits - totalscientificResearchedCredits) || 0}</span>
                         </div>
-                        <div className={cx('infomation')}>
-                            <div className={cx('sort')}>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Loại A: Từ 8.5 trở lên</span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Loại B: Từ 7.0 đến 8.4</span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Loại C: Từ 5.5 đến 6.9</span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Loại D: Từ 4.0 đến 5.4</span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Loại F: Dưới 4.0</span>
-                                </div>
-                            </div>
-                            <div className={cx('sort')}>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Xếp loại xuất sắc: Đạt từ 3.6 đến 4.0 </span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Xếp loại giỏi: Đạt từ 3.2 đến 3.59 </span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Xếp loại khá: Đạt từ 2.5 đến 3.19</span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Xếp loại trung bình: Đạt từ 2.0 đến 2.49</span>
-                                </div>
-                                <div className={cx('info-item')}>
-                                    <span className={cx('title-info')}>Không được xét tốt nghiệp: Đạt dưới 2.0</span>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                     <div className={cx('result-right')}>
                         <div className={cx('result-item')}>
@@ -291,6 +432,31 @@ function DiemTotNghiep() {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className={cx('title-sapxep-diem')}>
+                <h3>Thông tin quy đổi điểm</h3>
+            </div>
+            <div className={cx('container-info-score')}>
+                <TableCustomAnt
+                    title={() => 'Quy đổi điểm học phần'}
+                    height={null}
+                    width='40%'
+                    columns={columnsSubject}
+                    data={dataSubject}
+                    size={"large"}
+                    isHaveRowSelection={false}
+                    isPagination={false}
+                />
+                <TableCustomAnt
+                    title={() => 'Quy đổi điểm tốt nghiệp'}
+                    height={null}
+                    width='40%'
+                    columns={columnsGrade}
+                    data={dataGrade}
+                    size={"large"}
+                    isHaveRowSelection={false}
+                    isPagination={false}
+                />
             </div>
         </div>
     );

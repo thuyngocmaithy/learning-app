@@ -12,3 +12,23 @@
 .radio-period {
     cursor: pointer;
 }
+
+.action-item {
+    display: grid;
+
+    .btnDetail {
+        margin-top: 5px;
+    }
+}
+
+:global .ant-input-disabled.score-10 {
+    color: var(--blue-900);
+    background-color: floralwhite;
+}
+
+:global .ant-input.score-letter {
+    color: var(--blue-900);
+    font-weight: 500;
+    background-color: var(--blue-50);
+    border-color: var(--primary-pastel);
+}

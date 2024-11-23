@@ -1,10 +1,11 @@
 import { createContext, useEffect, useState, useCallback, useContext } from 'react';
-import { getUserById } from '../services/userService';
+import { getScore, getUserById } from '../services/userService';
 import { AccountLoginContext } from './AccountLoginContext';
+import { getExpectedScoreByStudentId } from '../services/scoreService';
 const GradeScoreContext = createContext();
 
 function GradeScoreProvider({ children }) {
-    const { userId } = useContext(AccountLoginContext);
+    const { userId, access_token } = useContext(AccountLoginContext);
     const [currentGPA, setCurrentGPA] = useState(0);
     const [totalCredits, setTotalCredits] = useState(0);
     const [creditsA, setCreditsA] = useState(0);
@@ -16,20 +17,47 @@ function GradeScoreProvider({ children }) {
     const [remainingCredits, setRemainingCredits] = useState(0);
     const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
     const [graduationType, setGraduationType] = useState('');
-    const [currentCredits, setCurrentCredits] = useState(0);
     const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
+    const [currentCredits, setCurrentCredits] = useState(0);
+    const [expectedSubjects, setexpectedSubjects] = useState([]);
+    const [prevScores, setPrevScores] = useState([]);
+    const [scores, setScores] = useState(); // ds điểm dùng cho dashboard
+
+
 
     useEffect(() => {
         const fetchPoint = async () => {
             const userData = await getUserById(userId);
             const gpa = parseFloat(userData.data.GPA) || 0;
+            const totalCredits = parseInt(userData.data.faculty.creditHourTotal);
+            setTotalCredits(totalCredits);
             setCurrentGPA(gpa);
             setCalculatedGPA(gpa);
         }
         if (userId) fetchPoint();
     }, [userId])
 
-    // Handle input changes
+    useEffect(() => {
+        const fetchCurrentCreditHour = async () => {
+            try {
+                const responseScore = await getScore(access_token);
+                setScores(responseScore.data.ds_diem_hocky)
+
+                if (responseScore.status === 'success') {
+                    for (let diem of responseScore.data.ds_diem_hocky) {
+                        if (diem.so_tin_chi_dat_tich_luy !== "") {
+                            setCurrentCredits(diem.so_tin_chi_dat_tich_luy); // set giá trị số tc hiện tại
+                            break; // thoát khỏi vòng lặp
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log("Lỗi lấy số tín chỉ hiện tại: " + error);
+            }
+        }
+        fetchCurrentCreditHour();
+    }, [access_token])
+
     const calculateResults = useCallback(() => {
         const currentCreditsNum = Number(currentCredits);
         const improvedCreditsNum = Number(improvedCredits) || 0;
@@ -72,6 +100,7 @@ function GradeScoreProvider({ children }) {
         calculateResults();
     }, [calculateResults]);
 
+
     return (
         <GradeScoreContext.Provider value={{
             calculatedGPA,
@@ -86,6 +115,9 @@ function GradeScoreProvider({ children }) {
             remainingCredits,
             totalscientificResearchedCredits,
             graduationType,
+            expectedSubjects,
+            prevScores,
+            scores,
             setGradeTotals,
             setCreditsA,
             setCreditsB,
@@ -94,6 +126,8 @@ function GradeScoreProvider({ children }) {
             setCurrentCredits,
             setImprovedCredits,
             setTotalCredits,
+            setexpectedSubjects,
+            setPrevScores
         }}
         >
             {children}

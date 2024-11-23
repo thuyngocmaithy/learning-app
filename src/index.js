@@ -25,9 +25,7 @@ root.render(
                             <SRAndThesisJoinProvider>
                                 <SocketNotificationProvider>
                                     <SocketMessagesProvider>
-                                        <GradeScoreProvider>
-                                            <App />
-                                        </GradeScoreProvider>
+                                        <App />
                                     </SocketMessagesProvider>
                                 </SocketNotificationProvider>
                             </SRAndThesisJoinProvider>

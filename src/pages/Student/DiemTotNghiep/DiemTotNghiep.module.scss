@@ -1,3 +1,7 @@
+.wrapper-graduation {
+    margin-bottom: 40px;
+}
+
 .info {
     display: flex;
     margin-bottom: 30px;
@@ -16,9 +20,11 @@
     color: var(--primary);
 }
 
-.wrapper {
+.wrapper,
+.container-info-score {
     display: flex;
-    margin: 15px 0;
+    margin: 20px 0;
+    justify-content: space-around;
 }
 
 .content-left {
@@ -38,7 +44,7 @@
 }
 
 .content-right {
-    width: 45%;
+    width: 40%;
     border: 3px solid var(--primary);
     box-shadow: var(--box-shadow-1);
     background-color: var(--white);
