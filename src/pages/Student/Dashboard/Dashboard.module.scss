@@ -24,3 +24,11 @@
 .chart {
     margin: 20px 10px;
 }
+
+@media only screen and (max-width: 768px) {
+    .list-card {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}

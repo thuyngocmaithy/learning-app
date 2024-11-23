@@ -11,6 +11,17 @@ export const getSemesters = async () => {
     }
 };
 
+export const getSemesterById = async (id) => {
+    try {
+        const response = await api.get(`/semesters/${id}`);
+        return response;
+    } catch (error) {
+        console.error('[semestersService - getSemesterById - error] : ', error);
+        throw error;
+    }
+};
+
+
 export const createSemester = async (data) => {
     try {
         const response = await api.post('/semesters', data);

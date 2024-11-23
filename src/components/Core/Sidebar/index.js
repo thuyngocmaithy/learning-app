@@ -85,7 +85,14 @@ function Sidebar() {
     };
 
     return (
-        <Sider className={cx("wrapper")} collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} width={240}>
+        <Sider
+            breakpoint="lg"
+            className={cx("wrapper")}
+            collapsible
+            collapsed={collapsed}
+            onCollapse={(value) => setCollapsed(value)}
+            width={240}
+        >
             <div className="demo-logo-vertical">
                 <img
                     className={cx('logo', {

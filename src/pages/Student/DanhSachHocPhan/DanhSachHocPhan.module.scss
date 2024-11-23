@@ -86,3 +86,15 @@
         background-color: var(--color-subject-open);
     }
 }
+
+@media only screen and (max-width: 768px) {
+    .info {
+        flex-direction: column;
+    }
+
+    .toolbar {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+}

@@ -11,6 +11,7 @@ import { PermissionDetailProvider } from './context/PermissionDetailContext';
 import { SRAndThesisJoinProvider } from './context/SRAndThesisJoinContext';
 import { MenuProvider } from './context/MenuContext';
 import { BrowserRouter } from 'react-router-dom';
+import { GradeScoreProvider } from './context/GradeScoreContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -24,7 +25,9 @@ root.render(
                             <SRAndThesisJoinProvider>
                                 <SocketNotificationProvider>
                                     <SocketMessagesProvider>
-                                        <App />
+                                        <GradeScoreProvider>
+                                            <App />
+                                        </GradeScoreProvider>
                                     </SocketMessagesProvider>
                                 </SocketNotificationProvider>
                             </SRAndThesisJoinProvider>

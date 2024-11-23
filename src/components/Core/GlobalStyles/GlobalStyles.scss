@@ -156,6 +156,10 @@ body {
         align-items: center;
     }
 
+    .ant-card-type-inner .ant-card-head-title {
+        white-space: unset;
+    }
+
     .ant-card-small>.ant-card-body {
         padding: 20px;
     }

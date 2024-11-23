@@ -5,11 +5,14 @@ import Table from '../../../components/Table';
 import { ListCourseActiveIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import {
+    getUserById,
     saveRegisterSubjects
 } from '../../../services/userService';
-import { Descriptions, message, Radio, Spin, Switch } from 'antd';
+import { Descriptions, message, Radio, Spin } from 'antd';
 import { findKhungCTDTByUserId } from '../../../services/studyFrameService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import { createSemester, getSemesterById } from '../../../services/semesterService';
+import { createCycle, getWhere } from '../../../services/cycleService';
 
 const cx = classNames.bind(styles);
 function DanhSachHocPhan() {
@@ -38,11 +41,46 @@ function DanhSachHocPhan() {
     }, [userId])
 
     const handleSave = async () => {
-        const result = Object.keys(registeredSubjects).map(key => ({
-            user: userId,
-            subject: key,
-            semester: registeredSubjects[key].semesterId
-        }));
+
+        const promises = Object.keys(registeredSubjects).map(async (key) => {
+            // Kiểm tra semester có trong db chưa
+            const responseSemesterExist = await getSemesterById(registeredSubjects[key].semesterId)
+            if (responseSemesterExist.status === 204) {
+                const responseUser = await getUserById(userId);
+                const startYear = responseUser.data.firstAcademicYear;
+                const endYear = responseUser.data.lastAcademicYear;
+
+                // Kiểm tra có chu kỳ trong db chưa
+                const responseCycleExist = await getWhere({ startYear: startYear, endYear: endYear });
+                let createCycleData;
+                if (responseCycleExist.status === 204) {
+                    // Chưa có trong db => Tạo chu kỳ mới
+                    const cycleName = `${startYear}-${endYear}`;
+                    const createCycleRes = await createCycle({
+                        cycleName: cycleName,
+                        startYear: startYear,
+                        endYear: endYear
+                    })
+                    createCycleData = createCycleRes.data.data;
+                }
+                else {
+                    createCycleData = responseCycleExist.data.data;
+                }
+                // Chưa có trong db => Tạo kỳ mới
+                await createSemester({
+                    semesterId: registeredSubjects[key].semesterId,
+                    semesterName: String(registeredSubjects[key].semesterId).slice(-1), // Ký tự cuối của semesterId
+                    academicYear: String(registeredSubjects[key].semesterId).slice(0, 4), // 4 ký tự đầu của semesterId
+                    cycle: createCycleData.cycleId
+                })
+            }
+            return {
+                user: userId,
+                subject: key,
+                semester: registeredSubjects[key].semesterId
+            }
+        });
+        const result = await Promise.all(promises);
         try {
             const response = await saveRegisterSubjects(result);
             if (response.status === 201) {
@@ -55,13 +93,7 @@ function DanhSachHocPhan() {
             console.error(error);
         }
     };
-    if (isLoading) {
-        return (
-            <div className={cx('container-loading')}>
-                <Spin size="large" />
-            </div>
-        );
-    }
+
 
     const items = [
         {
@@ -99,6 +131,14 @@ function DanhSachHocPhan() {
     const handleChange = (e) => {
         setValueSatus(e.target.value); // Cập nhật giá trị khi chọn
     };
+
+    if (isLoading) {
+        return (
+            <div className={cx('container-loading')}>
+                <Spin size="large" />
+            </div>
+        );
+    }
 
     return (
         <div className={cx('wrapper')}>

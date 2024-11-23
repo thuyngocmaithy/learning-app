@@ -53,6 +53,7 @@ function Home() {
                     },
                 },
             },
+            // colors: ['#1ab7ea', '#39539E'],
             colors: ['#28DF99', '#27AA80'],
             labels: ['Đề tài nghiên cứu', 'Khóa luận tốt nghiệp'],
             responsive: [
@@ -94,90 +95,7 @@ function Home() {
             ],
         },
     });
-    const [stateCore, setStateCore] = useState({
-        series: [
-            {
-                name: 'Số lượng sinh viên',
-                data: [10, 15, 25, 30, 20, 10, 5], // Dữ liệu điểm của sinh viên
-            },
-        ],
-        options: {
-            chart: {
-                type: 'area',
-                height: 350,
-            },
-            xaxis: {
-                categories: ['0-1', '1-2', '2-3', '3-4', '4-5', '5-6', '6-7', '7-8', '8-9', '9-10'],
-                title: {
-                    text: 'Khoảng điểm',
-                },
-            },
-            yaxis: {
-                title: {
-                    text: 'Số lượng sinh viên',
-                },
-            },
-            title: {
-                text: 'Biểu đồ phân bố điểm của sinh viên trong khoa',
-                align: 'center',
-            },
-        },
-    });
-    const [stateIntern, setStateIntern] = useState({
-        series: [76, 67, 80, 20],
-        options: {
-            chart: {
-                height: 390,
-                type: 'radialBar',
-            },
-            title: {
-                text: 'Thống kê tình trạng thực tập tốt nghiệp',
-                align: 'center',
-            },
-            plotOptions: {
-                radialBar: {
-                    offsetY: 0,
-                    startAngle: 0,
-                    endAngle: 270,
-                    hollow: {
-                        margin: 5,
-                        size: '30%',
-                        background: 'transparent',
-                        image: undefined,
-                    },
-                    dataLabels: {
-                        name: {
-                            show: false,
-                        },
-                        value: {
-                            show: false,
-                        },
-                    },
-                    barLabels: {
-                        enabled: true,
-                        useSeriesColors: true,
-                        offsetX: -8,
-                        fontSize: '16px',
-                        formatter: function (seriesName, opts) {
-                            return seriesName + ':  ' + opts.w.globals.series[opts.seriesIndex];
-                        },
-                    },
-                },
-            },
-            colors: ['#1ab7ea', '#0084ff', '#39539E', '#0077B5'],
-            labels: ['Đăng ký', 'Đang thực hiện', 'Đã hoàn thành', 'Bị từ chối'],
-            responsive: [
-                {
-                    breakpoint: 480,
-                    options: {
-                        legend: {
-                            show: false,
-                        },
-                    },
-                },
-            ],
-        },
-    });
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('info')}>
@@ -209,36 +127,12 @@ function Home() {
                     </div>
                     <div className={cx('chart')}>
                         <ReactApexChart
-                            options={stateIntern.options}
-                            series={stateIntern.series}
-                            type="radialBar"
-                            height={390}
-                            width={400}
-                            style={{ display: 'flex', justifyContent: 'center' }}
-                        />
-                    </div>
-                </div>
-            </div>
-            <Divider />
-            <div className={cx('circle-chart')}>
-                <div className={cx('container-chart')}>
-                    <div className={cx('chart')}>
-                        <ReactApexChart
                             options={stateDegree.options}
                             series={stateDegree.series}
                             type="pie"
-                            width={400}
+                            width={460}
                         />
                     </div>
-                </div>
-                <div id="chart">
-                    <ReactApexChart
-                        options={stateCore.options}
-                        series={stateCore.series}
-                        type="area"
-                        height={350}
-                        width={600}
-                    />
                 </div>
             </div>
         </div>

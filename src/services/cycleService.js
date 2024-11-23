@@ -48,14 +48,15 @@ export const deleteCycles = async (ids) => {
     }
 };
 
-// export const getWhere = async (conditions) => {
-//     try {
-//         const queryParams = new URLSearchParams(conditions).toString();
-//         const url = `/cycles/getCycleWhereParentAndKeyRoute?${queryParams}`;
+export const getWhere = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/cycles/getWhere?${queryParams}`;
 
-//         const response = await api.get(url);
-//         return response;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        console.error('[majorService - getWhere - error] : ', error);
+        throw error;
+    }
+};

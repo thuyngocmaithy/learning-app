@@ -11,11 +11,20 @@ import { PermissionDetailContext } from './context/PermissionDetailContext';
 import { api } from './utils/apiConfig';
 
 function App() {
-    const { userId, permission } = useContext(AccountLoginContext);
+    const { userId, permission, isTokenExpired, updateUserInfo } = useContext(AccountLoginContext);
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
     const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        // KIỂM TRA TOKEN HẾT HẠN => Logout
+        if (isTokenExpired) {
+            <Navigate to={config.routes.Login} replace={true} />
+            localStorage.removeItem('userLogin');
+            updateUserInfo();
+        }
+    }, [isTokenExpired])
 
     const getListFeature = async () => {
         try {

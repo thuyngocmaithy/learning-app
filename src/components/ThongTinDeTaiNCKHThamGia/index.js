@@ -121,9 +121,11 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                     <Descriptions
                         title={
                             <div className={cx('container-title')}>
-                                <h2>Đề tài:</h2>
-                                <h2 className={cx("title-SR")}>{scientificResearch.scientificResearchName}</h2>
-                                <Tag color={statusSelected.color} className='status-detail'>
+                                <div className={cx('title')}>
+                                    <h2 className={cx('label-title')}>Đề tài:</h2>
+                                    <h2 className={cx("content-title")}>{scientificResearch.scientificResearchName}</h2>
+                                </div>
+                                <Tag color={statusSelected.color} className={cx('status-detail')}>
                                     <Dropdown
                                         menu={{
                                             items: statusOptions,

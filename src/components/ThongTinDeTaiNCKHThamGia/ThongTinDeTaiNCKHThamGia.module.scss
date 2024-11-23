@@ -3,15 +3,20 @@
     margin-bottom: 20px;
     flex-wrap: wrap;
 
-    h2 {
-        margin-right: 20px;
+    .label-title {}
 
-    }
-
-    .title-SR {
+    .title {
+        display: flex;
         flex: 1 1 500px;
         text-wrap: pretty;
     }
+
+    .title h2 {
+        margin-right: 20px;
+        font-size: 2.1vw;
+    }
+
+
 }
 
 .container-info-detail {
@@ -30,5 +35,16 @@
     h4 {
         color: var(--primary);
         margin-bottom: 10px;
+    }
+}
+
+.status-detail {
+    height: fit-content;
+}
+
+@media only screen and (max-width: 768px) {
+    .status-detail {
+        margin-top: 20px;
+
     }
 }

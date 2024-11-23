@@ -5,12 +5,12 @@ import { Card, List, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getSRUByUserIdAndSRGId, getWhere as getWhereSRU } from '../../../services/scientificResearchUserService';
+import { getWhere as getWhereSRU } from '../../../services/scientificResearchUserService';
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getAllSRGroup, getWhere as getWhereSRG } from '../../../services/scientificResearchGroupService';
+import { getWhere as getWhereSRG } from '../../../services/scientificResearchGroupService';
 
 const cx = classNames.bind(styles);
 
@@ -23,6 +23,23 @@ function NhomDeTaiNCKH() {
     const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // Số lượng mục trên mỗi trang
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // Xử lý active tab từ url
     const navigate = useNavigate();
@@ -113,6 +130,13 @@ function NhomDeTaiNCKH() {
                                     title={<div className={cx('name')}>{item.scientificResearchGroupName}</div>}
                                     description={
                                         <div>
+                                            <div
+                                                className={cx('container-deadline-register')}
+                                                style={{ display: screenWidth < 768 ? 'flex' : 'none', margin: "7px 0" }}
+                                            >
+                                                <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                                <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
+                                            </div>
                                             <p>Khoa: {item.faculty.facultyName}</p>
                                             <p style={{ margin: "7px 0" }}>
                                                 Trạng thái:
@@ -123,7 +147,10 @@ function NhomDeTaiNCKH() {
                                         </div>
                                     }
                                 />
-                                <div className={cx('container-deadline-register')}>
+                                <div
+                                    className={cx('container-deadline-register')}
+                                    style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                >
                                     <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
                                     <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
                                 </div>
