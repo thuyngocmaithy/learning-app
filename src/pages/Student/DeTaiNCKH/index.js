@@ -233,7 +233,7 @@ function DeTaiNCKH() {
                                 </Button>,
                                 listscientificResearchRegister && listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
                                     <Button
-                                        className={cx('btn-cancel')}
+                                        redColor
                                         outline
                                         verysmall
                                         onClick={() => {

@@ -1,49 +1,94 @@
 .container-loading {
     display: flex;
     justify-content: center;
-    align-items: center;
+    padding-top: 100px;
 }
 
-.container-table {
-    box-shadow: var(--box-shadow-1) !important;
-    border-radius: 17px !important;
-}
+// .container-table {
+//     box-shadow: var(--box-shadow-1) !important;
+//     border-radius: 17px !important;
+// }
 
-.radio-period {
-    cursor: pointer;
-}
+// .radio-period {
+//     cursor: pointer;
+// }
 
-/* New styles for the checkbox */
-.ant-checkbox-checked .ant-checkbox-inner {
-    background-color: #1890ff;
-    border-color: #1890ff;
-}
+// /* New styles for the checkbox */
+// .ant-checkbox-checked .ant-checkbox-inner {
+//     background-color: #1890ff;
+//     border-color: #1890ff;
+// }
 
-.ant-checkbox-checked .ant-checkbox-inner::after {
-    border-color: #000000;
-}
+// .ant-checkbox-checked .ant-checkbox-inner::after {
+//     border-color: #000000;
+// }
 
-/* Hover effect for the checkbox */
-.ant-checkbox:hover .ant-checkbox-inner {
-    border-color: #40a9ff;
-}
+// /* Hover effect for the checkbox */
+// .ant-checkbox:hover .ant-checkbox-inner {
+//     border-color: #40a9ff;
+// }
 
-/* Disabled state for the checkbox */
-.ant-checkbox-disabled .ant-checkbox-inner {
-    background-color: #9b4f4f;
-    border-color: #d9d9d9 !important;
-}
+// /* Disabled state for the checkbox */
+// .ant-checkbox-disabled .ant-checkbox-inner {
+//     background-color: #9b4f4f;
+//     border-color: #d9d9d9 !important;
+// }
 
-.ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after {
-    border-color: rgb(0, 0, 0);
-}
+// .ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after {
+//     border-color: rgb(0, 0, 0);
+// }
 
-.radio-check {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+// .radio-check {
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+// }
 
 td {
     background-color: inherit;
 }
+
+th {
+    color: var(--color-text-base) !important;
+}
+
+// :root {
+//     --color-background: #102539; // Nền chính
+//     --color-text: #ffffff; // Màu chữ
+//     --color-border: #333333; // Màu viền
+//     --color-subject-open: #2b6cb0; // Màu cho môn học mở
+//     --color-subject-correct: #2f855a; // Màu đúng
+//     --color-subject-error: #c53030; // Màu lỗi
+// }
+
+// .container-table {
+//     background-color: var(--color-background);
+//     color: var(--color-text);
+
+//     .MuiTableCell-root {
+//         background-color: var(--color-background);
+//         color: var(--color-text);
+//         border-color: var(--color-border);
+//     }
+
+//     .title {
+//         font-weight: bold;
+//         color: var(--color-text);
+//         background-color: var(--color-background);
+//     }
+// }
+
+// .radio-check {
+//     display: flex;
+//     align-items: center;
+//     gap: 8px;
+
+//     .MuiRadio-root {
+//         color: var(--color-text);
+//     }
+// }
+
+// .container-loading {
+//     background-color: var(--color-background);
+//     color: var(--color-text);
+// }

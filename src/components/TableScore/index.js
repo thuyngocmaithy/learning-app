@@ -11,15 +11,6 @@ import { DiemDetail } from '../FormDetail/DiemDetail';
 import { EyeOutlined } from '@ant-design/icons';
 const cx = classNames.bind(styles);
 
-const OptionScore = [
-    { value: '', label: '' },
-    { value: 'A', label: 'A' },
-    { value: 'B', label: 'B' },
-    { value: 'C', label: 'C' },
-    { value: 'D', label: 'D' },
-    { value: 'F', label: 'F' },
-];
-
 // Hàm chuyển đổi điểm số sang điểm chữ
 const convertToLetterGrade = (score) => {
     if (score >= 8.5) return 'A';
@@ -389,7 +380,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
 
     return (
         <>
-            <Paper className={cx('container-table')}>
+            <Paper className={cx('container-table-score')}>
                 <TableContainer sx={{ maxHeight: height }}>
                     <Table stickyHeader>
                         <TableHead>

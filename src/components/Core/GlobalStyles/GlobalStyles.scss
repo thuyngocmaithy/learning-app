@@ -16,9 +16,9 @@
     --red-100: #fceeee;
     --red-200: #fee2e2;
     --red-300: #f39595;
-    --color-subject-open: rgb(212 241 255);
-    --color-subject-correct: #e6fffb;
-    --color-subject-error: #fff1f0;
+    --color-subject-open: rgb(198 234 252);
+    --color-subject-correct: #7fe789;
+    --color-subject-error: #fd9393de;
 
 
     // BOX-SHADOW
@@ -62,6 +62,13 @@ h3,
 h4,
 p {
     font-family: var(--font-family) !important;
+    color: var(--color-text-base) !important;
+    margin-bottom: 0 !important;
+}
+
+h2,
+h3 {
+    font-weight: 600 !important;
 }
 
 /* Custom scrollbar */
@@ -128,6 +135,10 @@ span {
 body {
 
     // Thay đổi thuộc tính của cell trong table mui
+    .css-1ps6pg7-MuiPaper-root {
+        border-radius: 17px;
+    }
+
     .MuiTableCell-root {
         font-size: 1.2rem;
         padding: 10px;
@@ -242,7 +253,7 @@ body {
     }
 
     .ant-divider-horizontal {
-        background-color: var(--blue-50);
+        background-color: var(--color-divider);
         border-radius: 4px;
         padding: 5px 0;
     }
@@ -314,7 +325,7 @@ body {
         border-radius: 16px;
     }
 
-    :where(.css-dev-only-do-not-override-apn68).ant-tree .ant-tree-checkbox {
+    .ant-tree .ant-tree-checkbox {
         align-self: center;
     }
 
@@ -328,10 +339,15 @@ body {
         background-color: #3465D4;
     }
 
-    // TABLE    
+    // TABLE 
     .ant-table-body {
         min-height: 250px;
     }
+
+    .ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
+        background-color: var(--color-row-active);
+    }
+
 
     // MODAL
     .ant-modal-header {
@@ -383,7 +399,7 @@ body {
 
     // INPUT
     .ant-input-number-outlined.ant-input-number-disabled {
-        color: var(--black);
+        color: var(--color-text-base);
     }
 
     .ant-select-selection-item span {
@@ -463,4 +479,9 @@ body {
     .ant-steps-label-horizontal {
         margin-bottom: 30px;
     }
+
+    // CHECKBOX
+    // .ant-checkbox .ant-checkbox-inner {
+    //     border: var(--color-border);
+    // }
 }

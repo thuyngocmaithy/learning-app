@@ -11,6 +11,9 @@
 
 .menu-popper {
     padding-bottom: 8px;
+    background-color: var(--color-bg-layout);
+    border: 1px solid var(--color-border);
+
 }
 
 // Menu-body
@@ -28,13 +31,15 @@
     font-weight: 600;
     padding: 8px 16px;
     line-height: 1.8rem;
+    color: var(--color-text-base);
+    border: none;
 
     &.separate {
         border-top: 1px solid rgba(22, 24, 35, 0.12);
     }
 
     &:hover {
-        background-color: rgba(22, 24, 35, 0.03);
+        background-color: var(--color-bg-container-item-hover);
     }
 }
 

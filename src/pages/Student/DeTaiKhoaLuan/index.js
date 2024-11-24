@@ -227,12 +227,12 @@ function DeTaiKhoaLuan() {
                     renderItem={(item, index) => (
                         <List.Item
                             actions={[
-                                <Button className={cx('btnDetail')} outline verysmall onClick={() => setShowModalDetail(item)}>
+                                <Button outline verysmall onClick={() => setShowModalDetail(item)}>
                                     Chi tiết
                                 </Button>,
                                 listthesisRegister && listthesisRegister.some(thesisRegister => thesisRegister.thesis.thesisId === item.thesisId) ?
                                     <Button
-                                        className={cx('btn-cancel')}
+                                        colorRed
                                         outline
                                         verysmall
                                         onClick={() => {

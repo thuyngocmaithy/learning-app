@@ -9,14 +9,9 @@
     font-weight: 500;
     font-family: var(--font-family);
     cursor: pointer;
-    background-color: var(--white);
-    border: 1px solid transparent;
+    background-color: var(--color-bg-base);
+    border: 1px solid var(--color-border);
     user-select: none;
-
-    // Nút đứng sau 1 nút => cách ra 1 khoảng
-    // +.wrapper {
-    //     margin-left: 8px;
-    // }
 
     &.disabled {
         pointer-events: none;
@@ -39,39 +34,39 @@
 // Button types
 
 .rounded {
-    border-radius: 999px; //Để số lớn => tự động bo tròn
+    border-radius: 999px;
     box-shadow: var(--box-shadow-button);
-    border-color: rgba(22, 24, 35, 0.12);
+    border-color: var(--color-border);
 
     &:hover {
-        border-color: rgba(22, 24, 35, 0.2);
+        border-color: var(--color-border);
         background-color: rgba(22, 24, 35, 0.03);
-
-
     }
 }
 
-// types primary được viết sau => ưu tiên hơn
 .primary {
-    color: var(--white);
-    background-color: var(--primary);
-    border-color: var(--primary);
+    color: var(--color-btn-text-primary);
+    /* Sử dụng màu chữ cho nút chính */
+    background-color: var(--color-btn-primary);
+    /* Sử dụng màu nền cho nút chính */
+    border-color: var(--color-btn-primary);
+    /* Sử dụng màu viền cho nút chính */
 
     &:hover {
-        background: linear-gradient(0deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.06)), #3465D4;
-        border-color: var(--primary);
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.06)), var(--color-btn-primary);
+        border-color: var(--color-btn-primary);
     }
 }
 
 .outline {
-    color: var(--primary);
-    border-color: currentColor; //giống màu color
+    color: var(--color-btn-outline);
+    border-color: var(--color-btn-outline);
+    background-color: transparent;
 
     &:hover {
-        border-color: currentColor; //giống màu color
-        background-color: rgba(254, 44, 85, 0.06);
+        border-color: currentColor;
+        background-color: var(--color-btn-outline-hover);
     }
-
 }
 
 .text {
@@ -81,13 +76,17 @@
 }
 
 .colorRed {
-    color: #cf1322;
-    background: #fff1f0;
+    color: var(--color-btn-text-error);
+    background: var(--color-btn-bg-error);
     border-color: #ffa39e;
+
+    &:hover {
+        background-color: #d6b7b6;
+    }
 }
 
+// Button sizes
 
-//Button sizes
 .verysmall {
     min-width: 60px;
     padding: 4px 10px;

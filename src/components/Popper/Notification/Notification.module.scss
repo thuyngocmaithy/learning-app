@@ -1,5 +1,6 @@
 .wrapper-notification {
     width: 450px;
+
 }
 
 .wrapper-notification a,
@@ -11,6 +12,7 @@
 
 .container-popper {
     overflow-y: auto;
+    background: var(--color-bg-popup);
 
     .body {
         padding: 20px 20px 0 20px;
@@ -35,9 +37,10 @@
     justify-content: center;
     position: sticky;
     bottom: 0;
-    background: white;
+    background: var(--color-bg-popup);
     z-index: 10;
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    background-color: var(--color-bg-container-item);
 
     .btn-readAll {
         margin: 15px;
@@ -72,7 +75,7 @@
 
 
 .notRead {
-    background-color: var(--red-100);
+    background-color: var(--color-bg-container-item-red);
 }
 
 .no-noti {
@@ -82,11 +85,11 @@
 }
 
 .isRead:hover {
-    background: aliceblue;
+    background: var(--color-bg-container-item-hover);
 }
 
 .notRead:hover {
-    background: var(--red-200);
+    background: var(--color-bg-container-item-red-hover);
 }
 
 @media only screen and (max-width: 768px) {

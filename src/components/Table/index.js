@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio, Checkbox } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio } from '@mui/material';
 import { Spin, message } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
@@ -8,6 +8,7 @@ import { getScoreByStudentId } from '../../services/scoreService';
 import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
 import { getWhere } from '../../services/subject_course_openingService';
+import { ThemeContext } from '../../context/ThemeContext';
 
 const cx = classNames.bind(styles);
 
@@ -236,6 +237,7 @@ const SubjectCell = React.memo(({
     disableCheckbox,
     handleChange
 }) => {
+    const { theme } = useContext(ThemeContext);
     const cellState = useMemo(() => {
         const isRegistered = registeredInfo?.semesterIndex === semesterIndex;
         const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
@@ -253,6 +255,7 @@ const SubjectCell = React.memo(({
             align="center"
             style={{
                 backgroundColor: isOpen ? 'var(--color-subject-open)' : 'transparent',
+                color: isOpen ? '#000' : 'var(--color-text-base)'
             }}
         >
             {hasScore
@@ -262,6 +265,10 @@ const SubjectCell = React.memo(({
                         onChange={() => handleChange(subject.subjectId, semesterIndex)}
                         disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
                         size="small"
+                        style={{
+                            color: theme === 'dark' ? 'rgb(39 61 157)' : '#000',
+                            opacity: (hasScore || disableCheckbox) ? '0.3' : '1'
+                        }}
                     />
                     <span>{scoreInfo.finalScore10}</span>
                 </div>
@@ -270,6 +277,10 @@ const SubjectCell = React.memo(({
                     onChange={() => handleChange(subject.subjectId, semesterIndex)}
                     disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
                     size="small"
+                    style={{
+                        color: theme === 'dark' ? 'rgb(39 61 157)' : '#000',
+                        opacity: (hasScore || disableCheckbox) ? '0.3' : '1'
+                    }}
                 />
             }
         </TableCell>
@@ -294,6 +305,7 @@ const SubjectRow = React.memo(({
     getSemesterIndex,
     handleChangeCell
 }) => {
+    const { theme } = useContext(ThemeContext)
     const registeredInfo = registeredSubjects[subject?.subjectId];
 
     // Kiểm tra xem có học kỳ nào đã có điểm trước học kỳ đăng ký không
@@ -362,13 +374,38 @@ const SubjectRow = React.memo(({
                     ? 'var(--color-subject-correct)'
                     : disableCheckboxIndexes.redRow
                         ? 'var(--color-subject-error)'
-                        : '#ffffff'
+                        : theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
             }}>
-            <TableCell align="center" style={{ position: "sticky", left: "0", zIndex: '99' }}>{index + 1}</TableCell>
-            <TableCell align="center" style={{ position: "sticky", left: "50px", zIndex: '99' }}>{subject.subjectId}</TableCell>
-            <TableCell align="left" style={{ position: "sticky", left: "150px", zIndex: '99' }}>{subject.subjectName}</TableCell>
-            <TableCell align="center">{subject.creditHour}</TableCell>
-            <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
+            <TableCell
+                align="center"
+                style={{ position: "sticky", left: "0", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+            >
+                {index + 1}
+            </TableCell>
+            <TableCell
+                align="center"
+                style={{ position: "sticky", left: "50px", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+            >
+                {subject.subjectId}
+            </TableCell>
+            <TableCell
+                align="left"
+                style={{ position: "sticky", left: "150px", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+            >
+                {subject.subjectName}
+            </TableCell>
+            <TableCell
+                align="center"
+                style={{ color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+            >
+                {subject.creditHour}
+            </TableCell>
+            <TableCell
+                align="center"
+                style={{ color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+            >
+                {subject.subjectBeforeId || '-'}
+            </TableCell>
             {semesterCells}
         </TableRow>
     );
@@ -382,6 +419,7 @@ const FrameComponentRow = React.memo(({
     repeatHK,
     renderSubjectRow
 }) => {
+    const { theme } = useContext(ThemeContext)
     const paddingLeft = 50 + (level * 50);
 
     return (
@@ -391,19 +429,37 @@ const FrameComponentRow = React.memo(({
                     className={cx('title')}
                     align="left"
                     colSpan={5}
-                    style={{ paddingLeft: `${paddingLeft}px`, position: "sticky", left: "0", zIndex: '50' }}
+                    style={{
+                        paddingLeft: `${paddingLeft}px`,
+                        position: "sticky",
+                        left: "0",
+                        zIndex: '50',
+                        background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
+                        color: 'var(--color-text-base)'
+                    }}
+
                 >
                     {frameComponent.frameComponentName}
                     {frameComponent.creditHour ? ` (${frameComponent.creditHour})` : ''}
                     {frameComponent.majorName ? ` - ${frameComponent.majorName}` : ''}
                 </TableCell>
-                <TableCell align="center" colSpan={repeatHK}></TableCell>
-            </TableRow>
-            {frameComponent.subjectInfo?.map((subject, index) => {
-                subject.studyFrameComponentId = frameComponent.frameComponentId;
-                return renderSubjectRow(subject, index)
+                <TableCell
+                    align="center"
+                    colSpan={repeatHK}
+                    style={{
+                        background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
+                        color: 'var(--color-text-base)'
+                    }}
+                >
+                </TableCell>
+            </TableRow >
+            {
+                frameComponent.subjectInfo?.map((subject, index) => {
+                    subject.studyFrameComponentId = frameComponent.frameComponentId;
+                    return renderSubjectRow(subject, index)
+                }
+                )
             }
-            )}
         </>
     );
 });
@@ -420,7 +476,7 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
         getSemesterIndex,
         handleSelectSubject
     } = useTableLogic(userId, frameId, status, registeredSubjects, setRegisteredSubjects);
-
+    const { theme } = useContext(ThemeContext)
     const columns = useMemo(() => [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
@@ -474,7 +530,7 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
                                     position: 'sticky',
                                     left: '0',
                                     zIndex: "999",
-                                    background: "#ffffff"
+                                    background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff'
                                 }}>
                             </TableCell>
                             <TableCell
@@ -486,7 +542,7 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
                                     position: 'sticky',
                                     left: '0',
                                     zIndex: "999",
-                                    background: "#ffffff"
+                                    background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff'
                                 }}
                             >
                                 Học kỳ thực hiện
@@ -505,8 +561,8 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
                                             minWidth: column.minWidth,
                                             position: 'sticky',
                                             left: isSticky ? `${calculateLeft(columns, index)}px` : '0',
-                                            zIndex: isSticky ? "999" : '99',
-                                            background: "#ffffff"
+                                            zIndex: isSticky ? "999" : '998',
+                                            background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff'
                                         }}
                                     >
                                         {column.label}

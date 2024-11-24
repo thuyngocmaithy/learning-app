@@ -1,7 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './SearchForm.module.scss';
-import { Button, Col, Form, Row, Space, theme } from 'antd';
+import { Col, Form, Row, Space, theme } from 'antd';
 import { useEffect } from 'react';
+import Button from '../Button';
+import { ClearOutlined, SearchOutlined } from '@ant-design/icons';
 
 const cx = classNames.bind(styles);
 
@@ -33,7 +35,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
     }, [form]);
 
     return (
-        <Form form={form} className={cx("advanced_search")} style={formStyle} onFinish={onSearch}>
+        <Form form={form} className={cx("advanced_search")} style={formStyle}>
             <Row gutter={[16, 16]} className={cx('row-filter')}>
                 {getFields && getFields.map((field, index) => (
                     <Col xs={24} sm={12} md={8} lg={6} key={index}>
@@ -49,14 +51,22 @@ function SearchForm({ getFields, onSearch, onReset }) {
             >
                 <Space size="small">
                     <Button
+                        small
+                        outline
                         onClick={() => {
                             form.resetFields();
                             if (onReset) onReset();
                         }}
+                        leftIcon={<ClearOutlined />}
                     >
                         Clear
                     </Button>
-                    <Button type="primary" htmlType="submit">
+                    <Button
+                        primary
+                        small
+                        onClick={onSearch}
+                        leftIcon={<SearchOutlined />}
+                    >
                         Tìm kiếm
                     </Button>
                 </Space>

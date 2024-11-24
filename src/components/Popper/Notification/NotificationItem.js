@@ -31,14 +31,13 @@ function NotificationItem({ data }) {
     return (
         <Link to={data.url} onClick={handleRead}>
             <div className={cx('wrapper-item', !data.isRead ? 'notRead' : 'isRead')}>
-
                 <div className={cx('container-info')}>
                     <h4>{data.content}</h4>
                     <p>{format(data.createDate, 'dd/MM/yyyy HH:mm:ss')}</p>
                 </div>
                 <div className={cx('container-data.type')}>
                     {data.type === 'success' ? (
-                        <CheckCircleOutlined style={{ color: '#52c41a', background: '#f6ffed', borderRadius: '50%' }} />
+                        <CheckCircleOutlined style={{ color: '#52c41a', background: 'var(--color-bg-title);', borderRadius: '50%' }} />
                     ) : data.type === 'warning' ? (
                         <ExclamationCircleOutlined
                             style={{ color: '#faad14', background: '#fffbe6', borderRadius: '50%' }}

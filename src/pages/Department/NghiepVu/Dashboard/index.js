@@ -12,19 +12,21 @@ import { getWhere as getSRWhere } from '../../../../services/scientificResearchS
 import { getWhere as getThesisWhere } from '../../../../services/thesisService';
 import { getWhereUser } from '../../../../services/userService';
 import { getAllSRGroup } from '../../../../services/scientificResearchGroupService';
+import { ThemeContext } from '../../../../context/ThemeContext';
 
 const cx = classNames.bind(styles);
 
 function Home() {
+    const { theme } = useContext(ThemeContext);
     const responsive = [
         {
             breakpoint: 1500, // Định nghĩa kích thước cho màn hình lớn
             options: {
                 chart: {
-                    width: '90%', // Chiều rộng của biểu đồ cho màn hình lớn
+                    width: '100%', // Chiều rộng của biểu đồ cho màn hình lớn
                 },
                 title: {
-                    fontSize: '20px', // Kích thước font tiêu đề khi màn hình lớn
+                    fontSize: '25px', // Kích thước font tiêu đề khi màn hình lớn
                 },
             },
         },
@@ -269,8 +271,18 @@ function Home() {
                         title: {
                             text: 'Thống kê điểm của sinh viên trong hệ thống',
                             align: 'center',
+                            style: { color: 'var(--color-text-base)' }
                         },
                         labels: ['Loại xuất sắc', 'Loại giỏi', 'Loại khá', 'Loại trung bình '],
+                        legend: {
+                            labels: {
+                                colors: ['var(--color-text-base)', 'var(--color-text-base)', 'var(--color-text-base)', 'var(--color-text-base)'],
+                                style: {
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                },
+                            },
+                        },
                         responsive: [
                             {
                                 breakpoint: 480,
@@ -305,7 +317,7 @@ function Home() {
                             margin: 20,
                             style: {
                                 fontWeight: 'bold',
-                                color: '#333'
+                                color: theme === 'dark' ? '#fff' : '#000000',
                             }
                         },
                         chart: {
@@ -323,7 +335,15 @@ function Home() {
                             enabled: true,
                         },
                         xaxis: {
-                            categories: chartSRGData?.categories
+                            categories: chartSRGData?.categories,
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
+                        },
+                        yaxis: {
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
                         },
                         responsive: responsive,
                     }}
@@ -340,7 +360,7 @@ function Home() {
                             margin: 20,
                             style: {
                                 fontWeight: 'bold',
-                                color: '#333'
+                                color: 'var(--color-text-base)'
                             }
                         },
                         chart: {
@@ -359,6 +379,14 @@ function Home() {
                         },
                         xaxis: {
                             categories: srData.categories,
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
+                        },
+                        yaxis: {
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
                         },
                         responsive: responsive,
                     }}
@@ -380,7 +408,7 @@ function Home() {
                             margin: 20,
                             style: {
                                 fontWeight: 'bold',
-                                color: '#333'
+                                color: 'var(--color-text-base)'
                             }
                         },
                         chart: {
@@ -398,7 +426,15 @@ function Home() {
                             enabled: true,
                         },
                         xaxis: {
-                            categories: chartThesisGroupData?.categories
+                            categories: chartThesisGroupData?.categories,
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
+                        },
+                        yaxis: {
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
                         },
                         responsive: responsive,
                     }}
@@ -415,7 +451,7 @@ function Home() {
                             margin: 20,
                             style: {
                                 fontWeight: 'bold',
-                                color: '#333'
+                                color: 'var(--color-text-base)'
                             }
                         },
                         chart: {
@@ -433,7 +469,15 @@ function Home() {
                             enabled: true
                         },
                         xaxis: {
-                            categories: thesisData.categories
+                            categories: thesisData.categories,
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
+                        },
+                        yaxis: {
+                            labels: {
+                                style: { colors: 'var(--color-text-base)' }
+                            },
                         },
                         responsive: responsive,
                     }}

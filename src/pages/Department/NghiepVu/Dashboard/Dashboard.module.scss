@@ -1,5 +1,6 @@
 h3 {
     text-align: center;
+    color: currentColor !important;
 }
 
 .info {
@@ -52,14 +53,18 @@ h3 {
 
 .container-title {
     margin: 25px 0;
-    background-color: #f6ffed;
+    background-color: var(--color-bg-title);
     padding: 20px 50px;
-    color: #389e0d;
+    color: var(--color-text-title);
     letter-spacing: 0.5px;
     font-weight: 500;
     font-size: 21px;
     text-align: center;
     box-shadow: var(--box-shadow-3);
+
+    h3 {
+        color: currentColor !important;
+    }
 }
 
 @media only screen and (max-width: 768px) {

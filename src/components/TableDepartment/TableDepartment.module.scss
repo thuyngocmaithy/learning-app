@@ -7,6 +7,12 @@
 .container-table {
     box-shadow: var(--box-shadow-1);
     border-radius: 17px;
+
+    td,
+    th {
+        color: var(--color-text-base);
+        background-color: var(--color-bg-popup);
+    }
 }
 
 .radio-period {

@@ -16,7 +16,7 @@ d.container-detail {
 
 .container-description {
     margin: 30px 10px;
-    box-shadow: var(--box-shadow-1);
+    box-shadow: var(--box-shadow-3);
     border-radius: 17px;
     padding: 20px;
     font-size: 15px;
@@ -27,11 +27,6 @@ d.container-detail {
         color: var(--primary);
         margin-bottom: 10px;
     }
-}
-
-.btn-cancel {
-    color: red;
-    z-index: 999;
 }
 
 .btn-approve {
