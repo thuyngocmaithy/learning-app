@@ -85,8 +85,8 @@ function TrangThai() {
             value: 'Tiến độ đề tài NCKH'
         },
         {
-            label: 'Tiến độ khóa luận',
-            value: 'Tiến độ khóa luận'
+            label: 'Tiến độ đề tài khóa luận',
+            value: 'Tiến độ đề tài khóa luận'
         },
         {
             label: 'Tiến độ nhóm đề tài NCKH',

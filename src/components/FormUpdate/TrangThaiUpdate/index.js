@@ -111,7 +111,7 @@ export const TrangThaiUpdate = memo(function TrangThaiUpdate({ title, isUpdate, 
                         <Select.Option value="Tiến độ nhóm đề tài NCKH">Tiến độ nhóm đề tài NCKH</Select.Option>
                         <Select.Option value="Tiến độ nhóm đề tài khóa luận">Tiến độ nhóm đề tài khóa luận</Select.Option>
                         <Select.Option value="Tiến độ đề tài NCKH">Tiến độ đề tài NCKH</Select.Option>
-                        <Select.Option value="Tiến độ khóa luận">Tiến độ khóa luận</Select.Option>
+                        <Select.Option value="Tiến độ đề tài khóa luận">Tiến độ đề tài khóa luận</Select.Option>
                     </Select>
                 </FormItem>
                 <FormItem
