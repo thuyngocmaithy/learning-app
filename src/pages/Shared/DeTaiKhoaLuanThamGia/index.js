@@ -16,6 +16,7 @@ import Toolbar from '../../../components/Core/Toolbar';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getWhere } from '../../../services/attachService';
 import { ProjectIcon } from '../../../assets/icons';
+import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
@@ -28,7 +29,6 @@ function DeTaiKhoaLuanThamGia() {
     const isAll = queryParams.get('all');
     const [isLoading, setIsLoading] = useState(true);
     const [thesis, setThesis] = useState(null);
-    const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     const [dataFollower, setDataFollower] = useState([])
     const [dataAttach, setDataAttach] = useState([])
     const fileInputRef = useRef(null);
@@ -84,11 +84,6 @@ function DeTaiKhoaLuanThamGia() {
         }
     }, [tabActive])
 
-    useEffect(() => {
-        const height = document.getElementsByClassName('main-content')[0].clientHeight;
-        setHeightContainerLoading(height);
-    }, []);
-
     const getInfothesis = async () => {
         try {
             if (ThesisIdFromUrl) {
@@ -111,9 +106,9 @@ function DeTaiKhoaLuanThamGia() {
                 if (response.status === 200) {
                     const dataAttach = response.data.data.map((data, index) => {
                         return {
-                            key: index + 1,
+                            id: data.id,
                             filename: data.filename,
-                            createDate: data.createDate,
+                            createDate: dayjs(data.createDate).format('DD/MM/YYYY HH:mm'),
                             createUser: data.createUser.fullname
                         }
                     })
@@ -136,7 +131,7 @@ function DeTaiKhoaLuanThamGia() {
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu: " + error);
             } finally {
-                setIsLoading(false); // Đặt trạng thái hoàn tất sau khi cả hai function hoàn thành
+                setIsLoading(false);
             }
         };
 
@@ -151,17 +146,16 @@ function DeTaiKhoaLuanThamGia() {
     const handleUpload = async (files) => {
 
         if (files.length === 0) {
-            message.warning('Please select a file to upload.'); // Kiểm tra xem có file đã chọn hay không
+            message.warning('Vui lòng chọn file đính kèm'); // Kiểm tra xem có file đã chọn hay không
             return;
         }
 
         try {
-            const response = await uploadFile(files, userId, ThesisIdFromUrl); // Gọi hàm upload file
-            console.log('Upload successful:', response);
-            message.success('Tệp đã được tải lên thành công');
+            await uploadFile(files, userId, ThesisIdFromUrl); // Gọi hàm upload file
+            message.success('File đã được tải lên thành công');
         } catch (error) {
             console.error('Upload failed:', error);
-            message.error('Tải tệp lên thất bại.');
+            message.error('Tải file lên thất bại.');
         } finally {
             getAttach();
         }
@@ -205,8 +199,6 @@ function DeTaiKhoaLuanThamGia() {
             key: 'filename',
             render: (_, { filename }) => (
                 <div className='container-link-file' onClick={() => handleDownload(filename)}>
-                    {console.log(loadingFiles[filename])}
-
                     <span className={cx('link-file')} key={filename} style={{ textDecoration: 'underline' }}>
                         {filename}
                     </span>
@@ -242,7 +234,7 @@ function DeTaiKhoaLuanThamGia() {
         {
             id: 3,
             title: 'Đính kèm',
-            children: <Attach columns={columns} data={dataAttach} />,
+            dren: <Attach columns={columns} data={dataAttach} />,
         },
         {
             id: 4,
@@ -275,7 +267,7 @@ function DeTaiKhoaLuanThamGia() {
 
 
     return isLoading ? (
-        <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
+        <div className={cx('container-loading')}>
             <Spin size="large" />
         </div>
     ) : (

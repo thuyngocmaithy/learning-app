@@ -85,7 +85,7 @@ function Sidebar() {
 
     return (
         <Sider
-            breakpoint="lg"
+            breakpoint="md"
             className={cx("wrapper")}
             collapsible
             collapsed={collapsed}

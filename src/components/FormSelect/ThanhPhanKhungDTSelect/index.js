@@ -1,8 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { useForm } from 'antd/es/form/Form';
 import FormSelect from '../../Core/FormSelect';
-import { createCycle, updateCycle } from '../../../services/cycleService';
-import { Form, message } from 'antd';
 import TableCustomAnt from '../../Core/TableCustomAnt';
 import { getAllStudyFrameComponent } from '../../../services/studyFrameCompService';
 
@@ -19,20 +16,6 @@ const ThanhPhanKhungDTFormSelect = memo(function ThanhPhanKhungDTFormSelect({
     const [dataFrameComponent, setDataFrameComponent] = useState([])
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-
-    // useEffect(() => {
-    //     if (form && showModal) {
-    //         if (isFormSelect) {
-    //             form.setFieldsValue({
-    //                 cycleName: showModal.cycleName,
-    //                 startYear: showModal.startYear,
-    //                 endYear: showModal.endYear
-    //             });
-    //         } else {
-    //             form.resetFields();
-    //         }
-    //     }
-    // }, [showModal, isFormSelect, form]);
 
     const handleCloseModal = () => {
         if (showModal !== false) {

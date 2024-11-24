@@ -14,6 +14,7 @@
             align-items: center;
             max-width: 900px;
             line-height: 2;
+            text-align: left;
         }
 
         .icon {
@@ -25,6 +26,12 @@
 
     .wrapper-toolbar {
         display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        >div {
+            margin-bottom: 10px;
+        }
     }
 
 }
@@ -59,5 +66,11 @@
     .btnDetail {
         margin-bottom: 5px;
 
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .container-header {
+        flex-direction: column;
     }
 }

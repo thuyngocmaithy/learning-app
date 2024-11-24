@@ -34,7 +34,7 @@ export const ChuyenNganhDetail = memo(function ChuyenNganhDetail({
                 <FormItem label={'Tên chuyên ngành'} name="majorName">
                     <p>{showModal?.majorName || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên khoa/ngành'} name="facultyName">
+                <FormItem label={'Tên ngành'} name="facultyName">
                     <p>{showModal?.facultyName || ''}</p>
                 </FormItem>
             </Form>

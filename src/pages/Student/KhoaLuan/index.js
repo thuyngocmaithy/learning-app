@@ -22,7 +22,7 @@ function KhoaLuan() {
                     id: thesis.id,
                     name: thesis.title,
                     supervisor: thesis.supervisor.fullname,
-                    khoa: thesis.faculty.facultyName,
+                    ngành: thesis.faculty.facultyName,
                 }));
                 setList(thesis);
                 setIsLoading(false);
@@ -61,7 +61,7 @@ function KhoaLuan() {
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.name}</div>}
-                                    description={'Khoa: ' + item.khoa}
+                                    description={'Ngành: ' + item.ngành}
                                 />
                                 <div className={cx('container-count-register')}>
                                     <p style={{ marginRight: '10px' }}>Giảng viên hướng dẫn: </p>

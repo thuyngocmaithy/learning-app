@@ -122,12 +122,12 @@ function DeTaiKhoaLuan() {
         {
             title: 'Trạng thái',
             key: 'status',
-            dataIndex: ['status', 'statusName'],
+            dataIndex: ['status'],
             align: 'center',
             width: '150px',
-            render: (statusName, record) => (
+            render: (_, record) => (
                 <Tag color={record.status.color} className='status-table'>
-                    {statusName.toUpperCase()}
+                    {record.status.statusName.toUpperCase()}
                 </Tag>
             ),
         },
@@ -156,7 +156,7 @@ function DeTaiKhoaLuan() {
                         Danh sách đăng ký: {numberOfRegister.length}
                     </ButtonCustom >
                 ) : (
-                    <p style={{ textAlign: 'center' }}>0</p>
+                    '0'
                 ),
         },
         {
@@ -296,69 +296,54 @@ function DeTaiKhoaLuan() {
     }, [statusType]);
 
     // Tạo field cho bộ lọc
-    const getFilterFields = () => {
-        return (
-            <>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'thesisId'}
-                        label={'Mã đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'thesisName'}
-                        label={'Tên đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'instructorName'}
-                        label={'Chủ nhiệm đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'status'}
-                        label={'Trạng thái'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={statusOptions}
-                            labelInValue
-                        />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'isDisable'}
-                        label={'Hiển thị'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            options={levelDisable}
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                        />
-                    </FormItem>
-                </Col>
-
-            </>
-        )
-    };
+    const filterFields = [
+        <FormItem
+            name={'thesisId'}
+            label={'Mã đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'thesisName'}
+            label={'Tên đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'instructorName'}
+            label={'Chủ nhiệm đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'status'}
+            label={'Trạng thái'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={statusOptions}
+                labelInValue
+            />
+        </FormItem>,
+        <FormItem
+            name={'isDisable'}
+            label={'Hiển thị'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                options={levelDisable}
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+            />
+        </FormItem>
+    ];
 
     const onSearch = async (values) => {
         setIsLoading(true)
@@ -399,7 +384,7 @@ function DeTaiKhoaLuan() {
                 <>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
-                            getFields={getFilterFields}
+                            getFields={filterFields}
                             onSearch={onSearch}
                             onReset={fetchData}
                         />

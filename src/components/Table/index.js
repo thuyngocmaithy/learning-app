@@ -142,6 +142,7 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
 
 
     const fetchData = (async () => {
+        setIsLoading(true);
         try {
             const userData = await getUserById(userId);
             const [frameComponentsRes, scoresRes] = await Promise.all([
@@ -361,11 +362,11 @@ const SubjectRow = React.memo(({
                     ? 'var(--color-subject-correct)'
                     : disableCheckboxIndexes.redRow
                         ? 'var(--color-subject-error)'
-                        : 'transparent'
+                        : '#ffffff'
             }}>
-            <TableCell align="center">{index + 1}</TableCell>
-            <TableCell align="center">{subject.subjectId}</TableCell>
-            <TableCell align="left">{subject.subjectName}</TableCell>
+            <TableCell align="center" style={{ position: "sticky", left: "0", zIndex: '99' }}>{index + 1}</TableCell>
+            <TableCell align="center" style={{ position: "sticky", left: "50px", zIndex: '99' }}>{subject.subjectId}</TableCell>
+            <TableCell align="left" style={{ position: "sticky", left: "150px", zIndex: '99' }}>{subject.subjectName}</TableCell>
             <TableCell align="center">{subject.creditHour}</TableCell>
             <TableCell align="center">{subject.subjectBeforeId || '-'}</TableCell>
             {semesterCells}
@@ -390,7 +391,7 @@ const FrameComponentRow = React.memo(({
                     className={cx('title')}
                     align="left"
                     colSpan={5}
-                    style={{ paddingLeft: `${paddingLeft}px` }}
+                    style={{ paddingLeft: `${paddingLeft}px`, position: "sticky", left: "0", zIndex: '50' }}
                 >
                     {frameComponent.frameComponentName}
                     {frameComponent.creditHour ? ` (${frameComponent.creditHour})` : ''}
@@ -449,6 +450,10 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
         />
     ), [repeatHK, registeredSubjects, scores, currentSemester, courseOpen, handleSelectSubject, getSemesterIndex]);
 
+    const calculateLeft = (columns, currentIndex) => {
+        return columns.slice(0, currentIndex).reduce((total, column) => total + (column.minWidth || 0), 0);
+    };
+
     if (isLoading) {
         return (
             <div className={cx('container-loading')} style={{ height: 880 }}>
@@ -460,29 +465,54 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
     return (
         <Paper className={cx('container-table')}>
             <TableContainer sx={{ maxHeight: 680 }}>
-                <Table stickyHeader>
+                <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="center" colSpan={5}></TableCell>
+                            <TableCell align="center" colSpan={5}
+                                style={{
+                                    top: 0,
+                                    position: 'sticky',
+                                    left: '0',
+                                    zIndex: "999",
+                                    background: "#ffffff"
+                                }}>
+                            </TableCell>
                             <TableCell
                                 className={cx('title')}
                                 align="center"
                                 colSpan={repeatHK}
+                                style={{
+                                    top: 0,
+                                    position: 'sticky',
+                                    left: '0',
+                                    zIndex: "999",
+                                    background: "#ffffff"
+                                }}
                             >
                                 Học kỳ thực hiện
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={`${column.id}-title`}
-                                    className={cx('title')}
-                                    align={column.align}
-                                    style={{ top: 48, minWidth: column.minWidth }}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
+                            {columns.map((column, index) => {
+                                const isSticky = index < 3;
+                                return (
+                                    <TableCell
+                                        key={`${column.id}-title`}
+                                        className={cx('title')}
+                                        align={column.align}
+                                        style={{
+                                            top: 36,
+                                            minWidth: column.minWidth,
+                                            position: 'sticky',
+                                            left: isSticky ? `${calculateLeft(columns, index)}px` : '0',
+                                            zIndex: isSticky ? "999" : '99',
+                                            background: "#ffffff"
+                                        }}
+                                    >
+                                        {column.label}
+                                    </TableCell>
+                                )
+                            })}
                         </TableRow>
                     </TableHead>
                     <TableBody>

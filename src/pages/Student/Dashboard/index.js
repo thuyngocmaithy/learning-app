@@ -7,7 +7,6 @@ import Card from '../../../components/Card';
 import styles from './Dashboard.module.scss';
 import { HomeActiveIcon } from '../../../assets/icons';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { GradeScoreContext } from '../../../context/GradeScoreContext';
 import { getFacultyById } from '../../../services/facultyService';
 import { getScore, getUserById } from '../../../services/userService';
 import { Spin } from 'antd';
@@ -65,6 +64,37 @@ function Home() {
                         },
                     },
                 },
+                responsive: [
+                    {
+                        breakpoint: 768,
+                        options: {
+                            plotOptions: {
+                                bar: {
+                                    horizontal: true,
+                                },
+                            },
+                            chart: {
+                                height: 300,
+                            },
+                            xaxis: {
+                                labels: {
+                                    show: false,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                height: 250,
+                            },
+                            legend: {
+                                position: 'bottom',
+                            },
+                        },
+                    },
+                ],
             },
         })
     }, []);

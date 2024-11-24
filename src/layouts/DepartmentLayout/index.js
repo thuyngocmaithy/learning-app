@@ -10,16 +10,29 @@ import { Content } from 'antd/es/layout/layout';
 const cx = classNames.bind(styles);
 
 function DepartmentLayout({ children }) {
+    const siderStyle = {
+        overflow: 'auto',
+        height: '100vh',
+        position: 'fixed',
+        insetInlineStart: 0,
+        top: 0,
+        bottom: 0,
+        scrollbarWidth: 'thin',
+        scrollbarGutter: 'stable',
+    };
+
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
+
     return (
         <Layout
+            hasSider
             style={{
                 minHeight: '100vh',
             }}
         >
-            <Sidebar department={true} />
+            <Sidebar />
             <Layout>
                 <Header
                     style={{

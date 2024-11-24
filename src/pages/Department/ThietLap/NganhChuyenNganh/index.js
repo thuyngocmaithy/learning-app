@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Tabs, message, Divider, Input, Col, Select } from 'antd';
 import classNames from 'classnames/bind';
-import styles from './KhoaChuyenNganh.module.scss'
+import styles from './NganhChuyenNganh.module.scss'
 import { ProjectIcon } from '../../../../assets/icons';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -10,9 +10,9 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import { getAllFaculty, deleteFacultyById, getWhereFaculty, importFaculty } from '../../../../services/facultyService';
 import { getAll as getAllMajors, deleteMajorById, getWhere, importMajor } from '../../../../services/majorService';
-import { KhoaUpdate } from '../../../../components/FormUpdate/KhoaUpdate';
+import { NganhUpdate } from '../../../../components/FormUpdate/NganhUpdate';
 import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganhUpdate';
-import { KhoaDetail } from '../../../../components/FormDetail/KhoaDetail';
+import { NganhDetail } from '../../../../components/FormDetail/NganhDetail';
 import { ChuyenNganhDetail } from '../../../../components/FormDetail/ChuyenNganhDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
@@ -21,18 +21,18 @@ import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
-function KhoaChuyenNganh() {
+function NganhChuyenNganh() {
     // Shared states
     const [activeTab, setActiveTab] = useState(1);
 
-    // Khoa states
-    const [khoaData, setKhoaData] = useState([]);
-    const [khoaIsLoading, setKhoaIsLoading] = useState(true);
-    const [khoaSelectedKeys, setKhoaSelectedKeys] = useState([]);
-    const [khoaShowModal, setKhoaShowModal] = useState(false);
-    const [khoaIsUpdate, setKhoaIsUpdate] = useState(false);
-    const [khoaViewOnly, setKhoaViewOnly] = useState(false);
-    const [showModalDetailKhoa, setShowModalDetailKhoa] = useState(false);
+    // Ngành states
+    const [ngànhData, setNgànhData] = useState([]);
+    const [ngànhIsLoading, setNgànhIsLoading] = useState(true);
+    const [ngànhSelectedKeys, setNgànhSelectedKeys] = useState([]);
+    const [ngànhShowModal, setNgànhShowModal] = useState(false);
+    const [ngànhIsUpdate, setNgànhIsUpdate] = useState(false);
+    const [ngànhViewOnly, setNgànhViewOnly] = useState(false);
+    const [showModalDetailNgành, setShowModalDetailNgành] = useState(false);
 
 
     // ChuyenNganh states
@@ -51,13 +51,13 @@ function KhoaChuyenNganh() {
 
 
     // Import 
-    const [showModalImportKhoa, setShowModalImportKhoa] = useState(false);
+    const [showModalImportNgành, setShowModalImportNgành] = useState(false);
     const [showModalImportChuyenNganh, setShowModalImportChuyenNganh] = useState(false);
 
 
 
     // Fetch Functions
-    const fetchKhoaData = async () => {
+    const fetchNgànhData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
@@ -68,12 +68,12 @@ function KhoaChuyenNganh() {
                     facultyName: faculty.facultyName,
                     creditHourTotal: faculty.creditHourTotal
                 })) : [];
-            setKhoaData(listFaculty);
+            setNgànhData(listFaculty);
             setFacultyOptions(listFaculty);
-            setKhoaIsLoading(false);
+            setNgànhIsLoading(false);
         } catch (error) {
-            console.error('Error fetching khoa data:', error);
-            setKhoaIsLoading(false);
+            console.error('Error fetching ngành data:', error);
+            setNgànhIsLoading(false);
         }
     };
 
@@ -97,19 +97,19 @@ function KhoaChuyenNganh() {
     };
 
     useEffect(() => {
-        fetchKhoaData();
+        fetchNgànhData();
         fetchMajorData();
     }, []);
 
     // Delete handlers
-    const handleKhoaDelete = async () => {
+    const handleNgànhDelete = async () => {
         try {
-            await deleteFacultyById({ ids: khoaSelectedKeys.join(',') });
-            fetchKhoaData();
-            setKhoaSelectedKeys([]);
-            message.success('Xoá khoa thành công');
+            await deleteFacultyById({ ids: ngànhSelectedKeys.join(',') });
+            fetchNgànhData();
+            setNgànhSelectedKeys([]);
+            message.success('Xoá ngành thành công');
         } catch (error) {
-            message.error('Xoá khoa thất bại');
+            message.error('Xoá ngành thất bại');
         }
     };
 
@@ -141,15 +141,15 @@ function KhoaChuyenNganh() {
             const response = await getWhereFaculty(searchParams);
 
             if (response.status === 200) {
-                setKhoaData(response.data.data);
+                setNgànhData(response.data.data);
             } else if (response.status === 204) {
-                setKhoaData([]);
+                setNgànhData([]);
                 message.info('Không tìm thấy kết quả phù hợp');
             }
         } catch (error) {
             console.error('[onSearch - error]: ', error);
             message.error('Có lỗi xảy ra khi tìm kiếm');
-            setKhoaData([]);
+            setNgànhData([]);
         }
     };
 
@@ -188,72 +188,56 @@ function KhoaChuyenNganh() {
         }
     };
 
-    const getFilterFieldsFaculty = () => {
-        return (
-            <>
-                <Col className="gutter-row" span={8}>
-                    <FormItem name={'facultyId'}
-                        label={'Mã Khoa-Ngành'}>
-                        <Input />
-                    </FormItem>
-                </Col>
+    const filterFieldsFaculty = [
+        <FormItem name={'facultyId'}
+            label={'Mã Ngành'}>
+            <Input />
+        </FormItem>,
+        <FormItem name={'facultyName'}
+            label={'Tên Ngành'}>
+            <Input />
+        </FormItem>
+    ];
 
-                <Col className="gutter-row" span={8}>
-                    <FormItem name={'facultyName'}
-                        label={'Tên Khoa-Ngành'}>
-                        <Input />
-                    </FormItem>
-                </Col>
-            </>
-        );
-    };
+    const filterFieldsMajor = [
+        <FormItem name={'majorId'}
+            label={'Mã chuyên ngành'}>
+            <Input />
+        </FormItem>,
 
-    const getFilterFieldsMajor = () => {
-        return (
-            <>
-                <Col className="gutter-row" span={7}>
-                    <FormItem name={'majorId'}
-                        label={'Mã chuyên ngành'}>
-                        <Input />
-                    </FormItem>
-                </Col>
+        <FormItem name={'majorName'}
+            label={'Tên chuyên ngành'}>
+            <Input />
+        </FormItem>,
 
-                <Col className="gutter-row" span={8}>
-                    <FormItem name={'majorName'}
-                        label={'Tên chuyên ngành'}>
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={8}>
-                    <FormItem
-                        name={'faculty'}
-                        label={'Khoa'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={facultyOptions}
-                            labelInValue
-                        />
-                    </FormItem>
-                </Col>
-            </>
-        );
-    };
+
+        <FormItem
+            name={'faculty'}
+            label={'Ngành'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={facultyOptions}
+                labelInValue
+            />
+        </FormItem>,
+    ]
+
 
     // Column definitions
-    const khoaColumns = [
+    const ngànhColumns = [
         {
-            title: 'Mã Khoa-Ngành',
+            title: 'Mã Ngành',
             dataIndex: 'facultyId',
             key: 'facultyId',
         },
         {
-            title: 'Tên khoa-ngành',
+            title: 'Tên ngành-ngành',
             dataIndex: 'facultyName',
             key: 'facultyName',
         },
@@ -275,7 +259,7 @@ function KhoaChuyenNganh() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModalDetailKhoa(record);
+                            setShowModalDetailNgành(record);
                         }}>
                         Chi tiết
                     </ButtonCustom>
@@ -285,9 +269,9 @@ function KhoaChuyenNganh() {
                         primary
                         verysmall
                         onClick={() => {
-                            setKhoaShowModal(record);
-                            setKhoaIsUpdate(true);
-                            setKhoaViewOnly(false);
+                            setNgànhShowModal(record);
+                            setNgànhIsUpdate(true);
+                            setNgànhViewOnly(false);
                         }}>
                         Sửa
                     </ButtonCustom>
@@ -308,7 +292,7 @@ function KhoaChuyenNganh() {
             key: 'majorName',
         },
         {
-            title: 'Tên Khoa/Ngành',
+            title: 'Tên Ngành',
             dataIndex: 'facultyName',
             key: 'facultyName',
         },
@@ -347,16 +331,16 @@ function KhoaChuyenNganh() {
     ];
 
     // Update components
-    const KhoaUpdateMemo = useMemo(() => (
-        <KhoaUpdate
-            title={'khoa'}
-            isUpdate={khoaIsUpdate}
-            showModal={khoaShowModal}
-            setShowModal={setKhoaShowModal}
-            reLoad={fetchKhoaData}
-            viewOnly={khoaViewOnly}
+    const NganhUpdateMemo = useMemo(() => (
+        <NganhUpdate
+            title={'ngành'}
+            isUpdate={ngànhIsUpdate}
+            showModal={ngànhShowModal}
+            setShowModal={setNgànhShowModal}
+            reLoad={fetchNgànhData}
+            viewOnly={ngànhViewOnly}
         />
-    ), [khoaShowModal, khoaIsUpdate, khoaViewOnly]);
+    ), [ngànhShowModal, ngànhIsUpdate, ngànhViewOnly]);
 
     const ChuyenNganhUpdateMemo = useMemo(() => (
         <ChuyenNganhUpdate
@@ -371,13 +355,13 @@ function KhoaChuyenNganh() {
 
 
     // Detail components
-    const KhoaDetailMemoized = useMemo(() => (
-        <KhoaDetail
-            title={'khoa'}
-            showModal={showModalDetailKhoa}
-            setShowModal={setShowModalDetailKhoa}
+    const NganhDetailMemoized = useMemo(() => (
+        <NganhDetail
+            title={'ngành'}
+            showModal={showModalDetailNgành}
+            setShowModal={setShowModalDetailNgành}
         />
-    ), [showModalDetailKhoa]);
+    ), [showModalDetailNgành]);
 
     const ChuyenNganhDetailMemoized = useMemo(() => (
         <ChuyenNganhDetail
@@ -390,24 +374,24 @@ function KhoaChuyenNganh() {
     const ITEM_TABS = [
         {
             id: 1,
-            title: 'Khoa',
+            title: 'Ngành',
             children: (
                 <div>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
-                            getFields={getFilterFieldsFaculty}
+                            getFields={filterFieldsFaculty}
                             onSearch={onSearchFaculty}
-                            onReset={fetchKhoaData}
+                            onReset={fetchNgànhData}
                         />
                         <Divider />
                     </div>
                     <TableCustomAnt
                         height={'600px'}
-                        columns={khoaColumns}
-                        data={khoaData}
-                        selectedRowKeys={khoaSelectedKeys}
-                        setSelectedRowKeys={setKhoaSelectedKeys}
-                        loading={khoaIsLoading}
+                        columns={ngànhColumns}
+                        data={ngànhData}
+                        selectedRowKeys={ngànhSelectedKeys}
+                        setSelectedRowKeys={setNgànhSelectedKeys}
+                        loading={ngànhIsLoading}
                         keyIdChange="facultyId"
                     />
                 </div>
@@ -420,7 +404,7 @@ function KhoaChuyenNganh() {
                 <div>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
-                            getFields={getFilterFieldsMajor}
+                            getFields={filterFieldsMajor}
                             onSearch={onSearchMajor}
                             onReset={fetchMajorData}
                         />
@@ -447,7 +431,7 @@ function KhoaChuyenNganh() {
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
-                    <h3 className={cx('title')}>Quản lý Khoa - Chuyên ngành</h3>
+                    <h3 className={cx('title')}>Quản lý Ngành - Chuyên ngành</h3>
                 </div>
 
                 <div className={cx('wrapper-toolbar')}>
@@ -462,16 +446,16 @@ function KhoaChuyenNganh() {
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {
-                                    setKhoaShowModal(true);
-                                    setKhoaIsUpdate(false);
-                                    setKhoaViewOnly(false);
+                                    setNgànhShowModal(true);
+                                    setNgànhIsUpdate(false);
+                                    setNgànhViewOnly(false);
                                 }}
                             />
                             <Toolbar
                                 type={'Xóa'}
-                                onClick={() => deleteConfirm('khoa', handleKhoaDelete)}
+                                onClick={() => deleteConfirm('ngành', handleNgànhDelete)}
                             />
-                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportKhoa(true)} />
+                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportNgành(true)} />
                             <Toolbar type={'Xuất file Excel'} />
                         </>
                     ) : (
@@ -518,10 +502,10 @@ function KhoaChuyenNganh() {
                 </div>
             </div>
             <ImportExcel
-                title={'Khoa - Ngành'}
-                showModal={showModalImportKhoa}
-                setShowModal={setShowModalImportKhoa}
-                reLoad={fetchKhoaData}
+                title={'Ngành'}
+                showModal={showModalImportNgành}
+                setShowModal={setShowModalImportNgành}
+                reLoad={fetchNgànhData}
                 type={config.imports.FACULTY}
                 onImport={importFaculty}
             />
@@ -533,8 +517,8 @@ function KhoaChuyenNganh() {
                 type={config.imports.MAJOR}
                 onImport={importMajor}
             />
-            {KhoaUpdateMemo}
-            {KhoaDetailMemoized}
+            {NganhUpdateMemo}
+            {NganhDetailMemoized}
             {ChuyenNganhUpdateMemo}
             {ChuyenNganhDetailMemoized}
 
@@ -543,4 +527,4 @@ function KhoaChuyenNganh() {
 
 }
 
-export default KhoaChuyenNganh;
+export default NganhChuyenNganh;

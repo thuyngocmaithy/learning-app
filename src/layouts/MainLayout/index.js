@@ -15,6 +15,7 @@ function MainLayout({ children }) {
     } = theme.useToken();
     return (
         <Layout
+            hasSider
             style={{
                 minHeight: '100vh',
             }}
@@ -29,9 +30,6 @@ function MainLayout({ children }) {
                 />
                 <Content
                     className={cx('main-content')}
-                    style={{
-                        margin: '0 16px',
-                    }}
                 >
                     <div
                         style={{

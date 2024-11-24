@@ -1,14 +1,11 @@
-import { Table } from 'antd';
+import TableCustomAnt from '../../Core/TableCustomAnt';
 
 function Attach({ columns, data }) {
     return (
         <div>
-            <Table
+            <TableCustomAnt
                 columns={columns}
-                dataSource={data}
-                showSorterTooltip={{
-                    target: 'sorter-icon',
-                }}
+                data={data}
             />
         </div>
     );

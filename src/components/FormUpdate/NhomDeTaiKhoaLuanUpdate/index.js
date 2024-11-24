@@ -47,7 +47,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                     }
                 }
             } catch (error) {
-                console.error(' [ Khoaluanupdate - fetchStatusByType - Error ] :', error);
+                console.error(' [ Ngànhluanupdate - fetchStatusByType - Error ] :', error);
             }
         };
 
@@ -55,7 +55,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     }, [statusType, selectedStatus]);
 
     // Fetch data khi component được mount
-    //lấy danh sách các khoa ra ngoài thẻ select
+    //lấy danh sách các ngành ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             const response = await getAllFaculty();
@@ -187,12 +187,12 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                         </FormItem>
                         <FormItem
                             name="faculty"
-                            label="Khoa"
-                            rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
+                            label="Ngành"
+                            rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
                         >
                             <Select
                                 showSearch
-                                placeholder="Chọn khoa"
+                                placeholder="Chọn ngành"
                                 optionFilterProp="children"
                                 onChange={handleFacultySelect}
                                 value={selectedFaculty}

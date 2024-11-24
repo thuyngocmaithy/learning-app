@@ -9,11 +9,11 @@ import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { createFaculty, updateFacultyById, } from '../../../services/facultyService';
 import classNames from 'classnames/bind';
-import styles from './KhoaUpdate.module.scss'
+import styles from './NganhUpdate.module.scss'
 
 const cx = classNames.bind(styles);
 
-export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal, setShowModal, reLoad, viewOnly }) {
+export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad, viewOnly }) {
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -51,13 +51,13 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
                 : await createFaculty(facultyData);
 
             if (response?.data) {
-                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thành công!`);
+                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} ngành thành công!`);
                 if (reLoad) reLoad();
                 if (isUpdate) setShowModal(false)
             }
         } catch (error) {
             console.error(`Failed to ${isUpdate ? 'update' : 'create'} faculty:`, error);
-            message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} khoa thất bại!`);
+            message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} ngành thất bại!`);
         }
     };
 
@@ -77,15 +77,15 @@ export const KhoaUpdate = memo(function KhoaUpdate({ title, isUpdate, showModal,
             <Form form={form}>
                 <FormItem
                     name="facultyId"
-                    label="Mã khoa/ngành"
-                    rules={[{ required: true, message: 'Vui lòng nhập mã khoa/ngành' }]}
+                    label="Mã ngành"
+                    rules={[{ required: true, message: 'Vui lòng nhập mã ngành' }]}
                 >
                     <Input disabled={viewOnly || isUpdate} />
                 </FormItem>
                 <FormItem
                     name="facultyName"
-                    label="Tên khoa/ngành"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên khoa/ngành' }]}
+                    label="Tên ngành"
+                    rules={[{ required: true, message: 'Vui lòng nhập tên ngành' }]}
                 >
                     <Input disabled={viewOnly} />
                 </FormItem>

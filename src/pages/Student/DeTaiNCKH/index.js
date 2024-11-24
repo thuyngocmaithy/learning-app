@@ -32,6 +32,23 @@ function DeTaiNCKH() {
     const { deleteNotification } = useSocketNotification();
     const navigate = useNavigate();
     const location = useLocation();
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
@@ -101,8 +118,9 @@ function DeTaiNCKH() {
     const getSRGName = async () => {
         try {
             const SRG = await getScientificResearchGroupById(SRGIdFromUrl)
-            if (SRG.status === "success") {
-                setSRGName(SRG.data.scientificResearchGroupName);
+
+            if (SRG.status === 200) {
+                setSRGName(SRG.data.data.scientificResearchGroupName);
             }
         } catch (error) {
             console.error("Lỗi lấy tên SRG")
@@ -210,7 +228,7 @@ function DeTaiNCKH() {
                     renderItem={(item, index) => (
                         <List.Item
                             actions={[
-                                <Button outline verysmall onClick={() => setShowModalDetail(item)}>
+                                <Button className={cx('btnDetail')} outline verysmall onClick={() => setShowModalDetail(item)}>
                                     Chi tiết
                                 </Button>,
                                 listscientificResearchRegister && listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
@@ -235,13 +253,26 @@ function DeTaiNCKH() {
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.scientificResearchName}</div>}
-                                    description={<div>
-                                        <p>Lượt đăng ký: {item.count} </p>
-                                        <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
-                                    </div>}
+                                    description={
+                                        <div>
+                                            <p>Lượt đăng ký: {item.count} </p>
+                                            <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
+                                            <p style={{ display: screenWidth < 768 ? 'block' : 'none' }}>
+                                                Thời gian thực hiện:
+                                                {
+                                                    item.startDate && item.finishDate
+                                                        ? dayjs(item.startDate).format('DD/MM/YYYY HH:mm') - dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')
+                                                        : 'Chưa có'
+                                                }
+                                            </p>
+                                        </div>
+                                    }
                                 />
                                 <p></p>
-                                <div className={cx('container-deadline-register')}>
+                                <div
+                                    className={cx('container-deadline-register')}
+                                    style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                >
                                     <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
                                     {item.startDate && item.finishDate
                                         ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
@@ -315,10 +346,10 @@ function DeTaiNCKH() {
                     className={cx('breadcrumb')}
                     items={[
                         {
-                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu ngành học</Link>,
                         },
                         {
-                            title: 'Danh sách đề tài nghiên cứu khoa học',
+                            title: 'Danh sách đề tài nghiên cứu ngành học',
                         },
                     ]}
                 />
@@ -332,8 +363,8 @@ function DeTaiNCKH() {
                 <h3 className={cx('title')}>
                     {
                         SRGIdFromUrl
-                            ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
-                            : 'Danh sách đề tài nghiên cứu khoa học'
+                            ? `Danh sách đề tài nghiên cứu ngành học nhóm: ${SRGName}`
+                            : 'Danh sách đề tài nghiên cứu ngành học'
                     }
 
                 </h3>

@@ -38,7 +38,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     const statusType = 'Tiến độ khóa luận';
 
     // Fetch data khi component được mount
-    //lấy danh sách các khoa ra ngoài thẻ select
+    //lấy danh sách các ngành ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             const response = await getAllFaculty();
@@ -62,7 +62,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         fetchFaculties();
     }, [selectedFaculty]);
 
-    //lấy danh sách giảng viên theo khoa
+    //lấy danh sách giảng viên theo ngành
     useEffect(() => {
         const fetchSupervisors = async () => {
             if (selectedFaculty) {
@@ -107,7 +107,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     }
                 }
             } catch (error) {
-                console.error(' [ Khoaluanupdate - fetchStatusByType - Error ] :', error);
+                console.error(' [ Ngànhluanupdate - fetchStatusByType - Error ] :', error);
             }
         };
 
@@ -196,7 +196,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                 message.error('Vui lòng chọn thời gian thực hiện!');
             }
         } catch (error) {
-            console.error(`[ Khoaluanupdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesis `, error);
+            console.error(`[ Ngànhluanupdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesis `, error);
             message.error(`Có lỗi xảy ra khi ${isUpdate ? 'cập nhật' : 'tạo'} khóa luận: ${error.response?.data?.message || error.message}`);
         }
     };
@@ -240,12 +240,12 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                 </FormItem>
                 <FormItem
                     name="faculty"
-                    label="Khoa"
-                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
+                    label="Ngành"
+                    rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
                 >
                     <Select
                         showSearch
-                        placeholder="Chọn khoa"
+                        placeholder="Chọn ngành"
                         optionFilterProp="children"
                         onChange={handleFacultySelect}
                         value={selectedFaculty}

@@ -1,5 +1,4 @@
 import { api } from '../utils/apiConfig';
-import { getWhere } from './majorService';
 import { getUseridFromLocalStorage } from './userService';
 
 export const getAll = async () => {

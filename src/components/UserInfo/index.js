@@ -17,7 +17,6 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
     const [userInfo, setUserInfo] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-
     useEffect(() => {
         if (showModal !== open) {
             setOpen(showModal);
@@ -37,7 +36,6 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
                 if (response.message === "success") {
                     setUserInfo(response.data);
                 }
-
             } catch (error) {
                 console.log(error);
             }
@@ -66,6 +64,9 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
                     Thông tin sinh viên
                 </Divider>
                 <div className={cx('container-info-user')}>
+                    <div className={cx('avt-mobile')}>
+                        <Image src={`data:image/jpeg;base64,${userInfo?.avatar}`} className={cx('image-avt')} />
+                    </div>
                     <Form>
                         <Row gutter={[0, 0]}>
                             <Col span={12}>

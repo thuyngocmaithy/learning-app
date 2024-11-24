@@ -112,7 +112,7 @@ function TaiKhoan() {
     };
 
 
-    const taikhoanUpdateMemoized = useMemo(() => {
+    const taingànhnUpdateMemoized = useMemo(() => {
         return (
             <TaiKhoanUpdate
                 title={'tài khoản'}
@@ -152,7 +152,7 @@ function TaiKhoan() {
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
             />
-            {taikhoanUpdateMemoized}
+            {taingànhnUpdateMemoized}
 
         </div>
     );

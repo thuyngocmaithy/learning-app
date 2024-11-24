@@ -150,10 +150,14 @@ function DanhSachHocPhan() {
                     <h3 className={cx('title')}>Danh sách các học phần</h3>
                 </div>
                 <div className={cx('toolbar')}>
-                    <Radio.Group block options={options} defaultValue="Tất cả" optionType="button" onChange={handleChange} />
-                    <Button className={cx('btnSave')} primary small onClick={handleSave}>
-                        Lưu
-                    </Button>
+                    <div className={cx('filter')}>
+                        <Radio.Group block options={options} defaultValue="Tất cả" optionType="button" onChange={handleChange} />
+                    </div>
+                    <div className={cx('action')}>
+                        <Button className={cx('btnSave')} primary small onClick={handleSave}>
+                            Lưu
+                        </Button>
+                    </div>
                 </div>
             </div>
             <Descriptions items={items} className={cx('description')} />

@@ -8,9 +8,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { deleteSubjectById, getAllSubjectDetail, getWhereSubject, importSubject } from '../../../../services/subjectService';
-import { getAllFaculty } from '../../../../services/facultyService';
-import { getAll as getAllMajors, getWhere } from '../../../../services/majorService';
+import { deleteSubjectById, getAll, getAllSubjectDetail, getWhereSubject, importSubject } from '../../../../services/subjectService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
 import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -34,41 +32,15 @@ function MonHoc() {
 
     // Filter
     const [showFilter, setShowFilter] = useState(false);
-    const [facultyOptions, setFacultyOptions] = useState([]);
-    const [majorOptions, setMajorOptions] = useState([]);
 
     // Import 
     const [showModalImportSubject, setShowModalImportSubject] = useState(false);
 
     const fetchData = async () => {
         try {
-            const result = await getAllSubjectDetail();
-            console.log(result);
+            const result = await getAll();
 
-
-            let listSubject = Array.isArray(result.data[0])
-                ? result.data[0].map(subject => ({
-                    subjectId: subject.subjectId,
-                    subjectName: subject.subjectName,
-                    creditHour: subject.creditHour,
-                    isCompulsory: subject.isCompulsory,
-                    createDate: subject.createDate,
-                    lastModifyDate: subject.lastModifyDate,
-                    createUserId: subject.createUserId,
-                    lastModifyUserId: subject.lastModifyUserId,
-                    subjectBefore: subject.subjectBefore,
-                    majorId: subject.majorId,
-                    majorName: subject.majorName,
-                    facultyId: subject.facultyId,
-                    facultyName: subject.facultyName,
-                    frameComponentId: subject.frameComponentId,
-                    frameComponentName: subject.frameComponentName,
-                    frameDescription: subject.description
-
-                }))
-                : []; // Hoặc xử lý khác nếu data không phải là mảng
-
-            setData(listSubject);
+            setData(result.data.data || []);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -76,45 +48,8 @@ function MonHoc() {
         }
     };
 
-
-    const fetchKhoaData = async () => {
-        try {
-            const result = await getAllFaculty();
-            let listFaculty = Array.isArray(result.data)
-                ? result.data.map(faculty => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyName,
-                })) : [];
-            setFacultyOptions(listFaculty);
-        } catch (error) {
-            console.error('Error fetching faculty data:', error);
-        }
-    };
-
-    const fetchMajorData = async (facultyId) => {
-        try {
-            const response = await getWhere({
-                facultyId: facultyId,
-            });
-            if (response?.data?.data && Array.isArray(response.data.data)) {
-                const options = response.data.data.map((major) => ({
-                    value: major.majorId,
-                    label: major.majorName,
-                }));
-                setMajorOptions(options); // Cập nhật majors dựa vào khoa
-            } else {
-                setMajorOptions([]); // Nếu không có dữ liệu, đặt mảng rỗng
-            }
-        } catch (error) {
-            console.error('Error fetching majors:', error);
-            setMajorOptions([]); // Đặt majors rỗng nếu lỗi
-        }
-    };
-
-
     useEffect(() => {
         fetchData();
-        fetchKhoaData();
     }, []);
 
     useEffect(() => {
@@ -182,16 +117,6 @@ function MonHoc() {
             },
         },
         {
-            title: 'Khoa - Ngành',
-            dataIndex: 'facultyName',
-            key: 'facultyName',
-        },
-        {
-            title: 'Chuyên ngành',
-            dataIndex: 'majorName',
-            key: 'majorName',
-        },
-        {
             title: 'Mã môn trước',
             dataIndex: 'subjectBefore',
             key: 'subjectBefore',
@@ -242,16 +167,9 @@ function MonHoc() {
             let searchParams = {
                 subjectId: values.subjectId?.trim() || undefined,
                 subjectName: values.subjectName?.trim() || undefined,
-                isCompulsory: values.isCompulsory || undefined,
-                subjectBefore: values.subjectBefore?.trim() || undefined,
+                isCompulsory: values.isCompulsory === undefined ? undefined : values.isCompulsory ? 1 : 0,
                 creditHour: values.creditHour?.trim() || undefined,
-                facultyId: values.faculty?.value || undefined,
-                majorId: values.major?.value || undefined
             };
-            if (!searchParams.subjectId && !searchParams.subjectName && !searchParams.creditHour) {
-                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
-                return;
-            }
 
             const response = await getWhereSubject(searchParams);
             if (response.status === 200) {
@@ -279,82 +197,25 @@ function MonHoc() {
         }
     ];
 
-    const getFilterFieldsSubject = () => {
-        return (
-            <Row gutter={[16, 16]} align="middle">
-                {/* Dòng 1 */}
-                <Col span={6}>
-                    <FormItem name="subjectId" label="Mã môn học">
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col span={6}>
-                    <FormItem name="subjectBefore" label="Mã môn học trước">
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col span={6}>
-                    <FormItem name="faculty" label="Khoa">
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={facultyOptions}
-                            labelInValue
-                            onChange={(selectedFaculty) => {
-                                fetchMajorData(selectedFaculty.value);
-                                form.setFieldsValue({ major: null });
-                            }}
-                        />
-                    </FormItem>
-                </Col>
-
-                {/* Dòng 2 */}
-                <Col span={6}>
-                    <FormItem name="subjectName" label="Tên môn học">
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col span={6}>
-                    <FormItem name="creditHour" label="Số tín chỉ">
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col span={6}>
-                    <FormItem name="major" label="Chuyên ngành">
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={majorOptions}
-                            labelInValue
-                        />
-                    </FormItem>
-                </Col>
-
-                {/* Dòng 3 */}
-                <Col span={6}>
-                    <FormItem name="isCompulsory" label="Bắt buộc">
-                        <Select
-                            style={{ width: '100%' }}
-                            options={typeOptions}
-                            allowClear
-                            placeholder="Chọn loại trạng thái"
-                        />
-                    </FormItem>
-                </Col>
-            </Row>
-        );
-    };
-
-
-
+    const filterFieldsSubject = [
+        <FormItem name="subjectId" label="Mã môn học" >
+            <Input />
+        </FormItem>,
+        <FormItem name="subjectName" label="Tên môn học">
+            <Input />
+        </FormItem>,
+        <FormItem name="creditHour" label="Số tín chỉ">
+            <Input />
+        </FormItem>,
+        <FormItem name="isCompulsory" label="Bắt buộc" >
+            <Select
+                style={{ width: '100%' }}
+                options={typeOptions}
+                allowClear
+                placeholder="Chọn loại trạng thái"
+            />
+        </FormItem >
+    ]
 
     return (
         <div className={cx('wrapper')}>
@@ -387,7 +248,7 @@ function MonHoc() {
             <div className={`slide ${showFilter ? 'open' : ''}`}>
                 <SearchForm
                     form={form}
-                    getFields={getFilterFieldsSubject}
+                    getFields={filterFieldsSubject}
                     onSearch={onSearchSubject}
                     onReset={fetchData}
                 />

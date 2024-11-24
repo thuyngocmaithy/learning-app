@@ -8,6 +8,7 @@
     font-weight: 700;
     display: flex;
     align-items: center;
+    text-align: left;
 }
 
 .icon {
@@ -24,7 +25,7 @@
 .name {
     font-weight: 400;
     font-size: 17px;
-    width: max-content;
+    width: 80vw;
 }
 
 .container-deadline-register {

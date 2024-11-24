@@ -32,6 +32,23 @@ function DeTaiKhoaLuan() {
     const { deleteNotification } = useSocketNotification();
     const navigate = useNavigate();
     const location = useLocation();
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // Xử lý active tab từ url
     const queryParams = new URLSearchParams(location.search);
@@ -100,12 +117,12 @@ function DeTaiKhoaLuan() {
 
     const getThesisGroupName = async () => {
         try {
-            const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
-            if (ThesisGroup.status === "success") {
-                setThesisGroupName(ThesisGroup.data.thesisGroupName);
+            const thesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
+            if (thesisGroup.status === 200) {
+                setThesisGroupName(thesisGroup.data.data.thesisGroupName);
             }
         } catch (error) {
-            console.error("Lỗi lấy tên ThesisGroup")
+            console.error("Lỗi lấy tên thesisGroup")
         }
     }
     useEffect(() => {
@@ -210,7 +227,7 @@ function DeTaiKhoaLuan() {
                     renderItem={(item, index) => (
                         <List.Item
                             actions={[
-                                <Button outline verysmall onClick={() => setShowModalDetail(item)}>
+                                <Button className={cx('btnDetail')} outline verysmall onClick={() => setShowModalDetail(item)}>
                                     Chi tiết
                                 </Button>,
                                 listthesisRegister && listthesisRegister.some(thesisRegister => thesisRegister.thesis.thesisId === item.thesisId) ?
@@ -235,13 +252,27 @@ function DeTaiKhoaLuan() {
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.thesisName}</div>}
-                                    description={<div>
-                                        <p>Lượt đăng ký: {item.count} </p>
-                                        <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
-                                    </div>}
+                                    description={
+                                        <div>
+                                            <p>Lượt đăng ký: {item.count} </p>
+                                            <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
+                                            <p style={{ display: screenWidth < 768 ? 'block' : 'none' }}>
+                                                Thời gian thực hiện:
+                                            </p>
+                                            <p>
+                                                Từ: {item.startDate && dayjs(item.startDate).format('DD/MM/YYYY HH:mm')}
+                                            </p>
+                                            <p>
+                                                Đến: {item.finishDate && dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}
+                                            </p>
+                                        </div>
+                                    }
                                 />
                                 <p></p>
-                                <div className={cx('container-deadline-register')}>
+                                <div
+                                    className={cx('container-deadline-register')}
+                                    style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                >
                                     <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
                                     {item.startDate && item.finishDate
                                         ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>

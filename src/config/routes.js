@@ -40,9 +40,9 @@ const routes = {
     HocKy: '/Department/ThietLap/HocKy',
     ChuKy: '/Department/ThietLap/ChuKy',
     MonHoc: '/Department/ThietLap/MonHoc',
-    Khoa: '/Department/ThietLap/Khoa',
+    Ngành: '/Department/ThietLap/Ngành',
     ChuyenNganh: '/Department/ThietLap/ChuyenNganh',
-    KhoaChuyenNganh: '/Department/ThietLap/KhoaChuyenNganh',
+    NganhChuyenNganh: '/Department/ThietLap/NganhChuyenNganh',
     TrangThai: '/Department/ThietLap/TrangThai',
 
 };

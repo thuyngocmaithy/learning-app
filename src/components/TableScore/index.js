@@ -365,10 +365,9 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
         { id: 'name', label: 'Tên học phần', minWidth: 130, align: 'center' },
         { id: 'tinchi', label: 'Số tín chỉ', minWidth: 50, align: 'center' },
-        // { id: 'score10', label: 'Điểm hệ 10', minWidth: 100, align: 'center' },
         { id: 'input_score', label: 'Điểm hệ 10', minWidth: 100, align: 'center' },
         { id: 'score', label: 'Điểm chữ', minWidth: 100, align: 'center' },
-        { id: 'improvement', label: 'Cải thiện', minWidth: 100, align: 'center' },
+        { id: 'improvement', label: 'Cải thiện', minWidth: 120, align: 'center' },
     ];
 
     const DiemDetailMemoized = useMemo(() => (

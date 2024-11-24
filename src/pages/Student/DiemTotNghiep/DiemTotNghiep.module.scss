@@ -12,6 +12,7 @@
     font-weight: 700;
     display: flex;
     align-items: center;
+    text-align: left;
 }
 
 .icon {
@@ -20,7 +21,7 @@
     color: var(--primary);
 }
 
-.wrapper,
+.wrapper-calculate,
 .container-info-score {
     display: flex;
     margin: 20px 0;
@@ -122,4 +123,27 @@
 .infomation {
     display: flex;
     justify-content: space-between;
+}
+
+:global .ant-table-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary);
+}
+
+@media only screen and (max-width: 768px) {
+
+    .container-info-score,
+    .wrapper-calculate {
+        flex-direction: column;
+    }
+
+    .content-left,
+    .content-right {
+        width: 100%;
+    }
+
+    .content-left {
+        margin: 10px 0;
+    }
 }

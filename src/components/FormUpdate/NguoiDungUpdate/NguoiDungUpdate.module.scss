@@ -1,3 +1,7 @@
+.form-update-user {
+    display: flex;
+}
+
 .container-detail {
     display: flex;
     justify-content: space-between;
@@ -12,4 +16,18 @@
 .container-detail>div:nth-child(2) {
     width: 30%;
     margin-right: 50px;
+}
+
+.icon-action-step {
+    color: rgb(165, 187, 243);
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.left-action {
+    margin-right: 20px;
+}
+
+.right-action {
+    margin-left: 20px;
 }

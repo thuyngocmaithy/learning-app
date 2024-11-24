@@ -27,7 +27,7 @@ import ChuKy_Department from '../pages/Department/ThietLap/ChuKy';
 import MonHoc from '../pages/Department/ThietLap/MonHoc';
 import KhungCTDT from '../pages/Department/ThietLap/KhungCTDT';
 import ThanhPhanKhungDT from '../pages/Department/ThietLap/ThanhPhanKhungDT';
-import KhoaChuyenNganh from '../pages/Department/ThietLap/KhoaChuyenNganh';
+import NganhChuyenNganh from '../pages/Department/ThietLap/NganhChuyenNganh';
 import TrangThai from '../pages/Department/ThietLap/TrangThai';
 
 // COMMON
@@ -71,7 +71,7 @@ const privateRoutes = [
     { path: config.routes.ChuKy, component: ChuKy_Department, layout: DepartmentLayout },
     { path: config.routes.MonHoc, component: MonHoc, layout: DepartmentLayout },
     { path: config.routes.ThanhPhanKhungDT, component: ThanhPhanKhungDT, layout: DepartmentLayout },
-    { path: config.routes.KhoaChuyenNganh, component: KhoaChuyenNganh, layout: DepartmentLayout },
+    { path: config.routes.NganhChuyenNganh, component: NganhChuyenNganh, layout: DepartmentLayout },
     { path: config.routes.TrangThai, component: TrangThai, layout: DepartmentLayout },
 
 ];

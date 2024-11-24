@@ -137,7 +137,7 @@ function NhomDeTaiNCKH() {
                                                 <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
                                                 <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
                                             </div>
-                                            <p>Khoa: {item.faculty.facultyName}</p>
+                                            <p>Ngành: {item.faculty.facultyName}</p>
                                             <p style={{ margin: "7px 0" }}>
                                                 Trạng thái:
                                                 <Tag color={item.status.color} className={cx('tag-status')}>
@@ -166,7 +166,7 @@ function NhomDeTaiNCKH() {
             children: (
                 <div>
                     {listscientificResearchRegister?.map((item, index) => {
-                        let color = item.isApprove ? 'green' : 'red';
+                        let color = item.scientificResearch.status.statusName === 'Chờ duyệt' ? 'red' : item.scientificResearch.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiNCKHThamGia')}
@@ -238,7 +238,7 @@ function NhomDeTaiNCKH() {
                     <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>Nhóm đề tài nghiên cứu khoa học</h3>
+                <h3 className={cx('title')}>Nhóm đề tài nghiên cứu ngành học</h3>
             </div>
             <Tabs
                 activeKey={tabActive}

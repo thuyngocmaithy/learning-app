@@ -53,3 +53,23 @@
     justify-content: space-between;
     margin-left: 20px;
 }
+
+@media only screen and (max-width: 768px) {
+    .wrapper {
+        flex-direction: column;
+    }
+
+    .container-system,
+    .container-follower {
+        width: 100%;
+    }
+
+    .container-system-detail {
+        width: 90%;
+    }
+
+    .container-follower {
+        padding-left: 0;
+        margin-top: 50px;
+    }
+}

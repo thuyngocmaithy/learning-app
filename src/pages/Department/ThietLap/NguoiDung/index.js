@@ -182,7 +182,7 @@ function NguoiDung() {
 
     useEffect(() => {
         fetchData();
-        fetchKhoaData();
+        fetchNgànhData();
     }, []);
 
     useEffect(() => {
@@ -239,7 +239,7 @@ function NguoiDung() {
     ];
 
 
-    const typeNienKhoa = [
+    const typeNienNgành = [
         {
             label: "2020-2024",
             value: "2020-2024"
@@ -263,7 +263,7 @@ function NguoiDung() {
     ];
 
 
-    const fetchKhoaData = async () => {
+    const fetchNgànhData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
@@ -287,7 +287,7 @@ function NguoiDung() {
                     value: major.majorId,
                     label: major.majorName,
                 }));
-                setMajorOptions(options); // Cập nhật majors dựa vào khoa
+                setMajorOptions(options); // Cập nhật majors dựa vào ngành
             } else {
                 setMajorOptions([]); // Nếu không có dữ liệu, đặt mảng rỗng
             }
@@ -333,94 +333,67 @@ function NguoiDung() {
         }
     };
 
-    const getFilterFieldsUser = () => {
-        return (
-            <>
-                <Row gutter={[16, 16]} align="middle">
-                    <Col span={6}>
-                        <FormItem name="userId" label="Mã người dùng">
-                            <Input />
-                        </FormItem>
-                    </Col>
-                    <Col span={6}>
-                        <FormItem name="fullname" label="Họ tên">
-                            <Input />
-                        </FormItem>
-                    </Col>
-                    <Col span={6}>
-                        <FormItem name="class" label="Lớp">
-                            <Input />
-                        </FormItem>
-                    </Col>
-
-
-                    <Col span={6}>
-                        <FormItem name="faculty" label="Khoa">
-                            <Select
-                                style={{ width: '100%' }}
-                                showSearch
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={facultyOptions}
-                                labelInValue
-                                onChange={(selectedFaculty) => {
-                                    fetchMajorData(selectedFaculty.value);
-                                    form.setFieldsValue({ major: null });
-                                }}
-                            />
-                        </FormItem>
-                    </Col>
-                    <Col span={6}>
-                        <FormItem name="major" label="Chuyên ngành">
-                            <Select
-                                style={{ width: '100%' }}
-                                showSearch
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={majorOptions}
-                                labelInValue
-                            />
-                        </FormItem>
-                    </Col>
-                    <Col span={6}>
-                        <FormItem name="isStudent" label="Chức danh">
-                            <Select
-                                style={{ width: '100%' }}
-                                options={typeUser}
-                                allowClear
-                                placeholder="Chọn chức danh"
-                            />
-                        </FormItem>
-
-                    </Col>
-                    <Col span={6}>
-                        <FormItem name="nien_khoa" label="Niên khoá">
-                            <Select
-                                style={{ width: '100%' }}
-                                options={typeNienKhoa}
-                                allowClear
-                                placeholder="Chọn niên khoá"
-                            />
-                        </FormItem>
-                    </Col>
-                    <Col span={3}>
-                        <FormItem name="firstAcademicYear" label="Năm bắt đầu">
-                            <Input />
-                        </FormItem>
-                    </Col>
-                    <Col span={3}>
-                        <FormItem name="lastAcademicYear" label="Năm kết thúc">
-                            <Input />
-                        </FormItem>
-                    </Col>
-                </Row>
-            </>
-        )
-    }
+    const filterFieldsUser = [
+        <FormItem name="userId" label="Mã người dùng">
+            <Input />
+        </FormItem>,
+        <FormItem name="fullname" label="Họ tên">
+            <Input />
+        </FormItem>,
+        <FormItem name="class" label="Lớp">
+            <Input />
+        </FormItem>,
+        <FormItem name="faculty" label="Ngành">
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={facultyOptions}
+                labelInValue
+                onChange={(selectedFaculty) => {
+                    fetchMajorData(selectedFaculty.value);
+                    form.setFieldsValue({ major: null });
+                }}
+            />
+        </FormItem>,
+        <FormItem name="major" label="Chuyên ngành">
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={majorOptions}
+                labelInValue
+            />
+        </FormItem>,
+        <FormItem name="isStudent" label="Chức danh">
+            <Select
+                style={{ width: '100%' }}
+                options={typeUser}
+                allowClear
+                placeholder="Chọn chức danh"
+            />
+        </FormItem>,
+        <FormItem name="nien_khoa" label="Niên khoá">
+            <Select
+                style={{ width: '100%' }}
+                options={typeNienNgành}
+                allowClear
+                placeholder="Chọn niên khoá"
+            />
+        </FormItem>,
+        <FormItem name="firstAcademicYear" label="Năm bắt đầu">
+            <Input />
+        </FormItem>,
+        <FormItem name="lastAcademicYear" label="Năm kết thúc">
+            <Input />
+        </FormItem>,
+    ]
 
     return (
         <div className={cx('wrapper')}>
@@ -453,7 +426,7 @@ function NguoiDung() {
             <div className={`slide ${showFilter ? 'open' : ''}`}>
                 <SearchForm
                     form={form}
-                    getFields={getFilterFieldsUser}
+                    getFields={filterFieldsUser}
                     onSearch={onSearchUser}
                     onReset={fetchData}
                 />

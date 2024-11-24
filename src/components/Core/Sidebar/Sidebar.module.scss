@@ -1,6 +1,11 @@
 .wrapper {
-    width: 20%;
     min-height: 563px;
+    height: 100vh;
+    position: sticky;
+    inset-inline-start: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
 
     a {
         color: inherit;
@@ -10,7 +15,12 @@
     a:selected {
         color: #fff;
     }
+
+    :global .ant-layout-sider-children {
+        overflow: overlay;
+    }
 }
+
 
 .logo {
     border-radius: 999px;
@@ -34,4 +44,28 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+
+@media only screen and (max-width: 768px) {
+    .wrapper {
+        position: fixed;
+    }
+
+    :global .ant-layout-sider-collapsed {
+        min-height: 10px;
+        height: 10px;
+        top: unset;
+        border-top-right-radius: 8px;
+
+        .ant-layout-sider-children {
+            display: none;
+        }
+
+        .ant-layout-sider-trigger {
+            border-top-right-radius: 8px;
+        }
+
+    }
+
 }

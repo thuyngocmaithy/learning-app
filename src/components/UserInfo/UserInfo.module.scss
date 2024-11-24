@@ -24,6 +24,11 @@
     }
 }
 
+.avt-mobile {
+    display: none;
+    margin-bottom: 10px;
+}
+
 .image-avt {
     width: 150px;
     height: 200px;
@@ -37,4 +42,18 @@
         color: var(--primary);
     }
 
+}
+
+@media only screen and (max-width: 768px) {
+    .container-info-user {
+        flex-direction: column;
+    }
+
+    .avt {
+        display: none;
+    }
+
+    .avt-mobile {
+        display: block;
+    }
 }

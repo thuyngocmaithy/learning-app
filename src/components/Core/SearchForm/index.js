@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './SearchForm.module.scss';
-import { Button, Form, Row, Space, theme } from 'antd';
+import { Button, Col, Form, Row, Space, theme } from 'antd';
 import { useEffect } from 'react';
 
 const cx = classNames.bind(styles);
@@ -34,7 +34,13 @@ function SearchForm({ getFields, onSearch, onReset }) {
 
     return (
         <Form form={form} className={cx("advanced_search")} style={formStyle} onFinish={onSearch}>
-            <Row gutter={24} className={cx('row-filter')}>{getFields()}</Row>
+            <Row gutter={[16, 16]} className={cx('row-filter')}>
+                {getFields && getFields.map((field, index) => (
+                    <Col xs={24} sm={12} md={8} lg={6} key={index}>
+                        {field}
+                    </Col>
+                ))}
+            </Row>
             <div
                 style={{
                     textAlign: 'right',
@@ -55,6 +61,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
                 </Space>
             </div>
         </Form>
+
     );
 }
 

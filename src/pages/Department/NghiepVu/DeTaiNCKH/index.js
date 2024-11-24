@@ -136,12 +136,12 @@ function DeTaiNCKH() {
         {
             title: 'Trạng thái',
             key: 'status',
-            dataIndex: ['status', 'statusName'],
+            dataIndex: ['status'],
             align: 'center',
             width: '150px',
-            render: (statusName, record) => (
+            render: (_, record) => (
                 <Tag color={record.status.color} className='status-table'>
-                    {statusName.toUpperCase()}
+                    {record.status.statusName.toUpperCase()}
                 </Tag>
             ),
         },
@@ -170,7 +170,7 @@ function DeTaiNCKH() {
                         Danh sách đăng ký: {numberOfRegister.length}
                     </ButtonCustom >
                 ) : (
-                    <p style={{ textAlign: 'center' }}>0</p>
+                    '0'
                 ),
         },
         {
@@ -310,84 +310,69 @@ function DeTaiNCKH() {
     }, [statusType]);
 
     // Tạo field cho bộ lọc
-    const getFilterFields = () => {
-        return (
-            <>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'scientificResearchId'}
-                        label={'Mã đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'scientificResearchName'}
-                        label={'Tên đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'instructorName'}
-                        label={'Chủ nhiệm đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'level'}
-                        label={'Cấp'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            options={levelOptions}
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                        />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'status'}
-                        label={'Trạng thái'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={statusOptions}
-                            labelInValue
-                        />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'isDisable'}
-                        label={'Hiển thị'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            options={levelDisable}
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                        />
-                    </FormItem>
-                </Col>
+    const filterFields = [
+        <FormItem
+            name={'scientificResearchId'}
+            label={'Mã đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'scientificResearchName'}
+            label={'Tên đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'instructorName'}
+            label={'Chủ nhiệm đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'level'}
+            label={'Cấp'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                options={levelOptions}
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+            />
+        </FormItem>,
+        <FormItem
+            name={'status'}
+            label={'Trạng thái'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={statusOptions}
+                labelInValue
+            />
+        </FormItem>,
+        <FormItem
+            name={'isDisable'}
+            label={'Hiển thị'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                options={levelDisable}
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+            />
+        </FormItem>,
 
-            </>
-        )
-    };
+    ]
+
 
     const onSearch = async (values) => {
         setIsLoading(true)
@@ -428,7 +413,7 @@ function DeTaiNCKH() {
                 <>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
-                            getFields={getFilterFields}
+                            getFields={filterFields}
                             onSearch={onSearch}
                             onReset={fetchData}
                         />
@@ -539,7 +524,7 @@ function DeTaiNCKH() {
     const DeTaiNCKHUpdateMemoized = useMemo(() => {
         return (
             <DeTaiNCKHUpdate
-                title={'đề tài nghiên cứu khoa học'}
+                title={'đề tài nghiên cứu ngành học'}
                 isUpdate={isUpdate}
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
@@ -562,7 +547,7 @@ function DeTaiNCKH() {
 
     const DeTaiNCKHDetailMemoized = useMemo(() => (
         <DeTaiNCKHDetail
-            title={'Đề tài nghiên cứu khoa học'}
+            title={'Đề tài nghiên cứu ngành học'}
             showModal={showModalDetail}
             setShowModal={setShowModalDetail}
         />
@@ -578,10 +563,10 @@ function DeTaiNCKH() {
                         className={cx('breadcrumb')}
                         items={[
                             {
-                                title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu khoa học</Link>,
+                                title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu ngành học</Link>,
                             },
                             {
-                                title: 'Danh sách đề tài nghiên cứu khoa học',
+                                title: 'Danh sách đề tài nghiên cứu ngành học',
                             },
                         ]}
                     />
@@ -591,7 +576,7 @@ function DeTaiNCKH() {
                         <span className={cx('icon')}>
                             <ProjectIcon />
                         </span>
-                        <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
+                        <h3 className={cx('title')}>Danh sách đề tài nghiên cứu ngành học</h3>
                     </div>
                     {tabActive === 1 ? (
                         <div className={cx('wrapper-toolbar')}>

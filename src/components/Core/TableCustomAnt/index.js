@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
-import { Table } from 'antd';
-import { useState } from 'react';
+import { List, Table } from 'antd';
+import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
 
@@ -17,6 +17,7 @@ function TableCustomAnt({
     isHaveRowSelection = true,
     isPagination = true,
     isHideSTT = false,
+    size,
     ...props
 }) {
     // State để lưu trạng thái phân trang
@@ -24,6 +25,23 @@ function TableCustomAnt({
         current: 1,
         pageSize: 10,
     });
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const onSelectChange = (newSelectedRowKeys, selectedRows) => {
         // Nếu key để xóa không phải id => VD: scientificResearchId - Truyền key để xóa vào keyIdChange
@@ -49,7 +67,7 @@ function TableCustomAnt({
                     title: 'STT',
                     dataIndex: 'index',
                     key: 'stt',
-                    width: '70px',
+                    width: '5rem',
                     render: (text, record, index) => {
                         const { current, pageSize } = paginationState;
                         return (current - 1) * pageSize + index + 1;
@@ -58,6 +76,53 @@ function TableCustomAnt({
             ]),
         ...columns // Các cột khác
     ];
+
+    // Hiển thị List khi màn hình nhỏ hơn 768px
+    if (screenWidth < 768) {
+        return (
+            <List
+                className={cx('list-container')}
+                dataSource={data}
+                renderItem={(item, index) => (
+                    <List.Item
+                        key={item.id || item[keyIdChange]}
+                        actions={columnsWithSTT.map((col) => {
+                            if (col.key === 'action') {
+                                // Xử lý riêng cột Action
+                                return (
+                                    <div key={col.key} className={cx('list-item-action')}>
+                                        {col.render
+                                            ? col.render(null, item, index) // Gọi hàm render với record
+                                            : null}
+                                    </div>
+                                );
+                            }
+                        })}
+                    >
+                        <div className={cx('list-item')}>
+                            {/* Hiển thị các cột thông thường */}
+                            {columnsWithSTT.map((col) => {
+                                if (col.key !== 'action') {
+                                    return (
+                                        <div key={col.key || col.dataIndex}>
+                                            <strong>{col.title}: </strong>
+                                            {col.render
+                                                ? col.render(
+                                                    item[col.dataIndex],
+                                                    item,
+                                                    index
+                                                )
+                                                : item[col.dataIndex]}
+                                        </div>
+                                    );
+                                }
+                            })}
+                        </div>
+                    </ List.Item >
+                )}
+            />
+        );
+    }
 
     return (
         <div
@@ -93,6 +158,16 @@ function TableCustomAnt({
                         }
                         : false // Không phân trang nếu `isPagination` là false
                 }
+                size={
+                    size
+                        ? size
+                        : screenWidth < 768
+                            ? "small"
+                            : "middle"
+                }
+                locale={{
+                    emptyText: 'No data available',
+                }}
                 {...props}
             />
         </div>

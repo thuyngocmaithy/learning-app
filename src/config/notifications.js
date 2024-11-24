@@ -12,7 +12,7 @@ const notifications = {
             registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}, với sự tham gia của bạn`,
             // Gửi thông báo duyệt cho sinh viên được duyệt
             approveForStudent: `Bạn được duyệt tham gia đề tài NCKH ${data.scientificResearchId}`,
-            // Gửi thông báo duyệt cho giảng viên hướng dẫn nếu khoa duyệt
+            // Gửi thông báo duyệt cho giảng viên hướng dẫn nếu ngành duyệt
             approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài NCKH ${data.scientificResearchId}`,
             // Gửi thông báo add người theo dõi
             follow: `Bạn được thêm theo dõi đề tài NCKH ${data.scientificResearchId}`,
@@ -145,7 +145,7 @@ const notifications = {
             registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}, với sự tham gia của bạn`,
             // Gửi thông báo duyệt cho sinh viên được duyệt
             approveForStudent: `Bạn được duyệt tham gia đề tài khóa luận ${data.thesisId}`,
-            // Gửi thông báo duyệt cho giảng viên hướng dẫn nếu khoa duyệt
+            // Gửi thông báo duyệt cho giảng viên hướng dẫn nếu ngành duyệt
             approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài khóa luận ${data.thesisId}`,
             // Gửi thông báo add người theo dõi
             follow: `Bạn được thêm theo dõi đề tài khóa luận ${data.thesisId}`,

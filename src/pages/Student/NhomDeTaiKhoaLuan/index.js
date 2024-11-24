@@ -23,6 +23,23 @@ function NhomDeTaiKhoaLuan() {
     const [listThesisRegister, setListThesisRegister] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // Số lượng mục trên mỗi trang
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // Xử lý active tab từ url
     const navigate = useNavigate();
@@ -113,7 +130,12 @@ function NhomDeTaiKhoaLuan() {
                                     title={<div className={cx('name')}>{item.thesisGroupName}</div>}
                                     description={
                                         <div>
-                                            <p>Khoa: {item.faculty.facultyName}</p>
+                                            <p
+                                                style={{ display: screenWidth < 768 ? 'flex' : 'none', margin: "7px 0" }}
+                                            >
+                                                Thời gian thực hiện: {item.startYear} - {item.finishYear}
+                                            </p>
+                                            <p>Ngành: {item.faculty.facultyName}</p>
                                             <p style={{ margin: "7px 0" }}>
                                                 Trạng thái:
                                                 <Tag color={item.status.color} className={cx('tag-status')}>
@@ -123,7 +145,10 @@ function NhomDeTaiKhoaLuan() {
                                         </div>
                                     }
                                 />
-                                <div className={cx('container-deadline-register')}>
+                                <div
+                                    className={cx('container-deadline-register')}
+                                    style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                >
                                     <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
                                     <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
                                 </div>
@@ -139,7 +164,7 @@ function NhomDeTaiKhoaLuan() {
             children: (
                 <div>
                     {listThesisRegister?.map((item, index) => {
-                        let color = item.isApprove ? 'green' : 'red';
+                        let color = item.thesis.status.statusName === 'Chờ duyệt' ? 'red' : item.thesis.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiKhoaLuanThamGia')}

@@ -94,43 +94,31 @@ function TrangThai() {
         }
     ];
 
-    const getFilterFieldsStatus = () => {
-        return (
-            <>
-                <Col className="gutter-row" span={7}>
-                    <FormItem
-                        name="statusId"
-                        label="Mã trạng thái"
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-
-                <Col className="gutter-row" span={8}>
-                    <FormItem
-                        name="statusName"
-                        label="Tên trạng thái"
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-
-                <Col className="gutter-row" span={8}>
-                    <FormItem
-                        name="type"
-                        label="Loại trạng thái"
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            options={typeOptions}
-                            allowClear
-                            placeholder="Chọn loại trạng thái"
-                        />
-                    </FormItem>
-                </Col>
-            </>
-        );
-    };
+    const filterFieldsStatus = [
+        <FormItem
+            name="statusId"
+            label="Mã trạng thái"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="statusName"
+            label="Tên trạng thái"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="type"
+            label="Loại trạng thái"
+        >
+            <Select
+                style={{ width: '100%' }}
+                options={typeOptions}
+                allowClear
+                placeholder="Chọn loại trạng thái"
+            />
+        </FormItem>
+    ]
 
     const onSearchStatus = async (values) => {
         try {
@@ -303,7 +291,7 @@ function TrangThai() {
             </div>
             <div className={`slide ${showFilter ? 'open' : ''}`}>
                 <SearchForm
-                    getFields={getFilterFieldsStatus}
+                    getFields={filterFieldsStatus}
                     onSearch={onSearchStatus}
                     onReset={fetchData}
                 />

@@ -31,10 +31,6 @@ function MoHocPhan() {
     const [isLoadingCourseOpening, setIsLoadingCourseOpening] = useState(true);
     const [studyFrame, setStudyFrame] = useState();
 
-
-
-
-
     //hàm chỉ cho phép nhập số 
     const formatValue = (value) => {
         // Chỉ cho phép nhập số
@@ -158,7 +154,6 @@ function MoHocPhan() {
             }
 
             const response = await findKhungCTDTDepartment(data.startYear, data.facultyId, data.cycleId);
-            console.log(response);
 
             if (response.status === 200 && response.data.data !== null) {
                 response.data.data.year = values.academicYear;
@@ -234,24 +229,23 @@ function MoHocPhan() {
                 title: 'Năm học',
                 dataIndex: 'year',
                 key: 'year',
-                width: '120px',
-                align: 'center'
+                align: 'center',
             },
             {
                 title: 'Khung đào tạo',
                 dataIndex: 'studyFrameName',
                 key: 'studyFrameName',
+                width: '30%'
             },
             {
                 title: 'Ngành',
                 dataIndex: 'facultyName',
                 key: 'facultyName',
-                width: '20%'
             },
             {
                 title: 'Action',
                 key: 'action',
-                width: '260px',
+                width: '10%',
                 render: (_, record) => (
                     <div className={cx('action-item')}>
                         <ButtonCustom

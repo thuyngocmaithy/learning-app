@@ -41,7 +41,7 @@ export const MonHocDetail = memo(function MonHocDetail({
                 <FormItem label={'Tên chuyên ngành: '} name="majorName">
                     <p>{showModal?.majorName || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên khoa/ngành: '} name="facultyName">
+                <FormItem label={'Tên ngành: '} name="facultyName">
                     <p>{showModal?.facultyName || ''}</p>
                 </FormItem>
                 <FormItem label={'Bắt buộc: '} name="isCompulsory">

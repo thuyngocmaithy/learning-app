@@ -1,7 +1,5 @@
 .container-crud {
-    // border: 2.5px solid var(--blue-100);
     border-radius: 10px;
-    // box-shadow: var(--box-shadow-1);
     text-align: center;
     align-content: space-around;
 
@@ -9,7 +7,32 @@
     h2 {
         margin-bottom: 40px;
     }
+}
 
+:global .ant-list-item {
+    flex-direction: column !important;
+    align-items: start !important;
+    justify-content: flex-start !important;
 
+    .status-table {
+        width: fit-content !important;
+    }
 
+    .ant-list-item-action {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+
+        .list-item-action {
+            margin-right: 10px;
+        }
+    }
+
+    .ant-list-item-action-split {
+        display: none;
+    }
+
+    .ant-input {
+        width: fit-content;
+    }
 }

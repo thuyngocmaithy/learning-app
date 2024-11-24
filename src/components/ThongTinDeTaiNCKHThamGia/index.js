@@ -27,7 +27,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
         },
         {
             key: '1-info',
-            label: 'Khoa',
+            label: 'Ngành',
             children: scientificResearch ? scientificResearch.scientificResearchGroup?.faculty?.facultyName : '',
         },
         {
@@ -55,11 +55,6 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
             label: 'Ngân sách',
             children: scientificResearch ? scientificResearch.budget : '',
         },
-        // {
-        //     key: '6-info',
-        //     label: 'Sinh viên thực hiện',
-        //     children: scientificResearch ? scientificResearch.user.fullname : '',
-        // },
     ];
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -122,8 +117,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                         title={
                             <div className={cx('container-title')}>
                                 <div className={cx('title')}>
-                                    <h2 className={cx('label-title')}>Đề tài:</h2>
-                                    <h2 className={cx("content-title")}>{scientificResearch.scientificResearchName}</h2>
+                                    Đề tài: {scientificResearch.scientificResearchName}
                                 </div>
                                 <Tag color={statusSelected.color} className={cx('status-detail')}>
                                     <Dropdown
@@ -152,7 +146,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                     {scientificResearch.description}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

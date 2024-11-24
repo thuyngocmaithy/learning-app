@@ -16,6 +16,7 @@ import Toolbar from '../../../components/Core/Toolbar';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getWhere } from '../../../services/attachService';
 import { ProjectIcon } from '../../../assets/icons';
+import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
@@ -28,7 +29,6 @@ function DeTaiNCKHThamGia() {
     const isAll = queryParams.get('all');
     const [isLoading, setIsLoading] = useState(true);
     const [scientificResearch, setScientificResearch] = useState(null);
-    const [heightContainerLoading, setHeightContainerLoading] = useState(0);
     const [dataFollower, setDataFollower] = useState([])
     const [dataAttach, setDataAttach] = useState([])
     const fileInputRef = useRef(null);
@@ -84,11 +84,6 @@ function DeTaiNCKHThamGia() {
         }
     }, [tabActive])
 
-    useEffect(() => {
-        const height = document.getElementsByClassName('main-content')[0].clientHeight;
-        setHeightContainerLoading(height);
-    }, []);
-
     const getInfoscientificResearch = async () => {
         try {
             if (SRIdFromUrl) {
@@ -111,9 +106,9 @@ function DeTaiNCKHThamGia() {
                 if (response.status === 200) {
                     const dataAttach = response.data.data.map((data, index) => {
                         return {
-                            key: index + 1,
+                            id: data.id,
                             filename: data.filename,
-                            createDate: data.createDate,
+                            createDate: dayjs(data.createDate).format('DD/MM/YYYY HH:mm'),
                             createUser: data.createUser.fullname
                         }
                     })
@@ -196,10 +191,6 @@ function DeTaiNCKHThamGia() {
 
     const columns = [
         {
-            title: 'STT',
-            dataIndex: 'key',
-        },
-        {
             title: 'File đính kèm',
             dataIndex: 'filename',
             key: 'filename',
@@ -273,7 +264,7 @@ function DeTaiNCKHThamGia() {
 
 
     return isLoading ? (
-        <div className={cx('container-loading')} style={{ height: heightContainerLoading }}>
+        <div className={cx('container-loading')}>
             <Spin size="large" />
         </div>
     ) : (
@@ -292,7 +283,7 @@ function DeTaiNCKHThamGia() {
                                                 ? config.routes.NhomDeTaiNCKH_Department
                                                 : config.routes.NhomDeTaiNCKH
                                         }>
-                                        Nhóm đề tài nghiên cứu khoa học
+                                        Nhóm đề tài nghiên cứu ngành học
                                     </Link>,
                                 }
                             ] : []),
@@ -304,11 +295,11 @@ function DeTaiNCKHThamGia() {
                                     navigate(url);
                                 }}
                             >
-                                Danh sách đề tài nghiên cứu khoa học
+                                Danh sách đề tài nghiên cứu ngành học
                             </span>,
                         },
                         {
-                            title: "Thông tin đề tài nghiên cứu khoa học",
+                            title: "Thông tin đề tài nghiên cứu ngành học",
                         },
 
                     ]
@@ -320,11 +311,11 @@ function DeTaiNCKHThamGia() {
                                     ? config.routes.NhomDeTaiNCKH_Department
                                     : config.routes.NhomDeTaiNCKH
                             } >
-                                Nhóm đề tài nghiên cứu khoa học
+                                Nhóm đề tài nghiên cứu ngành học
                             </Link>,
                         },
                         {
-                            title: "Thông tin đề tài nghiên cứu khoa học",
+                            title: "Thông tin đề tài nghiên cứu ngành học",
                         },
                     ]
                 }
@@ -335,7 +326,7 @@ function DeTaiNCKHThamGia() {
                         <ProjectIcon />
                     </span>
                     <h3 className={cx('title')}>
-                        Thông tin đề tài nghiên cứu khoa học
+                        Thông tin đề tài nghiên cứu ngành học
                     </h3>
                 </div>
                 {isToolbar && (

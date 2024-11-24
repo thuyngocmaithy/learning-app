@@ -95,8 +95,8 @@ function NhomDeTaiKhoaLuan() {
             width: '200px'
         },
         {
-            title: 'Khoa',
-            dataIndex: ['faculty', 'facultyName'],
+            title: 'Ngành',
+            dataIndex: ['faculty'],
             key: 'faculty',
         },
         {
@@ -114,15 +114,15 @@ function NhomDeTaiKhoaLuan() {
         {
             title: 'Trạng thái',
             key: 'status',
-            dataIndex: ['status', 'statusName'],
+            dataIndex: ['status'],
             align: 'center',
             width: '190px',
-            render: (statusName, record) => (
+            render: (_, record) => (
                 <Tag
                     className='status-table'
                     color={record.status.color}
                 >
-                    {statusName.toUpperCase()}
+                    {record.status.statusName.toUpperCase()}
                 </Tag>
             ),
         },
@@ -193,6 +193,7 @@ function NhomDeTaiKhoaLuan() {
                 const resultData = result.data.data.map((item) => {
                     return {
                         ...item,
+                        faculty: item.faculty.facultyName,
                         // startCreateThesisDate và endCreateThesisDate đều null
                         // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh
@@ -257,7 +258,7 @@ function NhomDeTaiKhoaLuan() {
         );
     }, [showModalUpdate, isUpdate]);
 
-    //lấy danh sách các khoa ra ngoài thẻ select
+    //lấy danh sách các ngành ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             try {
@@ -300,83 +301,66 @@ function NhomDeTaiKhoaLuan() {
     }, [statusType]);
 
     // Tạo field cho bộ lọc
-    const getFilterFields = () => {
-        return (
-            <>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'thesisGroupId'}
-                        label={'Mã nhóm đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'thesisGroupName'}
-                        label={'Tên nhóm đề tài'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'startYear'}
-                        label={'Năm thực hiện'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'finishYear'}
-                        label={'Năm kết thúc'}
-                    >
-                        <Input />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'faculty'}
-                        label={'Khoa'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={facultyOptions}
-                            labelInValue
-                        />
-                    </FormItem>
-                </Col>
-                <Col className="gutter-row" span={6}>
-                    <FormItem
-                        name={'status'}
-                        label={'Trạng thái'}
-                    >
-                        <Select
-                            style={{ width: '100%' }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={statusOptions}
-                            labelInValue
-                        />
-                    </FormItem>
-                </Col>
-
-            </>
-        )
-    };
+    const filterFields = [
+        <FormItem
+            name={'thesisGroupId'}
+            label={'Mã nhóm đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'thesisGroupName'}
+            label={'Tên nhóm đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'startYear'}
+            label={'Năm thực hiện'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'finishYear'}
+            label={'Năm kết thúc'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'faculty'}
+            label={'Ngành'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={facultyOptions}
+                labelInValue
+            />
+        </FormItem>,
+        <FormItem
+            name={'status'}
+            label={'Trạng thái'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={statusOptions}
+                labelInValue
+            />
+        </FormItem>
+    ]
 
     const onSearch = async (values) => {
         try {
-            // Lấy value ID của khoa từ select
+            // Lấy value ID của ngành từ select
             values.faculty = values.faculty?.value || undefined;
 
             const response = await getWhere(values);
@@ -432,7 +416,7 @@ function NhomDeTaiKhoaLuan() {
                 <>
                     <div className={`slide ${showFilter ? 'open' : ''}`}>
                         <SearchForm
-                            getFields={getFilterFields}
+                            getFields={filterFields}
                             onSearch={onSearch}
                             onReset={fetchData}
                         />
@@ -458,7 +442,7 @@ function NhomDeTaiKhoaLuan() {
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
                     {listThesisJoined.map((item, index) => {
-                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : 'green';
+                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : item.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiKhoaLuanThamGia')}

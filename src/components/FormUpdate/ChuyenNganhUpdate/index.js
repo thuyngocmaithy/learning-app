@@ -128,10 +128,10 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                 >
                     <Input disabled={viewOnly} />
                 </FormItem>
-                <FormItem name="facultyId" label="Khoa-Ngành" rules={[{ required: true, message: 'Vui lòng chọn khoa/ngành' }]}>
+                <FormItem name="facultyId" label="Ngành" rules={[{ required: true, message: 'Vui lòng chọn ngành' }]}>
                     <Select
                         showSearch
-                        placeholder="Chọn khoa"
+                        placeholder="Chọn ngành"
                         optionFilterProp="children"
                         onChange={handleFacultySelect}
                         value={selectedFaculty}

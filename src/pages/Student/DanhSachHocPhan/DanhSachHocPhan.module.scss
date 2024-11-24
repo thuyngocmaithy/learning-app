@@ -9,6 +9,8 @@
 
     .toolbar {
         display: flex;
+        justify-content: space-between;
+        align-items: center;
 
         :global .ant-radio-group.ant-radio-group-block {
             display: block;
@@ -25,6 +27,7 @@
     font-weight: 700;
     display: flex;
     align-items: center;
+    text-align: left;
 }
 
 .icon {
@@ -94,7 +97,28 @@
 
     .toolbar {
         margin-top: 20px;
-        display: flex;
-        justify-content: space-between;
+    }
+
+    :global .ant-descriptions-view tbody tr {
+        margin-left: 20px;
+        justify-content: flex-start !important;
+    }
+
+}
+
+@media only screen and (max-width: 576px) {
+    .toolbar {
+        flex-direction: column;
+
+        .action,
+        .filter {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .action {
+            margin-top: 10px;
+        }
     }
 }

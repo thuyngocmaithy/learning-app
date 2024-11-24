@@ -8,7 +8,6 @@ import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import ButtonCustom from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { createExpectedScore, deleteExpectedScoreBySubjectAndStudent, getExpectedScoreByStudentId, updateExpectedScore } from '../../../services/scoreService';
-import { GradeScoreContext } from '../../../context/GradeScoreContext';
 import { getScore, getUserById } from '../../../services/userService';
 
 const cx = classNames.bind(styles);
@@ -30,7 +29,23 @@ function DiemTotNghiep() {
     const [currentCredits, setCurrentCredits] = useState(0);
     const [expectedSubjects, setexpectedSubjects] = useState([]);
     const [prevScores, setPrevScores] = useState([]);
-    const [scores, setScores] = useState(); // ds điểm dùng cho dashboard
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchPoint = async () => {
@@ -48,7 +63,6 @@ function DiemTotNghiep() {
         const fetchCurrentCreditHour = async () => {
             try {
                 const responseScore = await getScore(access_token);
-                setScores(responseScore.data.ds_diem_hocky)
 
                 if (responseScore.status === 'success') {
                     for (let diem of responseScore.data.ds_diem_hocky) {
@@ -242,26 +256,31 @@ function DiemTotNghiep() {
     ];
     const dataSubject = [
         {
+            id: 'subjetc1',
             diemhe10: 'Dưới 4.0',
             diemchu: 'F',
             diemhe4: '0'
         },
         {
+            id: 'subjetc2',
             diemhe10: '4.0 đến 5.4',
             diemchu: 'D',
             diemhe4: '1'
         },
         {
+            id: 'subjetc3',
             diemhe10: '5.5 đến 6.9',
             diemchu: 'C',
             diemhe4: '2'
         },
         {
+            id: 'subjetc4',
             diemhe10: '7.0 đến 8.4',
             diemchu: 'B',
             diemhe4: '3'
         },
         {
+            id: 'subjetc5',
             diemhe10: '8.5 đến 10',
             diemchu: 'A',
             diemhe4: '4'
@@ -280,18 +299,22 @@ function DiemTotNghiep() {
     ];
     const dataGrade = [
         {
+            id: 'grade1',
             gpa: '2.00 đến 2.49',
             grade: 'Loại trung bình',
         },
         {
+            id: 'grade2',
             gpa: '2.50 đến 3.19',
             grade: 'Loại khá',
         },
         {
+            id: 'grade3',
             gpa: '3.20 đến 3.59',
             grade: 'Loại giỏi',
         },
         {
+            id: 'grade4',
             gpa: '3.60 đến 4.00',
             grade: 'Loại xuất sắc',
         },
@@ -321,7 +344,7 @@ function DiemTotNghiep() {
             <div className={cx('title-sapxep-diem')}>
                 <h3>Điểm tốt nghiệp dự kiến (sau khi sắp xếp)</h3>
             </div>
-            <div className={cx('wrapper')}>
+            <div className={cx('wrapper-calculate')}>
                 <div className={cx('content-left')}>
                     <div className={cx('content-left-item')}>
                         <label>Điểm trung bình tích lũy hiện tại (hệ 4)</label>
@@ -440,7 +463,7 @@ function DiemTotNghiep() {
                 <TableCustomAnt
                     title={() => 'Quy đổi điểm học phần'}
                     height={null}
-                    width='40%'
+                    width={screenWidth < 768 ? '100%' : '40%'}
                     columns={columnsSubject}
                     data={dataSubject}
                     size={"large"}
@@ -450,7 +473,7 @@ function DiemTotNghiep() {
                 <TableCustomAnt
                     title={() => 'Quy đổi điểm tốt nghiệp'}
                     height={null}
-                    width='40%'
+                    width={screenWidth < 768 ? '100%' : '40%'}
                     columns={columnsGrade}
                     data={dataGrade}
                     size={"large"}
