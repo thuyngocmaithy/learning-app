@@ -151,8 +151,7 @@ function DeTaiNCKHThamGia() {
         }
 
         try {
-            const response = await uploadFile(files, userId, SRIdFromUrl); // Gọi hàm upload file
-            console.log('Upload successful:', response);
+            await uploadFile(files, userId, SRIdFromUrl); // Gọi hàm upload file            
             message.success('Tệp đã được tải lên thành công');
         } catch (error) {
             console.error('Upload failed:', error);
@@ -283,7 +282,7 @@ function DeTaiNCKHThamGia() {
                                                 ? config.routes.NhomDeTaiNCKH_Department
                                                 : config.routes.NhomDeTaiNCKH
                                         }>
-                                        Nhóm đề tài nghiên cứu ngành học
+                                        Nhóm đề tài nghiên cứu khoa học
                                     </Link>,
                                 }
                             ] : []),
@@ -295,11 +294,11 @@ function DeTaiNCKHThamGia() {
                                     navigate(url);
                                 }}
                             >
-                                Danh sách đề tài nghiên cứu ngành học
+                                Danh sách đề tài nghiên cứu khoa học
                             </span>,
                         },
                         {
-                            title: "Thông tin đề tài nghiên cứu ngành học",
+                            title: "Thông tin đề tài nghiên cứu khoa học",
                         },
 
                     ]
@@ -311,11 +310,11 @@ function DeTaiNCKHThamGia() {
                                     ? config.routes.NhomDeTaiNCKH_Department
                                     : config.routes.NhomDeTaiNCKH
                             } >
-                                Nhóm đề tài nghiên cứu ngành học
+                                Nhóm đề tài nghiên cứu khoa học
                             </Link>,
                         },
                         {
-                            title: "Thông tin đề tài nghiên cứu ngành học",
+                            title: "Thông tin đề tài nghiên cứu khoa học",
                         },
                     ]
                 }
@@ -326,7 +325,7 @@ function DeTaiNCKHThamGia() {
                         <ProjectIcon />
                     </span>
                     <h3 className={cx('title')}>
-                        Thông tin đề tài nghiên cứu ngành học
+                        Thông tin đề tài nghiên cứu khoa học
                     </h3>
                 </div>
                 {isToolbar && (

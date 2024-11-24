@@ -43,6 +43,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
             </Row>
             <div
                 style={{
+                    marginTop: "30px",
                     textAlign: 'right',
                 }}
             >

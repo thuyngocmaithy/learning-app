@@ -169,8 +169,7 @@ function NguoiDung() {
                 permission: user.permission || null,
             }));
 
-            setData(listUser);
-            console.log(listUser);
+            setData(listUser);            
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);

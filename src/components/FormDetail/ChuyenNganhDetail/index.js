@@ -20,7 +20,6 @@ export const ChuyenNganhDetail = memo(function ChuyenNganhDetail({
             setShowModal(false);
         }
     };
-    console.log(showModal);
     return (
         <Detail
             title={title}

@@ -5,7 +5,6 @@ import Dashboard from '../pages/Student/Dashboard';
 import DanhSachHocPhan from '../pages/Student/DanhSachHocPhan';
 import NhomDeTaiNCKH from '../pages/Student/NhomDeTaiNCKH';
 import DeTaiNCKH from '../pages/Student/DeTaiNCKH';
-import TienDoHocPhan from '../pages/Student/TienDoHocPhan';
 import DiemTotNghiep from '../pages/Student/DiemTotNghiep';
 import NhomDeTaiKhoaLuan from '../pages/Student/NhomDeTaiKhoaLuan';
 import DeTaiKhoaLuan from '../pages/Student/DeTaiKhoaLuan';
@@ -46,7 +45,6 @@ const privateRoutes = [
     { path: config.routes.Dashboard, component: Dashboard },
     { path: config.routes.DanhSachHocPhan, component: DanhSachHocPhan },
     { path: config.routes.DiemTotNghiep, component: DiemTotNghiep },
-    { path: config.routes.TienDoHocPhan, component: TienDoHocPhan },
     { path: config.routes.NhomDeTaiNCKH, component: NhomDeTaiNCKH },
     { path: config.routes.DeTaiNCKH, component: DeTaiNCKH, urlDepend: "NhomDeTaiNCKH" },
     { path: config.routes.DeTaiNCKHThamGia, component: DeTaiNCKHThamGia, urlDepend: ["NhomDeTaiNCKH", "NhomDeTaiNCKH_Department"] },

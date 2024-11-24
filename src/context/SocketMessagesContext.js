@@ -28,7 +28,6 @@ export const SocketMessagesProvider = ({ children }) => {
 
             // Xử lý kết nối thành công
             socketIo.on('connect', async () => {
-                console.log('Kết nối socket thành công');
                 // Cập nhật socket instance vào state
                 setSocket(socketIo);
 

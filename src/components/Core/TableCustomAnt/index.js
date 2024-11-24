@@ -81,7 +81,7 @@ function TableCustomAnt({
     if (screenWidth < 768) {
         return (
             <List
-                className={cx('list-container')}
+                className={cx('list-container-table-custom-ant')}
                 dataSource={data}
                 renderItem={(item, index) => (
                     <List.Item
@@ -106,13 +106,15 @@ function TableCustomAnt({
                                     return (
                                         <div key={col.key || col.dataIndex}>
                                             <strong>{col.title}: </strong>
-                                            {col.render
-                                                ? col.render(
-                                                    item[col.dataIndex],
-                                                    item,
-                                                    index
-                                                )
-                                                : item[col.dataIndex]}
+                                            {
+                                                col.render
+                                                    ? col.render(
+                                                        item[col.dataIndex],
+                                                        item,
+                                                        index
+                                                    )
+                                                    : item[col.dataIndex]
+                                            }
                                         </div>
                                     );
                                 }

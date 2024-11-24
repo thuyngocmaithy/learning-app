@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, forwardRef } from 'react';
+import { useState, forwardRef, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import noImage from '../../../assets/images/no-image.png';
 import styles from './Image.module.scss';
@@ -8,6 +8,10 @@ const Image = forwardRef(({ src, alt, className, fallback: customFallback = noIm
     //Nhận tất cả props ở bên ngoài
 
     const [fallback, setFallback] = useState('');
+
+    useEffect(() => {
+        setFallback('');
+    }, [src]);
 
     const handleError = () => {
         setFallback(customFallback);

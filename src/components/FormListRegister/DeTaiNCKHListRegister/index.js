@@ -74,67 +74,71 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
             return {
                 key: groupItems[0].id,
                 isApprove: isApprove,
-                label: <div style={{ display: 'flex', justifyContent: "space-between" }}>
-                    <p>Nhóm {groupKey}</p>
-                    <div>
-                        {isApprove
-                            ? <Button
-                                className={cx("btn-cancel")}
-                                verysmall
-                                outline
-                                key="list-loadmore-more"
-                                onClick={(e) => {
-                                    e.stopPropagation(); // Ngừng bọt sự kiện
-                                    e.preventDefault();
-                                    scientificResearchCancelApproveRef.current = groupItems;
-                                    setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
-                                }}
-                            >
-                                Hủy duyệt
-                            </Button>
-                            : <Button
-                                className={cx("btn-approve")}
-                                verysmall
-                                primary
-                                key="list-loadmore-more"
-                                onClick={(e) => {
-                                    e.stopPropagation(); // Ngừng bọt sự kiện
-                                    e.preventDefault();
-                                    handleApprove(groupItems)
-                                }}
-                            >
-                                Duyệt
-                            </Button>
-                        }
-                    </div>
-                </div>,
-                children: <List
-                    className="demo-loadmore-list"
-                    itemLayout="horizontal"
-                    dataSource={groupItems}
-                    renderItem={(item) => (
-                        <List.Item
-                            actions={[
-                                <Button
+                label:
+                    <div style={{ display: 'flex', justifyContent: "space-between" }}>
+                        <p>Nhóm {groupKey}</p>
+                        <div>
+                            {isApprove
+                                ? <Button
+                                    className={cx("btn-cancel")}
                                     verysmall
                                     outline
-                                    key="list-loadmore-edit"
-                                    onClick={() => {
-                                        setShowModalInfo(item.user.userId)
+                                    key="list-loadmore-more"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Ngừng bọt sự kiện
+                                        e.preventDefault();
+                                        scientificResearchCancelApproveRef.current = groupItems;
+                                        setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                     }}
-                                >Thông tin sinh viên</Button>,
-                            ]}
-                        >
-                            <Skeleton avatar title={false} loading={item.loading} active>
-                                <List.Item.Meta
-                                    avatar={<Avatar src={`data:image/jpeg;base64,${item.user.avatar}`} size={'large'} />}
-                                    title={item.user.fullname}
-                                    description={`GPA: ${item.user.GPA}`}
-                                />
-                            </Skeleton>
-                        </List.Item>
-                    )}
-                />
+                                >
+                                    Hủy duyệt
+                                </Button>
+                                : <Button
+                                    className={cx("btn-approve")}
+                                    verysmall
+                                    primary
+                                    key="list-loadmore-more"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Ngừng bọt sự kiện
+                                        e.preventDefault();
+                                        handleApprove(groupItems)
+                                    }}
+                                >
+                                    Duyệt
+                                </Button>
+                            }
+                        </div>
+                    </div>,
+                children:
+                    <List
+                        className="demo-loadmore-list"
+                        itemLayout="horizontal"
+                        dataSource={groupItems}
+                        renderItem={(item) => (
+                            <List.Item
+                                actions={[
+                                    <Button
+                                        verysmall
+                                        outline
+                                        key="list-loadmore-edit"
+                                        onClick={() => {
+                                            setShowModalInfo(item.user.userId)
+                                        }}
+                                    >
+                                        Thông tin sinh viên
+                                    </Button>,
+                                ]}
+                            >
+                                <Skeleton avatar title={false} loading={item.loading} active>
+                                    <List.Item.Meta
+                                        avatar={<Avatar src={`data:image/jpeg;base64,${item.user.avatar}`} size={'large'} />}
+                                        title={item.user.fullname}
+                                        description={`GPA: ${item.user.GPA}`}
+                                    />
+                                </Skeleton>
+                            </List.Item>
+                        )}
+                    />
             }
         });
 
@@ -339,6 +343,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                             <List.Item
                                 actions={[
                                     <Button
+                                        className={cx('info-user')}
                                         verysmall
                                         outline
                                         key="list-loadmore-edit"

@@ -346,10 +346,10 @@ function DeTaiNCKH() {
                     className={cx('breadcrumb')}
                     items={[
                         {
-                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu ngành học</Link>,
+                            title: <Link to={config.routes.NhomDeTaiNCKH}>Nhóm đề tài nghiên cứu khoa học</Link>,
                         },
                         {
-                            title: 'Danh sách đề tài nghiên cứu ngành học',
+                            title: 'Danh sách đề tài nghiên cứu khoa học',
                         },
                     ]}
                 />
@@ -363,8 +363,8 @@ function DeTaiNCKH() {
                 <h3 className={cx('title')}>
                     {
                         SRGIdFromUrl
-                            ? `Danh sách đề tài nghiên cứu ngành học nhóm: ${SRGName}`
-                            : 'Danh sách đề tài nghiên cứu ngành học'
+                            ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
+                            : 'Danh sách đề tài nghiên cứu khoa học'
                     }
 
                 </h3>

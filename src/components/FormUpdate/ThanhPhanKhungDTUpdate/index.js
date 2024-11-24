@@ -131,7 +131,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     setListSubjectSelected([])
                 }
             } catch (error) {
-                console.log('ThanhPhanKhungDTUpdate - fetchSubjectOfFC - error:', error);
+                console.error('ThanhPhanKhungDTUpdate - fetchSubjectOfFC - error:', error);
 
             }
         }

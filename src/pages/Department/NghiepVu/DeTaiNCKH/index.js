@@ -524,7 +524,7 @@ function DeTaiNCKH() {
     const DeTaiNCKHUpdateMemoized = useMemo(() => {
         return (
             <DeTaiNCKHUpdate
-                title={'đề tài nghiên cứu ngành học'}
+                title={'đề tài nghiên cứu khoa học'}
                 isUpdate={isUpdate}
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
@@ -547,7 +547,7 @@ function DeTaiNCKH() {
 
     const DeTaiNCKHDetailMemoized = useMemo(() => (
         <DeTaiNCKHDetail
-            title={'Đề tài nghiên cứu ngành học'}
+            title={'Đề tài nghiên cứu khoa học'}
             showModal={showModalDetail}
             setShowModal={setShowModalDetail}
         />
@@ -563,10 +563,10 @@ function DeTaiNCKH() {
                         className={cx('breadcrumb')}
                         items={[
                             {
-                                title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu ngành học</Link>,
+                                title: <Link to={config.routes.NhomDeTaiNCKH_Department}>Nhóm đề tài nghiên cứu khoa học</Link>,
                             },
                             {
-                                title: 'Danh sách đề tài nghiên cứu ngành học',
+                                title: 'Danh sách đề tài nghiên cứu khoa học',
                             },
                         ]}
                     />
@@ -576,7 +576,7 @@ function DeTaiNCKH() {
                         <span className={cx('icon')}>
                             <ProjectIcon />
                         </span>
-                        <h3 className={cx('title')}>Danh sách đề tài nghiên cứu ngành học</h3>
+                        <h3 className={cx('title')}>Danh sách đề tài nghiên cứu khoa học</h3>
                     </div>
                     {tabActive === 1 ? (
                         <div className={cx('wrapper-toolbar')}>

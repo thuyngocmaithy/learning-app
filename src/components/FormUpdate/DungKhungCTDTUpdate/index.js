@@ -239,7 +239,6 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const getFrameStructureByFrameId = async () => {
         try {
             const response = await getWhereFrameStructures({ studyFrame: showModal.frameId });
-            console.log(response.data.data);
 
             setFrameStructureByFrameId(response.data.data);
         } catch (error) {

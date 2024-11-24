@@ -61,8 +61,6 @@ const TableDepartment = ({
     setTeacherAssignments,
     height = 600
 }) => {
-    console.log(teacherAssignments);
-
     const [frameComponents, setFrameComponents] = useState([]); // Dữ liệu cấu trúc chương trình
     const [listSemester, setListSemester] = useState([]); // Danh sách các học kỳ
     const [isLoading, setIsLoading] = useState(true); // Trạng thái loading

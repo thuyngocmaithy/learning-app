@@ -127,7 +127,6 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             };
 
             let response;
-            console.log(thesisGroupData)
             if (isUpdate) {
                 response = await updateThesisGroupById(showModal.thesisGroupId, thesisGroupData);
                 handleCloseModal();

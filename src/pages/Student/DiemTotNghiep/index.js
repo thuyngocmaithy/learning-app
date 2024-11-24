@@ -73,7 +73,7 @@ function DiemTotNghiep() {
                     }
                 }
             } catch (error) {
-                console.log("Lỗi lấy số tín chỉ hiện tại: " + error);
+                console.error("Lỗi lấy số tín chỉ hiện tại: " + error);
             }
         }
         fetchCurrentCreditHour();
@@ -173,11 +173,9 @@ function DiemTotNghiep() {
             const subjectsToUpdate = [];
             const subjectsToDelete = [];
 
-            console.log(expectedSubjects);
 
             expectedSubjects.forEach(subject => {
                 const prevScore = prevScores.find(p => p.subjectId === subject.subjectId);
-                console.log(subject);
                 if (!prevScore) {
                     // Nếu là môn học mới và có điểm dự kiến, thêm vào danh sách tạo mới
                     if (subject.expectedScore10) {
@@ -193,7 +191,6 @@ function DiemTotNghiep() {
                 }
             });
 
-            console.log(subjectsToDelete)
             // Gửi các yêu cầu đồng thời
             await Promise.all([
                 // Xóa các điểm dự kiến

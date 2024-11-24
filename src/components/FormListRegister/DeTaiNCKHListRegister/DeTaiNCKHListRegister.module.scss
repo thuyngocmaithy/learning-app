@@ -43,3 +43,18 @@ d.container-detail {
     overflow-y: scroll;
     padding: 5px 0;
 }
+
+@media only screen and (max-width: 768px) {
+    :global .ant-list-item-action {
+        display: grid;
+        width: 100px;
+
+        button {
+            width: 100%;
+        }
+
+        .info-user {
+            margin-bottom: 5px;
+        }
+    }
+}

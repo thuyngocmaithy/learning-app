@@ -9,30 +9,32 @@
     }
 }
 
-:global .ant-list-item {
-    flex-direction: column !important;
-    align-items: start !important;
-    justify-content: flex-start !important;
+.list-container-table-custom-ant {
+    :global .ant-list-item {
+        flex-direction: column !important;
+        align-items: start !important;
+        justify-content: flex-start !important;
 
-    .status-table {
-        width: fit-content !important;
-    }
-
-    .ant-list-item-action {
-        width: 100%;
-        display: flex;
-        justify-content: flex-end;
-
-        .list-item-action {
-            margin-right: 10px;
+        .status-table {
+            width: fit-content !important;
         }
-    }
 
-    .ant-list-item-action-split {
-        display: none;
-    }
+        .ant-list-item-action {
+            width: 100%;
+            display: grid;
+            justify-content: flex-end;
 
-    .ant-input {
-        width: fit-content;
+            .list-item-action {
+                margin-right: 10px;
+            }
+        }
+
+        .ant-list-item-action-split {
+            display: none;
+        }
+
+        .ant-input {
+            width: fit-content;
+        }
     }
 }

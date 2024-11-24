@@ -120,8 +120,6 @@ function ThanhPhanKhungDT() {
 
     const handleDelete = async () => {
         try {
-            console.log(selectedRowKeys);
-
             await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();

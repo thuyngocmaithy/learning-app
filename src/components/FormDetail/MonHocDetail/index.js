@@ -21,7 +21,6 @@ export const MonHocDetail = memo(function MonHocDetail({
         }
     };
 
-    console.log(showModal);
     return (
         <Detail
             title={title}
@@ -29,22 +28,22 @@ export const MonHocDetail = memo(function MonHocDetail({
             onClose={handleCloseModal}
             className={cx('wrapper-modal-detail')}>
             <Form className={cx('container-detail')}>
-                <FormItem label={'Mã môn học: '} name="subjectId">
+                <FormItem label={'Mã môn học'} name="subjectId">
                     <p>{showModal?.subjectId || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên môn học: '} name="subjectName">
+                <FormItem label={'Tên môn học'} name="subjectName">
                     <p>{showModal?.subjectName || ''}</p>
                 </FormItem>
-                <FormItem label={'Số tín chỉ: '} name="creditHour">
+                <FormItem label={'Số tín chỉ'} name="creditHour">
                     <p>{showModal?.creditHour || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên chuyên ngành: '} name="majorName">
+                <FormItem label={'Tên chuyên ngành'} name="majorName">
                     <p>{showModal?.majorName || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên ngành: '} name="facultyName">
+                <FormItem label={'Tên ngành'} name="facultyName">
                     <p>{showModal?.facultyName || ''}</p>
                 </FormItem>
-                <FormItem label={'Bắt buộc: '} name="isCompulsory">
+                <FormItem label={'Bắt buộc'} name="isCompulsory">
                     {showModal?.isCompulsory === 1 ? <p>Có</p> : <p>Không</p>}
                 </FormItem>
 

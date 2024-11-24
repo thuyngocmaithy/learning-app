@@ -127,7 +127,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             };
 
             let response;
-            console.log(scientificResearchGroupData)
             if (isUpdate) {
                 response = await updateScientificResearchGroupById(showModal.scientificResearchGroupId, scientificResearchGroupData);
                 handleCloseModal();

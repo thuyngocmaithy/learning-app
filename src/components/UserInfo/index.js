@@ -37,7 +37,7 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
                     setUserInfo(response.data);
                 }
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
             finally {
                 setIsLoading(false)

@@ -39,8 +39,13 @@ function MonHoc() {
     const fetchData = async () => {
         try {
             const result = await getAll();
-
-            setData(result.data.data || []);
+            const dataHandle = result.data.data.map((item) => {
+                return {
+                    ...item,
+                    subjectBefore: item.subjectBefore?.subjectId
+                }
+            })
+            setData(dataHandle || []);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);

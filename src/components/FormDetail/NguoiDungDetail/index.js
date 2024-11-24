@@ -5,6 +5,7 @@ import Detail from '../../Core/Detail';
 import classNames from 'classnames/bind';
 import styles from './NguoiDung.module.scss';
 import { Form, Steps } from 'antd';
+import Image from '../../Core/Image';
 
 const cx = classNames.bind(styles);
 
@@ -38,11 +39,7 @@ export const NguoiDungDetail = memo(function NguoiDungDetail({ title, showModal,
                 {currentStep === 0 && (
                     <div className={cx('grid-container')}>
                         <div className={cx('grid-item')}>
-                            <img
-                                src={`data:image/png;base64,${showModal.avatar}`}
-                                alt="Avatar"
-                                className={cx('avatar-image')}
-                            />
+                            <Image src={`data:image/jpeg;base64,${showModal?.avatar || null}`} className={cx('image-avt')} />
                             <FormItem label={'Mã người dùng'} name="userId">
                                 <p>{showModal?.userId || ''}</p>
                             </FormItem>
@@ -52,7 +49,6 @@ export const NguoiDungDetail = memo(function NguoiDungDetail({ title, showModal,
                             <FormItem label={'Email'} name="email">
                                 <p>{showModal?.email || ''}</p>
                             </FormItem>
-
                         </div>
                         <div className={cx('grid-item')}>
                             <FormItem label={'Số căn cước công dân'} name="cccd">

@@ -238,7 +238,7 @@ function NhomDeTaiNCKH() {
                     <ProjectIcon />
                 </span>
 
-                <h3 className={cx('title')}>Nhóm đề tài nghiên cứu ngành học</h3>
+                <h3 className={cx('title')}>Nhóm đề tài nghiên cứu khoa học</h3>
             </div>
             <Tabs
                 activeKey={tabActive}

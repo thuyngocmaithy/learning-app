@@ -14,12 +14,20 @@
 
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; // Hai cột bằng nhau
-    gap: 16px; // Khoảng cách giữa các mục
+    // grid-template-columns: 1fr 1fr; // Hai cột bằng nhau
+    // gap: 16px; // Khoảng cách giữa các mục
     width: 100%; // Đảm bảo lưới sử dụng toàn bộ chiều rộng có sẵn
 }
 
 .grid-item {
     display: flex;
     flex-direction: column;
+}
+
+.image-avt {
+    width: 110px;
+    height: 110px;
+    border-radius: 10px;
+    margin: 0 auto;
+    margin-bottom: 20px;
 }

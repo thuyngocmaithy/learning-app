@@ -165,8 +165,7 @@ function DeTaiKhoaLuanThamGia() {
     const handleDownload = async (file) => {
         setLoadingFiles(prev => ({ ...prev, [file]: true })); // Bắt đầu tải file cho file cụ thể
         try {
-            const response = await downloadFile(file); // Gọi hàm download file
-            console.log('Download successful:', response);
+            const response = await downloadFile(file); // Gọi hàm download file            
         } catch (error) {
             console.error('Download failed:', error);
         } finally {

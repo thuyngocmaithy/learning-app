@@ -8,15 +8,13 @@ import {
     ConfigProvider,
     Checkbox,
     Steps,
-    Button,
     Row,
     Col,
     Upload,
 } from 'antd';
-import { EyeInvisibleOutlined, EyeTwoTone, InboxOutlined, LeftCircleFilled, LeftOutlined, RightCircleFilled, RightOutlined } from '@ant-design/icons';
+import { InboxOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getAll } from '../../../services/permissionService';
 import {
     createUser,
     updateUserById,
@@ -26,7 +24,7 @@ import {
 import classNames from 'classnames/bind';
 import styles from './NguoiDungUpdate.module.scss';
 import { getAllFaculty } from '../../../services/facultyService';
-import { getMajorByFacultyId, getMajorByFacultyName, getWhere } from '../../../services/majorService';
+import { getWhere } from '../../../services/majorService';
 import viVN from 'antd/es/locale/vi_VN'; // Import the Vietnamese locale for Antd
 import 'moment/locale/vi';
 import moment from 'moment';
@@ -55,8 +53,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const [fileList, setFileList] = useState([]);
     const [avatarPreview, setAvatarPreview] = useState(null);
-
-
 
 
     useEffect(() => {
@@ -136,10 +132,11 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             } else {
                 setMajorOptions([]);
                 setSelectedMajor(null);
-                form.setFieldValue('majorId', null);
+                form.setFieldValue('majorId', '');
             }
         };
-        fetchMajor();
+        if (showModal)
+            fetchMajor();
     }, [selectedFaculty, showModal, form]);
 
 
@@ -225,7 +222,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleChangeSupervisor = (value) => {
         setSelectedSupervisor(value);
-        console.log(value);
     };
 
     const handleMajorSelect = (value) => {

@@ -52,10 +52,10 @@ const DeTaiKhoaLuanDetail = memo(function DeTaiKhoaLuanDetail({
                 </div>
                 <div>
                     <FormItem label={'Thời điểm bắt đầu'}>
-                        <p>{dayjs(showModal.startDate).format('DD/MM/YYYY HH:mm')}</p>
+                        <p>{showModal.startDate && dayjs(showModal.startDate).format('DD/MM/YYYY HH:mm')}</p>
                     </FormItem>
                     <FormItem label={'Hạn hoàn thành'}>
-                        <p>{dayjs(showModal.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                        <p>{showModal.finishDate && dayjs(showModal.finishDate).format('DD/MM/YYYY HH:mm')}</p>
                     </FormItem>
                     <FormItem label={'Kinh phí'}>
                         <p>{convertToVND(showModal.budget)}</p>

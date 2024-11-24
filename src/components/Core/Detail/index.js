@@ -28,7 +28,6 @@ function Detail({ title = '', children, showModal, onClose }) {
             onCancel={handleCancel}
             footer={null}
             width={"max-content"}
-            style={{ maxWidth: "1000px", minWidth: "500px" }}
         >
             {children}
         </Modal>
