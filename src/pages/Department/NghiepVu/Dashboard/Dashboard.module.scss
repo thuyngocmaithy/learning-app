@@ -1,5 +1,6 @@
 h3 {
     text-align: center;
+    color: currentColor !important;
 }
 
 .info {
@@ -26,16 +27,52 @@ h3 {
 
 }
 
-.container-chart {
-    margin: 20px 0;
+// .container-chart {
+//     margin: 20px 0;
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-around;
+//     width: 80%;
+// }
+
+// .chart {
+//     display: flex;
+// }
+
+// .circle-chart {
+//     display: flex;
+//     justify-content: space-around;
+//     margin: 70px 0;
+// }
+.groupSta {
     display: flex;
-    align-items: center;
     justify-content: space-around;
-    width: 80%;
+    margin: 40px 0;
+    align-items: center;
 }
 
-.circle-chart {
-    display: flex;
-    justify-content: space-around;
-    margin: 70px 0;
+.container-title {
+    margin: 25px 0;
+    background-color: var(--color-bg-title);
+    padding: 20px 50px;
+    color: var(--color-text-title);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    font-size: 21px;
+    text-align: center;
+    box-shadow: var(--box-shadow-3);
+
+    h3 {
+        color: currentColor !important;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+
+    .list-card,
+    .groupSta {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 }

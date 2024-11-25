@@ -11,10 +11,12 @@ import { getFacultyById } from '../../../services/facultyService';
 import { getScore, getUserById } from '../../../services/userService';
 import { Spin } from 'antd';
 import { getExpectedScoreByStudentId } from '../../../services/scoreService';
+import { ThemeContext } from '../../../context/ThemeContext';
 
 const cx = classNames.bind(styles);
 
 function Home() {
+    const { theme } = useContext(ThemeContext);
     const { userId, access_token } = useContext(AccountLoginContext);
     const [scores, setScores] = useState();
     const [creditHourCurrent, setCreditHourCurrent] = useState(0);
@@ -34,6 +36,15 @@ function Home() {
                     type: 'bar',
                     height: 350,
                 },
+                legend: {
+                    labels: {
+                        colors: ['var(--color-text-base)', 'var(--color-text-base)'],
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 600,
+                        },
+                    },
+                },
                 plotOptions: {
                     bar: {
                         horizontal: false,
@@ -51,8 +62,14 @@ function Home() {
                 },
                 xaxis: {
                     categories: chartData.categories,
+                    labels: {
+                        style: { colors: 'var(--color-text-base)' }
+                    },
                 },
                 yaxis: {
+                    labels: {
+                        style: { colors: 'var(--color-text-base)' }
+                    },
                 },
                 fill: {
                     opacity: 1,
@@ -97,7 +114,7 @@ function Home() {
                 ],
             },
         })
-    }, []);
+    }, [theme]);
 
 
     const fetchChartData = useCallback(async () => {

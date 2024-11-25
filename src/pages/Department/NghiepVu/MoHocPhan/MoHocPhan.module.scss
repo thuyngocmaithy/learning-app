@@ -65,12 +65,16 @@
 
 .title-list-course-opening {
     margin: 25px 0;
-    background-color: #f6ffed;
+    background-color: var(--color-bg-title);
     padding: 20px 50px;
-    color: #389e0d;
+    color: var(--color-text-title);
     letter-spacing: 2.5px;
     font-weight: 500;
     font-size: 21px;
     text-align: center;
     box-shadow: var(--box-shadow-3);
+
+    h3 {
+        color: currentColor !important;
+    }
 }

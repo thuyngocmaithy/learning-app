@@ -4,9 +4,19 @@
     align-items: center;
 }
 
-.container-table {
+.container-table-score {
     box-shadow: var(--box-shadow-1);
     border-radius: 17px;
+
+    td,
+    th {
+        color: var(--color-text-base);
+        background-color: var(--color-bg-popup);
+    }
+}
+
+.css-1ps6pg7-MuiPaper-root {
+    background-color: var(--color-bg-popup);
 }
 
 .radio-period {

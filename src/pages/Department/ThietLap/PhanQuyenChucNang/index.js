@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { deletePermissions, getAll as getAllPermission } from '../../../../services/permissionService';
 import { deleteFeatures, saveTreeFeature } from '../../../../services/featureService';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
-import { message, Spin, Tabs } from 'antd';
+import { message, Tabs } from 'antd';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import ChucNangUpdate from '../../../../components/FormUpdate/ChucNangUpdate';

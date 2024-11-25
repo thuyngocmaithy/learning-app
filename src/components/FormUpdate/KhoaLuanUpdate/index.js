@@ -35,7 +35,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedMemberCount, setSelectedMemberCount] = useState(null);
 
-    const statusType = 'Tiến độ khóa luận';
+    const statusType = 'Tiến độ đề tài khóa luận';
 
     // Fetch data khi component được mount
     //lấy danh sách các ngành ra ngoài thẻ select
@@ -88,7 +88,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         fetchSupervisors();
     }, [selectedFaculty, selectedSupervisor]);
 
-    // Fetch danh sách trạng thái theo loại "Tiến độ khóa luận"
+    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài khóa luận"
 
 
     useEffect(() => {

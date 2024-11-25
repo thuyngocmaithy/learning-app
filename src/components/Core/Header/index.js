@@ -13,10 +13,12 @@ import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import config from '../../../config';
 import UserInfo from '../../UserInfo';
 import { MoonFilled, MoonOutlined } from '@ant-design/icons';
+import { ThemeContext } from '../../../context/ThemeContext';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const { theme, toggleTheme } = useContext(ThemeContext)
     const { avatar, updateUserInfo } = useContext(AccountLoginContext)
     const { notifications } = useSocketNotification();
     const [countNotRead, setCountNotRead] = useState(0);
@@ -78,12 +80,14 @@ function Header() {
     ), [showModalInfo]);
 
     return (
-        <div className={cx('wrapper')}>
+        <div className={cx('wrapper', theme === 'dark' ? 'dark' : '')}>
             <div className={cx('actions')}>
                 <span>
                     <Switch
+                        checked={theme === "dark" ? true : false}
                         checkedChildren={<MoonFilled />}
                         unCheckedChildren={<MoonOutlined />}
+                        onChange={toggleTheme}
                     />
                 </span>
                 <span>

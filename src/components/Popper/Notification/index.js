@@ -58,11 +58,11 @@ function Notification({ children }) {
                         )}
                     </div>
                     <div className={cx('option')}>
-                        <Button outline verysmall onClick={handleReadAll} className={cx('btn-readAll')}>
+                        < Button outline verysmall onClick={handleReadAll} className={cx('btn-readAll')} >
                             Đánh dấu đã đọc tất cả
                         </Button>
                     </div>
-                </div>
+                </div >
             </PopperWrapper >
         </div >
     );

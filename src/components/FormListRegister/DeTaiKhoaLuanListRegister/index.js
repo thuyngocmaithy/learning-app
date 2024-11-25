@@ -79,7 +79,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
                     <div>
                         {isApprove
                             ? <Button
-                                className={cx("btn-cancel")}
+                                colorRed
                                 verysmall
                                 outline
                                 key="list-loadmore-more"
@@ -349,7 +349,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
                                         Thông tin sinh viên
                                     </Button>,
                                     item.isApprove
-                                        ? <Button className={cx("btn-cancel")} verysmall outline key="list-loadmore-more" onClick={() => {
+                                        ? <Button colorRed verysmall outline key="list-loadmore-more" onClick={() => {
                                             thesisCancelApproveRef.current = [item];
                                             setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                         }}>

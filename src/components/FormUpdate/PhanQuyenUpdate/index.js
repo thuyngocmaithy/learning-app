@@ -71,7 +71,10 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                 const attachChildren = (features) => {
                     features.forEach((feature) => {
                         if (featureMap.has(feature.featureId)) {
-                            feature.children = featureMap.get(feature.featureId);
+                            feature.children = featureMap.get(feature.featureId).map((child) => ({
+                                ...child,
+                                key: `${feature.featureId}-${child.featureId}`, // Tạo key duy nhất
+                            }));
                             attachChildren(feature.children);  // Đệ quy gắn con cho tất cả các cấp
                         }
                     });
@@ -248,28 +251,49 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
         setDataFeature(newData);
     };
 
+    const updateFeatureRecursively = (features, targetFeatureId, updateCallback) => {
+        return features.map(feature => {
+            if (feature.featureId === targetFeatureId) {
+                // Nếu tìm thấy tính năng cần cập nhật
+                return updateCallback(feature);
+            }
+
+            if (feature.children && feature.children.length > 0) {
+                // Nếu có children, gọi đệ quy để cập nhật
+                return {
+                    ...feature,
+                    children: updateFeatureRecursively(feature.children, targetFeatureId, updateCallback),
+                };
+            }
+
+            return feature; // Trả lại tính năng không bị thay đổi
+        });
+    };
+
+
     const handleSelectRow = (record) => {
         const allChecked = Object.keys(record.permissionDetail).every(
             (key) => record.permissionDetail?.[key] ?? false
         );
 
-        const newData = dataFeature.map(item =>
-            item.featureId === record.featureId
-                ? {
-                    ...item,
-                    permissionDetail: {
-                        ...item.permissionDetail,
-                        isView: !allChecked,
-                        isAdd: !allChecked,
-                        isEdit: !allChecked,
-                        isDelete: !allChecked,
-                    }
-                }
-                : item
-        );
+        // Hàm callback để cập nhật trạng thái `permissionDetail`
+        const updateCallback = (feature) => ({
+            ...feature,
+            permissionDetail: {
+                ...feature.permissionDetail,
+                isView: !allChecked,
+                isAdd: !allChecked,
+                isEdit: !allChecked,
+                isDelete: !allChecked,
+            },
+        });
 
-        setDataFeature(newData);
+        // Cập nhật dữ liệu bằng hàm đệ quy
+        const updatedDataFeature = updateFeatureRecursively(dataFeature, record.featureId, updateCallback);
+
+        setDataFeature(updatedDataFeature);
     };
+
 
     const columns = useCallback(
         () => [
@@ -486,6 +510,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                     isPagination={false}
                     isHideSTT={true}
                     loading={isLoading}
+                    keyIdChange={"featureId"}
                 />
             </>
         </Update>
