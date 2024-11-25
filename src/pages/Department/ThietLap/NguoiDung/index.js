@@ -169,7 +169,7 @@ function NguoiDung() {
                 permission: user.permission || null,
             }));
 
-            setData(listUser);            
+            setData(listUser);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -181,7 +181,7 @@ function NguoiDung() {
 
     useEffect(() => {
         fetchData();
-        fetchNgànhData();
+        fetchFacultyData();
     }, []);
 
     useEffect(() => {
@@ -262,7 +262,7 @@ function NguoiDung() {
     ];
 
 
-    const fetchNgànhData = async () => {
+    const fetchFacultyData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)

@@ -10,7 +10,7 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
-import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRByIds } from '../../../../services/scientificResearchService';
+import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRByIds, importScientificResearch } from '../../../../services/scientificResearchService';
 import { getBySRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
@@ -21,6 +21,7 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
 import { getScientificResearchGroupById } from '../../../../services/scientificResearchGroupService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -42,6 +43,8 @@ function DeTaiNCKH() {
     const { permissionDetails } = useContext(PermissionDetailContext);
     const [showFilter, setShowFilter] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
+
     // khóa toolbar nhập liệu khi có SRGId trên url và SRGId là nhóm đề tài NCKH hết hạn nhập liệu
     const [disableToolbar, setDisableToolbar] = useState(false);
 
@@ -604,7 +607,7 @@ function DeTaiNCKH() {
                             <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài nghiên cứu', handleDisable)} />
                             <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài nghiên cứu', handleEnable)} />
                             {!disableToolbar &&
-                                <Toolbar type={'Nhập file Excel'} />
+                                <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} onClick={() => setShowModalImport(true)} />
                             }
                             <Toolbar type={'Xuất file Excel'} />
                         </div>
@@ -630,6 +633,14 @@ function DeTaiNCKH() {
             {DeTaiNCKHUpdateMemoized}
             {DeTaiNCKHListRegisterMemoized}
             {DeTaiNCKHDetailMemoized}
+            <ImportExcel
+                title={'đề tài nghiên cứu khoa học'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.SCIENRESEARCH}
+                onImport={importScientificResearch}
+            />
         </>
     );
 }

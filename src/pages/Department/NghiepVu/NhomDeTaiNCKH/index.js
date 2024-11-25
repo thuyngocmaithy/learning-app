@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiNCKH.module.scss';
-import { Card, Col, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
+import { Card, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -9,7 +9,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds, importScientificResearchGroup } from '../../../../services/scientificResearchGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
@@ -19,6 +19,7 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -37,6 +38,7 @@ function NhomDeTaiNCKH() {
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
 
 
 
@@ -505,7 +507,7 @@ function NhomDeTaiNCKH() {
                             isVisible={permissionDetailData.isDelete} />
                         <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài nghiên cứu', handleDisable)} />
                         <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài nghiên cứu', handleEnable)} />
-                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} />
+                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} onClick={() => setShowModalImport(true)} />
                         <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
                     </div>
                 )}
@@ -524,6 +526,14 @@ function NhomDeTaiNCKH() {
             />
 
             {NhomDeTaiNCKHUpdateMemoized}
+            <ImportExcel
+                title={'nhóm đề tài nghiên cứu khoa học'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.SCIENRESEARCHGROUP}
+                onImport={importScientificResearchGroup}
+            />
         </div>
     );
 }

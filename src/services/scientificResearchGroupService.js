@@ -73,3 +73,12 @@ export const getWhere = async (conditions) => {
         throw error;
     }
 };
+
+
+export const importScientificResearchGroup = async (data) => {
+    try {
+
+    } catch (error) {
+
+    }
+};

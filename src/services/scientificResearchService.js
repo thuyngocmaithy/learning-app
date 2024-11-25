@@ -98,3 +98,12 @@ export const getBySRGIdAndCheckApprove = async (conditions) => {
         throw error;
     }
 };
+
+
+export const importScientificResearch = async (data) => {
+    try {
+
+    } catch (error) {
+
+    }
+};

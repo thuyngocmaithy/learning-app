@@ -55,8 +55,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     //lấy danh sách giảng viên theo ngành
     const fetchInstructors = async (SRGIdInput) => {
-        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput);
-        const response = await getUsersByFaculty(SRG.data.faculty?.facultyId);
+        console.log("SRGIdInput:", SRGIdInput)
+        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput.key);
+        console.log(SRG);
+        const response = await getUsersByFaculty(SRG.data?.data.faculty?.facultyId);
+        console.log(response);
         if (response && response.data) {
             const options = response.data.map((user) => ({
                 value: user.userId,

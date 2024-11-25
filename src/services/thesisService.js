@@ -98,3 +98,11 @@ export const getByThesisGroupIdAndCheckApprove = async (conditions) => {
         throw error;
     }
 };
+
+export const importThesis = async (data) => {
+    try {
+
+    } catch (error) {
+
+    }
+};

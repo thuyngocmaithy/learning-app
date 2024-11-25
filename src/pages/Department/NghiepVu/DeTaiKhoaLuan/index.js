@@ -10,7 +10,7 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
-import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds } from '../../../../services/thesisService';
+import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds, importThesis } from '../../../../services/thesisService';
 import { getByThesisId } from '../../../../services/thesisUserService';
 import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
 import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
@@ -21,6 +21,7 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
 import { getThesisGroupById } from '../../../../services/thesisGroupService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -42,6 +43,7 @@ function DeTaiKhoaLuan() {
     const { permissionDetails } = useContext(PermissionDetailContext);
     const [showFilter, setShowFilter] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
     // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
     const [disableToolbar, setDisableToolbar] = useState(false);
 
@@ -575,7 +577,7 @@ function DeTaiKhoaLuan() {
                             <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài khóa luận', handleDisable)} />
                             <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài khóa luận', handleEnable)} />
                             {!disableToolbar &&
-                                <Toolbar type={'Nhập file Excel'} />
+                                <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} onClick={() => setShowModalImport(true)} />
                             }
                             <Toolbar type={'Xuất file Excel'} />
                         </div>
@@ -601,6 +603,14 @@ function DeTaiKhoaLuan() {
             {DeTaiKhoaLuanUpdateMemoized}
             {DeTaiKhoaLuanListRegisterMemoized}
             {DeTaiKhoaLuanDetailMemoized}
+            <ImportExcel
+                title={'đề tài khoá luận'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.THESIS}
+                onImport={importThesis}
+            />
         </>
     );
 }
