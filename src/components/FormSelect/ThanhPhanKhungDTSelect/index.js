@@ -33,7 +33,7 @@ const ThanhPhanKhungDTFormSelect = memo(function ThanhPhanKhungDTFormSelect({
         }
     };
 
-    // Lấy data cho bảng thành phần khung đào tạo
+    // Lấy data cho bảng khối kiến thức
     const fetchData = async () => {
         try {
             const result = await getAllStudyFrameComponent();
@@ -47,7 +47,7 @@ const ThanhPhanKhungDTFormSelect = memo(function ThanhPhanKhungDTFormSelect({
                 }
                 ));
 
-                // Set các thành phần khung đào tạo đã có trong db
+                // Set các khối kiến thức đã có trong db
                 setSelectedRowKeys(selectedItem);
             }
             setIsLoading(false);
@@ -64,12 +64,12 @@ const ThanhPhanKhungDTFormSelect = memo(function ThanhPhanKhungDTFormSelect({
 
     const columns = [
         {
-            title: 'Mã thành phần khung đào tạo',
+            title: 'Mã khối kiến thức',
             dataIndex: 'frameComponentId',
             key: 'frameComponentId',
         },
         {
-            title: 'Tên thành phần khung',
+            title: 'Tên khối kiến thức',
             dataIndex: 'frameComponentName',
             key: 'frameComponentName',
         },

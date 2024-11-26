@@ -28,7 +28,7 @@ function NganhChuyenNganh() {
     // Ngành states
     const [ngànhData, setNgànhData] = useState([]);
     const [ngànhIsLoading, setNgànhIsLoading] = useState(true);
-    const [ngànhSelectedKeys, setNgànhSelectedKeys] = useState([]);
+    const [nganhSelectedKeys, setNgànhSelectedKeys] = useState([]);
     const [ngànhShowModal, setNgànhShowModal] = useState(false);
     const [ngànhIsUpdate, setNgànhIsUpdate] = useState(false);
     const [ngànhViewOnly, setNgànhViewOnly] = useState(false);
@@ -104,7 +104,7 @@ function NganhChuyenNganh() {
     // Delete handlers
     const handleNgànhDelete = async () => {
         try {
-            await deleteFacultyById({ ids: ngànhSelectedKeys.join(',') });
+            await deleteFacultyById({ ids: nganhSelectedKeys.join(',') });
             fetchNgànhData();
             setNgànhSelectedKeys([]);
             message.success('Xoá ngành thành công');
@@ -389,7 +389,7 @@ function NganhChuyenNganh() {
                         height={'600px'}
                         columns={ngànhColumns}
                         data={ngànhData}
-                        selectedRowKeys={ngànhSelectedKeys}
+                        selectedRowKeys={nganhSelectedKeys}
                         setSelectedRowKeys={setNgànhSelectedKeys}
                         loading={ngànhIsLoading}
                         keyIdChange="facultyId"

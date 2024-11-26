@@ -111,7 +111,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
     }, [showModal]);
 
     useEffect(() => {
-        // fetch danh sách các môn học thuộc thành phần khung
+        // fetch danh sách các môn học thuộc khối kiến thức
         const fetchSubjectOfFC = async () => {
             try {
                 const response = await getWheresubject_studyFrameComp({
@@ -216,7 +216,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
             }
 
             if (response && response.data) {
-                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} thành phần khung đào tạo thành công!`);
+                message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} khối kiến thức thành công!`);
                 if (isUpdate) handleCloseModal();
                 if (reLoad) reLoad();
             }
@@ -265,22 +265,22 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     <>
                         <FormItem
                             name="frameComponentId"
-                            label="Mã thành phần khung"
-                            rules={[{ required: true, message: 'Vui lòng nhập mã thành phần khung' }]}
+                            label="Mã khối kiến thức"
+                            rules={[{ required: true, message: 'Vui lòng nhập mã khối kiến thức' }]}
                         >
                             <Input disabled={isUpdate} />
                         </FormItem>
                         <FormItem
                             name="frameComponentName"
-                            label="Tên thành phần khung"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên thành phần khung' }]}
+                            label="Tên khối kiến thức"
+                            rules={[{ required: true, message: 'Vui lòng nhập tên khối kiến thức' }]}
                         >
                             <Input />
                         </FormItem>
                         <FormItem
                             name="description"
                             label="Mô tả"
-                            rules={[{ required: true, message: 'Vui lòng nhập mô tả thành phần khung' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mô tả khối kiến thức' }]}
                         >
                             <TextArea />
                         </FormItem>
@@ -332,7 +332,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                             columns={columns}
                             targetObjects={listSubjectSelected}
                             setTargetObjects={setListSubjectSelected}
-                            titles={['Tất cả học phần', 'Học phần thuộc thành phần khung']}
+                            titles={['Tất cả học phần', 'Học phần thuộc khối kiến thức']}
                         />
                     </>
                 )}

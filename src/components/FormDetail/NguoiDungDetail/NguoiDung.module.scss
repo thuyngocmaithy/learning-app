@@ -25,9 +25,14 @@
 }
 
 .image-avt {
-    width: 110px;
-    height: 110px;
+    width: 130px;
+    height: 130px;
     border-radius: 10px;
-    margin: 0 auto;
-    margin-bottom: 20px;
+    margin: 10px auto;
+    margin-top: 20px;
+    display: flex;
+}
+
+.container-detail {
+    padding: 20px;
 }

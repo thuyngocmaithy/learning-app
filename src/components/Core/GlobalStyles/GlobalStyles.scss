@@ -484,4 +484,10 @@ body {
     // .ant-checkbox .ant-checkbox-inner {
     //     border: var(--color-border);
     // }
+
+    .ant-tree .ant-tree-switcher {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 }

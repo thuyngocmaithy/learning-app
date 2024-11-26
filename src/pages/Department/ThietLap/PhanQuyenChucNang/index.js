@@ -229,6 +229,7 @@ function PhanQuyenChucNang() {
                     columns={columnsPermisison(setShowModalPermission)}
                     data={dataPermission}
                     height="550px"
+                    selectedRowKeys={selectedPermission}
                     setSelectedRowKeys={setSelectedPermission}
                     keyIdChange={"permissionId"}
                     loading={isLoadingPermission}

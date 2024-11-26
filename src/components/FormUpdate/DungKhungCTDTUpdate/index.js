@@ -44,7 +44,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const thanhPhanKhungDTFormSelectMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTFormSelect
-                title={'thành phần khung chương trình đào tạo'}
+                title={'khối kiến thức chương trình đào tạo'}
                 showModal={showModalSelect}
                 setShowModal={setShowModalSelect}
                 setSelectedItem={setSelectedFrameComp}
@@ -90,7 +90,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
     }, [])
 
-    // Nhận các thành phần khung từ Form Select
+    // Nhận các khối kiến thức từ Form Select
     useEffect(() => {
         if (receiveFormSelect) {
             fetchData(); // Gọi lại fetchData
@@ -249,7 +249,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
     const fetchData = async () => {
         try {
-            // Tìm thành phần khung được chọn từ form select
+            // Tìm khối kiến thức được chọn từ form select
             const frameStructurePromise = frameStructureByFrameId?.map(async (item) => {
                 const listSujectOfFrameCompRes = await getWheresubject_studyFrameComp({ studyFrameComponent: item.studyFrameComponent?.frameComponentId });
                 const listSubjectOfFrameComp = listSujectOfFrameCompRes.data.data?.map((item) => {
@@ -268,7 +268,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
             let frameStructure = await Promise.all(frameStructurePromise)
 
-            // Lặp qua các id của selectedFrameComp để lấy thành phần khung đào tạo được chọn bỏ vào cấu trúc cây
+            // Lặp qua các id của selectedFrameComp để lấy khối kiến thức được chọn bỏ vào cấu trúc cây
             if (receiveFormSelect) {
                 const listFrameCompPromises = selectedFrameComp?.map(async (item) => {
                     // Kiểm tra xem frameComponent đã có trong frameStructure chưa
@@ -339,7 +339,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
     useEffect(() => {
         setTreeData(treeDataMemoized);
-        // Set các thành phần khung đào tạo có sẵn trong db vào form select
+        // Set các khối kiến thức có sẵn trong db vào form select
         const allKeyFrameComp = getAllKeyFrameComp(treeDataMemoized);
         setSelectedFrameComp(allKeyFrameComp);
         // Mở rộng tất cả các keys trong cây
@@ -349,7 +349,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const thanhphankhungdtDetailMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTDetail
-                title={'thành phần khung đào tạo'}
+                title={'khối kiến thức'}
                 showModal={showModalDetail}
                 setShowModal={setShowModalDetail}
             />
@@ -374,7 +374,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                         setShowModalSelect(showModal.frameId);
                     }}
                 >
-                    Chọn thành phần khung
+                    Chọn khối kiến thức
                 </Button>
                 <Checkbox onChange={onChange} style={{ fontSize: '17px' }}>Hiển thị môn học</Checkbox>
             </div>

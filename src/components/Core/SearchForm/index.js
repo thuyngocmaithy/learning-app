@@ -35,7 +35,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
     }, [form]);
 
     return (
-        <Form form={form} className={cx("advanced_search")} style={formStyle}>
+        <Form form={form} className={cx("advanced_search")} style={formStyle} onFinish={onSearch}>
             <Row gutter={[16, 16]} className={cx('row-filter')}>
                 {getFields && getFields.map((field, index) => (
                     <Col xs={24} sm={12} md={8} lg={6} key={index}>
@@ -64,11 +64,12 @@ function SearchForm({ getFields, onSearch, onReset }) {
                     <Button
                         primary
                         small
-                        onClick={onSearch}
+                        htmlType={"submit"}
                         leftIcon={<SearchOutlined />}
                     >
                         Tìm kiếm
                     </Button>
+
                 </Space>
             </div>
         </Form>

@@ -145,7 +145,7 @@ function KhungCTDT() {
                             setIsUpdate(false);
                         }}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('thành phần khung đào tạo', handleDelete)} />
+                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('khối kiến thức', handleDelete)} />
                 </div>
 
             </div>
@@ -153,6 +153,7 @@ function KhungCTDT() {
                 height={'350px'}
                 columns={columns(setShowModal)}
                 data={data}
+                selectedRowKeys={selectedRowKeys}
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
                 keyIdChange={"frameId"}

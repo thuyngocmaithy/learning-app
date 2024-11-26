@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
-import { List, Table } from 'antd';
+import { Checkbox, List, Table } from 'antd';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
@@ -83,45 +83,64 @@ function TableCustomAnt({
             <List
                 className={cx('list-container-table-custom-ant')}
                 dataSource={data}
-                renderItem={(item, index) => (
-                    <List.Item
-                        key={item.id || item[keyIdChange]}
-                        actions={columnsWithSTT.map((col) => {
-                            if (col.key === 'action') {
-                                // Xử lý riêng cột Action
-                                return (
-                                    <div key={col.key} className={cx('list-item-action')}>
-                                        {col.render
-                                            ? col.render(null, item, index) // Gọi hàm render với record
-                                            : null}
-                                    </div>
-                                );
-                            }
-                        })}
-                    >
-                        <div className={cx('list-item')}>
-                            {/* Hiển thị các cột thông thường */}
-                            {columnsWithSTT.map((col) => {
-                                if (col.key !== 'action') {
+                renderItem={(item, index) => {
+                    const key = item.id || item[keyIdChange]; // Lấy key để xác định row
+
+                    return (
+                        <List.Item
+                            key={key}
+                            actions={columnsWithSTT.map((col) => {
+                                if (col.key === 'action') {
+                                    // Xử lý riêng cột Action
                                     return (
-                                        <div key={col.key || col.dataIndex}>
-                                            <strong>{col.title}: </strong>
-                                            {
-                                                col.render
-                                                    ? col.render(
-                                                        item[col.dataIndex],
-                                                        item,
-                                                        index
-                                                    )
-                                                    : item[col.dataIndex]
-                                            }
+                                        <div key={col.key} className={cx('list-item-action')}>
+                                            {col.render
+                                                ? col.render(null, item, index) // Gọi hàm render với record
+                                                : null}
                                         </div>
                                     );
                                 }
                             })}
-                        </div>
-                    </ List.Item >
-                )}
+                        >
+                            <Checkbox
+                                checked={selectedRowKeys?.includes(key)}
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    const newSelectedRowKeys = checked
+                                        ? [...selectedRowKeys, key] // Thêm key nếu được chọn
+                                        : selectedRowKeys.filter((rowKey) => rowKey !== key); // Loại bỏ nếu không chọn
+
+                                    // Gọi callback để cập nhật trạng thái
+                                    if (setSelectedRowKeys) {
+                                        setSelectedRowKeys(newSelectedRowKeys);
+                                    }
+                                }}
+                            >
+                                <div className={cx('list-item')}>
+                                    {/* Hiển thị các cột thông thường */}
+                                    {columnsWithSTT.map((col) => {
+                                        if (col.key !== 'action') {
+                                            return (
+                                                <div key={col.key || col.dataIndex}>
+                                                    <strong>{col.title}: </strong>
+                                                    {
+                                                        col.render
+                                                            ? col.render(
+                                                                item[col.dataIndex],
+                                                                item,
+                                                                index
+                                                            )
+                                                            : item[col.dataIndex]
+                                                    }
+                                                </div>
+                                            );
+                                        }
+                                    })}
+                                </div>
+                            </Checkbox>
+                        </List.Item>
+                    );
+                }}
             />
         );
     }

@@ -26,7 +26,7 @@ const ThanhPhanKhungDTDetail = memo(function ThanhPhanKhungDTDetail({
     };
 
     useEffect(() => {
-        // fetch danh sách các môn học thuộc thành phần khung
+        // fetch danh sách các môn học thuộc khối kiến thức
         const fetchSubjectOfFC = async () => {
             try {
                 const response = await getWheresubject_studyFrameComp({
@@ -98,10 +98,10 @@ const ThanhPhanKhungDTDetail = memo(function ThanhPhanKhungDTDetail({
         >
             <div className={cx('container-detail')}>
                 <div>
-                    <FormItem label={'Mã thành phần khung'} className={cx("form-item")}>
+                    <FormItem label={'Mã khối kiến thức'} className={cx("form-item")}>
                         <p>{showModal.frameComponentId}</p>
                     </FormItem>
-                    <FormItem label={'Tên thành phần khung'}>
+                    <FormItem label={'Tên khối kiến thức'}>
                         <p>{showModal.frameComponentName}</p>
                     </FormItem>
                     <FormItem label={'Mô tả'}>
@@ -122,6 +122,8 @@ const ThanhPhanKhungDTDetail = memo(function ThanhPhanKhungDTDetail({
                         loading={isLoading}
                         size={"small"}
                         keyIdChange={"subjectId"}
+                        isHaveRowSelection={false}
+                        width='500px'
                     />
                 </div>
             </div>

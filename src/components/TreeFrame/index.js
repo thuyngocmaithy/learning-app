@@ -9,7 +9,7 @@ const cx = classNames.bind(styles)
 const TreeFrame = ({
     treeData, // Dữ liệu cấu trúc cây
     setTreeData, // Set dữ liệu cấu trúc cây
-    expandedKeys // Key để mở rộng thành phần khung
+    expandedKeys // Key để mở rộng khối kiến thức
 }) => {
 
 

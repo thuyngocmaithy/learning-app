@@ -71,12 +71,11 @@ export const findKhungCTDTByUserId = async (userId) => {
     }
 };
 
-export const findKhungCTDTDepartment = async (startYear, facultyId, cycleId) => {
+export const findKhungCTDTDepartment = async (facultyId, cycleId) => {
     try {
         const params = {
-            ...(startYear && { startYear }),
             facultyId,
-            ...(cycleId && { cycleId }) // Chỉ thêm cycleId nếu nó có giá trị
+            cycleId
         };
 
         const response = await api.get('/study-frames/findKhungCTDTDepartment', { params });

@@ -7,7 +7,7 @@ import TableScore from '../../../components/TableScore';
 import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import ButtonCustom from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { createExpectedScore, deleteExpectedScoreBySubjectAndStudent, getExpectedScoreByStudentId, updateExpectedScore } from '../../../services/scoreService';
+import { createExpectedScore, deleteExpectedScoreBySubjectAndStudent, updateExpectedScore } from '../../../services/scoreService';
 import { getScore, getUserById } from '../../../services/userService';
 
 const cx = classNames.bind(styles);
@@ -52,32 +52,14 @@ function DiemTotNghiep() {
             const userData = await getUserById(userId);
             const gpa = parseFloat(userData.data.GPA) || 0;
             const totalCredits = parseInt(userData.data.faculty.creditHourTotal);
+            const currentCreditHour = parseInt(userData.data.currentCreditHour);
             setTotalCredits(totalCredits);
             setCurrentGPA(gpa);
             setCalculatedGPA(gpa);
+            setCurrentCredits(currentCreditHour)
         }
         if (userId) fetchPoint();
     }, [userId])
-
-    useEffect(() => {
-        const fetchCurrentCreditHour = async () => {
-            try {
-                const responseScore = await getScore(access_token);
-
-                if (responseScore.status === 'success') {
-                    for (let diem of responseScore.data.ds_diem_hocky) {
-                        if (diem.so_tin_chi_dat_tich_luy !== "") {
-                            setCurrentCredits(diem.so_tin_chi_dat_tich_luy); // set giá trị số tc hiện tại
-                            break; // thoát khỏi vòng lặp
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Lỗi lấy số tín chỉ hiện tại: " + error);
-            }
-        }
-        fetchCurrentCreditHour();
-    }, [access_token])
 
     const calculateResults = useCallback(() => {
         const currentCreditsNum = Number(currentCredits);

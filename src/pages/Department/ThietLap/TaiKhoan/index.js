@@ -146,9 +146,10 @@ function TaiKhoan() {
 
             </div>
             <TableCustomAnt
-                height={'350px'}
+                height={'550px'}
                 columns={columns(setShowModal)}
                 data={data}
+                selectedRowKeys={selectedRowKeys}
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
             />

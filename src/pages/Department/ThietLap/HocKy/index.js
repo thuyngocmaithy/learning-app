@@ -145,6 +145,7 @@ function HocKy() {
                 height={'350px'}
                 columns={columns(setShowModal)}
                 data={data}
+                selectedRowKeys={selectedRowKeys}
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
                 keyIdChange={"semesterId"}

@@ -426,6 +426,7 @@ function NhomDeTaiKhoaLuan() {
                         height={'550px'}
                         columns={columns(setShowModalUpdate)}
                         data={data}
+                        selectedRowKeys={selectedRowKeys}
                         setSelectedRowKeys={setSelectedRowKeys}
                         keyIdChange='thesisGroupId'
                         loading={isLoading}

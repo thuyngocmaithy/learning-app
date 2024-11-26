@@ -59,18 +59,27 @@ const TableDepartment = ({
     setSelectedSemesters,
     teacherAssignments,
     setTeacherAssignments,
+    setPercentArrange,
     height = 600
 }) => {
     const [frameComponents, setFrameComponents] = useState([]); // Dữ liệu cấu trúc chương trình
     const [listSemester, setListSemester] = useState([]); // Danh sách các học kỳ
     const [isLoading, setIsLoading] = useState(true); // Trạng thái loading
+    const [totalSubject, setTotalSubject] = useState(null);
+    const [subjectArranged, setSubjectArranged] = useState(null);
+
+    useEffect(() => {
+        if (totalSubject && subjectArranged) {
+            setPercentArrange(((parseInt(subjectArranged) / parseInt(totalSubject)) * 100).toFixed(2))
+        }
+    }, [totalSubject, subjectArranged])
 
     // Hàm tải danh sách học kỳ
     const fetchSemester = useCallback(async () => {
         try {
-            const response = await getWhere({ academicYear: data.year });
+            const response = await getWhere({ cycle: data.cycleId });
             if (response.status === 200) {
-                setListSemester(response.data.data);
+                setListSemester(response.data.data.filter(item => item.semesterName !== 3));
             }
         } catch (error) {
             console.error('Lỗi khi tải danh sách học kỳ:', error);
@@ -82,6 +91,12 @@ const TableDepartment = ({
         try {
             const response = await callKhungCTDT(data.frameId);
             if (Array.isArray(response)) {
+                // Đếm tổng số lượng subject trong tất cả subjectInfo
+                const totalSubjects = response.reduce((count, item) => {
+                    // Kiểm tra nếu subjectInfo là một mảng và thêm độ dài của nó vào count
+                    return count + (Array.isArray(item.subjectInfo) ? item.subjectInfo.length : 0);
+                }, 0);
+                setTotalSubject(totalSubjects);
                 setFrameComponents(response);
             }
         } catch (error) {
@@ -134,7 +149,37 @@ const TableDepartment = ({
         return map;
     }, [frameComponents]);
 
-    // Hàm đệ quy để render dữ liệu
+    useEffect(() => {
+        if (processedData && listSemester && selectedSemesters) {
+            let totalSubjects = 0;
+            const listSubject = [];
+
+            // Tính toán subjectArrange sau khi các giá trị cần thiết thay đổi
+            processedData.forEach((frameComponent) => {
+                frameComponent.forEach((item) => {
+                    // Kiểm tra item.subjectInfo là một mảng
+                    if (Array.isArray(item.subjectInfo)) {
+                        item.subjectInfo.forEach((subject) => {
+                            // Kiểm tra selectedSemesters và tránh cộng dư
+                            listSemester.forEach((semester) => {
+                                const id = `${semester.semesterId}-${subject.subjectId}`;
+                                if (selectedSemesters.has(id) && !listSubject.includes(subject.subjectId)) {
+                                    listSubject.push(subject.subjectId);
+                                    totalSubjects += 1; // Tăng số môn đã mở
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+
+            // Cập nhật số lượng môn đã mở
+            setSubjectArranged(totalSubjects);
+        }
+    }, [processedData, listSemester, selectedSemesters]);
+
+
+    // Đệ quy để render dữ liệu
     const renderFrameComponentContent = useCallback(
         (parentId = 'root', level = 0) => {
             const components = processedData.get(parentId) || [];
@@ -194,6 +239,7 @@ const TableDepartment = ({
 
                 return rows;
             });
+
         },
         [processedData, listSemester, selectedSemesters, teacherAssignments, handleCheckboxChange, handleTeacherChange]
     );

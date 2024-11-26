@@ -26,12 +26,12 @@ function ThanhPhanKhungDT() {
 
     const columns = (showModalUpdate) => [
         {
-            title: 'Mã thành phần khung đào tạo',
+            title: 'Mã khối kiến thức',
             dataIndex: 'frameComponentId',
             key: 'frameComponentId',
         },
         {
-            title: 'Tên thành phần khung',
+            title: 'Tên khối kiến thức',
             dataIndex: 'frameComponentName',
             key: 'frameComponentName',
         },
@@ -89,14 +89,13 @@ function ThanhPhanKhungDT() {
         try {
             const result = await getAllStudyFrameComponent();
             if (result.status === 200) {
-                setData(result.data.data.map(item => {
-                    return {
+                setData(
+                    result.data.data.map(({ id, ...item }) => ({
                         ...item,
                         majorId: item.major?.majorId,
-                        majorName: item.major?.majorName
-                    }
-                }
-                ));
+                        majorName: item.major?.majorName,
+                    }))
+                );
             }
             setIsLoading(false);
         } catch (error) {
@@ -135,7 +134,7 @@ function ThanhPhanKhungDT() {
     const thanhphankhungdtDetailMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTDetail
-                title={'thành phần khung đào tạo'}
+                title={'khối kiến thức'}
                 showModal={showModalDetail}
                 setShowModal={setShowModalDetail}
             />
@@ -145,7 +144,7 @@ function ThanhPhanKhungDT() {
     const thanhphankhungdtUpdateMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTUpdate
-                title={'thành phần khung đào tạo'}
+                title={'khối kiến thức'}
                 isUpdate={isUpdate}
                 showModal={showModalUpdate}
                 setShowModal={setShowModalUpdate}
@@ -161,7 +160,7 @@ function ThanhPhanKhungDT() {
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
-                    <h3 className={cx('title')}>Thành phần khung đào tạo</h3>
+                    <h3 className={cx('title')}>Khối kiến thức</h3>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
                     <Toolbar
@@ -171,7 +170,21 @@ function ThanhPhanKhungDT() {
                             setIsUpdate(false);
                         }}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('thành phần khung đào tạo', handleDelete)} />
+                    <Toolbar type={'Xóa'} onClick={() => {
+                        // Kiểm tra các khối kiến thức không được xóa
+                        // Danh sách ID không cho phép xóa
+                        const restrictedIds = ['MAKHUNG2', 'GDDC_BB', 'GDDC_TC', 'GDDC', 'CSN', 'NGANH', 'CHUYENNGANH', 'CHUYENNGHIEP'];
+
+                        // Kiểm tra xem selectedRowKeys có chứa bất kỳ ID nào trong restrictedIds không
+                        const hasRestrictedId = selectedRowKeys.some((id) => restrictedIds.includes(id));
+
+                        if (hasRestrictedId) {
+                            message.warning('Không thể xóa các khối kiến thức hệ thống!');
+                            return;
+                        }
+                        deleteConfirm('khối kiến thức', handleDelete)
+                    }}
+                    />
                 </div>
 
             </div>
@@ -182,6 +195,7 @@ function ThanhPhanKhungDT() {
                 setSelectedRowKeys={setSelectedRowKeys}
                 selectedRowKeys={selectedRowKeys}
                 loading={isLoading}
+                keyIdChange={"frameComponentId"}
             />
             {thanhphankhungdtUpdateMemoized}
             {thanhphankhungdtDetailMemoized}

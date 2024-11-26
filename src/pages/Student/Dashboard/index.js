@@ -10,7 +10,7 @@ import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getFacultyById } from '../../../services/facultyService';
 import { getScore, getUserById } from '../../../services/userService';
 import { Spin } from 'antd';
-import { getExpectedScoreByStudentId } from '../../../services/scoreService';
+import { getExpectedScoreByStudentId, getScoreByStudentId } from '../../../services/scoreService';
 import { ThemeContext } from '../../../context/ThemeContext';
 
 const cx = classNames.bind(styles);
@@ -120,62 +120,56 @@ function Home() {
     const fetchChartData = useCallback(async () => {
         if (!firstYear) return;
         try {
-            // Xử lý dữ liệu điểm theo học kỳ
+            // Nhóm dữ liệu theo học kỳ
             const groupedData = {};
 
+            // Sắp xếp dữ liệu theo semesterId
             const sortedScores = scores.sort((a, b) => {
-                const semesterA = parseInt(a.hoc_ky);
-                const semesterB = parseInt(b.hoc_ky);
-                // So sánh semesterId
-                return semesterA - semesterB;
+                return parseInt(a.semester.semesterId) - parseInt(b.semester.semesterId);
             });
 
-            sortedScores.forEach(score => {
-                const semesterId = score.hoc_ky;
-                let creditHour = parseInt(score.so_tin_chi_dat_hk) || 0;
-                let gpa = parseFloat(score.dtb_hk_he10) || 0.0;
+            // Lặp qua từng môn học
+            sortedScores.forEach((score) => {
+                if (score.result) {
+                    const semesterId = score.semester.semesterId;
+                    const creditHour = parseInt(score.subject.creditHour) || 0;
+                    const gpa = parseFloat(score.finalScore10) || 0.0;
 
-                // Nếu học kỳ chưa có trong groupedData, khởi tạo
-                if (!groupedData[semesterId]) {
-                    groupedData[semesterId] = { credits: 0, gpa: 0 };
+                    // Nếu học kỳ chưa có trong groupedData, khởi tạo
+                    if (!groupedData[semesterId]) {
+                        groupedData[semesterId] = {
+                            credits: 0,
+                            totalGpa: 0,
+                            totalCredits: 0,
+                        };
+                    }
+
+                    // Cộng dồn tín chỉ và điểm GPA
+                    groupedData[semesterId].credits += creditHour;
+                    groupedData[semesterId].totalGpa += gpa * creditHour; // GPA nhân tín chỉ
+                    groupedData[semesterId].totalCredits += creditHour;
                 }
 
-                const semester = parseInt(semesterId) % 10;
-                if (semester === 3) {
-                    let tong_gpa_monhoc = 0;
-                    score.ds_diem_mon_hoc.forEach((item) => {
-                        // Tính số tín chỉ
-                        creditHour += parseInt(item.so_tin_chi);
-                    })
-                    // Tính GPA
-                    score.ds_diem_mon_hoc.forEach((item) => {
-                        tong_gpa_monhoc += (parseInt(item.diem_tk) * parseInt(item.so_tin_chi));
-                    })
-                    gpa = tong_gpa_monhoc / creditHour;
-                }
-
-                // Cộng tín chỉ và điểm GPA
-                groupedData[semesterId].credits += creditHour;
-                groupedData[semesterId].gpa += gpa;
             });
 
-            // Dữ liệu cho categories và series
+            // Tạo dữ liệu categories và series cho biểu đồ
             const categories = [];
             const creditData = [];
             const gpaData = [];
 
-            // Tạo danh sách categories và dữ liệu cho biểu đồ
-            Object.keys(groupedData).forEach(semesterId => {
-                const { credits, gpa } = groupedData[semesterId];
+            Object.keys(groupedData).forEach((semesterId) => {
+                const { credits, totalGpa, totalCredits } = groupedData[semesterId];
+                const gpa = totalCredits > 0 ? totalGpa / totalCredits : 0;
 
                 // Chuyển semesterId thành tên học kỳ
                 const firstSemester = parseInt(`${firstYear}1`);
                 const year = Math.floor((parseInt(semesterId) - firstSemester) / 10) + 1;
                 const semester = parseInt(semesterId) % 10;
-                categories.push(`Năm ${year}-HK${semester}`);
+                categories.push(`Năm ${year} - HK${semester}`);
 
+                // Thêm dữ liệu vào mảng
                 creditData.push(credits);
-                gpaData.push(gpa.toFixed(2)); // Điểm trung bình hệ 4
+                gpaData.push(gpa.toFixed(2)); // Làm tròn GPA 2 chữ số
             });
 
             // Cập nhật state với dữ liệu đã xử lý
@@ -187,44 +181,45 @@ function Home() {
                         data: creditData,
                     },
                     {
-                        name: 'Điểm tích lũy (Hệ 10)',
+                        name: 'Điểm trung bình (Hệ 10)',
                         data: gpaData,
                     },
                 ],
             };
             handleDataChart(chartData);
-
         } catch (error) {
             console.error('Error fetching chart data', error);
-        }
-        finally {
-            setIsLoadingChart(false)
+        } finally {
+            setIsLoadingChart(false);
         }
     }, [firstYear, scores, handleDataChart]);
+
 
     // Tính Tiến độ hoàn thành
     const handleDataProgress = async () => {
         try {
             const expectedScoreResponse = await getExpectedScoreByStudentId(userId);
             setExpectedGPA(expectedScoreResponse[0].expectedGPA);
-            const responseScore = await getScore(access_token);
-            setScores(responseScore.data.ds_diem_hocky)
+            const responseScore = await getScoreByStudentId(userId);
+            setScores(responseScore)
 
-            let cdCurrent = 0;
-            if (responseScore.status === 'success') {
-                for (let diem of responseScore.data.ds_diem_hocky) {
-                    if (diem.so_tin_chi_dat_tich_luy !== "") {
-                        cdCurrent = diem.so_tin_chi_dat_tich_luy;
-                        setCreditHourCurrent(diem.so_tin_chi_dat_tich_luy); // set giá trị
-                        break; // thoát khỏi vòng lặp
-                    }
-                }
-            }
-            // Lấy ngành và năm học đầu tiên của user
+            // let cdCurrent = 0;
+            // if (responseScore.status === 'success') {
+            //     for (let diem of responseScore.data.ds_diem_hocky) {
+            //         if (diem.so_tin_chi_dat_tich_luy !== "") {
+            //             cdCurrent = diem.so_tin_chi_dat_tich_luy;
+            //             setCreditHourCurrent(diem.so_tin_chi_dat_tich_luy); // set giá trị
+            //             break; // thoát khỏi vòng lặp
+            //         }
+            //     }
+            // }
+            // Lấy ngành và năm học đầu tiên, số tín chỉ hiện tại của user
             const responseUser = await getUserById(userId);
             const faculty = responseUser.data.faculty.facultyId;
             const firstAcademicYear = responseUser.data.firstAcademicYear;
             setFirstYear(firstAcademicYear);
+            const cdCurrent = responseUser.data.currentCreditHour;
+            setCreditHourCurrent(cdCurrent);
 
             // Lấy số tín chỉ của ngành
             const responseFaculty = await getFacultyById(faculty);

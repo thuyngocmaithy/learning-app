@@ -366,7 +366,21 @@ function NhomDeTaiNCKH() {
             const response = await getWhere(values);
 
             if (response.status === 200) {
-                setData(response.data.data);
+                const resultData = response.data.data.map((item) => {
+                    var currentDate = new Date();
+                    return {
+                        ...item,
+                        faculty: item.faculty.facultyName,
+                        // startCreateSRDate và endCreateSRDate đều null
+                        // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
+                        // => Còn hạn thao tác cho nhóm đề tài nckh
+                        validDate: (item.startCreateSRDate === null && item.endCreateSRDate === null) ||
+                            (new Date(item.startCreateSRDate) <= currentDate && new Date(item.endCreateSRDate) > currentDate)
+                            ? true
+                            : false
+                    }
+                })
+                setData(resultData);
             }
             if (response.status === 204) {
                 setData([]);
@@ -426,6 +440,7 @@ function NhomDeTaiNCKH() {
                         height={'550px'}
                         columns={columns(setShowModalUpdate)}
                         data={data}
+                        selectedRowKeys={selectedRowKeys}
                         setSelectedRowKeys={setSelectedRowKeys}
                         keyIdChange='scientificResearchGroupId'
                         loading={isLoading}
