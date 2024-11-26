@@ -77,7 +77,7 @@ const TableDepartment = ({
     // Hàm tải danh sách học kỳ
     const fetchSemester = useCallback(async () => {
         try {
-            const response = await getWhere({ cycle: data.cycleId });
+            const response = await getWhere({ cycle: data.cycle.cycleId });
             if (response.status === 200) {
                 setListSemester(response.data.data.filter(item => item.semesterName !== 3));
             }
@@ -190,12 +190,20 @@ const TableDepartment = ({
 
                 // Render hàng chính của frameComponent
                 const rows = [
-                    <TableRow key={`frameComponent-${frameComponent.id}`}>
+                    <TableRow
+                        key={`frameComponent-${frameComponent.id}`}
+                    >
                         <TableCell
-                            className={cx('title')}
+                            className={cx('title', 'sticky')}
                             align="left"
-                            colSpan={listSemester.length * 2 + 4} // Mỗi học kỳ có thêm cột giảng viên
-                            style={{ paddingLeft: `${paddingLeft}px` }}
+                            colSpan={6} // Mỗi học kỳ có thêm cột giảng viên                            
+                            style={{
+                                paddingLeft: paddingLeft,
+                                zIndex: 1,
+                                position: 'sticky',
+                                left: 0,
+                                backgroundColor: 'var(--color-row-active)'
+                            }}
                         >
                             {frameComponent.frameComponentName}
                             {frameComponent.creditHour ? ` (${frameComponent.creditHour})` : ''}
@@ -208,9 +216,39 @@ const TableDepartment = ({
                     rows.push(
                         ...frameComponent.subjectInfo.map((subject, index) => (
                             <TableRow key={`subject-${subject.subjectId}-${frameComponent.frameComponentId}`}>
-                                <TableCell align="center">{index + 1}</TableCell>
-                                <TableCell align="center">{subject.subjectId}</TableCell>
-                                <TableCell align="left">{subject.subjectName}</TableCell>
+                                <TableCell
+                                    align="center"
+                                    style={{
+                                        zIndex: 1,
+                                        position: 'sticky',
+                                        left: 0
+                                    }}
+                                    className={cx('sticky')}
+                                >
+                                    {index + 1}
+                                </TableCell>
+                                <TableCell
+                                    align="center"
+                                    style={{
+                                        zIndex: 1,
+                                        position: 'sticky',
+                                        left: 50
+                                    }}
+                                    className={cx('sticky')}
+                                >
+                                    {subject.subjectId}
+                                </TableCell>
+                                <TableCell
+                                    align="left"
+                                    style={{
+                                        zIndex: 1,
+                                        position: 'sticky',
+                                        left: 150
+                                    }}
+                                    className={cx('sticky')}
+                                >
+                                    {subject.subjectName}
+                                </TableCell>
                                 <TableCell align="center">{subject.creditHour}</TableCell>
                                 {listSemester.flatMap((semester) => {
                                     const id = `${semester.semesterId}-${subject.subjectId}`;
@@ -276,8 +314,19 @@ const TableDepartment = ({
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            {columns.map((column) => (
-                                <TableCell key={column.id} align={column.align} style={{ minWidth: column.minWidth }}>
+                            {columns.map((column, index) => (
+                                <TableCell
+                                    key={column.id}
+                                    align={column.align}
+                                    style={{
+                                        minWidth: column.minWidth,
+                                        zIndex: index < 3 ? 3 : 2,
+                                        position: 'sticky',
+                                        left: index === 0 ? 0 : index === 1 ? 50 : index === 2 ? 150 : 'auto', // Vị trí left
+                                        top: 0
+                                    }}
+                                    className={cx('sticky')} // Thêm class sticky
+                                >
                                     {column.label}
                                 </TableCell>
                             ))}

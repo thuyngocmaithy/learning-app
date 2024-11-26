@@ -18,3 +18,10 @@
 .radio-period {
     cursor: pointer;
 }
+
+.sticky {
+    background-color: white; // Đảm bảo nền không bị lẫn với phần còn lại
+    z-index: 2;
+    border-right: 1px solid #ddd;
+    position: sticky;
+}

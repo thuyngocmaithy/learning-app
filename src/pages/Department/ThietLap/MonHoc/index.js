@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './MonHoc.module.scss';
-import { message, Tag, Divider, Col, Row, Input, Select, Form } from 'antd';
+import { message, Tag, Divider, Input, Select, Form } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -8,7 +8,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
-import { deleteSubjectById, getAll, getAllSubjectDetail, getWhereSubject, importSubject } from '../../../../services/subjectService';
+import { deleteSubjectById, getAll, getWhereSubject, importSubject } from '../../../../services/subjectService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
 import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -28,7 +28,6 @@ function MonHoc() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
-    const [viewOnly, setViewOnly] = useState(false);
 
     // Filter
     const [showFilter, setShowFilter] = useState(false);
@@ -84,7 +83,6 @@ function MonHoc() {
                 showModal={showModal}
                 setShowModal={setShowModal}
                 reLoad={fetchData}
-                viewOnly={viewOnly}
             />
         );
     }, [showModal, isUpdate]);
@@ -156,7 +154,6 @@ function MonHoc() {
                         onClick={() => {
                             setShowModal(record);
                             setIsUpdate(true);
-                            setViewOnly(false);
                             setShowModalDetail(false);
                         }}>
                         Sửa
@@ -241,7 +238,6 @@ function MonHoc() {
                         onClick={() => {
                             setShowModal(true);
                             setIsUpdate(false);
-                            setViewOnly(false);
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('môn học', handleDelete)} />

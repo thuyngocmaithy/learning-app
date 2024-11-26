@@ -27,7 +27,6 @@ function TrangThai() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
-    const [viewOnly, setViewOnly] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
 
     // Import 

@@ -1,9 +1,13 @@
 import { Transfer, Table, Flex } from 'antd';
-import { useState } from 'react';
 
 function TransferCustom({ data, columns, targetObjects, setTargetObjects, ...props }) {
     // Hàm lọc cho Transfer => Tìm kiếm các mục dựa trên input
-    const filterOption = (input, item) => item.title?.includes(input) || item.tag?.includes(input);
+    const filterOption = (input, item) => {
+        // Tìm kiếm trong subjectName và subjectId
+        return item.subjectName?.toLowerCase().includes(input.toLowerCase()) ||
+            item.subjectId?.toLowerCase().includes(input.toLowerCase());
+    };
+
 
     // Hàm xử lý khi thay đổi target objects (truyền object thay vì key)
     const onChange = (nextTargetKeys) => {

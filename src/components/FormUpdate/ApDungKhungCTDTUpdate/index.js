@@ -214,7 +214,7 @@
 
 //     return (
 //         <Update
-//             fullTitle={'Áp dụng khung chương trình đào tạo'}
+//             fullTitle={'Áp dụng khung đào tạo'}
 //             isUpdate={isUpdate}
 //             showModal={showModal !== false ? true : false}
 //             onClose={handleCloseModal}

@@ -24,7 +24,7 @@ const getThemeConfig = (theme) => ({
 
         colorBtnOutline: theme === 'dark' ? '#3465D4' : '#3465D4', // Màu nền của button outline
         colorBtnTextOutline: theme === 'dark' ? '#3465D4' : '#3465D4', // Màu chữ của button outline
-        colorBtnOutline_Hover: theme === 'dark' ? '#dec3c31c' : 'rgba(254, 44, 85, 0.06)', // Màu nền hover button outline
+        colorBtnOutline_Hover: theme === 'dark' ? '#dec3c31c' : 'rgba(254, 44, 85, 0.02)', // Màu nền hover button outline
 
         colorBtnTextError: theme === 'dark' ? '#cf1322' : '#cf1322', // Màu chữ button error
         colorBtnBgError: theme === 'dark' ? '#ccb0b0' : '#fceeee', // Màu nền button error

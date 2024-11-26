@@ -10,9 +10,9 @@ export const getAll = async () => {
     }
 };
 
-export const deleteSubjectCourseOpening = async (year, studyFrameId) => {
+export const deleteSubjectCourseOpening = async (cycleId, studyFrameId) => {
     try {
-        const response = await api.delete(`/subject_course_openings?year=${year}&studyFrameId=${studyFrameId}`);
+        const response = await api.delete(`/subject_course_openings?cycleId=${cycleId}&studyFrameId=${studyFrameId}`);
         return response;
     } catch (error) {
         console.error('deleteSubjectCourseOpening error:', error);

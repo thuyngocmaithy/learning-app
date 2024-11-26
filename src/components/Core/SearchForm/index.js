@@ -19,9 +19,9 @@ function SearchForm({ getFields, onSearch, onReset }) {
     };
 
     useEffect(() => {
-        // Thực hiện search khi nhấn F9
+        // Thực hiện search khi nhấn Enter
         const handleKeyDown = (event) => {
-            if (event.key === 'F9') {
+            if (event.key === 'Enter') {
                 event.preventDefault();
                 form.submit();
             }

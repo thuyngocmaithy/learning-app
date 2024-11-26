@@ -13,7 +13,7 @@ import styles from './NganhUpdate.module.scss'
 
 const cx = classNames.bind(styles);
 
-export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad, viewOnly }) {
+export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -67,7 +67,6 @@ export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModa
         <Update
             title={title}
             isUpdate={isUpdate}
-            isViewOnly={viewOnly}
             showModal={showModal !== false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
@@ -80,14 +79,14 @@ export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModa
                     label="Mã ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập mã ngành' }]}
                 >
-                    <Input disabled={viewOnly || isUpdate} />
+                    <Input disabled={isUpdate} />
                 </FormItem>
                 <FormItem
                     name="facultyName"
                     label="Tên ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập tên ngành' }]}
                 >
-                    <Input disabled={viewOnly} />
+                    <Input />
                 </FormItem>
                 <FormItem
                     name="creditHourTotal"

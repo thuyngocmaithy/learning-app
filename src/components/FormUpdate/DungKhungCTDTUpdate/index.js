@@ -44,7 +44,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const thanhPhanKhungDTFormSelectMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTFormSelect
-                title={'khối kiến thức chương trình đào tạo'}
+                title={'khối kiến thức đào tạo'}
                 showModal={showModalSelect}
                 setShowModal={setShowModalSelect}
                 setSelectedItem={setSelectedFrameComp}
@@ -359,7 +359,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
     return (
         <Update
-            fullTitle={"Dựng khung chương trình đào tạo"}
+            fullTitle={"Dựng khung đào tạo"}
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}

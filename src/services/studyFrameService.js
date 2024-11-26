@@ -108,3 +108,14 @@ export const getAllStudyFrameComponent = async () => {
     }
 }
 
+export const getWhere = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/study-frames/getWhere?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

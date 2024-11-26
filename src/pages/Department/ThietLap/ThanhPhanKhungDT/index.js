@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './ThanhPhanKhungDT.module.scss';
-import { message } from 'antd';
+import { Divider, Input, message, Select } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -9,9 +9,12 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import ThanhPhanKhungDTUpdate from '../../../../components/FormUpdate/ThanhPhanKhungDTUpdate';
-import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
+import { deleteStudyFrameComponents, getWhere } from '../../../../services/studyFrameCompService';
 import { getAllStudyFrameComponent } from '../../../../services/studyFrameCompService';
 import ThanhPhanKhungDTDetail from '../../../../components/FormDetail/ThanhPhanKhungDTDetail';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from '../../../../components/Core/FormItem';
+import { getAll } from '../../../../services/majorService';
 
 const cx = classNames.bind(styles);
 
@@ -23,6 +26,37 @@ function ThanhPhanKhungDT() {
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
+    const [majorOptions, setMajorOptions] = useState([
+        {
+            value: "",
+            label: ""
+        }
+    ]);
+
+    // Fetch danh sách chuyên ngành
+    useEffect(() => {
+        const fetchMajor = async () => {
+            try {
+                const response = await getAll();
+                if (response) {
+                    const options = response.data?.map((major) => ({
+                        value: major.majorId,
+                        label: major.majorId + " - " + major.majorName,
+                    }));
+
+                    setMajorOptions([
+                        ...majorOptions,  // Phần tử trống được thêm vào đầu
+                        ...options
+                    ]);
+                }
+            } catch (error) {
+                console.error('ThanhPhanKhungDTUpdate - fetchMajor - error:', error);
+            }
+        };
+        fetchMajor();
+    }, []);
+
 
     const columns = (showModalUpdate) => [
         {
@@ -153,6 +187,71 @@ function ThanhPhanKhungDT() {
         );
     }, [showModalUpdate, isUpdate]);
 
+    const filterFields = [
+        <FormItem
+            name="frameComponentId"
+            label="Mã khối kiến thức"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="frameComponentName"
+            label="Tên khối kiến thức"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="major"
+            label="Chuyên ngành"
+        >
+            <Select
+                showSearch
+                placeholder="Chọn chuyên ngành"
+                optionFilterProp="children"
+                labelInValue // Hiển thị label trên input
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={majorOptions}
+            />
+        </FormItem>,
+        <FormItem
+            name="description"
+            label="Mô tả"
+        >
+            <Input />
+        </FormItem>
+    ]
+
+    const onSearch = async (values) => {
+        try {
+            const searchParams = {
+                frameComponentId: values.frameComponentId?.trim() || undefined,
+                frameComponentName: values.frameComponentName?.trim() || undefined,
+                description: values.description?.trim() || undefined,
+                major: values.major?.value || undefined
+            };
+
+            const response = await getWhere(searchParams);
+
+            if (response.status === 200) {
+                if (response.data.data.length === 0) {
+                    setData([]);
+                } else {
+                    setData(response.data.data);
+                }
+            }
+            else {
+                setData([]);
+            }
+
+        } catch (error) {
+            console.error('[onSearch - error]: ', error);
+            message.error('Có lỗi xảy ra khi tìm kiếm');
+        }
+    };
+
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -163,6 +262,11 @@ function ThanhPhanKhungDT() {
                     <h3 className={cx('title')}>Khối kiến thức</h3>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
+                    <Toolbar type={'Bộ lọc'}
+                        onClick={() => {
+                            setShowFilter(!showFilter);
+                        }}
+                    />
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
@@ -186,7 +290,14 @@ function ThanhPhanKhungDT() {
                     }}
                     />
                 </div>
-
+            </div>
+            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                <SearchForm
+                    getFields={filterFields}
+                    onSearch={onSearch}
+                    onReset={fetchData}
+                />
+                <Divider />
             </div>
             <TableCustomAnt
                 height={'450px'}

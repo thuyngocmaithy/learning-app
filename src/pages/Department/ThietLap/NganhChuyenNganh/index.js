@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Tabs, message, Divider, Input, Col, Select } from 'antd';
+import { Tabs, message, Divider, Input, Select } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './NganhChuyenNganh.module.scss'
 import { ProjectIcon } from '../../../../assets/icons';
@@ -31,7 +31,6 @@ function NganhChuyenNganh() {
     const [nganhSelectedKeys, setNgànhSelectedKeys] = useState([]);
     const [ngànhShowModal, setNgànhShowModal] = useState(false);
     const [ngànhIsUpdate, setNgànhIsUpdate] = useState(false);
-    const [ngànhViewOnly, setNgànhViewOnly] = useState(false);
     const [showModalDetailNgành, setShowModalDetailNgành] = useState(false);
 
 
@@ -41,7 +40,6 @@ function NganhChuyenNganh() {
     const [majorSelectedKeys, setMajorSelectedKeys] = useState([]);
     const [majorShowModal, setMajorShowModal] = useState(false);
     const [majorIsUpdate, setMajorIsUpdate] = useState(false);
-    const [majorViewOnly, setMajorViewOnly] = useState(false);
     const [showModalDetailChuyenNganh, setShowModalDetailChuyenNganh] = useState(false);
 
 
@@ -271,7 +269,6 @@ function NganhChuyenNganh() {
                         onClick={() => {
                             setNgànhShowModal(record);
                             setNgànhIsUpdate(true);
-                            setNgànhViewOnly(false);
                         }}>
                         Sửa
                     </ButtonCustom>
@@ -321,7 +318,6 @@ function NganhChuyenNganh() {
                         onClick={() => {
                             setMajorShowModal(record);
                             setMajorIsUpdate(true);
-                            setMajorViewOnly(false);
                         }}>
                         Sửa
                     </ButtonCustom>
@@ -338,9 +334,8 @@ function NganhChuyenNganh() {
             showModal={ngànhShowModal}
             setShowModal={setNgànhShowModal}
             reLoad={fetchNgànhData}
-            viewOnly={ngànhViewOnly}
         />
-    ), [ngànhShowModal, ngànhIsUpdate, ngànhViewOnly]);
+    ), [ngànhShowModal, ngànhIsUpdate]);
 
     const ChuyenNganhUpdateMemo = useMemo(() => (
         <ChuyenNganhUpdate
@@ -349,9 +344,8 @@ function NganhChuyenNganh() {
             showModal={majorShowModal}
             setShowModal={setMajorShowModal}
             reLoad={fetchMajorData}
-            viewOnly={majorViewOnly}
         />
-    ), [majorShowModal, majorIsUpdate, majorViewOnly]);
+    ), [majorShowModal, majorIsUpdate]);
 
 
     // Detail components
@@ -448,7 +442,6 @@ function NganhChuyenNganh() {
                                 onClick={() => {
                                     setNgànhShowModal(true);
                                     setNgànhIsUpdate(false);
-                                    setNgànhViewOnly(false);
                                 }}
                             />
                             <Toolbar
@@ -471,7 +464,6 @@ function NganhChuyenNganh() {
                                 onClick={() => {
                                     setMajorShowModal(true);
                                     setMajorIsUpdate(false);
-                                    setMajorViewOnly(false);
                                 }}
                             />
                             <Toolbar

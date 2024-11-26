@@ -23,34 +23,13 @@
 
 }
 
-
-.container-arrange {
-    height: 100%;
-    width: 100%;
-    margin-bottom: 30px;
-
-    .form-data-arrange>input {
-        margin: 0 10px;
-        text-align: center;
-    }
-
-    .info-warning {
-        color: rgb(210, 0, 0);
-    }
-
-    .table-arrange {
-        height: calc(100% - 60px);
-        align-items: center;
-    }
-}
-
 .status-save {
     display: flex;
     justify-content: center;
     align-items: center;
 
-    .btnSave {
-        margin-left: 30px;
+    .btnClose {
+        margin: 0 20px;
     }
 }
 

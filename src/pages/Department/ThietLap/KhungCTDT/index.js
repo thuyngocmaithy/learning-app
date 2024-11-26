@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './KhungCTDT.module.scss';
-import { message } from 'antd';
+import { Divider, Input, message, Select } from 'antd';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
@@ -10,8 +10,12 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import KhungCTDTUpdate from '../../../../components/FormUpdate/KhungCTDTUpdate';
 import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
-import { getAll } from '../../../../services/studyFrameService';
+import { getAll as getAllStudyFrame, getWhere } from '../../../../services/studyFrameService';
+import { getAll as getAllCycle } from '../../../../services/cycleService';
 import DungKhungCTDTUpdate from '../../../../components/FormUpdate/DungKhungCTDTUpdate';
+import SearchForm from '../../../../components/Core/SearchForm';
+import FormItem from '../../../../components/Core/FormItem';
+import { getAllFaculty } from '../../../../services/facultyService';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +26,48 @@ function KhungCTDT() {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
+    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [showFilter, setShowFilter] = useState(false);
+    const [cycleOptions, setCycleOptions] = useState([]);
+
+    // Fetch danh sách chu kỳ
+    useEffect(() => {
+        const fetchCycle = async () => {
+            try {
+                const response = await getAllCycle();
+                if (response) {
+                    const options = response.data.data.map((cycle) => ({
+                        value: cycle.cycleId,
+                        label: cycle.cycleName,
+                    }));
+                    setCycleOptions(options);
+                }
+            } catch (error) {
+                console.error('HocKyUpdate - fetchCycle - error:', error);
+            }
+        };
+
+        fetchCycle();
+    }, []);
+
+    useEffect(() => {
+        const fetchFaculties = async () => {
+            try {
+                const response = await getAllFaculty();
+                if (response && response.data) {
+                    const options = response.data.map((faculty) => ({
+                        value: faculty.facultyId,
+                        label: faculty.facultyName,
+                    }));
+                    setFacultyOptions(options);
+                }
+            } catch (error) {
+                console.error('Error fetching faculties:', error);
+            }
+        };
+        fetchFaculties();
+    }, [showModal]);
+
 
     const columns = (showModal) => [
         {
@@ -34,6 +80,16 @@ function KhungCTDT() {
             title: 'Tên khung đào tạo',
             dataIndex: 'frameName',
             key: 'frameName',
+        },
+        {
+            title: 'Ngành',
+            dataIndex: 'facultyName',
+            key: 'facultyName',
+        },
+        {
+            title: 'Chu kỳ',
+            dataIndex: 'cycleName',
+            key: 'cycleName',
         },
         {
             title: 'Action',
@@ -72,9 +128,15 @@ function KhungCTDT() {
 
     const fetchData = async () => {
         try {
-            const result = await getAll();
+            const result = await getAllStudyFrame();
             if (result.status === 200) {
-                setData(result.data.data);
+                setData(result.data.data.map((item) => {
+                    return {
+                        ...item,
+                        facultyName: item.faculty.facultyName,
+                        cycleName: item.cycle.cycleName,
+                    }
+                }));
             }
             setIsLoading(false);
         } catch (error) {
@@ -128,6 +190,82 @@ function KhungCTDT() {
         );
     }, [showModalBuildFrame]);
 
+    const filterFields = [
+        <FormItem
+            name="frameId"
+            label="Mã khung đào tạo"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="frameName"
+            label="Tên khung đào tạo"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem name="faculty" label="Ngành">
+            <Select
+                showSearch
+                placeholder="Chọn ngành"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={facultyOptions}
+            />
+        </FormItem>,
+        <FormItem
+            name="cycle"
+            label="Chu kỳ"
+        >
+            <Select
+                showSearch
+                placeholder="Chọn chu kỳ"
+                optionFilterProp="children"
+                labelInValue // Hiển thị label trên input
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={cycleOptions}
+            />
+        </FormItem>
+    ]
+
+    const onSearch = async (values) => {
+        try {
+            const searchParams = {
+                frameId: values.frameId?.trim() || undefined,
+                frameName: values.frameName?.trim() || undefined,
+                faculty: values.faculty || undefined,
+                cycle: values.cycle?.value || undefined
+            };
+
+            const response = await getWhere(searchParams);
+
+            if (response.status === 200) {
+                if (response.data.data.length === 0) {
+                    setData([]);
+                } else {
+                    setData(response.data.data.map((item) => {
+                        return {
+                            ...item,
+                            facultyName: item.faculty.facultyName,
+                            cycleName: item.cycle.cycleName,
+                        }
+                    }));
+                }
+            }
+            else {
+                setData([]);
+            }
+
+        } catch (error) {
+            console.error('[onSearch - error]: ', error);
+            message.error('Có lỗi xảy ra khi tìm kiếm');
+        }
+    };
+
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -135,9 +273,14 @@ function KhungCTDT() {
                     <span className={cx('icon')}>
                         <ProjectIcon />
                     </span>
-                    <h3 className={cx('title')}>Khung chương trình đào tạo</h3>
+                    <h3 className={cx('title')}>Khung đào tạo</h3>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
+                    <Toolbar type={'Bộ lọc'}
+                        onClick={() => {
+                            setShowFilter(!showFilter);
+                        }}
+                    />
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
@@ -147,7 +290,14 @@ function KhungCTDT() {
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('khối kiến thức', handleDelete)} />
                 </div>
-
+            </div>
+            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                <SearchForm
+                    getFields={filterFields}
+                    onSearch={onSearch}
+                    onReset={fetchData}
+                />
+                <Divider />
             </div>
             <TableCustomAnt
                 height={'350px'}

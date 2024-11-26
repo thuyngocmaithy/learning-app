@@ -1,15 +1,11 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Empty, Form, InputNumber, message, Progress, Select, Switch } from 'antd';
+import { Empty, message, Progress, Switch, Tag } from 'antd';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableHP from '../../../../components/TableDepartment';
 import { useCallback, useEffect, useState } from 'react'; //
-import FormItem from '../../../../components/Core/FormItem';
-import { getAllFaculty } from '../../../../services/facultyService';
-import { useForm } from 'antd/es/form/Form';
-import { getAll as getAllCycle } from '../../../../services/cycleService';
-import { findKhungCTDTDepartment } from '../../../../services/studyFrameService';
+import { getAll, getById } from '../../../../services/studyFrameService';
 import { deleteSubjectCourseOpening, getAll as getAllCourseOpening, getTeacherAssignmentsAndSemesters, getWhere, saveMulti, updateSubjectCourseOpening } from '../../../../services/subject_course_openingService';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
@@ -18,36 +14,50 @@ import { deleteConfirm } from '../../../../components/Core/Delete';
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
 function MoHocPhan() {
-    const [form] = useForm();
-    const [cycleOptions, setCycleOptions] = useState([]);
-    const [facultyOptions, setFacultyOptions] = useState([]);
     const [dataArrange, setDataArrange] = useState(null);
-    const [disableValidation, setDisableValidation] = useState(false);
     const [selectedSemesters, setSelectedSemesters] = useState(new Set()); // Các học kỳ được chọn
     const [teacherAssignments, setTeacherAssignments] = useState(new Map()); // Ghi thông tin giảng viên
-    const [dataCourseOpening, setDataCourseOpening] = useState([]);
-    const [isLoadingCourseOpening, setIsLoadingCourseOpening] = useState(true);
-    const [studyFrame, setStudyFrame] = useState();
+    const [dataFrame, setDataFrame] = useState([]);
     const [percentArrange, setPercentArrange] = useState(0);
     const [switchStates, setSwitchStates] = useState({});  // Lưu trạng thái của các Switches
+    const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
 
 
 
-    // Fetch danh sách năm học đã mở học phần
-    const fetchCourseOpening = async () => {
+
+    const fetchDataFrame = async () => {
         try {
-            const response = await getAllCourseOpening();
+            const resultFrame = await getAll();
+            const resultOpen = await getAllCourseOpening();
+            const listFrameOpened = resultOpen.data.data.map((item) => {
+                return {
+                    frameId: item.studyFrameId,
+                    disabled: item.disabled
+                }
+            })
+            if (resultFrame.status === 200) {
+                setDataFrame(resultFrame.data.data.map((item) => {
+                    const isFrameOpen = listFrameOpened.find((frameOpen) => frameOpen.frameId === item.frameId)
 
-            if (response.status === 200) {
-                setDataCourseOpening(response.data.data);
+                    return {
+                        ...item,
+                        facultyName: item.faculty.facultyName,
+                        cycleName: item.cycle.cycleName,
+                        status: isFrameOpen,
+                        disabled: isFrameOpen?.disabled
+                    }
+                }));
             }
+            setIsLoading(false);
         } catch (error) {
-            console.error('MoHocPhan - fetchCourseOpenning - error:', error);
-        }
-        finally {
-            setIsLoadingCourseOpening(false);
+            console.error('Error fetching data:', error);
+            setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchDataFrame();
+    }, []);
 
     const fetchDataAssignment = useCallback(async () => {
         try {
@@ -60,74 +70,22 @@ function MoHocPhan() {
         }
     }, [setSelectedSemesters, setTeacherAssignments]);
 
-    useEffect(() => {
-        // Lấy danh sách ngành
-        const fetchFaculties = async () => {
-            const response = await getAllFaculty();
-            if (response && response.data) {
-                const options = response.data.map((faculty) => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyName,
-                }));
-                setFacultyOptions(options);
-            }
-        };
-        // Fetch danh sách chu kỳ
-        const fetchCycle = async () => {
-            try {
-                const response = await getAllCycle();
-                if (response) {
-                    const options = response.data.data.map((cycle) => ({
-                        value: cycle.cycleId,
-                        label: cycle.cycleName,
-                    }));
-                    setCycleOptions(options);
-                }
-            } catch (error) {
-                console.error('MoHocPhan - fetchCycle - error:', error);
-            }
-        };
-
-        fetchCycle();
-        fetchFaculties();
-        fetchCourseOpening();
-    }, []);
-
     const onReset = () => {
-        // Tạm thời tắt rule validation
-        setDisableValidation(true);
-
-        // Reset form
-        form.resetFields();
         setDataArrange(null)
-
-        // Kích hoạt lại rule validation
-        setTimeout(() => {
-            setDisableValidation(false);
-        }, 0); // Sử dụng setTimeout với giá trị 0 để kích hoạt lại validation ngay sau khi reset
+        setPercentArrange(0)
     };
 
-    const handleArrange = async () => {
+    const handleArrange = async (frameId) => {
         try {
-            const values = await form.validateFields();
-            const data = {
-                cycleId: values.cycle.value,
-                facultyId: values.faculty.value
-            }
-
-            const response = await findKhungCTDTDepartment(data.facultyId, data.cycleId);
+            const response = await getById(frameId);
 
             if (response.status === 200 && response.data.data !== null) {
-                setStudyFrame(response.data.data.frameId)
-                response.data.data.cycleId = values.cycle.value;
                 setDataArrange(response.data.data);
                 fetchDataAssignment();
             }
             else {
-                setStudyFrame(null)
+                setDataArrange(null)
             }
-
-
         } catch (error) {
             if (error.errorFields.length === 0)
                 console.error(`[ MoHocPhan - handleArrange - error]: ${error}`);
@@ -156,8 +114,8 @@ function MoHocPhan() {
         try {
             const response = await saveMulti(dataSave);
             if (response.status === 201) {
+                fetchDataFrame();
                 message.success('Mở học phần thành công');
-                fetchCourseOpening();
             }
         } catch (error) {
             message.error('Mở học phần thất bại')
@@ -168,14 +126,16 @@ function MoHocPhan() {
     };
 
     // Xóa năm học đã sắp xếp
-    const handleDelete = async (year, studyFrameId) => {
+    const handleDelete = async (cycleId, studyFrameId) => {
         try {
-            const response = await deleteSubjectCourseOpening(year, studyFrameId);
-            fetchCourseOpening();
-            handleArrange();
-
+            const response = await deleteSubjectCourseOpening(cycleId, studyFrameId);
+            fetchDataFrame();
             if (response.status === 200) {
                 message.success('Xoá thành công');
+                if (studyFrameId === dataArrange?.frameId) {
+                    // Nếu đang hiển thị sắp xếp khung xóa => set lại null
+                    setDataArrange(null)
+                }
             }
         } catch (error) {
             message.error('Xoá thất bại');
@@ -183,9 +143,9 @@ function MoHocPhan() {
         }
     };
 
-    const toggleViewIntructor = async (checked, studyFrameId, year) => {
+    const toggleViewIntructor = async (checked, studyFrameId, cycleId) => {
         try {
-            const listDataUpdate = await getWhere({ studyFrame: studyFrameId, year: year });
+            const listDataUpdate = await getWhere({ studyFrame: studyFrameId, cycle: cycleId });
             if (listDataUpdate.status === 200) {
                 listDataUpdate.data.data.forEach(async (item) => {
                     await updateSubjectCourseOpening(item.id, { disabled: checked });
@@ -193,7 +153,7 @@ function MoHocPhan() {
                 // Sau khi cập nhật, bạn cần cập nhật lại trạng thái checked cho switch
                 setSwitchStates((prevState) => ({
                     ...prevState,
-                    [`${studyFrameId}-${year}`]: checked,  // Sử dụng `studyFrameId` và `year` làm key để cập nhật
+                    [`${studyFrameId}-${cycleId}`]: checked,  // Sử dụng `studyFrameId` và `cycleId` làm key để cập nhật
                 }));
                 message.success(`${checked ? 'Hiển thị' : 'Ẩn'} giảng viên thành công`)
             }
@@ -203,13 +163,12 @@ function MoHocPhan() {
         }
     };
 
-
-    const columnCourseOpening = useCallback(
+    const columnFrame = useCallback(
         () => [
             {
                 title: 'Khung đào tạo',
-                dataIndex: 'studyFrameName',
-                key: 'studyFrameName',
+                dataIndex: 'frameName',
+                key: 'frameName',
                 width: '30%'
             },
             {
@@ -224,18 +183,27 @@ function MoHocPhan() {
                 key: 'facultyName',
             },
             {
+                title: 'Trạng thái',
+                dataIndex: 'status',
+                key: 'status',
+                render: (_, record) => record.status
+                    ? <Tag color='green'>Đã sắp xếp</Tag>
+                    : <Tag color='red'>Chưa sắp xếp</Tag>
+            },
+            {
                 title: 'Hiển thị giảng viên',
                 dataIndex: 'disabled',
                 key: 'disabled',
                 render: (_, record) => {
-                    const { studyFrameId, year } = record;
-                    const key = `${studyFrameId}-${year}`;
+                    const { frameId, cycle: { cycleId }, status } = record;
+                    const key = `${frameId}-${cycleId}`;
                     const checked = switchStates[key] !== undefined ? switchStates[key] : record.disabled;  // Dùng state để kiểm tra trạng thái `checked`
 
                     return (
                         <Switch
                             checked={checked}
-                            onChange={(checked) => toggleViewIntructor(checked, studyFrameId, year)}
+                            onChange={(checked) => toggleViewIntructor(checked, frameId, cycleId)}
+                            disabled={!status}  // Disable switch nếu chưa mở học phần
                         />
                     );
                 },
@@ -252,7 +220,7 @@ function MoHocPhan() {
                             leftIcon={<DeleteOutlined />}
                             outline
                             verysmall
-                            onClick={() => deleteConfirm('dữ liệu mở học phần', () => handleDelete(record.year, record.studyFrameId))}
+                            onClick={() => deleteConfirm('dữ liệu mở học phần', () => handleDelete(record.cycle.cycleId, record.frameId))}
                         >
                             Xóa
                         </ButtonCustom>
@@ -262,22 +230,7 @@ function MoHocPhan() {
                             primary
                             verysmall
                             onClick={() => {
-                                form.setFieldsValue({
-                                    cycle: {
-                                        value: record.cycleId,
-                                        label: record.cycleName
-                                    },
-                                    academicYear: record.year,
-                                    faculty: {
-                                        value: record.facultyId,
-                                        label: record.facultyName
-                                    },
-                                });
-                                handleArrange();
-                                window.scrollTo({
-                                    top: 0,
-                                    behavior: 'smooth'
-                                });
+                                handleArrange(record.frameId);
                             }}
                         >
                             Sắp xếp
@@ -301,73 +254,47 @@ function MoHocPhan() {
                 </div>
             </div>
             <div className={cx('container-arrange')}>
-                <div className={cx('form-data-arrange')}>
-                    <Form form={form} layout="inline" className={cx("form-inline")}>
-                        <FormItem
-                            name="cycle"
-                            label="Chu kỳ"
-                            rules={disableValidation ? [] : [{ required: true, message: 'Vui lòng chọn chu kỳ' }]}
-                        >
-                            <Select
-                                style={{ width: '200px', marginLeft: "-70px" }}
-                                showSearch
-                                placeholder="Chọn chu kỳ"
-                                optionFilterProp="children"
-                                labelInValue // Hiển thị label trên input
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={cycleOptions}
-                            />
-                        </FormItem>
-                        <FormItem
-                            name="faculty"
-                            label="Ngành"
-                            rules={disableValidation ? [] : [{ required: true, message: 'Vui lòng chọn ngành' }]}
-                        >
-                            <Select
-                                style={{ width: '200px', marginLeft: "-70px" }}
-                                showSearch
-                                placeholder="Chọn ngành"
-                                optionFilterProp="children"
-                                labelInValue // Hiển thị label trên input
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={facultyOptions}
-                            />
-                        </FormItem>
-                        <ButtonCustom primary type="primary" onClick={handleArrange} small>
-                            Sắp xếp
-                        </ButtonCustom>
-                        <ButtonCustom outline onClick={onReset} small>
-                            Reset
-                        </ButtonCustom>
-                    </Form>
-                </div>
-                <div className={cx('status-save')}>
-                    <Progress
-                        percent={percentArrange}
-                        percentposition={{
-                            align: 'start',
-                            type: 'outer',
-                        }}
-                        size={['100%', 15]}
-                        style={{ margin: "50px 0" }}
-                    />
-                    <ButtonCustom
-                        outline
-                        colorRed
-                        className={cx('btnSave')}
-                        onClick={handleOpeningCourse}
-                    >
-                        Lưu
-                    </ButtonCustom>
-                </div>
+                <TableCustomAnt
+                    columns={columnFrame()}
+                    data={dataFrame}
+                    height="550px"
+                    loading={isLoading}
+                    isHaveRowSelection={false}
+                    keyIdChange={"frameId"}
+                />
                 <div className={cx('table-arrange')}>
+                    <div className={cx('title-list-course-opening')}>
+                        <h3>{dataArrange ? dataArrange.frameName : 'Khung đào tạo'}</h3>
+                    </div>
                     {dataArrange ? (
                         <>
-                            {/* Hiển thị bảng nếu có năm học */}
+                            <div className={cx('status-save')}>
+                                <Progress
+                                    percent={percentArrange}
+                                    percentposition={{
+                                        align: 'start',
+                                        type: 'outer',
+                                    }}
+                                    size={['100%', 15]}
+                                    style={{ margin: "50px 0" }}
+                                />
+                                <ButtonCustom
+                                    outline
+                                    className={cx('btnClose')}
+                                    onClick={onReset}
+                                >
+                                    Đóng
+                                </ButtonCustom>
+                                <ButtonCustom
+                                    outline
+                                    colorRed
+                                    className={cx('btnSave')}
+                                    onClick={handleOpeningCourse}
+                                >
+                                    Lưu
+                                </ButtonCustom>
+                            </div>
+                            {/* Hiển thị bảng nếu chọn khung đào tạo*/}
                             <TableHP
                                 data={dataArrange}
                                 selectedSemesters={selectedSemesters}
@@ -378,23 +305,13 @@ function MoHocPhan() {
                             />
                         </>
                     ) : (
-                        // Hiển thị thông báo khi không chọn năm học
+                        // Hiển thị thông báo khi chưa chọn khung đào tạo
                         <Empty
                             className={cx("empty")}
-                            description={studyFrame ? 'Bạn chưa chọn năm học sắp xếp' : 'Chu kỳ này chưa có khung chương trình đào tạo'}
+                            description={'Bạn chưa chọn khung đào tạo sắp xếp'}
                         />
                     )}
                 </div>
-                <div className={cx('title-list-course-opening')}>
-                    <h3>Danh sách năm học đã sắp xếp</h3>
-                </div>
-                <TableCustomAnt
-                    columns={columnCourseOpening()}
-                    data={dataCourseOpening}
-                    height="550px"
-                    loading={isLoadingCourseOpening}
-                    isHaveRowSelection={false}
-                />
             </div>
         </div>
     );

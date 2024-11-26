@@ -4,18 +4,13 @@ import {
     Select,
     Form,
     message,
-    Checkbox
 } from 'antd';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getUseridFromLocalStorage } from '../../../services/userService';
 import { getAllFaculty } from '../../../services/facultyService';
 import { createMajor, updateMajorById } from '../../../services/majorService';
-import classNames from 'classnames/bind';
-import styles from './ChuyenNganhUpdate.module.scss'
 
-
-export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad, viewOnly }) {
+export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const [form] = Form.useForm();
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -107,7 +102,6 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
         <Update
             title={title}
             isUpdate={isUpdate}
-            isViewOnly={viewOnly}
             showModal={showModal !== false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
@@ -119,14 +113,14 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                     label="Mã chuyên ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập mã chuyên ngành' }]}
                 >
-                    <Input disabled={viewOnly || isUpdate} />
+                    <Input disabled={isUpdate} />
                 </FormItem>
                 <FormItem
                     name="majorName"
                     label="Tên chuyên ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập tên chuyên ngành' }]}
                 >
-                    <Input disabled={viewOnly} />
+                    <Input />
                 </FormItem>
                 <FormItem name="facultyId" label="Ngành" rules={[{ required: true, message: 'Vui lòng chọn ngành' }]}>
                     <Select
@@ -139,7 +133,6 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
                         options={facultyOptions}
-                        disabled={viewOnly}
                     />
                 </FormItem>
             </Form>

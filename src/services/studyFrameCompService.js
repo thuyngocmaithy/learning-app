@@ -49,4 +49,14 @@ export const deleteStudyFrameComponents = async (ids) => {
     }
 };
 
+export const getWhere = async (conditions) => {
+    try {
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/study-frame-components/getWhere?${queryParams}`;
 
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

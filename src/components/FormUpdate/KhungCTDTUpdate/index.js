@@ -152,14 +152,14 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
             <Form {...layoutForm} form={form}>
                 <FormItem
                     name="frameId"
-                    label="Mã khung chương trình đào tạo"
+                    label="Mã khung đào tạo"
                     rules={[{ required: true, message: 'Vui lòng nhập mã khung' }]}
                 >
                     <Input disabled={isUpdate ? true : false} />
                 </FormItem>
                 <FormItem
                     name="frameName"
-                    label="Tên khung chương trình đào tạo"
+                    label="Tên khung đào tạo"
                     rules={[{ required: true, message: 'Vui lòng nhập tên khung' }]}
                 >
                     <Input />

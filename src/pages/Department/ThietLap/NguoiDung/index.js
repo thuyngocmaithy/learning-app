@@ -12,7 +12,7 @@ import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { NguoiDungDetail } from '../../../../components/FormDetail/NguoiDungDetail';
 import { deleteUserById, importUser } from '../../../../services/userService';
 import { getAllUser, getWhereUser } from '../../../../services/userService';
-import { getAll as getAllMajors, getWhere } from '../../../../services/majorService';
+import { getWhere } from '../../../../services/majorService';
 import { getAllFaculty } from '../../../../services/facultyService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import config from '../../../../config';
@@ -32,7 +32,6 @@ function NguoiDung() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
-    const [viewOnly, setViewOnly] = useState(false);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
 
     // Filter
@@ -108,7 +107,6 @@ function NguoiDung() {
                         onClick={() => {
                             setShowModal(record);
                             setIsUpdate(true);
-                            setViewOnly(false);
                             setShowModalDetail(false);
                         }}>
                         Sửa
@@ -169,7 +167,7 @@ function NguoiDung() {
                 permission: user.permission || null,
             }));
 
-            setData(listUser);            
+            setData(listUser);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -218,7 +216,6 @@ function NguoiDung() {
                 showModal={showModal}
                 setShowModal={setShowModal}
                 reLoad={fetchData}
-                viewOnly={viewOnly}
             />
         );
     }, [showModal, isUpdate]);
@@ -413,7 +410,6 @@ function NguoiDung() {
                         onClick={() => {
                             setShowModal(true);
                             setIsUpdate(false);
-                            setViewOnly(false);
                         }}
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('người dùng', handleDelete)} />
