@@ -14,38 +14,42 @@ import { BrowserRouter } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
 import getThemeConfig from './config/themeConfig';
+import { App as AppAnt } from 'antd';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>
-    <ThemeProvider>
-        <GlobalStyles>
-            <BrowserRouter>
-                <ThemeContext.Consumer>
-                    {({ theme }) => {
-                        const themeConfig = getThemeConfig(theme); // Lấy cấu hình theme từ file config
-                        return (
-                            <ConfigProvider theme={themeConfig}>
-                                <AccountLoginProvider>
-                                    <PermissionDetailProvider>
-                                        <MenuProvider>
-                                            <SRAndThesisJoinProvider>
-                                                <SocketNotificationProvider>
-                                                    <SocketMessagesProvider>
-                                                        <App />
-                                                    </SocketMessagesProvider>
-                                                </SocketNotificationProvider>
-                                            </SRAndThesisJoinProvider>
-                                        </MenuProvider>
-                                    </PermissionDetailProvider>
-                                </AccountLoginProvider>
-                            </ConfigProvider>
-                        );
-                    }}
-                </ThemeContext.Consumer>
-            </BrowserRouter>
-        </GlobalStyles>
-    </ThemeProvider>,
+    <AppAnt>
+        <ThemeProvider>
+            <GlobalStyles>
+                <BrowserRouter>
+                    <ThemeContext.Consumer>
+                        {({ theme }) => {
+                            const themeConfig = getThemeConfig(theme); // Lấy cấu hình theme từ file config
+                            return (
+                                <ConfigProvider
+                                    theme={themeConfig}>
+                                    <AccountLoginProvider>
+                                        <PermissionDetailProvider>
+                                            <MenuProvider>
+                                                <SRAndThesisJoinProvider>
+                                                    <SocketNotificationProvider>
+                                                        <SocketMessagesProvider>
+                                                            <App />
+                                                        </SocketMessagesProvider>
+                                                    </SocketNotificationProvider>
+                                                </SRAndThesisJoinProvider>
+                                            </MenuProvider>
+                                        </PermissionDetailProvider>
+                                    </AccountLoginProvider>
+                                </ConfigProvider>
+                            );
+                        }}
+                    </ThemeContext.Consumer>
+                </BrowserRouter>
+            </GlobalStyles>
+        </ThemeProvider>
+    </AppAnt>
     // </React.StrictMode>,
 );
 

@@ -182,6 +182,9 @@ function MonHoc() {
                     setData(response.data.data);
                 }
             }
+            else {
+                setData([]);
+            }
         } catch (error) {
             console.error('[onSearch - error]: ', error);
             message.error('Có lỗi xảy ra khi tìm kiếm');

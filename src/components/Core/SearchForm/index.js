@@ -64,7 +64,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
                     <Button
                         primary
                         small
-                        htmlType={"submit"}
+                        type={"submit"}
                         leftIcon={<SearchOutlined />}
                     >
                         Tìm kiếm

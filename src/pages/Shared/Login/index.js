@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Form, Input, message, Spin } from 'antd';
+import React, { useContext, useEffect, useState } from 'react';
+import { Checkbox, Form, Input, message, Spin } from 'antd';
 import { UserOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { loginToSgu } from '../../../services/userService';
@@ -9,20 +9,34 @@ import sgu from '../../../assets/images/sgu.jpg';
 import Button from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { SRAndThesisJoinContext } from '../../../context/SRAndThesisJoinContext';
+import FormItem from '../../../components/Core/FormItem';
+import { getAccountById, getWhere } from '../../../services/accountService';
+import useDebounce from '../../../hooks/useDebounce';
 
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
-
     const { updateUserInfo } = useContext(AccountLoginContext);
     const { updateSRAndThesisJoin } = useContext(SRAndThesisJoinContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [isSync, setIsSync] = useState(false);
+    const [accountValue, setAccountValue] = useState('');
+    const debouncedAccountValue = useDebounce(accountValue, 1000);
+
+    useEffect(() => {
+        if (debouncedAccountValue) {
+            fetchAccountSGU(debouncedAccountValue);
+        }
+        else {
+            setIsSync(false);
+        }
+    }, [debouncedAccountValue]);
 
     const onFinish = async (values) => {
         setLoading(true);
         try {
-            const response = await loginToSgu(values.username, values.password);
+            const response = await loginToSgu(values.username, values.password, values.isSync);
 
             if (response.status === 'success' && response.data?.user?.userId) {
                 message.success('Đăng nhập thành công');
@@ -51,6 +65,21 @@ const LoginForm = () => {
         }
     };
 
+    const fetchAccountSGU = async (username) => {
+        try {
+            const response = await getAccountById(username);
+            if (response.status === "success") {
+                setIsSync(!response.data.isSystem);
+            }
+            else {
+                setIsSync(false);
+            }
+        } catch (error) {
+            console.error(error);
+
+        }
+    }
+
 
     return (
         <div className={cx('wrapper')}>
@@ -75,7 +104,11 @@ const LoginForm = () => {
                                                 name="username"
                                                 rules={[{ required: true, message: 'Vui lòng nhập MSSV!' }]}
                                             >
-                                                <Input prefix={<UserOutlined />} placeholder="Mã" />
+                                                <Input
+                                                    prefix={<UserOutlined />}
+                                                    placeholder="Mã"
+                                                    onChange={(e) => setAccountValue(e.target.value)}
+                                                />
                                             </Form.Item>
                                         </div>
                                         <div className={cx('input-box')}>
@@ -86,6 +119,18 @@ const LoginForm = () => {
                                                 <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
                                             </Form.Item>
                                         </div>
+                                        {isSync &&
+                                            <div className={cx('input-box')}>
+                                                <FormItem
+                                                    name="isSync"
+                                                    label={"Đồng bộ dữ liệu trang thông tin đào tạo SGU"}
+                                                    style={{ fontStyle: 'italic' }}
+                                                    valuePropName="checked"
+                                                >
+                                                    <Checkbox />
+                                                </FormItem>
+                                            </div>
+                                        }
                                         <div className={cx('btnLogin')}>
                                             <Button primary disabled={loading}>
                                                 {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}

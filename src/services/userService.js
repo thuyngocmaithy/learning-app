@@ -45,9 +45,9 @@ export const login = async (username, password) => {
 };
 
 // Hàm đăng nhập sử dụng SGU
-export const loginToSgu = async (username, password) => {
+export const loginToSgu = async (username, password, isSync) => {
   try {
-    const response = await api.post('/authSGU/login-sgu', { username, password });
+    const response = await api.post('/authSGU/login-sgu', { username, password, isSync });
     return response.data;
   } catch (error) {
     console.error('[userService - loginToSgu - error] : ', error);

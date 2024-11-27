@@ -7,10 +7,13 @@ import TextArea from 'antd/es/input/TextArea';
 import classNames from 'classnames/bind';
 import styles from "./ThanhPhanKhungDTUpdate.module.scss"
 import TransferCustom from '../../Core/TransferCustom';
-import { getAll as getAllSubject } from '../../../services/subjectService';
+import { getAll as getAllSubject, importSubject } from '../../../services/subjectService';
 import { createSSMByListSubject, getWheresubject_studyFrameComp, updateSSMByListSubject } from '../../../services/subject_studyFrameCompService';
 import { getAll } from '../../../services/majorService';
 import { createStudyFrameComponent, updateStudyFrameComponent } from '../../../services/studyFrameCompService';
+import ImportExcelKhoiKienThuc from '../../Core/ImportExcelKhoiKienThuc';
+import config from '../../../config';
+import Toolbar from '../../Core/Toolbar';
 
 
 const cx = classNames.bind(styles)
@@ -57,6 +60,8 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
         }
     ]);
     const [maxCreditHour, setMaxCreditHour] = useState(0); // Lưu số tín chỉ tối đa được nhập
+    // Import 
+    const [showModalImportSubject, setShowModalImportSubject] = useState(false);
 
 
     // Fetch danh sách chuyên ngành
@@ -327,6 +332,9 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                                 </Form.Item>
                             </Space.Compact>
                         </FormItem>
+                        <div className={cx('import')}>
+                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportSubject(true)} />
+                        </div>
                         <TransferCustom
                             data={listSubject}
                             columns={columns}
@@ -337,6 +345,17 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                     </>
                 )}
             </Form>
+            <ImportExcelKhoiKienThuc
+                title={'môn học'}
+                showModal={showModalImportSubject}
+                setShowModal={setShowModalImportSubject}
+                // reLoad={fetchData}
+                type={config.imports.SUBJECT}
+                onImport={importSubject}
+                listSubject={listSubject}
+                setListSubject={setListSubject}
+                setListSubjectSelected={setListSubjectSelected}
+            />
         </Update>
     );
 });

@@ -51,3 +51,16 @@ export const updateAccountById = async (accountId, accountData) => {
     throw error;
   }
 }
+
+export const getWhere = async (conditions) => {
+  try {
+    const queryParams = new URLSearchParams(conditions).toString();
+    const url = `/accounts/getWhere?${queryParams}`;
+
+    const response = await api.get(url);
+    return response;
+  } catch (error) {
+    console.error('[accountServive - getWhere - error] : ', error);
+    throw error;
+  }
+};

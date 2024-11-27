@@ -9,8 +9,11 @@ import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';
 import { PermissionDetailContext } from './context/PermissionDetailContext';
 import { api } from './utils/apiConfig';
+import { useAntdApp } from './hooks/useAntdApp';
+
 
 function App() {
+    useAntdApp();
     const { userId, permission, isTokenExpired, updateUserInfo } = useContext(AccountLoginContext);
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true)

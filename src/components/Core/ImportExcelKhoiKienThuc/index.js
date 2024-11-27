@@ -1,15 +1,30 @@
 import classNames from 'classnames/bind';
-import styles from './ImportExcel.module.scss';
+import styles from './ImportExcelKhoiKienThuc.module.scss';
 import { useState, useCallback } from 'react';
 import ExcelJS from 'exceljs';
-import { Button, message, Modal, Spin, Upload } from 'antd';
+import { App, Button, Modal, Spin, Upload } from 'antd';
 import ButtonCustom from '../Button';
 import { downloadTemplate } from '../../../services/fileService';
 import { UploadOutlined } from '@ant-design/icons';
+import { message } from '../../../hooks/useAntdApp';
 
 const cx = classNames.bind(styles);
 
-function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose, onImport, reLoad, ...props }) {
+function ImportExcelKhoiKienThuc({
+    form,
+    title = '',
+    showModal,
+    type,
+    setShowModal,
+    onClose,
+    onImport,
+    reLoad,
+    listSubject,
+    setListSubject,
+    setListSubjectSelected,
+    ...props }) {
+
+    const { message } = App.useApp();
     const [file, setFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -53,8 +68,35 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
             });
 
             try {
-                if (onImport) {
-                    await onImport(data); // Gọi hàm onImport để xử lý dữ liệu
+                // Kiểm tra dữ liệu nào đã có thì add select từ transform
+                let dataImport = data;
+                data.forEach((item) => {
+                    // Kiểm tra xem item đã có trong listSubjects chưa (giả sử bạn so sánh theo 'subjectId')
+                    const existingSubject = listSubject.find(subject => subject.subjectId.toString() === item.subjectId.toString());
+
+                    // Nếu tìm thấy subject trong listSubjects 
+                    if (existingSubject) {
+                        // Thêm vào listSubjectSelected
+                        setListSubjectSelected(prev => [...prev, existingSubject]);
+                        // Xóa khỏi dataImport
+                        dataImport = dataImport.filter(i => i.subjectId.toString() !== item.subjectId.toString());
+                    }
+                });
+                if (onImport && dataImport.length > 0) {
+                    const response = await onImport(dataImport); // Gọi hàm onImport để xử lý dữ liệu
+                    console.log(response.data);
+                    if (response.message === 'success' && response.data && response.data.length > 0) {
+                        const listSubjectAdded = response.data.map((item) => {
+                            return {
+                                ...item,
+                                key: item.subjectId
+                            }
+                        })
+                        // Thêm vào transform
+                        setListSubject(prev => [...prev, ...listSubjectAdded])
+                        // Thêm vào listSubjectSelected
+                        setListSubjectSelected(prev => [...prev, ...listSubjectAdded]);
+                    }
                 }
                 message.success('Import thành công!');
                 if (reLoad) {
@@ -115,4 +157,4 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
     );
 }
 
-export default ImportExcel;
+export default ImportExcelKhoiKienThuc;

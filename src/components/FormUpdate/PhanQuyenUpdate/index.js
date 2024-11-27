@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
-import { message } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import Update from '../../Core/Update';
 import TableCustomAnt from '../../Core/TableCustomAnt';
 import { getAll } from '../../../services/featureService';

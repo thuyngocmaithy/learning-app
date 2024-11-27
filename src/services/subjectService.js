@@ -78,8 +78,8 @@ export const importSubject = async (data) => {
   try {
     const createUserId = await getUseridFromLocalStorage();
     const response = await api.post('/subjects/import', {
-      data,
-      createUserId,
+      subjects: data,
+      createUserId: createUserId,
     });
     return response.data;
   } catch (error) {
