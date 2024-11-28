@@ -20,7 +20,7 @@ import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
-
+import ExportExcel from '../../../../components/Core/ExportExcel';
 const cx = classNames.bind(styles);
 
 
@@ -476,6 +476,32 @@ function NhomDeTaiNCKH() {
         },
     ];
 
+
+    // Export 
+    const schemas = [
+        { label: "Mã nhóm đề tài", prop: "scientificResearchGroupId" },
+        { label: "Tên nhóm đề tài", prop: "scientificResearchGroupName" },
+        { label: "Ngành", prop: "faculty" },
+        { label: "Năm thực hiện", prop: "startYear" },
+        { label: "Năm kết thúc", prop: "finishYear" },
+        { label: "Trạng thái", prop: "status" }
+    ];
+
+    const processedData = data.map(item => ({
+        ...item,
+        status: item.status?.statusName
+    }));
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nhomdetai",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH NHÓM ĐỀ TÀI NGHIÊN CỨU KHOA HỌC",
+
+        });
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -508,7 +534,7 @@ function NhomDeTaiNCKH() {
                         <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài nghiên cứu', handleDisable)} />
                         <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài nghiên cứu', handleEnable)} />
                         <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} onClick={() => setShowModalImport(true)} />
-                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
+                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} onClick={handleExportExcel} />
                     </div>
                 )}
             </div>

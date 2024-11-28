@@ -14,6 +14,7 @@ import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 import config from '../../../../config';
 
 const cx = classNames.bind(styles);
@@ -220,7 +221,27 @@ function MonHoc() {
                 placeholder="Chọn loại trạng thái"
             />
         </FormItem >
-    ]
+    ];
+
+    const schemas = [
+        { label: "Mã môn học", prop: "subjectId" },
+        { label: "Tên môn học", prop: "subjectName" },
+        { label: "Bắt buộc", prop: "isCompulsory" },
+        { label: "Mã môn trước", prop: "subjectBefore" },
+        { label: "Số tín chỉ", prop: "creditHour" },
+    ];
+
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_mon_hoc",
+            data,
+            schemas,
+            headerContent: "DANH SÁCH MÔN HỌC",
+        });
+    };
+
+
 
     return (
         <div className={cx('wrapper')}>
@@ -246,7 +267,10 @@ function MonHoc() {
                     />
                     <Toolbar type={'Xóa'} onClick={() => deleteConfirm('môn học', handleDelete)} />
                     <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportSubject(true)} />
-                    <Toolbar type={'Xuất file Excel'} />
+                    <Toolbar
+                        type={'Xuất file Excel'}
+                        onClick={handleExportExcel}
+                    />
                 </div>
 
             </div>

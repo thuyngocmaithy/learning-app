@@ -22,6 +22,7 @@ import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
 import { getThesisGroupById } from '../../../../services/thesisGroupService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -526,6 +527,44 @@ function DeTaiKhoaLuan() {
         />
     ), [showModalDetail]);
 
+
+    const schemas = [
+        { label: "Mã đề tài", prop: "thesisId" },
+        { label: "Tên đề tài", prop: "thesisName" },
+        { label: "Chủ nhiệm đề tài", prop: "instructor" },
+        { label: "Số lượng thành viên", prop: "numberOfMember" },
+        { label: "Trạng thái", prop: "status" },
+        { label: "Thời điểm bắt đầu", prop: "startDate" },
+        { label: "Thời điểm hoàn thành", prop: "finishDate" },
+
+    ];
+
+    const formatDate = (isoDate) => {
+        const date = new Date(isoDate); // Chuyển chuỗi ISO thành đối tượng Date
+        const day = String(date.getDate()).padStart(2, '0'); // Lấy ngày, thêm 0 nếu cần
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Lấy tháng (0-indexed)
+        const year = date.getFullYear(); // Lấy năm
+        return `${day}/${month}/${year}`; // Định dạng dd/mm/yyyy
+    };
+    const processedData = data.map(item => ({
+        ...item, // Giữ nguyên các trường khác
+        status: item.status?.statusName,
+        instructor: item.instructor?.fullname || "",
+        startDate: formatDate(item.startDate), // Định dạng ngày bắt đầu
+        finishDate: formatDate(item.finishDate), // Định dạng ngày hoàn thành
+    }));
+
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_detaikhoaluan",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH ĐỀ TÀI KHOÁ LUẬN",
+
+        });
+    };
+
     return (
         <>
             <div className={cx('wrapper')}>
@@ -579,7 +618,7 @@ function DeTaiKhoaLuan() {
                             {!disableToolbar &&
                                 <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} onClick={() => setShowModalImport(true)} />
                             }
-                            <Toolbar type={'Xuất file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
                         </div>
                     ) : null}
                 </div>
