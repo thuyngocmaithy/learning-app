@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Checkbox, List, message } from 'antd';
 import Update from '../../Core/Update';
 import styles from "./DungKhungCTDTUpdate.module.scss"
@@ -7,7 +7,7 @@ import TreeFrame from '../../TreeFrame';
 import Button from '../../Core/Button';
 import ThanhPhanKhungDTFormSelect from '../../FormSelect/ThanhPhanKhungDTSelect';
 import { saveTreeFrameStructure } from '../../../services/frameStructureService';
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { getWhereFrameStructures } from '../..//../services/frameStructureService';
 import { getWheresubject_studyFrameComp } from '../../../services/subject_studyFrameCompService';
 import { getById as getStudyFrameCompById } from '../../../services/studyFrameCompService';
