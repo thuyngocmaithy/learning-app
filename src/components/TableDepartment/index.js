@@ -160,7 +160,7 @@ const TableDepartment = ({
                     // Kiểm tra item.subjectInfo là một mảng
                     if (Array.isArray(item.subjectInfo)) {
                         item.subjectInfo.forEach((subject) => {
-                            // Kiểm tra selectedSemesters và tránh cộng dư
+                            // Kiểm tra selectedSemesters
                             listSemester.forEach((semester) => {
                                 const id = `${semester.semesterId}-${subject.subjectId}`;
                                 if (selectedSemesters.has(id) && !listSubject.includes(subject.subjectId)) {

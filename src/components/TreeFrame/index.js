@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Empty, List, Tree } from 'antd';
+import { Empty, List, Spin, Tree } from 'antd';
 import classNames from 'classnames/bind';
 import styles from "./TreeFrame.module.scss"
 
@@ -9,7 +9,8 @@ const cx = classNames.bind(styles)
 const TreeFrame = ({
     treeData, // Dữ liệu cấu trúc cây
     setTreeData, // Set dữ liệu cấu trúc cây
-    expandedKeys // Key để mở rộng khối kiến thức
+    expandedKeys, // Key để mở rộng khối kiến thức
+    isLoading
 }) => {
 
 
@@ -89,23 +90,28 @@ const TreeFrame = ({
 
 
     return (
-        <>
-            {(treeData.length === 0)
-                ? <Empty className={cx("empty")} description="Không có dữ liệu" />
-                : <>
-                    <Tree
-                        checkStrictly
-                        className="draggable-tree"
-                        expandedKeys={expandedKeys}
-                        draggable
-                        blockNode
-                        onDrop={onDrop}
-                        treeData={treeData}
-                    // loadData={isLoadingFrame}
-                    />
-                </>
-            }
-        </>
+        isLoading
+            ?
+            <div className={('container-loading')}>
+                <Spin size="large" />
+            </div>
+            :
+            <>
+                {(treeData.length === 0)
+                    ? <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    : <>
+                        <Tree
+                            checkStrictly
+                            className="draggable-tree"
+                            expandedKeys={expandedKeys}
+                            draggable
+                            blockNode
+                            onDrop={onDrop}
+                            treeData={treeData}
+                        />
+                    </>
+                }
+            </>
     );
 };
 

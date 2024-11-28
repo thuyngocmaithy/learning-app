@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Checkbox, List, message } from 'antd';
 import Update from '../../Core/Update';
 import styles from "./DungKhungCTDTUpdate.module.scss"
@@ -7,13 +7,17 @@ import TreeFrame from '../../TreeFrame';
 import Button from '../../Core/Button';
 import ThanhPhanKhungDTFormSelect from '../../FormSelect/ThanhPhanKhungDTSelect';
 import { saveTreeFrameStructure } from '../../../services/frameStructureService';
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { getWhereFrameStructures } from '../..//../services/frameStructureService';
 import { getWheresubject_studyFrameComp } from '../../../services/subject_studyFrameCompService';
 import { getById as getStudyFrameCompById } from '../../../services/studyFrameCompService';
 import { getById as getStudyFrameById } from '../../../services/studyFrameService';
 import { v4 as uuidv4 } from 'uuid';
 import ThanhPhanKhungDTDetail from '../../FormDetail/ThanhPhanKhungDTDetail';
+import Toolbar from '../../Core/Toolbar';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { getWhere } from '../../../services/semesterService';
 
 const cx = classNames.bind(styles)
 
@@ -44,15 +48,12 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const thanhPhanKhungDTFormSelectMemoized = useMemo(() => {
         return (
             <ThanhPhanKhungDTFormSelect
-                title={'khối kiến thức đào tạo'}
+                title={'khối kiến thức'}
                 showModal={showModalSelect}
                 setShowModal={setShowModalSelect}
                 setSelectedItem={setSelectedFrameComp}
                 selectedItem={selectedFrameComp}
                 setReceiveFormSelect={setReceiveFormSelect}
-
-            // reLoad={fetchData}
-
             />
         );
     }, [showModalSelect, selectedFrameComp]);
@@ -84,11 +85,6 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         loop(data);
         return keys;
     };
-
-
-    useEffect(() => {
-
-    }, [])
 
     // Nhận các khối kiến thức từ Form Select
     useEffect(() => {
@@ -224,8 +220,13 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 key: item.id,
                 orderNo: item.orderNo,
                 studyFrameId: item.studyFrame?.frameId,
+                studyFrameName: item.studyFrame?.frameName,
                 studyFrameComponentId: item.studyFrameComponent?.id,
+                studyFrameComponentName: item.studyFrameComponent?.frameComponentName,
                 studyFrameComponentParentId: item.studyFrameComponentParent?.id,
+                description: item.studyFrameComponent?.description,
+                creditHour: item.studyFrameComponent?.creditHour,
+                listSubject: item.listSubject,
                 children: buildTreeData(list, item.studyFrameComponent?.id), // Đệ quy bất đồng bộ
 
             }));
@@ -248,6 +249,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     }
 
     const fetchData = async () => {
+        setIsLoadingFrame(true);
         try {
             // Tìm khối kiến thức được chọn từ form select
             const frameStructurePromise = frameStructureByFrameId?.map(async (item) => {
@@ -256,6 +258,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                     return {
                         subjectId: item.subject?.subjectId,
                         subjectName: item.subject?.subjectName,
+                        creditHour: item.subject?.creditHour
                     }
                 }
                 ) || [];
@@ -307,9 +310,6 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         } catch (error) {
             console.error(error);
         }
-        finally {
-            setIsLoadingFrame(false)
-        }
     };
 
     // Lấy dữ liệu ban đầu khi mở form lần đầu
@@ -344,6 +344,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         setSelectedFrameComp(allKeyFrameComp);
         // Mở rộng tất cả các keys trong cây
         setExpandedKeys(getAllKeys(treeDataMemoized));
+        setIsLoadingFrame(false);
     }, [treeDataMemoized]);
 
     const thanhphankhungdtDetailMemoized = useMemo(() => {
@@ -357,6 +358,122 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     }, [showModalDetail]);
 
 
+    //===========================EXPORT EXCEL================================
+    const [listSemester, setListSemester] = useState([]); // Danh sách các học kỳ
+
+    // Hàm tải danh sách học kỳ
+    const fetchSemester = useCallback(async () => {
+        try {
+            const response = await getWhere({ cycle: showModal.cycleId });
+            if (response.status === 200) {
+                setListSemester(response.data.data.filter(item => item.semesterName !== 3));
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách học kỳ:', error);
+        }
+    }, [showModal]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await fetchSemester();
+        };
+        fetchData();
+    }, [fetchSemester]);
+
+    // Hàm đệ quy để xử lý dữ liệu dạng cây
+    const processTreeForExcel = (treeData, level = 0, result = []) => {
+        treeData.forEach(node => {
+            result.push({
+                name: `${" ".repeat(level * 10)}${node.studyFrameComponentName}`,
+                description: node.description,
+                creditHour: node.creditHour,
+                type: "component", // Đánh dấu loại node (thành phần chính)
+            });
+
+            // Thêm dòng cho danh sách môn học (nếu có)
+            if (node.listSubject && node.listSubject.length > 0) {
+                node.listSubject.forEach(subject => {
+                    result.push({
+                        name: `${" ".repeat((level + 1) * 4)}${subject.subjectId}`,
+                        description: subject.subjectName,
+                        creditHour: subject.creditHour,
+                        type: "subject", // Đánh dấu loại node (môn học)
+                    });
+                });
+            }
+            // Đệ quy xử lý các con của node
+            if (node.children && node.children.length > 0) {
+                processTreeForExcel(node.children, level + 1, result);
+            }
+        });
+        return result;
+    };
+
+    // Hàm xuất file Excel
+    const exportTreeToExcel = async (treeData) => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Cấu trúc cây");
+
+        // Thêm tiêu đề trên cùng
+        worksheet.mergeCells("A1:L1"); // Gộp 3 ô đầu tiên (A1 -> C1)
+        const titleCell = worksheet.getRow(1).getCell(1);
+        titleCell.value = `Khung chương trình đào tạo: ${showModal.frameName}`;
+        titleCell.font = { bold: true, size: 16 }; // Định dạng tiêu đề
+        titleCell.alignment = { vertical: "middle", horizontal: "center" }; // Canh giữa
+
+        // Cấu hình cột (không thêm `header`)
+        const semesterColumns = listSemester.flatMap((_, index) => [
+            { key: `semester-${index + 1}`, width: 15 },
+            { key: `teacher-${index + 1}`, width: 20 },
+        ]);
+
+        worksheet.columns = [
+            { key: "name", width: 50 },
+            { key: "description", width: 50 },
+            { key: "creditHour", width: 15 },
+            ...semesterColumns,
+        ];
+
+        // Thêm tiêu đề cột (Dòng 3)
+        const headerRow = worksheet.getRow(3);
+        headerRow.values = [
+            "Tên",
+            "Mô tả",
+            "Số tín chỉ",
+            ...listSemester.flatMap((_, index) => [`Học kỳ ${index + 1}`, `Giảng viên`]),
+        ];
+        headerRow.font = { bold: true };
+        headerRow.alignment = { vertical: "middle", horizontal: "center" };
+
+        // Cố định 3 cột đầu tiên (Tên, Mô tả, Tín chỉ) và dòng tiêu đề
+        worksheet.views = [
+            { state: "frozen", xSplit: 3, ySplit: 3 }
+        ];
+
+        // Xử lý dữ liệu cây và thêm vào Excel
+        const flatTreeData = processTreeForExcel(treeData);
+        flatTreeData.forEach(row => {
+            worksheet.addRow(row);
+        });
+
+        // Định dạng các dòng để làm nổi bật cấp bậc
+        flatTreeData.forEach((row, index) => {
+            const excelRow = worksheet.getRow(index + 4); // Dữ liệu bắt đầu từ dòng 4
+
+            if (row.type === "component") {
+                excelRow.font = { bold: true }; // Thành phần chính -> In đậm
+            } else if (row.type === "subject") {
+                excelRow.font = { italic: true }; // Môn học -> In nghiêng
+            }
+        });
+
+        // Xuất file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, `ChuongTrinhDaoTao_${showModal.facultyId}_${showModal.cycleId}.xlsx`);
+    };
+
+
     return (
         <Update
             fullTitle={"Dựng khung đào tạo"}
@@ -366,16 +483,19 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
             width='1200px'
         >
             <div className={cx('toolbar')}>
-                <Button
-                    colorRed
-                    outline
-                    style={{ marginBottom: "20px" }}
-                    onClick={() => {
-                        setShowModalSelect(showModal.frameId);
-                    }}
-                >
-                    Chọn khối kiến thức
-                </Button>
+                <div className={cx('toolbar-left')}>
+                    <Toolbar type={'Xuất file Excel'} onClick={() => { exportTreeToExcel(treeData) }} />
+                    <Button
+                        colorRed
+                        outline
+                        style={{ marginBottom: "20px", marginLeft: "20px" }}
+                        onClick={() => {
+                            setShowModalSelect(showModal.frameId);
+                        }}
+                    >
+                        Chọn khối kiến thức
+                    </Button>
+                </div>
                 <Checkbox onChange={onChange} style={{ fontSize: '17px' }}>Hiển thị môn học</Checkbox>
             </div>
             <TreeFrame
@@ -385,6 +505,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 // reLoad={reLoadStructureFeature}
                 selectedFrameComp={selectedFrameComp}
                 expandedKeys={expandedKeys}
+                isLoading={isLoadingFrame}
 
             />
             {thanhPhanKhungDTFormSelectMemoized}

@@ -134,7 +134,9 @@ function KhungCTDT() {
                     return {
                         ...item,
                         facultyName: item.faculty.facultyName,
+                        facultyId: item.faculty.facultyId,
                         cycleName: item.cycle.cycleName,
+                        cycleId: item.cycle.cycleId,
                     }
                 }));
             }
