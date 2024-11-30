@@ -12,7 +12,7 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
 import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds, importThesis } from '../../../../services/thesisService';
-import { getByThesisId } from '../../../../services/thesisUserService';
+import { getByListThesisId, getByThesisId } from '../../../../services/thesisUserService';
 import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
 import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
@@ -210,62 +210,76 @@ function DeTaiKhoaLuan() {
 
     const fetchData = useCallback(async () => {
         try {
-            let result = null;
+            // Bật trạng thái loading
+            setIsLoading(true);
+
+            const currentDate = new Date(); // Ngày hiện tại
+            let validDate = true; // Biến kiểm tra ngày hợp lệ
+            let thesisData = []; // Dữ liệu khóa luận
 
             if (ThesisGroupIdFromUrl) {
-                // Kiểm tra ThesisGroup còn hạn tạo đề tài
-                const resultThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
+                // Nếu có ID nhóm khóa luận trong URL
+
+                // Gọi API để lấy thông tin nhóm khóa luận
+                const resultThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl);
                 if (resultThesisGroup.status === 200) {
                     const dataThesisGroup = resultThesisGroup.data.data;
 
-                    const currentDate = new Date();
-                    const validDate = (dataThesisGroup.startCreateThesisDate === null && dataThesisGroup.endCreateThesisDate === null) ||
-                        (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate && new Date(dataThesisGroup.endCreateThesisDate) > currentDate)
-                        ? true
-                        : false
+                    // Kiểm tra ngày hợp lệ
+                    validDate =
+                        (!dataThesisGroup.startCreateThesisDate && !dataThesisGroup.endCreateThesisDate) ||
+                        (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate &&
+                            new Date(dataThesisGroup.endCreateThesisDate) > currentDate);
+
+                    // Cập nhật trạng thái của toolbar (vô hiệu hóa nếu ngày không hợp lệ)
                     setDisableToolbar(!validDate);
                 }
 
-                //     if (validDate) {
-                //         result = await getByThesisGroupId(ThesisGroupIdFromUrl);
-                //     } else {
-                //         result = { status: 'NotValid' }
-                //     }
-                // }
-                result = await getByThesisGroupId(ThesisGroupIdFromUrl);
-            }
-            else {
-                result = await getAllThesis();
-            }
-
-            if (result.status === 200) {
-                const thesiss = await Promise.all((result.data.data || result.data).map(async (data) => {
-                    // Kiểm tra ThesisGroup còn hạn tạo đề tài
-                    // const currentDate = new Date();
-                    // const dataThesisGroup = data.thesisGroup;
-                    // const validDate = (dataThesisGroup.startCreateThesisDate === null && dataThesisGroup.endCreateThesisDate === null) ||
-                    //     (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate && new Date(dataThesisGroup.endCreateThesisDate) > currentDate)
-                    //     ? true
-                    //     : false
-                    // lấy số sinh viên đăng ký
-                    const numberOfRegister = await getByThesisId({ thesis: data.thesisId });
-
-                    return {
-                        ...data,
-                        numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
-                        // validDate: validDate
-                    };
-                }));
-                setData(thesiss);
+                // Gọi API để lấy danh sách khóa luận thuộc nhóm
+                const result = await getByThesisGroupId(ThesisGroupIdFromUrl);
+                if (result.status === 200) {
+                    thesisData = result.data.data || result.data;
+                }
+            } else {
+                // Nếu không có ID nhóm, lấy tất cả khóa luận
+                const result = await getAllThesis();
+                if (result.status === 200) {
+                    thesisData = result.data.data || result.data;
+                }
             }
 
+            // Gọi API để lấy số lượng sinh viên đăng ký cho từng khóa luận
+            const allRegistersRes = await getByListThesisId(thesisData.map((item) => item.thesisId));
+            const allRegisters = allRegistersRes.data;
+
+            // Tạo Map với thesisId làm key
+            const thesisMap = new Map();
+            allRegisters.forEach((item) => {
+                const thesisId = item.thesis.thesisId;
+                if (!thesisMap.has(thesisId)) {
+                    thesisMap.set(thesisId, []);
+                }
+                // Đưa từng `ThesisUser` vào danh sách tương ứng của thesisId
+                thesisMap.get(thesisId).push(item);
+            });
+
+            // Kết hợp dữ liệu khóa luận và số lượng đăng ký
+            const thesiss = thesisData.map((data) => ({
+                ...data,
+                numberOfRegister: thesisMap.get(data.thesisId) || 0, // Mặc định là 0 nếu không tìm thấy
+            }));
+
+            // Lưu dữ liệu vào state
+            setData(thesiss);
         } catch (error) {
+            // Log lỗi nếu xảy ra
             console.error('Error fetching data:', error);
-        }
-        finally {
+        } finally {
+            // Tắt trạng thái loading
             setIsLoading(false);
         }
     }, [ThesisGroupIdFromUrl]);
+
 
     useEffect(() => {
         fetchData();

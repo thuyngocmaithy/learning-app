@@ -30,6 +30,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
 
     useEffect(() => {
         const getFeature = async () => {
+            setIsLoading(true);
             try {
                 const response = await getAll()
 

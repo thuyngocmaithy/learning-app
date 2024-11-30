@@ -26,7 +26,7 @@ const notifications = {
             case 'create':
                 if (data.instructor && data.instructor.userId !== fromUser) {
                     notifications.push({
-                        content: messages.create,
+                        title: messages.create,
                         type: 'info',
                         url: `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
                         toUser: data.instructor,
@@ -37,7 +37,7 @@ const notifications = {
             case 'register':
                 // Thông báo cho GV hướng dẫn
                 notifications.push({
-                    content: messages.registerForInstructor,
+                    title: messages.registerForInstructor,
                     type: 'warning',
                     url: `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
                     toUser: data.instructor,
@@ -50,7 +50,7 @@ const notifications = {
                         listUserReceived.map(async (member) => {
                             const toUser = await getUserById(member.userId);
                             return {
-                                content: messages.registerWithMembers,
+                                title: messages.registerWithMembers,
                                 type: 'warning',
                                 url: `${config.routes.DeTaiNCKH}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}&tabIndex=2`,
                                 toUser: toUser.data,
@@ -71,7 +71,7 @@ const notifications = {
                         listUserReceived.map(async (member) => {
                             const toUser = await getUserById(member.userId);
                             return {
-                                content: messages.approveForStudent,
+                                title: messages.approveForStudent,
                                 type: 'success',
                                 url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}`,
                                 toUser: toUser.data,
@@ -87,7 +87,7 @@ const notifications = {
                 // Thêm thông báo cho instructor
                 if (data.instructor && data.instructor.userId !== fromUser.userId) {
                     notifications.push({
-                        content: messages.approveForInstructor(data.userId),
+                        title: messages.approveForInstructor(data.userId),
                         type: 'success',
                         url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}`,
                         toUser: data.instructor,
@@ -97,7 +97,7 @@ const notifications = {
                 break;
             case 'follow':
                 notifications.push({
-                    content: messages.follow,
+                    title: messages.follow,
                     type: 'info',
                     url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}`,
                     toUser: data.toUser,
@@ -114,7 +114,7 @@ const notifications = {
                         filteredList.map(async (member) => {
                             const toUser = await getUserById(member.userId);
                             return {
-                                content: messages.note,
+                                title: messages.note,
                                 type: 'warning',
                                 url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}&tabIndex=2`,
                                 toUser: toUser.data,
@@ -135,7 +135,7 @@ const notifications = {
         return notifications;
     },
 
-    getKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = []) => {
+    getKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = [], content) => {
         const messages = {
             // Gửi thông báo tạo cho giảng viên hướng dẫn
             create: `Đề tài khóa luận ${data.thesisId} đã được giảng viên ${fromUser.fullname} tạo`,
@@ -159,7 +159,7 @@ const notifications = {
             case 'create':
                 if (data.instructor && data.instructor.userId !== fromUser) {
                     notifications.push({
-                        content: messages.create,
+                        title: messages.create,
                         type: 'info',
                         url: `${config.routes.DeTaiKhoaLuan_Department}?ThesiGroupId=${data.thesisGroup.thesisGroupId}`,
                         toUser: data.instructor,
@@ -170,7 +170,7 @@ const notifications = {
             case 'register':
                 // Thông báo cho GV hướng dẫn
                 notifications.push({
-                    content: messages.registerForInstructor,
+                    title: messages.registerForInstructor,
                     type: 'warning',
                     url: `${config.routes.DeTaiKhoaLuan_Department}?ThesiGroupId=${data.thesisGroup.thesisGroupId}`,
                     toUser: data.instructor,
@@ -183,7 +183,7 @@ const notifications = {
                         listUserReceived.map(async (member) => {
                             const toUser = await getUserById(member.userId);
                             return {
-                                content: messages.registerWithMembers,
+                                title: messages.registerWithMembers,
                                 type: 'warning',
                                 url: `${config.routes.DeTaiKhoaLuan}?ThesiGroupId=${data.thesisGroup.thesisGroupId}&tabIndex=2`,
                                 toUser: toUser.data,
@@ -204,7 +204,7 @@ const notifications = {
                         listUserReceived.map(async (member) => {
                             const toUser = await getUserById(member.userId);
                             return {
-                                content: messages.approveForStudent,
+                                title: messages.approveForStudent,
                                 type: 'success',
                                 url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}`,
                                 toUser: toUser.data,
@@ -220,7 +220,7 @@ const notifications = {
                 // Thêm thông báo cho instructor
                 if (data.instructor && data.instructor.userId !== fromUser.userId) {
                     notifications.push({
-                        content: messages.approveForInstructor(data.userId),
+                        title: messages.approveForInstructor(data.userId),
                         type: 'success',
                         url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}`,
                         toUser: data.instructor,
@@ -230,7 +230,7 @@ const notifications = {
                 break;
             case 'follow':
                 notifications.push({
-                    content: messages.follow,
+                    title: messages.follow,
                     type: 'info',
                     url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}`,
                     toUser: data.toUser,
@@ -247,7 +247,8 @@ const notifications = {
                         filteredList.map(async (member) => {
                             const toUser = await getUserById(member.userId);
                             return {
-                                content: messages.note,
+                                title: messages.note,
+                                content: content,
                                 type: 'warning',
                                 url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}&tabIndex=2`,
                                 toUser: toUser.data,

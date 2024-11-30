@@ -98,3 +98,13 @@ export const getWhere = async (conditions) => {
         throw error;
     }
 };
+
+export const getByListThesisId = async (thesisIds) => {
+    try {
+        const response = await api.get(`/thesis-user/getByListThesisId/${thesisIds}`);
+        return response.data;
+    } catch (error) {
+        console.error('[thesis-userServive - getByListThesisId - error] : ', error);
+        throw error;
+    }
+}

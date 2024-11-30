@@ -32,7 +32,7 @@ function NotificationItem({ data }) {
         <Link to={data.url} onClick={handleRead}>
             <div className={cx('wrapper-item', !data.isRead ? 'notRead' : 'isRead')}>
                 <div className={cx('container-info')}>
-                    <h4>{data.content}</h4>
+                    <h4>{data.title}</h4>
                     <p>{format(data.createDate, 'dd/MM/yyyy HH:mm:ss')}</p>
                 </div>
                 <div className={cx('container-data.type')}>

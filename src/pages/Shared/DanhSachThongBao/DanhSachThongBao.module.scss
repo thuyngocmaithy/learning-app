@@ -1,0 +1,38 @@
+.info {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.title {
+    margin-left: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    text-align: left;
+}
+
+.icon {
+    display: flex;
+    width: 30px;
+    color: var(--primary);
+}
+
+.stt {
+    color: var(--primary);
+}
+
+.name {
+    font-weight: 400;
+    font-size: 17px;
+    width: 80vw;
+}
+
+.container-deadline-register {
+    font-style: italic;
+    display: flex;
+    width: max-content;
+}
+
+.tag-status {
+    margin-left: 10px;
+}

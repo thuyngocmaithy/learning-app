@@ -9,6 +9,16 @@ export const getAll = async () => {
     }
 };
 
+export const getByUserId = async (userId) => {
+    try {
+        const response = await api.get(`/notifications/getByUserId?user=${userId}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
 export const getById = async (id) => {
     try {
         const response = await api.get(`/notifications/${id}`);

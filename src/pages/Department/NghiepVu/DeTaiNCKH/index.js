@@ -12,7 +12,7 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
 import { deleteSRs, getAllSR, getBySRGId, getWhere, updateSRByIds, importScientificResearch } from '../../../../services/scientificResearchService';
-import { getBySRId } from '../../../../services/scientificResearchUserService';
+import { getByListSRId, getBySRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
@@ -209,74 +209,87 @@ function DeTaiNCKH() {
             ),
         }
     ];
+    // Hàm lấy danh sách các đề tài nghiên cứu khoa học mà giảng viên đã đăng ký
     const listRegisterscientificResearchJoined = useCallback(async () => {
         try {
+            // Gửi yêu cầu API để lấy danh sách các đề tài dựa trên ID giảng viên và nhóm nghiên cứu khoa học
             const response = await getWhere({ instructorId: userId, scientificResearchGroup: SRGIdFromUrl });
             if (response.status === 200 && response.data.data) {
+                // Lưu danh sách đề tài vào state nếu dữ liệu trả về thành công
                 setListscientificResearchJoined(response.data.data);
             }
-
         } catch (error) {
+            // Xử lý và log lỗi nếu có vấn đề xảy ra trong quá trình gọi API
             console.error('Error fetching registered scientificResearchs:', error);
-            setIsLoading(false);
         }
     }, [SRGIdFromUrl, userId]);
 
+    // Hàm chính để lấy dữ liệu và kiểm tra các điều kiện liên quan
     const fetchData = useCallback(async () => {
         try {
-            let result = null;
+            // Bật trạng thái loading
+            setIsLoading(true);
+
+            const currentDate = new Date(); // Lấy ngày hiện tại
+            let validDate = true; // Biến kiểm tra ngày hợp lệ
+            let scientificResearchData = []; // Dữ liệu các đề tài nghiên cứu
 
             if (SRGIdFromUrl) {
-                // Kiểm tra SRG còn hạn tạo đề tài
-                const resultSRG = await getScientificResearchGroupById(SRGIdFromUrl)
+                // Nếu có ID nhóm nghiên cứu khoa học trong URL
+
+                // Gọi API để lấy thông tin nhóm nghiên cứu khoa học
+                const resultSRG = await getScientificResearchGroupById(SRGIdFromUrl);
                 if (resultSRG.status === 200) {
                     const dataSRG = resultSRG.data.data;
 
-                    const currentDate = new Date();
-                    const validDate = (dataSRG.startCreateSRDate === null && dataSRG.endCreateSRDate === null) ||
-                        (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate)
-                        ? true
-                        : false
-                    setDisableToolbar(!validDate);
+                    // Kiểm tra ngày hợp lệ để xác định có được phép tạo đề tài hay không
+                    validDate = (!dataSRG.startCreateSRDate && !dataSRG.endCreateSRDate) ||
+                        (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate);
+                    setDisableToolbar(!validDate); // Cập nhật trạng thái của toolbar (vô hiệu hóa nếu ngày không hợp lệ)
                 }
 
-                //     if (validDate) {
-                //         result = await getBySRGId(SRGIdFromUrl);
-                //     } else {
-                //         result = { status: 'NotValid' }
-                //     }
-                // }
-                result = await getBySRGId(SRGIdFromUrl);
-            }
-            else {
-                result = await getAllSR();
-            }
-
-            if (result.status === 200) {
-                const scientificResearchs = await Promise.all((result.data.data || result.data).map(async (data) => {
-                    // Kiểm tra SRG còn hạn tạo đề tài
-                    // const currentDate = new Date();
-                    // const dataSRG = data.scientificResearchGroup;
-                    // const validDate = (dataSRG.startCreateSRDate === null && dataSRG.endCreateSRDate === null) ||
-                    //     (new Date(dataSRG.startCreateSRDate) <= currentDate && new Date(dataSRG.endCreateSRDate) > currentDate)
-                    //     ? true
-                    //     : false
-                    // lấy số sinh viên đăng ký
-                    const numberOfRegister = await getBySRId({ scientificResearch: data.scientificResearchId });
-
-                    return {
-                        ...data,
-                        numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
-                        // validDate: validDate
-                    };
-                }));
-                setData(scientificResearchs);
+                // Gọi API để lấy danh sách các đề tài thuộc nhóm nghiên cứu khoa học này
+                const result = await getBySRGId(SRGIdFromUrl);
+                if (result.status === 200) {
+                    scientificResearchData = result.data.data || result.data;
+                }
+            } else {
+                // Nếu không có ID nhóm, lấy tất cả các đề tài
+                const result = await getAllSR();
+                if (result.status === 200) {
+                    scientificResearchData = result.data.data || result.data;
+                }
             }
 
+            // Gọi API để lấy số lượng sinh viên đăng ký cho từng khóa luận
+            const allRegistersRes = await getByListSRId(scientificResearchData.map((item) => item.scientificResearchId));
+            const allRegisters = allRegistersRes.data;
+
+            // Tạo Map với SRId làm key
+            const SRMap = new Map();
+            allRegisters.forEach((item) => {
+                const SRId = item.scientificResearch.scientificResearchId;
+                if (!SRMap.has(SRId)) {
+                    SRMap.set(SRId, []);
+                }
+                // Đưa từng `ThesisUser` vào danh sách tương ứng của SRId
+                SRMap.get(SRId).push(item);
+            });
+
+            // Kết hợp dữ liệu khóa luận và số lượng đăng ký
+            const SRs = scientificResearchData.map((data) => ({
+                ...data,
+                numberOfRegister: SRMap.get(data.scientificResearchId) || 0, // Mặc định là 0 nếu không tìm thấy
+            }));
+
+
+            // Lưu danh sách đề tài vào state
+            setData(SRs);
         } catch (error) {
+            // Xử lý và log lỗi nếu có vấn đề xảy ra trong quá trình gọi API
             console.error('Error fetching data:', error);
-        }
-        finally {
+        } finally {
+            // Tắt trạng thái loading
             setIsLoading(false);
         }
     }, [SRGIdFromUrl]);
@@ -288,7 +301,8 @@ function DeTaiNCKH() {
         if (isChangeStatus) {
             setIsChangeStatus(false);
         }
-    }, [fetchData, listRegisterscientificResearchJoined, isChangeStatus]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchData, listRegisterscientificResearchJoined]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
     useEffect(() => {
@@ -441,7 +455,7 @@ function DeTaiNCKH() {
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
                     {listScientificResearchJoined.map((item, index) => {
-                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : item.status.color;
+                        let color = item.status?.statusName === 'Chờ duyệt' ? 'red' : item.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiNCKHThamGia')}

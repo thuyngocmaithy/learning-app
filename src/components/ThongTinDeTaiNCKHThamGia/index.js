@@ -13,9 +13,9 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
     const statusType = 'Tiến độ đề tài NCKH';
     const [statusSelected, setStatusSelected] = useState(
         {
-            key: scientificResearch.status.statusId,
-            label: scientificResearch.status.statusName,
-            color: scientificResearch.status.color
+            key: scientificResearch?.status?.statusId,
+            label: scientificResearch?.status?.statusName,
+            color: scientificResearch?.status?.color
         }
         || {})
     const [statusOptions, setStatusOptions] = useState([]);
@@ -65,9 +65,9 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                 const response = await getStatusByType(statusType);
                 if (response) {
                     const options = response.map((status) => ({
-                        key: status.statusId,
-                        label: status.statusName,
-                        color: status.color
+                        key: status?.statusId,
+                        label: status?.statusName,
+                        color: status?.color
                     }));
 
                     setStatusOptions(options);
@@ -118,9 +118,9 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                         title={
                             <div className={cx('container-title')}>
                                 <div className={cx('title')}>
-                                    Đề tài: {scientificResearch.scientificResearchName}
+                                    Đề tài: {scientificResearch?.scientificResearchName}
                                 </div>
-                                <Tag color={statusSelected.color} className={cx('status-detail')}>
+                                <Tag color={statusSelected?.color} className={cx('status-detail')}>
                                     <Dropdown
                                         menu={{
                                             items: statusOptions,
@@ -132,7 +132,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                                             pointAtCenter: true,
                                         }}
                                     >
-                                        <p>{statusSelected.label}</p>
+                                        <p>{statusSelected?.label}</p>
                                     </Dropdown>
                                 </Tag>
                             </div>
@@ -144,7 +144,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
             <div className={cx('container-description')}>
                 <h4>Thông tin mô tả</h4>
                 <div>
-                    {scientificResearch.description}
+                    {scientificResearch?.description}
                 </div>
             </div>
         </div >

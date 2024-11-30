@@ -284,6 +284,7 @@ function TrangThai() {
 
     ];
 
+    // eslint-disable-next-line no-unused-vars
     const handleExportExcel = async () => {
         ExportExcel({
             fileName: "Danh_sach_trang_thai",
@@ -326,7 +327,7 @@ function TrangThai() {
                         onClick={() => setShowModalImportStatus(true)}
                         isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
+                    {/* <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} /> */}
                 </div>
             </div>
             <div className={`slide ${showFilter ? 'open' : ''}`}>
