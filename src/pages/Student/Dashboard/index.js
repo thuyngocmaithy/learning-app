@@ -202,12 +202,13 @@ function Home() {
         // Tính Tiến độ hoàn thành
         const handleDataProgress = async () => {
             try {
+                const responseUser = await getUserById(userId);
+
                 const expectedScoreResponse = await getExpectedScoreByStudentId(userId);
-                setExpectedGPA(expectedScoreResponse[0].expectedGPA);
+                setExpectedGPA(expectedScoreResponse[0]?.expectedGPA || responseUser.data.GPA);
                 const responseScore = await getScoreByStudentId(userId);
                 setScores(responseScore)
                 // Lấy ngành và năm học đầu tiên, số tín chỉ hiện tại của user
-                const responseUser = await getUserById(userId);
                 const faculty = responseUser.data.faculty.facultyId;
                 const firstAcademicYear = responseUser.data.firstAcademicYear;
                 setFirstYear(firstAcademicYear);
