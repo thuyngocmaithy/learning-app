@@ -86,9 +86,7 @@ function MoHocPhan() {
     }, []);
 
     const fetchDataFrameArrange = useCallback(async (data) => {
-        setIsLoadingFrame(true);
         await Promise.all([fetchSemester(data.cycle?.cycleId), fetchFrameComponents(data.frameId)]);
-        setIsLoadingFrame(false);
     }, [fetchFrameComponents, fetchSemester]);
 
     const fetchDataFrame = async () => {
@@ -246,6 +244,7 @@ function MoHocPhan() {
             if (node.subjectInfo && node.subjectInfo.length > 0) {
                 node.subjectInfo.forEach(subject => {
                     result.push({
+                        subjectId: subject.subjectId,
                         name: `${" ".repeat((level + 1) * 4)}${subject.subjectId}`,
                         description: subject.subjectName,
                         creditHour: subject.creditHour,
@@ -280,7 +279,6 @@ function MoHocPhan() {
         descriptionCell.font = { bold: true, size: 14, color: { argb: "FF0000" } };
         descriptionCell.alignment = { vertical: "middle", horizontal: "left" };
 
-
         // Cấu hình cột (không thêm `header`)
         const semesterColumns = listSemester.flatMap((_, index) => [
             { key: `semester-${index + 1}`, width: 15 },
@@ -312,26 +310,39 @@ function MoHocPhan() {
 
         // Xử lý dữ liệu cây và thêm vào Excel
         const flatTreeData = processTreeForExcel(frameComponents);
-        flatTreeData.forEach(row => {
-            worksheet.addRow(row);
-        });
+        flatTreeData.forEach((row, rowIndex) => {
+            const newRow = worksheet.addRow(row);
 
-        // Định dạng các dòng để làm nổi bật cấp bậc
-        flatTreeData.forEach((row, index) => {
-            const excelRow = worksheet.getRow(index + 5); // Dữ liệu bắt đầu từ dòng 5
+            // Lặp qua các học kỳ và nạp dữ liệu
+            listSemester.forEach((semester, index) => {
+                const semesterColIndex = 4 + index * 2; // Bắt đầu từ cột thứ 4 (sau 3 cột đầu)
+                const teacherColIndex = semesterColIndex + 1;
+
+                const key = `${semester.semesterId}-${row.subjectId}`;
+                if (selectedSemesters.has(key)) {
+                    newRow.getCell(semesterColIndex).value = "X"; // Đánh dấu học kỳ mở
+                }
+
+                if (teacherAssignments.has(key)) {
+                    newRow.getCell(teacherColIndex).value = teacherAssignments.get(key); // Điền tên giảng viên
+                }
+            });
+
+            // Định dạng cấp bậc
             if (row.type === "component") {
-                excelRow.font = { bold: true }; // Thành phần chính -> In đậm
+                newRow.font = { bold: true }; // Thành phần chính -> In đậm
             } else if (row.type === "subject") {
-                excelRow.font = { italic: true }; // Môn học -> In nghiêng
+                newRow.font = { italic: true }; // Môn học -> In nghiêng
             }
-            excelRow.alignment = { wrapText: true };
+            newRow.alignment = { wrapText: true };
         });
 
         // Xuất file Excel
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
         saveAs(blob, `ChuongTrinhDaoTao_${record.facultyId}_${record.cycleId}.xlsx`);
-    }, [frameComponents, listSemester, processTreeForExcel]);
+    }, [frameComponents, listSemester, processTreeForExcel, selectedSemesters, teacherAssignments]);
+
 
     const processExcelFile = async (arrayBuffer) => {
         const dataSelectSemester = new Set();
@@ -480,8 +491,13 @@ function MoHocPhan() {
                 render: (_, record) => {
                     return (
                         <ButtonCustom
-                            onClick={() => {
-                                fetchFrameComponents(record.frameId);
+                            onClick={async () => {
+                                // fetchDataFrameArrange({
+                                //     cycle: { cycleId: record.cycleId },
+                                //     frameId: record.frameId
+                                // })
+                                // fetchDataAssignment();
+                                await handleArrange(record.frameId)
                                 exportTreeToExcel(record)
                             }}
                         >
@@ -511,8 +527,10 @@ function MoHocPhan() {
                             leftIcon={<EditOutlined />}
                             primary
                             verysmall
-                            onClick={() => {
-                                handleArrange(record.frameId);
+                            onClick={async () => {
+                                setIsLoadingFrame(true);
+                                await handleArrange(record.frameId);
+                                setIsLoadingFrame(false);
                             }}
                         >
                             Sắp xếp
