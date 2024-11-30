@@ -31,7 +31,7 @@ function DeTaiKhoaLuanThamGia() {
     // Lấy permissionDetail từ Context dựa trên keyRoute
     const permissionDetailData = permissionDetails[keyRoute];
 
-    const { userId } = useContext(AccountLoginContext);
+    const { userId, permission } = useContext(AccountLoginContext);
     const queryParams = new URLSearchParams(location.search);
     const ThesisIdFromUrl = queryParams.get('thesis');
     const ThesisGroupIdFromUrl = queryParams.get('ThesisGroup');
@@ -252,7 +252,7 @@ function DeTaiKhoaLuanThamGia() {
     ];
 
     const urlKhoaLuan = () => {
-        if (location.pathname.split('/')[1] === "Department") {
+        if (permission !== "SINHVIEN") {
             if (ThesisGroupIdFromUrl) {
                 return `${config.routes.DeTaiKhoaLuan_Department}?ThesisGroupId=${ThesisGroupIdFromUrl}`
             }

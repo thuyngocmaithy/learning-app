@@ -31,7 +31,7 @@ function DeTaiNCKHThamGia() {
     // Lấy permissionDetail từ Context dựa trên keyRoute
     const permissionDetailData = permissionDetails[keyRoute];
 
-    const { userId } = useContext(AccountLoginContext);
+    const { userId, permission } = useContext(AccountLoginContext);
     const queryParams = new URLSearchParams(location.search);
     const SRIdFromUrl = queryParams.get('scientificResearch');
     const SRGIdFromUrl = queryParams.get('SRG');
@@ -245,7 +245,7 @@ function DeTaiNCKHThamGia() {
     ];
 
     const urlNCKH = () => {
-        if (location.pathname.split('/')[1] === "Department") {
+        if (permission !== "SINHVIEN") {
             if (SRGIdFromUrl) {
                 return `${config.routes.DeTaiNCKH_Department}?SRGId=${SRGIdFromUrl}`
             }
