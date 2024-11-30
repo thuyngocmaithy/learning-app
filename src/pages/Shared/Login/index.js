@@ -134,7 +134,11 @@ const LoginForm = () => {
                                         }
                                         <div className={cx('btnLogin')}>
                                             <Button primary disabled={loading}>
-                                                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                                                {loading
+                                                    ? isSync
+                                                        ? 'Đang đồng bộ dữ liệu...'
+                                                        : 'Đang đăng nhập...'
+                                                    : 'Đăng nhập'}
                                             </Button>
                                         </div>
                                     </div>
