@@ -1,9 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Col, Select, Checkbox } from 'antd';
+import { Card, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Select } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -72,13 +73,13 @@ function DeTaiNCKH() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
+
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -197,7 +198,7 @@ function DeTaiNCKH() {
                             showModalUpdate(record);
                             setIsUpdate(true);
                         }}
-                    // disabled={record.validDate !== true}
+                        disabled={!permissionDetailData?.isEdit}
                     >
                         Sửa
                     </ButtonCustom>
@@ -205,7 +206,7 @@ function DeTaiNCKH() {
             ),
         }
     ];
-    const listRegisterscientificResearchJoined = async () => {
+    const listRegisterscientificResearchJoined = useCallback(async () => {
         try {
             const response = await getWhere({ instructorId: userId, scientificResearchGroup: SRGIdFromUrl });
             if (response.status === 200 && response.data.data) {
@@ -216,9 +217,9 @@ function DeTaiNCKH() {
             console.error('Error fetching registered scientificResearchs:', error);
             setIsLoading(false);
         }
-    };
+    }, [SRGIdFromUrl, userId]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             let result = null;
 
@@ -275,19 +276,16 @@ function DeTaiNCKH() {
         finally {
             setIsLoading(false);
         }
-    };
+    }, [SRGIdFromUrl]);
+
 
     useEffect(() => {
         fetchData();
         listRegisterscientificResearchJoined();
-    }, []);
-
-    useEffect(() => {
         if (isChangeStatus) {
-            fetchData();
             setIsChangeStatus(false);
         }
-    }, [isChangeStatus]);
+    }, [fetchData, listRegisterscientificResearchJoined, isChangeStatus]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
     useEffect(() => {
@@ -305,8 +303,8 @@ function DeTaiNCKH() {
                 console.error(error);
             }
         };
-
-        fetchStatusByType();
+        if (statusType)
+            fetchStatusByType();
     }, [statusType]);
 
     // Tạo field cho bộ lọc
@@ -532,7 +530,7 @@ function DeTaiNCKH() {
                 SRGId={SRGIdFromUrl}
             />
         );
-    }, [showModalUpdate, isUpdate, SRGIdFromUrl])
+    }, [isUpdate, showModalUpdate, fetchData, SRGIdFromUrl])
 
     const DeTaiNCKHListRegisterMemoized = useMemo(() => {
         return (
@@ -601,10 +599,18 @@ function DeTaiNCKH() {
                                 onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
                                 isVisible={permissionDetailData.isDelete}
                             />
-                            <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài nghiên cứu', handleDisable)} />
-                            <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài nghiên cứu', handleEnable)} />
+                            <Toolbar
+                                type={'Ẩn'}
+                                onClick={() => disableConfirm('đề tài nghiên cứu', handleDisable)}
+                                isVisible={permissionDetailData?.isEdit}
+                            />
+                            <Toolbar
+                                type={'Hiện'}
+                                onClick={() => enableConfirm('đề tài nghiên cứu', handleEnable)}
+                                isVisible={permissionDetailData?.isEdit}
+                            />
                             {!disableToolbar &&
-                                <Toolbar type={'Nhập file Excel'} />
+                                <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData?.isAdd} />
                             }
                             <Toolbar type={'Xuất file Excel'} />
                         </div>

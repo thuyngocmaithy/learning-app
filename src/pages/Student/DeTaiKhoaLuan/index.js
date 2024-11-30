@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState, useContext, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Breadcrumb, Card, List, message, Skeleton, Tabs, Tag } from 'antd';
+import { Breadcrumb, Card, List, Skeleton, Tabs, Tag } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
@@ -55,13 +56,14 @@ function DeTaiKhoaLuan() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
+
 
     useEffect(() => {
+        // Lấy tabIndex từ URL
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -88,7 +90,7 @@ function DeTaiKhoaLuan() {
     const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId');
 
 
-    const fetchthesiss = async () => {
+    const fetchthesiss = useCallback(async () => {
         try {
             const response = await getByThesisGroupIdAndCheckApprove({ userId: userId, ThesisGroupId: ThesisGroupIdFromUrl });
 
@@ -101,9 +103,9 @@ function DeTaiKhoaLuan() {
             console.error('Error fetching thesiss:', error);
             setIsLoading(false);
         }
-    };
+    }, [ThesisGroupIdFromUrl, userId]);
 
-    const checkRegisterthesis = async () => {
+    const checkRegisterthesis = useCallback(async () => {
         try {
             const response = await getWhere({ userId: userId, srgroupId: ThesisGroupIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
@@ -113,19 +115,20 @@ function DeTaiKhoaLuan() {
             console.error('Error fetching registered thesiss:', error);
             setIsLoading(false);
         }
-    };
+    }, [ThesisGroupIdFromUrl, userId]);
 
-    const getThesisGroupName = async () => {
-        try {
-            const thesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
-            if (thesisGroup.status === 200) {
-                setThesisGroupName(thesisGroup.data.data.thesisGroupName);
-            }
-        } catch (error) {
-            console.error("Lỗi lấy tên thesisGroup")
-        }
-    }
+
     useEffect(() => {
+        const getThesisGroupName = async () => {
+            try {
+                const thesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
+                if (thesisGroup.status === 200) {
+                    setThesisGroupName(thesisGroup.data.data.thesisGroupName);
+                }
+            } catch (error) {
+                console.error("Lỗi lấy tên thesisGroup")
+            }
+        }
         if (ThesisGroupIdFromUrl) {
             getThesisGroupName();
         }
@@ -134,7 +137,7 @@ function DeTaiKhoaLuan() {
     useEffect(() => {
         checkRegisterthesis();
         fetchthesiss();
-    }, [showModalRegister]);
+    }, [showModalRegister, checkRegisterthesis, fetchthesiss]);
 
 
     const handleCancelNotification = async () => {

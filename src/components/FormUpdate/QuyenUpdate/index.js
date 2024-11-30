@@ -1,5 +1,6 @@
 import React, { memo, useContext, useEffect } from 'react';
-import { Input, Form, message } from 'antd';
+import { Input, Form } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';

@@ -1,8 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiKhoaLuan.module.scss';
-import { Card, Col, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
+import { Card, Divider, Empty, Input, Select, Tabs, Tag } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
@@ -52,13 +53,13 @@ function NhomDeTaiKhoaLuan() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
+
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -162,22 +163,20 @@ function NhomDeTaiKhoaLuan() {
                     >
                         Danh sách
                     </ButtonCustom>
-                    {
-                        // có quyền edit
-                        permissionDetailData.isEdit
-                        && <ButtonCustom
-                            className={cx('btnEdit')}
-                            leftIcon={<EditOutlined />}
-                            primary
-                            verysmall
-                            onClick={() => {
-                                setShowModalUpdate(record);
-                                setIsUpdate(true)
-                            }}
-                        >
-                            Sửa
-                        </ButtonCustom>
-                    }
+                    <ButtonCustom
+                        className={cx('btnEdit')}
+                        leftIcon={<EditOutlined />}
+                        primary
+                        verysmall
+                        onClick={() => {
+                            setShowModalUpdate(record);
+                            setIsUpdate(true)
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
+                        Sửa
+                    </ButtonCustom>
+
                 </div>
             ),
         }
@@ -214,7 +213,8 @@ function NhomDeTaiKhoaLuan() {
     };
 
     // Lấy danh sách đề tài làm người hướng dẫn => Giảng viên
-    const fetchListThesisJoined = async () => {
+    const fetchListThesisJoined = useCallback(async () => {
+        if (!userId) return;
         try {
             const response = await getWhereThesis({ instructorId: userId });
             if (response.status === 200 && response.data.data) {
@@ -225,12 +225,12 @@ function NhomDeTaiKhoaLuan() {
             console.error('Error fetching listThesisJoined:', error);
             setIsLoading(false);
         }
-    };
+    }, [userId]);
 
     useEffect(() => {
         fetchData();
         fetchListThesisJoined();
-    }, []);
+    }, [fetchListThesisJoined]);
 
     // Xóa nhóm đề tài KhoaLuan
     const handleDelete = async () => {
@@ -504,10 +504,24 @@ function NhomDeTaiKhoaLuan() {
                             type={'Xóa'}
                             onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
                             isVisible={permissionDetailData.isDelete} />
-                        <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài khóa luận', handleDisable)} />
-                        <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài khóa luận', handleEnable)} />
-                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} />
-                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
+                        <Toolbar
+                            type={'Ẩn'}
+                            onClick={() => disableConfirm('nhóm đề tài khóa luận', handleDisable)}
+                            isVisible={permissionDetailData?.isEdit}
+                        />
+                        <Toolbar
+                            type={'Hiện'}
+                            onClick={() => enableConfirm('nhóm đề tài khóa luận', handleEnable)}
+                            isVisible={permissionDetailData?.isEdit}
+                        />
+                        <Toolbar
+                            type={'Nhập file Excel'}
+                            isVisible={permissionDetailData.isAdd}
+                        />
+                        <Toolbar
+                            type={'Xuất file Excel'}
+                            isVisible={permissionDetailData.isExport}
+                        />
                     </div>
                 )}
             </div>

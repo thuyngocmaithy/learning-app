@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Checkbox, Form, Input, message, Spin } from 'antd';
+import { Checkbox, Form, Input, Spin } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { UserOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { loginToSgu } from '../../../services/userService';
@@ -10,7 +11,7 @@ import Button from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { SRAndThesisJoinContext } from '../../../context/SRAndThesisJoinContext';
 import FormItem from '../../../components/Core/FormItem';
-import { getAccountById, getWhere } from '../../../services/accountService';
+import { getAccountById } from '../../../services/accountService';
 import useDebounce from '../../../hooks/useDebounce';
 
 const cx = classNames.bind(styles);

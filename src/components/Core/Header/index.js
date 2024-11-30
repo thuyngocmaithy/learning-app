@@ -54,10 +54,6 @@ function Header() {
         },
     ];
 
-    const handleMenuChange = (menuItem) => {
-        console.log(menuItem);
-    };
-
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
@@ -100,7 +96,7 @@ function Header() {
                     </Notification>
                 </span>
                 <span>
-                    <Menu items={MENU_ITEMS} onChange={handleMenuChange}>
+                    <Menu items={MENU_ITEMS}>
                         <span>
                             {avatar ?
                                 <Avatar className={cx('icon', 'user-icon')} src={`data:image/jpeg;base64,${avatar}`} />

@@ -1,13 +1,14 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHThamGia.module.scss';
-import { Breadcrumb, message, Spin, Tabs } from 'antd';
+import { Breadcrumb, Spin, Tabs } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { Link, useLocation } from 'react-router-dom';
 import ChatBox from '../../../components/Core/ChatBox';
 import ThongTinDeTaiNCKHThamGia from '../../../components/ThongTinDeTaiNCKHThamGia';
 import Attach from '../../../components/Core/Attach';
 import System from '../../../components/Core/System';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { getSRById } from '../../../services/scientificResearchService';
 import { uploadFile, downloadFile } from '../../../services/megaService';
@@ -17,12 +18,20 @@ import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getWhere } from '../../../services/attachService';
 import { ProjectIcon } from '../../../assets/icons';
 import dayjs from 'dayjs';
+import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles);
 
 function DeTaiNCKHThamGia() {
-    const { userId } = useContext(AccountLoginContext);
     const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
+    const { userId } = useContext(AccountLoginContext);
     const queryParams = new URLSearchParams(location.search);
     const SRIdFromUrl = queryParams.get('scientificResearch');
     const SRGIdFromUrl = queryParams.get('SRG');
@@ -40,13 +49,12 @@ function DeTaiNCKHThamGia() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -84,7 +92,7 @@ function DeTaiNCKHThamGia() {
         }
     }, [tabActive])
 
-    const getInfoscientificResearch = async () => {
+    const getInfoscientificResearch = useCallback(async () => {
         try {
             if (SRIdFromUrl) {
                 const responsescientificResearchUser = await getSRById(SRIdFromUrl);
@@ -97,9 +105,9 @@ function DeTaiNCKHThamGia() {
         } catch (error) {
             console.error("Lỗi lấy thông tin đề tài" + error);
         }
-    }
+    }, [SRIdFromUrl]);
 
-    const getAttach = async () => {
+    const getAttach = useCallback(async () => {
         try {
             if (SRIdFromUrl) {
                 const response = await getWhere({ SRId: SRIdFromUrl });
@@ -118,9 +126,7 @@ function DeTaiNCKHThamGia() {
         } catch (error) {
             console.error("Lỗi lấy file đính kèm" + error);
         }
-    }
-
-
+    }, [SRIdFromUrl]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -138,7 +144,7 @@ function DeTaiNCKHThamGia() {
         if (SRIdFromUrl) {
             fetchData();
         }
-    }, [SRIdFromUrl]);
+    }, [SRIdFromUrl, getAttach, getInfoscientificResearch]);
 
 
 
@@ -165,8 +171,7 @@ function DeTaiNCKHThamGia() {
     const handleDownload = async (file) => {
         setLoadingFiles(prev => ({ ...prev, [file]: true })); // Bắt đầu tải file cho file cụ thể
         try {
-            const response = await downloadFile(file); // Gọi hàm download file
-            console.log('Download successful:', response);
+            await downloadFile(file); // Gọi hàm download file
         } catch (error) {
             console.error('Download failed:', error);
         } finally {
@@ -334,6 +339,7 @@ function DeTaiNCKHThamGia() {
                             type={'Upload'}
                             onClick={handleUpload}
                             fileInputRef={fileInputRef}
+                            isVisible={permissionDetailData?.isAdd}
                         />
                     </div>
                 )}

@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useState, useContext } from 'react';
+import React, { useEffect, useMemo, useState, useContext, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiKhoaLuan.module.scss';
 import { Card, List, Skeleton, Tabs, Tag } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
-import { getThesisUByUserIdAndThesisGroupId, getWhere as getWhereThesisUser } from '../../../services/thesisUserService';
+import { getWhere as getWhereThesisUser } from '../../../services/thesisUserService';
 import DeTaiKhoaLuanDetail from '../../../components/FormDetail/DeTaiKhoaLuanDetail';
 import DeTaiKhoaLuanRegister from '../../../components/FormRegister/DeTaiKhoaLuanRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getAllThesisGroup, getWhere as getWhereThesisGroup } from '../../../services/thesisGroupService';
+import { getWhere as getWhereThesisGroup } from '../../../services/thesisGroupService';
 
 const cx = classNames.bind(styles);
 
@@ -48,13 +48,12 @@ function NhomDeTaiKhoaLuan() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -80,7 +79,7 @@ function NhomDeTaiKhoaLuan() {
         }
     };
 
-    const checkRegisterThesis = async () => {
+    const checkRegisterThesis = useCallback(async () => {
         try {
             const response = await getWhereThesisUser({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
@@ -89,12 +88,12 @@ function NhomDeTaiKhoaLuan() {
             console.error('Error fetching registered Thesis:', error);
             setIsLoading(false);
         }
-    };
+    }, [userId]);
 
     useEffect(() => {
         fetchThesis();
         checkRegisterThesis();
-    }, [showModalRegister]);
+    }, [showModalRegister, checkRegisterThesis]);
 
     const ITEM_TABS = [
         {

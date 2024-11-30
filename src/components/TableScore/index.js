@@ -29,96 +29,35 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const [improvementSubjects, setImprovementSubjects] = useState({});
     const [originalGrades, setOriginalGrades] = useState({});
     const [numericGrades, setNumericGrades] = useState({});
-    const [expectedScores, setExpectedScores] = useState({});
     const [showModalDetail, setShowModalDetail] = useState(false);
     const didMountRef = useRef(false);
-    const [selectedRows, setSelectedRows] = useState({});
 
 
-    // Tính toán số tín chỉ đã học - trừ những môn Thể chất và quốc phòng
-    const calculateTotalCredits = useCallback((scores) => {
-        const excludedSubjectIds = frameComponents
-            .filter(frame => frame.frameComponentId === "GDDC_TC")
-            .flatMap(frame => frame.subjectInfo.map(subject => subject.subjectId));
+    // // Tính toán số tín chỉ đã học - trừ những môn Thể chất và quốc phòng
+    // const calculateTotalCredits = useCallback((scores) => {
+    //     const excludedSubjectIds = frameComponents
+    //         .filter(frame => frame.frameComponentId === "GDDC_TC")
+    //         .flatMap(frame => frame.subjectInfo.map(subject => subject.subjectId));
 
-        let totalCredits = 0;
+    //     let totalCredits = 0;
 
-        scores.forEach(score => {
-            if (score.subject && score.subject.creditHour) {
-                const isExcludedSubject =
-                    excludedSubjectIds.includes(score.subject.subjectId) ||
-                    score.subject.subjectName.includes("Giáo dục quốc phòng") ||
-                    score.subject.subjectName.includes("Giáo dục thể chất") ||
-                    score.finalScoreLetter.includes("R") ||
-                    score.result === false;
+    //     scores.forEach(score => {
+    //         if (score.subject && score.subject.creditHour) {
+    //             const isExcludedSubject =
+    //                 excludedSubjectIds.includes(score.subject.subjectId) ||
+    //                 score.subject.subjectName.includes("Giáo dục quốc phòng") ||
+    //                 score.subject.subjectName.includes("Giáo dục thể chất") ||
+    //                 score.finalScoreLetter.includes("R") ||
+    //                 score.result === false;
 
-                if (!isExcludedSubject) {
-                    totalCredits += score.subject.creditHour;
-                }
-            }
-        });
+    //             if (!isExcludedSubject) {
+    //                 totalCredits += score.subject.creditHour;
+    //             }
+    //         }
+    //     });
 
-        return totalCredits;
-    }, [frameComponents]);
-
-    // Hiện data
-    const fetchData = useCallback(async () => {
-        if (didMountRef.current) return;
-        didMountRef.current = true;
-        const responseKhungCTDT = await findKhungCTDTByUserId(userId);
-        const frameId = responseKhungCTDT.data.data.frameId;
-        setIsLoading(true);
-        try {
-            const [frameComponentsResponse, scoresResponse, expectedScoreResponse] = await Promise.all([
-                callKhungCTDT(frameId),
-                getScoreByStudentId(userId),
-                getExpectedScoreByStudentId(userId),
-            ]);
-
-            setFrameComponents(frameComponentsResponse);
-
-            // Handle expected scores
-            if (expectedScoreResponse && Array.isArray(expectedScoreResponse)) {
-                const expectedScoresMap = {};
-                const numericGradesMap = {};
-                const improvementSubjectsMap = {};
-
-                expectedScoreResponse.forEach(expected => {
-                    if (expected.subject && expected.subject.subjectId) {
-                        expectedScoresMap[expected.subject.subjectId] = expected;
-                        numericGradesMap[expected.subject.subjectId] = parseFloat(expected.expectedScore10);
-                        improvementSubjectsMap[expected.subject.subjectId] = true;
-                        handleNumericGradeChange(expected.expectedScore10, expected.subject.subjectId, expected.subject.creditHour, expected.subject);
-                    }
-                });
-
-                setExpectedScores(expectedScoresMap);
-                setNumericGrades(numericGradesMap);
-                setImprovementSubjects(improvementSubjectsMap);
-            }
-            // Lọc bỏ ra các môn đang học và chưa có điểm
-            const scoreFilter = await scoresResponse.filter(item => item.finalScoreLetter !== '')
-
-            if (scoreFilter && Array.isArray(scoreFilter)) {
-                setScores(scoreFilter);
-                const origGrades = {};
-                scoreFilter.forEach(score => {
-                    if (score.subject && score.subject.subjectId) {
-                        origGrades[score.subject.subjectId] = score.finalScoreLetter;
-                    }
-                });
-                setOriginalGrades(origGrades);
-            }
-        } catch (error) {
-            console.error('Error fetching Score data:', error);
-        }
-        setIsLoading(false);
-    }, [userId]);
-
-    // fetch data
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+    //     return totalCredits;
+    // }, [frameComponents]);
 
     // Xử lý thay đổi điểm
     const handleChange = useCallback((value, subjectId, creditHour) => {
@@ -172,6 +111,67 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
             });
         }
     }, [handleChange, onSubjectModification]);
+
+    // Hiện data
+    const fetchData = useCallback(async () => {
+        if (didMountRef.current) return;
+        didMountRef.current = true;
+        const responseKhungCTDT = await findKhungCTDTByUserId(userId);
+        const frameId = responseKhungCTDT.data.data.frameId;
+        setIsLoading(true);
+        try {
+            const [frameComponentsResponse, scoresResponse, expectedScoreResponse] = await Promise.all([
+                callKhungCTDT(frameId),
+                getScoreByStudentId(userId),
+                getExpectedScoreByStudentId(userId),
+            ]);
+
+            setFrameComponents(frameComponentsResponse);
+
+            // Handle expected scores
+            if (expectedScoreResponse && Array.isArray(expectedScoreResponse)) {
+                const expectedScoresMap = {};
+                const numericGradesMap = {};
+                const improvementSubjectsMap = {};
+
+                expectedScoreResponse.forEach(expected => {
+                    if (expected.subject && expected.subject.subjectId) {
+                        expectedScoresMap[expected.subject.subjectId] = expected;
+                        numericGradesMap[expected.subject.subjectId] = parseFloat(expected.expectedScore10);
+                        improvementSubjectsMap[expected.subject.subjectId] = true;
+                        handleNumericGradeChange(expected.expectedScore10, expected.subject.subjectId, expected.subject.creditHour, expected.subject);
+                    }
+                });
+
+                // setExpectedScores(expectedScoresMap);
+                setNumericGrades(numericGradesMap);
+                setImprovementSubjects(improvementSubjectsMap);
+            }
+            // Lọc bỏ ra các môn đang học và chưa có điểm
+            const scoreFilter = await scoresResponse.filter(item => item.finalScoreLetter !== '')
+
+            if (scoreFilter && Array.isArray(scoreFilter)) {
+                setScores(scoreFilter);
+                const origGrades = {};
+                scoreFilter.forEach(score => {
+                    if (score.subject && score.subject.subjectId) {
+                        origGrades[score.subject.subjectId] = score.finalScoreLetter;
+                    }
+                });
+                setOriginalGrades(origGrades);
+            }
+        } catch (error) {
+            console.error('Error fetching Score data:', error);
+        }
+        setIsLoading(false);
+    }, [handleNumericGradeChange, userId]);
+
+    // fetch data
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+
 
     const handleImprovement = useCallback((subjectId, creditHour, subject) => {
         setImprovementSubjects(prev => {
@@ -261,8 +261,8 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
             frameComponent.subjectInfo.forEach((subject, index) => {
                 if (subject) {
                     const score = scores.find(s => s.subject.subjectId === subject.subjectId);
-                    const isImprovement = improvementSubjects[subject.subjectId];
-                    const currentGrade = selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || '';
+                    //const isImprovement = improvementSubjects[subject.subjectId];
+                    //const currentGrade = selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || '';
                     const numericGrade = numericGrades[subject.subjectId] || '';
 
                     frameComponentRows.push(
@@ -340,7 +340,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         }
 
         return frameComponentRows;
-    }, [frameComponents, scores, handleChange, selectedGrades, improvementSubjects, handleImprovement, originalGrades, numericGrades, handleNumericGradeChange, onSubjectModification]);
+    }, [frameComponents, scores, selectedGrades, improvementSubjects, handleImprovement, originalGrades, numericGrades, handleNumericGradeChange]);
 
 
     const renderTableRows = useCallback(() => {

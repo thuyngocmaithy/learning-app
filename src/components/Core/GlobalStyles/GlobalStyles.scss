@@ -62,7 +62,6 @@ h3,
 h4,
 p {
     font-family: var(--font-family) !important;
-    color: var(--color-text-base) !important;
     margin-bottom: 0 !important;
 }
 
@@ -260,7 +259,7 @@ body {
 
     .ant-divider-inner-text {
         font-weight: 500;
-        color: var(--primary);
+        color: var(--color-primary);
     }
 
     //NOTIFICATION

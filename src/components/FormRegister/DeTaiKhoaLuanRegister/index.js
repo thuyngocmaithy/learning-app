@@ -1,17 +1,14 @@
 import React, { memo, useContext, useEffect, useState } from 'react';
 import FormItem from '../../Core/FormItem';
 import Register from '../../Core/Register';
-import classNames from 'classnames/bind';
-import styles from './DeTaiKhoaLuanRegister.module.scss';
-import { Button, Form, message, Radio, Select, Space } from 'antd';
+import { Button, Form, Radio, Select, Space } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { createThesisUser } from '../../../services/thesisUserService';
 import { getActiveStudents, getUserById } from '../../../services/userService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { CloseOutlined } from '@ant-design/icons';
 import notifications from '../../../config/notifications';
-
-const cx = classNames.bind(styles);
 
 const DeTaiKhoaLuanRegister = memo(function DeTaiKhoaLuanRegister({
     title,

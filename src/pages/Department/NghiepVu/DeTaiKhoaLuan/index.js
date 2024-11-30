@@ -1,9 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Col, Select } from 'antd';
+import { Card, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Select } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -64,13 +65,13 @@ function DeTaiKhoaLuan() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
+
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -183,7 +184,7 @@ function DeTaiKhoaLuan() {
                             showModalUpdate(record);
                             setIsUpdate(true);
                         }}
-                    // disabled={record.validDate !== true}
+                        disabled={!permissionDetailData?.isEdit}
                     >
                         Sửa
                     </ButtonCustom>
@@ -191,7 +192,7 @@ function DeTaiKhoaLuan() {
             ),
         }
     ];
-    const listRegisterthesisJoined = async () => {
+    const listRegisterthesisJoined = useCallback(async () => {
         try {
             const response = await getWhere({ instructorId: userId, thesisGroup: ThesisGroupIdFromUrl });
             if (response.status === 200 && response.data.data) {
@@ -202,9 +203,9 @@ function DeTaiKhoaLuan() {
             console.error('Error fetching registered thesiss:', error);
             setIsLoading(false);
         }
-    };
+    }, [ThesisGroupIdFromUrl, userId]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             let result = null;
 
@@ -261,19 +262,15 @@ function DeTaiKhoaLuan() {
         finally {
             setIsLoading(false);
         }
-    };
+    }, [ThesisGroupIdFromUrl]);
 
     useEffect(() => {
         fetchData();
         listRegisterthesisJoined();
-    }, []);
-
-    useEffect(() => {
         if (isChangeStatus) {
-            fetchData();
             setIsChangeStatus(false);
         }
-    }, [isChangeStatus]);
+    }, [fetchData, listRegisterthesisJoined, isChangeStatus]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài khóa luận"
     useEffect(() => {
@@ -503,7 +500,7 @@ function DeTaiKhoaLuan() {
                 ThesisGroupId={ThesisGroupIdFromUrl}
             />
         );
-    }, [showModalUpdate, isUpdate, ThesisGroupIdFromUrl])
+    }, [isUpdate, showModalUpdate, fetchData, ThesisGroupIdFromUrl])
 
     const DeTaiKhoaLuanListRegisterMemoized = useMemo(() => {
         return (
@@ -572,10 +569,18 @@ function DeTaiKhoaLuan() {
                                 onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
                                 isVisible={permissionDetailData?.isDelete}
                             />
-                            <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài khóa luận', handleDisable)} />
-                            <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài khóa luận', handleEnable)} />
+                            <Toolbar
+                                type={'Ẩn'}
+                                onClick={() => disableConfirm('đề tài khóa luận', handleDisable)}
+                                isVisible={permissionDetailData?.isEdit}
+                            />
+                            <Toolbar
+                                type={'Hiện'}
+                                onClick={() => enableConfirm('đề tài khóa luận', handleEnable)}
+                                isVisible={permissionDetailData?.isEdit}
+                            />
                             {!disableToolbar &&
-                                <Toolbar type={'Nhập file Excel'} />
+                                <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData?.isAdd} />
                             }
                             <Toolbar type={'Xuất file Excel'} />
                         </div>

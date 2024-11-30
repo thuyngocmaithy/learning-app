@@ -12,7 +12,7 @@ function Detail({ title = '', children, showModal, onClose }) {
         if (showModal !== open) {
             setOpen(showModal);
         }
-    }, [showModal]);
+    }, [showModal, open]);
 
     const handleCancel = useCallback(() => {
         setOpen(false);

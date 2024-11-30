@@ -89,7 +89,7 @@ function TableCustomAnt({
                     return (
                         <List.Item
                             key={key}
-                            actions={columnsWithSTT.map((col) => {
+                            actions={columnsWithSTT.forEach((col) => {
                                 if (col.key === 'action') {
                                     // Xử lý riêng cột Action
                                     return (
@@ -118,7 +118,7 @@ function TableCustomAnt({
                             >
                                 <div className={cx('list-item')}>
                                     {/* Hiển thị các cột thông thường */}
-                                    {columnsWithSTT.map((col) => {
+                                    {columnsWithSTT.forEach((col) => {
                                         if (col.key !== 'action') {
                                             return (
                                                 <div key={col.key || col.dataIndex}>

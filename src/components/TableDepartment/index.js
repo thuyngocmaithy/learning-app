@@ -55,11 +55,13 @@ const TableDepartment = ({
     frameComponents,
     totalSubject,
     listSemester,
+    reRenderProgress,
     selectedSemesters,
     setSelectedSemesters,
     teacherAssignments,
     setTeacherAssignments,
     setPercentArrange,
+    setReRenderProgress,
     height = 600
 }) => {
     const [subjectArranged, setSubjectArranged] = useState(null);
@@ -68,12 +70,7 @@ const TableDepartment = ({
         if (totalSubject && subjectArranged) {
             setPercentArrange(((parseInt(subjectArranged) / parseInt(totalSubject)) * 100).toFixed(2))
         }
-    }, [totalSubject, subjectArranged])
-
-
-
-
-    // Gộp 2 hàm tải dữ liệu vào useEffect
+    }, [totalSubject, subjectArranged, setPercentArrange])
 
     // Tối ưu cập nhật state bằng Set
     const handleCheckboxChange = useCallback((idSelect) => {
@@ -86,7 +83,7 @@ const TableDepartment = ({
             }
             return new Set(updated);  // Đảm bảo tạo ra một Set mới để React nhận diện sự thay đổi
         });
-    }, []);
+    }, [setSelectedSemesters]);
 
     // Tối ưu cập nhật state bằng Map
     const handleTeacherChange = useCallback((semesterId, subjectId, teacherName) => {
@@ -95,7 +92,7 @@ const TableDepartment = ({
             updated.set(`${semesterId}-${subjectId}`, teacherName);
             return new Map(updated);  // Đảm bảo tạo ra một Map mới để React nhận diện sự thay đổi
         });
-    }, []);
+    }, [setTeacherAssignments]);
 
     // Chuẩn bị dữ liệu đã xử lý để giảm tính toán khi render
     const processedData = useMemo(() => {
@@ -111,7 +108,7 @@ const TableDepartment = ({
     }, [frameComponents]);
 
     useEffect(() => {
-        if (processedData && listSemester && selectedSemesters) {
+        if (processedData && listSemester && selectedSemesters && reRenderProgress) {
             let totalSubjects = 0;
             const listSubject = [];
 
@@ -136,8 +133,10 @@ const TableDepartment = ({
 
             // Cập nhật số lượng môn đã mở
             setSubjectArranged(totalSubjects);
+            // Set lại ReRenderProgress
+            setReRenderProgress(false);
         }
-    }, [processedData, listSemester, selectedSemesters]);
+    }, [processedData, listSemester, selectedSemesters, reRenderProgress, setReRenderProgress]);
 
 
     // Đệ quy để render dữ liệu

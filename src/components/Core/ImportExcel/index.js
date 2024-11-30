@@ -2,21 +2,22 @@ import classNames from 'classnames/bind';
 import styles from './ImportExcel.module.scss';
 import { useState, useCallback } from 'react';
 import ExcelJS from 'exceljs';
-import { Button, message, Modal, Spin, Upload } from 'antd';
+import { Button, Modal, Spin, Upload } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import ButtonCustom from '../Button';
 import { downloadTemplate } from '../../../services/fileService';
 import { UploadOutlined } from '@ant-design/icons';
 
 const cx = classNames.bind(styles);
 
-function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose, onImport, reLoad, ...props }) {
+function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose, onImport, reLoad, isOpenCourse = false, ...props }) {
     const [file, setFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleCancel = useCallback(() => {
         setShowModal(false);
         if (onClose) onClose();
-    }, [onClose]);
+    }, [onClose, setShowModal]);
 
     const handleUpload = async () => {
         if (!file) return;
@@ -82,7 +83,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
             onCancel={handleCancel}
             footer={
                 <ButtonCustom key={'save'} primary small onClick={handleUpload}>
-                    Lưu
+                    {isOpenCourse ? 'Chọn' : 'Lưu'}
                 </ButtonCustom>
             }
             width="500px"
@@ -90,15 +91,17 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
         >
             <Spin spinning={isLoading} >
                 <div className={cx('container-import')}>
-                    <ButtonCustom
-                        className={cx('btnDownloadTemplate')}
-                        outline
-                        colorRed
-                        small
-                        onClick={() => downloadTemplate(type)}
-                    >
-                        Tải xuống template
-                    </ButtonCustom>
+                    {!isOpenCourse &&
+                        <ButtonCustom
+                            className={cx('btnDownloadTemplate')}
+                            outline
+                            colorRed
+                            small
+                            onClick={() => downloadTemplate(type)}
+                        >
+                            Tải xuống template
+                        </ButtonCustom>
+                    }
                     <Upload
                         beforeUpload={() => false}
                         maxCount={1}

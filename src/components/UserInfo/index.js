@@ -21,7 +21,7 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
         if (showModal !== open) {
             setOpen(showModal);
         }
-    }, [showModal]);
+    }, [open, showModal]);
 
     const handleCancel = useCallback(() => {
         setOpen(false);
@@ -46,7 +46,7 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
         if (userId) {
             fetchUserInfo();
         }
-    }, [userId])
+    }, [showInfoStudent, showModal, userId])
 
     return <Modal
         className={cx('modal-user-info')}

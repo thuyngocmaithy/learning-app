@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useContext } from 'react';
+import React, { useEffect, useMemo, useState, useContext, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiNCKH.module.scss';
 import { Card, List, Skeleton, Tabs, Tag } from 'antd';
@@ -48,13 +48,14 @@ function NhomDeTaiNCKH() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
 
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
+
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -65,7 +66,7 @@ function NhomDeTaiNCKH() {
         navigate(`?tabIndex=${tabId}`); // Cập nhật URL
     };
 
-    const fetchscientificResearchs = async () => {
+    const fetchscientificResearchs = useCallback(async () => {
         try {
             const result = await getWhereSRG({ disabled: false })
             if (result.status === 200) {
@@ -78,9 +79,9 @@ function NhomDeTaiNCKH() {
             setIsLoading(false);
 
         }
-    };
+    }, []);
 
-    const checkRegisterscientificResearch = async () => {
+    const checkRegisterscientificResearch = useCallback(async () => {
         try {
             const response = await getWhereSRU({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
@@ -89,12 +90,12 @@ function NhomDeTaiNCKH() {
             console.error('Error fetching registered scientificResearchs:', error);
             setIsLoading(false);
         }
-    };
+    }, [userId]);
 
     useEffect(() => {
         fetchscientificResearchs();
         checkRegisterscientificResearch();
-    }, [showModalRegister]);
+    }, [showModalRegister, fetchscientificResearchs, checkRegisterscientificResearch]);
 
     const ITEM_TABS = [
         {

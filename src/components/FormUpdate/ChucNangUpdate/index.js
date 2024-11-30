@@ -1,17 +1,13 @@
 import React, { useEffect, memo, useState } from 'react';
-import { Input, message, Form } from 'antd';
+import { Input, Form } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import {
     createFeature,
     updateFeature,
 } from '../../../services/featureService';
-import classNames from 'classnames/bind';
-import styles from './ChucNangUpdate.module.scss';
 import IconPicker from '../../Core/IconPicker';
-import { login } from '../../../services/userService';
-
-const cx = classNames.bind(styles);
 
 const ChucNangUpdate = memo(function ChucNangUpdate({
     title,
@@ -77,7 +73,7 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
             });
             setIsLoading(false);
         }
-    }, [showModal]);
+    }, [form, showModal]);
 
     return (
         !isLoading &&

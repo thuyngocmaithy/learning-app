@@ -29,35 +29,36 @@ const ThanhPhanKhungDTFormSelect = memo(function ThanhPhanKhungDTFormSelect({
             setShowModal(false);
             setReceiveFormSelect(true);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
-    // Lấy data cho bảng khối kiến thức
-    const fetchData = async () => {
-        try {
-            const result = await getAllStudyFrameComponent();
-            if (result.status === 200) {
-                setDataFrameComponent(result.data.data.map(item => {
-                    return {
-                        ...item,
-                        majorId: item.major?.majorId,
-                        majorName: item.major?.majorName
-                    }
-                }
-                ));
-
-                // Set các khối kiến thức đã có trong db
-                setSelectedRowKeys(selectedItem);
-            }
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setIsLoading(false);
-        }
-    };
 
     useEffect(() => {
+        // Lấy data cho bảng khối kiến thức
+        const fetchData = async () => {
+            try {
+                const result = await getAllStudyFrameComponent();
+                if (result.status === 200) {
+                    setDataFrameComponent(result.data.data.map(item => {
+                        return {
+                            ...item,
+                            majorId: item.major?.majorId,
+                            majorName: item.major?.majorName
+                        }
+                    }
+                    ));
+
+                    // Set các khối kiến thức đã có trong db
+                    setSelectedRowKeys(selectedItem);
+                }
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setIsLoading(false);
+            }
+        };
+
         fetchData();
     }, [selectedItem]);
 

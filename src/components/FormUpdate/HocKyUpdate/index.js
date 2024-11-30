@@ -1,5 +1,6 @@
 import React, { useState, memo, useEffect } from 'react';
-import { Input, Select, Form, message, InputNumber } from 'antd';
+import { Input, Select, Form, InputNumber } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -56,7 +57,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 form.resetFields();
             }
         }
-    }, [showModal]);
+    }, [form, isUpdate, showModal]);
 
     // Hàm để đóng modal và cập nhật quyền hệ thống showModalAdd thành false
     const handleCloseModal = () => {

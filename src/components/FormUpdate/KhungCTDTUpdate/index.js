@@ -1,15 +1,13 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Input, Form, message, Select } from 'antd';
+import { Input, Form, Select } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import classNames from 'classnames/bind';
-import styles from "./KhungCTDTUpdate.module.scss"
 import { createStudyFrame, updateStudyFrame } from '../../../services/studyFrameService';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getAll } from '../../../services/cycleService';
 
-const cx = classNames.bind(styles)
 
 const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
     title,
@@ -88,7 +86,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
                 form.resetFields();
             }
         }
-    }, [showModal]);
+    }, [form, isUpdate, showModal]);
 
     // Hàm để đóng modal và cập nhật quyền hệ thống showModalAdd thành false
     const handleCloseModal = () => {

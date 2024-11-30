@@ -1,5 +1,6 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import { Checkbox, List, message } from 'antd';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Checkbox, List, Spin } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import Update from '../../Core/Update';
 import styles from "./DungKhungCTDTUpdate.module.scss"
 import classNames from 'classnames/bind';
@@ -29,6 +30,73 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const [receiveFormSelect, setReceiveFormSelect] = useState(false);
     const [frameStructureByFrameId, setFrameStructureByFrameId] = useState([])
     const [shouldFetchData, setShouldFetchData] = useState(false);
+    const [frameData, setFrameData] = useState(null)
+
+
+    const fetchData = useCallback(async () => {
+        try {
+            // Tìm khối kiến thức được chọn từ form select
+            const frameStructurePromise = frameStructureByFrameId?.map(async (item) => {
+                const listSujectOfFrameCompRes = await getWheresubject_studyFrameComp({ studyFrameComponent: item.studyFrameComponent?.frameComponentId });
+                const listSubjectOfFrameComp = listSujectOfFrameCompRes.data.data?.map((item) => {
+                    return {
+                        subjectId: item.subject?.subjectId,
+                        subjectName: item.subject?.subjectName,
+                    }
+                }
+                ) || [];
+
+                return {
+                    ...item,
+                    listSubject: listSubjectOfFrameComp
+                }
+            }) || []
+
+            let frameStructure = await Promise.all(frameStructurePromise)
+
+            // Lặp qua các id của selectedFrameComp để lấy khối kiến thức được chọn bỏ vào cấu trúc cây
+            if (receiveFormSelect) {
+                const listFrameCompPromises = selectedFrameComp?.map(async (item) => {
+                    // Kiểm tra xem frameComponent đã có trong frameStructure chưa
+                    const exists = frameStructure.some(structure => structure.studyFrameComponent?.id === item);
+                    if (!exists) {
+                        const responseFrameComp = await getStudyFrameCompById(item);
+                        const studyFrameComponent = responseFrameComp.data.data;
+
+                        // Lấy dữ liệu môn học
+                        const listSujectOfFrameCompRes = await getWheresubject_studyFrameComp({ studyFrameComponent: studyFrameComponent?.frameComponentId });
+                        const listSubjectOfFrameComp = listSujectOfFrameCompRes.data.data?.map((item) => {
+                            return {
+                                subjectId: item.subject?.subjectId,
+                                subjectName: item.subject?.subjectName,
+                            }
+                        }
+                        ) || [];
+
+                        // Thêm object mới vào frameStructure nếu chưa tồn tại
+                        frameStructure = frameStructure.concat({
+                            id: uuidv4(),
+                            orderNo: 0,
+                            studyFrame: frameData,
+                            studyFrameComponent: studyFrameComponent,
+                            studyFrameComponentParent: null,
+                            listSubject: listSubjectOfFrameComp
+                        });
+                    }
+                });
+                await Promise.all(listFrameCompPromises);
+            }
+            setFrameStructureData(frameStructure)
+
+            // Sau khi tạo xong dữ liệu frameStructure => Set lại receiveFormSelect
+            setReceiveFormSelect(false);
+        } catch (error) {
+            console.error(error);
+        }
+        finally {
+            setIsLoadingFrame(false)
+        }
+    }, [frameData, frameStructureByFrameId, receiveFormSelect, selectedFrameComp]);
 
 
     const onChange = (e) => {
@@ -85,17 +153,12 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         return keys;
     };
 
-
-    useEffect(() => {
-
-    }, [])
-
     // Nhận các khối kiến thức từ Form Select
     useEffect(() => {
         if (receiveFormSelect) {
             fetchData(); // Gọi lại fetchData
         }
-    }, [receiveFormSelect]);
+    }, [fetchData, receiveFormSelect]);
 
     // Loại bỏ các thuộc tính không cần thiết để lưu vào db
     const cleanTreeData = (nodes) => {
@@ -119,7 +182,6 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         }
 
     }
-
 
     useEffect(() => {
         // Lấy data cho entity frameData
@@ -149,7 +211,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
     }
 
-    const buildTreeData = (list, parentId = null) => {
+    const buildTreeData = useCallback((list, parentId = null) => {
         return list
             .filter(item => item.studyFrameComponentParent?.id === parentId || (!item.studyFrameComponentParent && parentId === null))
             .sort((a, b) => a.orderNo - b.orderNo)
@@ -229,14 +291,14 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 children: buildTreeData(list, item.studyFrameComponent?.id), // Đệ quy bất đồng bộ
 
             }));
-    };
+    }, [showSubject]);
+
     //======================================================================
     const [expandedKeys, setExpandedKeys] = useState([]);
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [isLoadingFrame, setIsLoadingFrame] = useState(true);
-    const [frameData, setFrameData] = useState(null)
 
-    const getFrameStructureByFrameId = async () => {
+    const getFrameStructureByFrameId = useCallback(async () => {
         try {
             const response = await getWhereFrameStructures({ studyFrame: showModal.frameId });
 
@@ -244,73 +306,8 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         } catch (error) {
             console.error("Lỗi lấy dữ liệu FrameStructure bằng FrameId: " + error);
         }
+    }, [showModal]);
 
-    }
-
-    const fetchData = async () => {
-        try {
-            // Tìm khối kiến thức được chọn từ form select
-            const frameStructurePromise = frameStructureByFrameId?.map(async (item) => {
-                const listSujectOfFrameCompRes = await getWheresubject_studyFrameComp({ studyFrameComponent: item.studyFrameComponent?.frameComponentId });
-                const listSubjectOfFrameComp = listSujectOfFrameCompRes.data.data?.map((item) => {
-                    return {
-                        subjectId: item.subject?.subjectId,
-                        subjectName: item.subject?.subjectName,
-                    }
-                }
-                ) || [];
-
-                return {
-                    ...item,
-                    listSubject: listSubjectOfFrameComp
-                }
-            }) || []
-
-            let frameStructure = await Promise.all(frameStructurePromise)
-
-            // Lặp qua các id của selectedFrameComp để lấy khối kiến thức được chọn bỏ vào cấu trúc cây
-            if (receiveFormSelect) {
-                const listFrameCompPromises = selectedFrameComp?.map(async (item) => {
-                    // Kiểm tra xem frameComponent đã có trong frameStructure chưa
-                    const exists = frameStructure.some(structure => structure.studyFrameComponent?.id === item);
-                    if (!exists) {
-                        const responseFrameComp = await getStudyFrameCompById(item);
-                        const studyFrameComponent = responseFrameComp.data.data;
-
-                        // Lấy dữ liệu môn học
-                        const listSujectOfFrameCompRes = await getWheresubject_studyFrameComp({ studyFrameComponent: studyFrameComponent?.frameComponentId });
-                        const listSubjectOfFrameComp = listSujectOfFrameCompRes.data.data?.map((item) => {
-                            return {
-                                subjectId: item.subject?.subjectId,
-                                subjectName: item.subject?.subjectName,
-                            }
-                        }
-                        ) || [];
-
-                        // Thêm object mới vào frameStructure nếu chưa tồn tại
-                        frameStructure = frameStructure.concat({
-                            id: uuidv4(),
-                            orderNo: 0,
-                            studyFrame: frameData,
-                            studyFrameComponent: studyFrameComponent,
-                            studyFrameComponentParent: null,
-                            listSubject: listSubjectOfFrameComp
-                        });
-                    }
-                });
-                await Promise.all(listFrameCompPromises);
-            }
-            setFrameStructureData(frameStructure)
-
-            // Sau khi tạo xong dữ liệu frameStructure => Set lại receiveFormSelect
-            setReceiveFormSelect(false);
-        } catch (error) {
-            console.error(error);
-        }
-        finally {
-            setIsLoadingFrame(false)
-        }
-    };
 
     // Lấy dữ liệu ban đầu khi mở form lần đầu
     useEffect(() => {
@@ -322,7 +319,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
         if (showModal) {
             handleGetDataInit()
         }
-    }, [showModal])
+    }, [getFrameStructureByFrameId, showModal])
 
     // useEffect khác để gọi fetchData khi frameStructureByFrameId thay đổi
     useEffect(() => {
@@ -330,12 +327,12 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
             fetchData();
             setShouldFetchData(false)
         }
-    }, [shouldFetchData]);
+    }, [fetchData, shouldFetchData]);
 
     // Tạo cấu trúc cây với dữ liệu frameStructure
     const treeDataMemoized = useMemo(() => {
         return buildTreeData(frameStructureData, null);
-    }, [frameStructureData, showSubject]);
+    }, [buildTreeData, frameStructureData]);
 
     useEffect(() => {
         setTreeData(treeDataMemoized);
@@ -378,15 +375,20 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 </Button>
                 <Checkbox onChange={onChange} style={{ fontSize: '17px' }}>Hiển thị môn học</Checkbox>
             </div>
-            <TreeFrame
-                frameId={showModal.frameId}
-                treeData={treeData}
-                setTreeData={setTreeData}
-                // reLoad={reLoadStructureFeature}
-                selectedFrameComp={selectedFrameComp}
-                expandedKeys={expandedKeys}
+            {isLoadingFrame
+                ? <div className={('container-loading')}>
+                    <Spin size="large" />
+                </div>
+                : < TreeFrame
+                    frameId={showModal.frameId}
+                    treeData={treeData}
+                    setTreeData={setTreeData}
+                    // reLoad={reLoadStructureFeature}
+                    selectedFrameComp={selectedFrameComp}
+                    expandedKeys={expandedKeys}
 
-            />
+                />
+            }
             {thanhPhanKhungDTFormSelectMemoized}
             {thanhphankhungdtDetailMemoized}
         </Update>

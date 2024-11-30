@@ -1,6 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinDeTaiNCKHThamGia.module.scss';
-import { Descriptions, Dropdown, message, Tag } from 'antd';
+import { Descriptions, Dropdown, Tag } from 'antd';
+import { message } from '../../hooks/useAntdApp';
 import { useEffect, useState } from 'react';
 import { getStatusByType } from '../../services/statusService';
 import { updateSRById } from '../../services/scientificResearchService';
@@ -81,7 +82,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
         };
 
         fetchStatusByType();
-    }, [statusType]);
+    }, [statusSelected, statusType]);
 
     const onClick = async ({ key }) => {
         const selectedItem = statusOptions.find((item) => item.key === key);

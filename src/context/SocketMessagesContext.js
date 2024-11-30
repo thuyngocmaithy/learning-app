@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { AccountLoginContext } from './AccountLoginContext';
 import { SRAndThesisJoinContext } from './SRAndThesisJoinContext';
@@ -14,6 +14,51 @@ export const SocketMessagesProvider = ({ children }) => {
     const { userId } = useContext(AccountLoginContext);
     const { listSRAndThesisIdJoin } = useContext(SRAndThesisJoinContext)
     const [messagesMap, setMessagesMap] = useState({});
+
+    const fetchAllMessages = useCallback(async (listSRAndThesisIdJoin, socketIo) => {
+        try {
+
+            // Tạo danh sách các SRId từ listSRAndThesisIdJoin
+            const IdList = listSRAndThesisIdJoin.map(element =>
+                element.scientificResearch
+                    ? {
+                        key: 'srId',
+                        value: element.scientificResearch.scientificResearchId
+                    }
+                    : element.thesis
+                        ? {
+                            key: 'thesisId',
+                            value: element.thesis.thesisId
+                        }
+                        : null // Giá trị mặc định nếu cả hai đều không tồn tại                
+            ).filter(id => id !== null); // Loại bỏ các giá trị null
+
+            // // Thêm Id support vào IdList
+            // IdList.push({
+            //     key: 'support',
+            //     value: userId // Tk đang login => Lấy các message của người login
+            // })
+            // console.log(IdList);
+
+
+            // Tham gia vào room cho mỗi SRId
+            IdList.forEach(id => {
+                socketIo.emit('joinRoom', id.value);
+            });
+
+            // Gọi getMessages với danh sách SRId
+            const allMessages = await getMessages(socketIo, IdList);
+
+            // Cập nhật toàn bộ tin nhắn vào state
+            setMessagesMap((prevMessagesMap) => ({
+                ...prevMessagesMap,
+                ...allMessages, // Gộp tất cả tin nhắn nhận được
+            }));
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    }, []);
+
 
     useEffect(() => {
         let socketIo;
@@ -97,7 +142,7 @@ export const SocketMessagesProvider = ({ children }) => {
             };
         }
 
-    }, [userId, listSRAndThesisIdJoin]);
+    }, [userId, listSRAndThesisIdJoin, fetchAllMessages]);
 
 
     // Function để gửi message đến room
@@ -133,50 +178,6 @@ export const SocketMessagesProvider = ({ children }) => {
                 socketIo.emit('getMessages', Id);
             });
         });
-    };
-
-    const fetchAllMessages = async (listSRAndThesisIdJoin, socketIo) => {
-        try {
-
-            // Tạo danh sách các SRId từ listSRAndThesisIdJoin
-            const IdList = listSRAndThesisIdJoin.map(element =>
-                element.scientificResearch
-                    ? {
-                        key: 'srId',
-                        value: element.scientificResearch.scientificResearchId
-                    }
-                    : element.thesis
-                        ? {
-                            key: 'thesisId',
-                            value: element.thesis.thesisId
-                        }
-                        : null // Giá trị mặc định nếu cả hai đều không tồn tại                
-            ).filter(id => id !== null); // Loại bỏ các giá trị null
-
-            // // Thêm Id support vào IdList
-            // IdList.push({
-            //     key: 'support',
-            //     value: userId // Tk đang login => Lấy các message của người login
-            // })
-            // console.log(IdList);
-
-
-            // Tham gia vào room cho mỗi SRId
-            IdList.forEach(id => {
-                socketIo.emit('joinRoom', id.value);
-            });
-
-            // Gọi getMessages với danh sách SRId
-            const allMessages = await getMessages(socketIo, IdList);
-
-            // Cập nhật toàn bộ tin nhắn vào state
-            setMessagesMap((prevMessagesMap) => ({
-                ...prevMessagesMap,
-                ...allMessages, // Gộp tất cả tin nhắn nhận được
-            }));
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        }
     };
 
     // Xóa tin nhắn

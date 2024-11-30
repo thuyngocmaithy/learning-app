@@ -2,18 +2,14 @@ import React, { memo, useContext, useEffect, useState } from 'react';
 import {
     Input,
     Form,
-    message,
     Checkbox,
     Select
 } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import classNames from 'classnames/bind';
-import styles from './MonHocUpdate.module.scss';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { createSubject, getAll as getAllSubject, updateSubjectById } from '../../../services/subjectService';
-
-const cx = classNames.bind(styles);
 
 const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const { userId } = useContext(AccountLoginContext);

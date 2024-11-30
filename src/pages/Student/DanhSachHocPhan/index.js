@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, memo } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
@@ -8,7 +8,8 @@ import {
     getUserById,
     saveRegisterSubjects
 } from '../../../services/userService';
-import { Descriptions, message, Radio, Spin } from 'antd';
+import { Descriptions, Radio, Spin } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { findKhungCTDTByUserId } from '../../../services/studyFrameService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { createSemester, getSemesterById } from '../../../services/semesterService';
@@ -19,11 +20,12 @@ function DanhSachHocPhan() {
     const { userId } = useContext(AccountLoginContext);
     const [registeredSubjects, setRegisteredSubjects] = useState({});
     const [frameId, setFrameId] = useState();
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [valueStatus, setValueSatus] = useState('Tất cả');
 
     useEffect(() => {
         const fetchKhungCTDT = async () => {
+            setIsLoading(true);
             try {
                 const res = await findKhungCTDTByUserId(userId);
                 if (res.status === 200) {
@@ -37,7 +39,8 @@ function DanhSachHocPhan() {
             }
 
         }
-        fetchKhungCTDT();
+        if (userId)
+            fetchKhungCTDT();
     }, [userId])
 
     const handleSave = async () => {
@@ -171,4 +174,4 @@ function DanhSachHocPhan() {
     );
 }
 
-export default DanhSachHocPhan;
+export default memo(DanhSachHocPhan);

@@ -1,8 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './TrangThai.module.scss';
-import { message, Tag, Divider, Input, Col, Select } from 'antd';
+import { Tag, Divider, Input, Select } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -15,10 +16,19 @@ import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpda
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import config from '../../../../config';
+import { useLocation } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles);
 
 function TrangThai() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
 
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -253,7 +263,9 @@ function TrangThai() {
                             setShowModal(record);
                             setIsUpdate(true);
                             setShowModalDetail(false);
-                        }}>
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
                         Sửa
                     </ButtonCustom>
                 </div>
@@ -282,9 +294,18 @@ function TrangThai() {
                             setShowModal(true);
                             setIsUpdate(false);
                         }}
+                        isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('trạng thái', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportStatus(true)} />
+                    <Toolbar
+                        type={'Xóa'}
+                        onClick={() => deleteConfirm('trạng thái', handleDelete)}
+                        isVisible={permissionDetailData?.isDelete}
+                    />
+                    <Toolbar
+                        type={'Nhập file Excel'}
+                        onClick={() => setShowModalImportStatus(true)}
+                        isVisible={permissionDetailData?.isAdd}
+                    />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>
             </div>

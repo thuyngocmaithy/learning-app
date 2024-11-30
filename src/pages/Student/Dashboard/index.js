@@ -8,7 +8,7 @@ import styles from './Dashboard.module.scss';
 import { HomeActiveIcon } from '../../../assets/icons';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getFacultyById } from '../../../services/facultyService';
-import { getScore, getUserById } from '../../../services/userService';
+import { getUserById } from '../../../services/userService';
 import { Spin } from 'antd';
 import { getExpectedScoreByStudentId, getScoreByStudentId } from '../../../services/scoreService';
 import { ThemeContext } from '../../../context/ThemeContext';
@@ -17,7 +17,7 @@ const cx = classNames.bind(styles);
 
 function Home() {
     const { theme } = useContext(ThemeContext);
-    const { userId, access_token } = useContext(AccountLoginContext);
+    const { userId } = useContext(AccountLoginContext);
     const [scores, setScores] = useState();
     const [creditHourCurrent, setCreditHourCurrent] = useState(0);
     const [creditHourTotal, setCreditHourTotal] = useState(0);
@@ -114,6 +114,7 @@ function Home() {
                 ],
             },
         })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [theme]);
 
 
@@ -195,50 +196,41 @@ function Home() {
     }, [firstYear, scores, handleDataChart]);
 
 
-    // Tính Tiến độ hoàn thành
-    const handleDataProgress = async () => {
-        try {
-            const expectedScoreResponse = await getExpectedScoreByStudentId(userId);
-            setExpectedGPA(expectedScoreResponse[0].expectedGPA);
-            const responseScore = await getScoreByStudentId(userId);
-            setScores(responseScore)
 
-            // let cdCurrent = 0;
-            // if (responseScore.status === 'success') {
-            //     for (let diem of responseScore.data.ds_diem_hocky) {
-            //         if (diem.so_tin_chi_dat_tich_luy !== "") {
-            //             cdCurrent = diem.so_tin_chi_dat_tich_luy;
-            //             setCreditHourCurrent(diem.so_tin_chi_dat_tich_luy); // set giá trị
-            //             break; // thoát khỏi vòng lặp
-            //         }
-            //     }
-            // }
-            // Lấy ngành và năm học đầu tiên, số tín chỉ hiện tại của user
-            const responseUser = await getUserById(userId);
-            const faculty = responseUser.data.faculty.facultyId;
-            const firstAcademicYear = responseUser.data.firstAcademicYear;
-            setFirstYear(firstAcademicYear);
-            const cdCurrent = responseUser.data.currentCreditHour;
-            setCreditHourCurrent(cdCurrent);
-
-            // Lấy số tín chỉ của ngành
-            const responseFaculty = await getFacultyById(faculty);
-            const cdTotal = responseFaculty.data.data.creditHourTotal;
-            setCreditHourTotal(cdTotal);
-            // Math.trunc lấy phần nguyên
-            const progressCurrent = Math.trunc((cdCurrent / Number(cdTotal)) * 100);
-            setProgress(progressCurrent);
-
-        } catch (error) {
-            console.error("Lỗi tính dữ liệu dashboard: " + error);
-        }
-        finally {
-            setIsLoadingBox(false)
-        }
-    }
 
     useEffect(() => {
-        handleDataProgress();
+        // Tính Tiến độ hoàn thành
+        const handleDataProgress = async () => {
+            try {
+                const expectedScoreResponse = await getExpectedScoreByStudentId(userId);
+                setExpectedGPA(expectedScoreResponse[0].expectedGPA);
+                const responseScore = await getScoreByStudentId(userId);
+                setScores(responseScore)
+                // Lấy ngành và năm học đầu tiên, số tín chỉ hiện tại của user
+                const responseUser = await getUserById(userId);
+                const faculty = responseUser.data.faculty.facultyId;
+                const firstAcademicYear = responseUser.data.firstAcademicYear;
+                setFirstYear(firstAcademicYear);
+                const cdCurrent = responseUser.data.currentCreditHour;
+                setCreditHourCurrent(cdCurrent);
+
+                // Lấy số tín chỉ của ngành
+                const responseFaculty = await getFacultyById(faculty);
+                const cdTotal = responseFaculty.data.data.creditHourTotal;
+                setCreditHourTotal(cdTotal);
+                // Math.trunc lấy phần nguyên
+                const progressCurrent = Math.trunc((cdCurrent / Number(cdTotal)) * 100);
+                setProgress(progressCurrent);
+
+            } catch (error) {
+                console.error("Lỗi tính dữ liệu dashboard: " + error);
+            }
+            finally {
+                setIsLoadingBox(false)
+            }
+        }
+        if (userId)
+            handleDataProgress();
     }, [userId])
 
     useEffect(() => {

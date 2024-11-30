@@ -13,7 +13,7 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
         if (showModal !== open) {
             setOpen(showModal);
         }
-    }, [showModal]);
+    }, [showModal, open]);
 
     const handleCancel = useCallback(() => {
         setOpen(false);
@@ -45,7 +45,7 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
                     Lưu & Sao chép
                 </ButtonCustom>,
             ];
-    }, [isUpdate, onUpdate]);
+    }, [isUpdate, onUpdate, form, fullTitle]);
 
     const modalTitle = useMemo(() => {
         if (fullTitle) return fullTitle;

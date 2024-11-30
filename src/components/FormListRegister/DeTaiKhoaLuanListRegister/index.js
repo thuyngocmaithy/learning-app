@@ -1,8 +1,8 @@
-import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuanListRegister.module.scss';
 import ListRegister from '../../Core/ListRegister';
-import { Avatar, Collapse, Empty, List, message, Skeleton, Tabs } from 'antd';
+import { Avatar, Collapse, Empty, List, Skeleton, Tabs } from 'antd';
 import Button from '../../Core/Button';
 import { getUserById } from '../../../services/userService';
 import { updateThesisUserById } from '../../../services/thesisUserService';
@@ -12,6 +12,7 @@ import { cancelApproveConfirm } from '../../Core/Delete';
 import notifications from '../../../config/notifications';
 import { deleteFollowerDetailByThesisIdAndUserId } from '../../../services/followerDetailService';
 import UserInfo from '../../UserInfo';
+import { message } from '../../../hooks/useAntdApp';
 
 const cx = classNames.bind(styles);
 
@@ -55,13 +56,165 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
                         listG[groupKey].isApprove = listG[groupKey][0].isApprove; // Thêm isApprove cho nhóm
                     }
                 });
-                console.log(listG);
-
                 setListGroup(listG)
             }
             if (showModal?.numberOfRegister) fetchList();
         }
     }, [showModal]);
+
+    const handleSendNotificationApprove = useCallback(async (item) => {
+        try {
+            let listMember = [];
+            if (item.group !== 0) {
+                listMember = item.map((ThesisUser) => ThesisUser.user);
+            }
+            else {
+                listMember.push(item.user);
+            }
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getKhoaLuanNotification('approve', showModal, user.data, listMember);
+
+            ListNotification.map(async (itemNoti) => {
+                await sendNotification(itemNoti.toUser, itemNoti);
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    }, [sendNotification, showModal, userId]);
+
+    const handleCancelNotification = useCallback(async () => {
+        const thesisCancel = thesisCancelApproveRef.current;
+        try {
+            let listMember = [];
+            if (thesisCancel.group !== 0) {
+                listMember = thesisCancel.map((ThesisUser) => ThesisUser.user);
+            }
+            else {
+                listMember.push(thesisCancel.user);
+            }
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getKhoaLuanNotification('approve', thesisCancel, user.data, listMember);
+
+            ListNotification.map(async (itemNoti) => {
+                await deleteNotification(itemNoti.toUser, itemNoti);
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    }, [deleteNotification, userId]);
+
+
+    const handleApprove = useCallback(async (item) => {
+        try {
+            const appoveData =
+            {
+                isApprove: true,
+            }
+            let responseApprove = null;
+            if (typeApprove === "personal") {
+                responseApprove = await updateThesisUserById([item.id], appoveData);
+            }
+            else {
+                const listIdUpdated = item.map((item) => item.id);
+                responseApprove = await updateThesisUserById(listIdUpdated, appoveData);
+            }
+            if (responseApprove) {
+                message.success('Duyệt thành công');
+
+                // Cập nhật trạng thái isApprove của item trong danh sách
+                if (typeApprove === 'personal')
+                    setListPersonal((prevList) =>
+                        prevList.map((listItem) =>
+                            listItem.id === item.id
+                                ? { ...listItem, isApprove: true }
+                                : listItem
+                        )
+                    );
+
+                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
+                if (typeApprove === 'group') {
+                    setListGroup((prevList) => {
+                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
+
+                        // Lặp qua từng nhóm trong listGroup
+                        Object.keys(updatedList).forEach((groupKey) => {
+                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
+                                groupItem.id === item[0].id
+                                    ? { ...groupItem, isApprove: true } // Cập nhật isApprove cho item có id tương ứng
+                                    : groupItem
+                            );
+                        });
+
+                        return updatedList;
+                    });
+                }
+
+                // Gửi thông báo
+                handleSendNotificationApprove(item);
+                changeStatus(true);
+            }
+        } catch (error) {
+            console.error("Lỗi duyệt đăng ký đề tài: " + error);
+        }
+    }, [changeStatus, handleSendNotificationApprove, typeApprove]);
+
+    const handleCancelApprove = useCallback(async () => {
+        const thesisCancel = thesisCancelApproveRef.current;
+        try {
+            const appoveData = {
+                isApprove: false,
+            }
+            const id = thesisCancel.map((item) => item.id);
+
+            const responseApprove = await updateThesisUserById(id, appoveData);
+            if (responseApprove) {
+                message.success('Hủy duyệt thành công');
+
+                // Cập nhật trạng thái isApprove của item trong danh sách
+                if (typeApprove === 'personal')
+                    setListPersonal((prevList) =>
+                        prevList.map((listItem) =>
+                            // Kiểm tra nếu id của listItem có trong mảng thesisCancel
+                            thesisCancel.some(item => item.id === listItem.id)
+                                ? { ...listItem, isApprove: false }
+                                : listItem
+                        )
+                    );
+
+
+                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
+                if (typeApprove === 'group') {
+                    setListGroup((prevList) => {
+                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
+
+                        // Lặp qua từng nhóm trong listGroup
+                        Object.keys(updatedList).forEach((groupKey) => {
+                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
+                                groupItem.id === thesisCancel[0].id
+                                    ? { ...groupItem, isApprove: false } // Cập nhật isApprove cho item có id tương ứng
+                                    : groupItem
+                            );
+                        });
+
+                        return updatedList;
+                    });
+                }
+
+                // Xóa người theo dõi
+                thesisCancel.forEach(async (item) => {
+                    await deleteFollowerDetailByThesisIdAndUserId({ srId: item.thesis.thesisId, userId: item.user.userId })
+                })
+
+                // Hủy thông báo
+                thesisCancel.forEach((item) => {
+                    handleCancelNotification(item);
+                })
+                changeStatus(true);
+            }
+        } catch (error) {
+            console.error("Lỗi duyệt đăng ký đề tài: " + error);
+        }
+    }, [changeStatus, handleCancelNotification, typeApprove]);
 
 
     // useEffect xử lý hiển thị các danh sách sinh viên đăng ký theo nhóm
@@ -140,166 +293,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
 
         setListGroupRender(handleListG);
 
-    }, [listGroup])
-
-    const handleApprove = async (item) => {
-        console.log(item);
-
-        try {
-            const appoveData =
-            {
-                isApprove: true,
-            }
-            let responseApprove = null;
-            if (typeApprove === "personal") {
-                responseApprove = await updateThesisUserById([item.id], appoveData);
-            }
-            else {
-                const listIdUpdated = item.map((item) => item.id);
-                responseApprove = await updateThesisUserById(listIdUpdated, appoveData);
-            }
-            if (responseApprove) {
-                message.success('Duyệt thành công');
-
-                // Cập nhật trạng thái isApprove của item trong danh sách
-                if (typeApprove === 'personal')
-                    setListPersonal((prevList) =>
-                        prevList.map((listItem) =>
-                            listItem.id === item.id
-                                ? { ...listItem, isApprove: true }
-                                : listItem
-                        )
-                    );
-
-                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
-                if (typeApprove === 'group') {
-                    setListGroup((prevList) => {
-                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
-
-                        // Lặp qua từng nhóm trong listGroup
-                        Object.keys(updatedList).forEach((groupKey) => {
-                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
-                                groupItem.id === item[0].id
-                                    ? { ...groupItem, isApprove: true } // Cập nhật isApprove cho item có id tương ứng
-                                    : groupItem
-                            );
-                        });
-
-                        return updatedList;
-                    });
-                }
-
-                // Gửi thông báo
-                handleSendNotificationApprove(item);
-                changeStatus(true);
-            }
-        } catch (error) {
-            console.error("Lỗi duyệt đăng ký đề tài: " + error);
-        }
-    };
-
-
-    const handleSendNotificationApprove = async (item) => {
-        try {
-            let listMember = [];
-            if (item.group !== 0) {
-                listMember = item.map((ThesisUser) => ThesisUser.user);
-            }
-            else {
-                listMember.push(item.user);
-            }
-            const user = await getUserById(userId);
-            const ListNotification = await notifications.getKhoaLuanNotification('approve', showModal, user.data, listMember);
-
-            ListNotification.map(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
-            })
-        } catch (err) {
-            console.error(err)
-        }
-    };
-
-
-    const handleCancelApprove = async () => {
-        const thesisCancel = thesisCancelApproveRef.current;
-        try {
-            const appoveData = {
-                isApprove: false,
-            }
-            const id = thesisCancel.map((item) => item.id);
-
-            const responseApprove = await updateThesisUserById(id, appoveData);
-            if (responseApprove) {
-                message.success('Hủy duyệt thành công');
-
-                // Cập nhật trạng thái isApprove của item trong danh sách
-                if (typeApprove === 'personal')
-                    setListPersonal((prevList) =>
-                        prevList.map((listItem) =>
-                            // Kiểm tra nếu id của listItem có trong mảng thesisCancel
-                            thesisCancel.some(item => item.id === listItem.id)
-                                ? { ...listItem, isApprove: false }
-                                : listItem
-                        )
-                    );
-
-
-                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
-                if (typeApprove === 'group') {
-                    setListGroup((prevList) => {
-                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
-
-                        // Lặp qua từng nhóm trong listGroup
-                        Object.keys(updatedList).forEach((groupKey) => {
-                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
-                                groupItem.id === thesisCancel[0].id
-                                    ? { ...groupItem, isApprove: false } // Cập nhật isApprove cho item có id tương ứng
-                                    : groupItem
-                            );
-                        });
-
-                        return updatedList;
-                    });
-                }
-
-                // Xóa người theo dõi
-                thesisCancel.forEach(async (item) => {
-                    await deleteFollowerDetailByThesisIdAndUserId({ srId: item.thesis.thesisId, userId: item.user.userId })
-                })
-
-                // Hủy thông báo
-                thesisCancel.forEach((item) => {
-                    handleCancelNotification(item);
-                })
-                changeStatus(true);
-            }
-        } catch (error) {
-            console.error("Lỗi duyệt đăng ký đề tài: " + error);
-        }
-    };
-
-
-    const handleCancelNotification = async () => {
-        const thesisCancel = thesisCancelApproveRef.current;
-        try {
-            let listMember = [];
-            if (thesisCancel.group !== 0) {
-                listMember = thesisCancel.map((ThesisUser) => ThesisUser.user);
-            }
-            else {
-                listMember.push(thesisCancel.user);
-            }
-            const user = await getUserById(userId);
-            const ListNotification = await notifications.getKhoaLuanNotification('approve', thesisCancel, user.data, listMember);
-
-            ListNotification.map(async (itemNoti) => {
-                await deleteNotification(itemNoti.toUser, itemNoti);
-            })
-        } catch (err) {
-            console.error(err)
-        }
-    };
-
+    }, [handleApprove, handleCancelApprove, listGroup])
 
     const ITEM_TABS = [
         {

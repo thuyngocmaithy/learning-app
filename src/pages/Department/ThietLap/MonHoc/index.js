@@ -1,8 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './MonHoc.module.scss';
-import { message, Tag, Divider, Input, Select, Form } from 'antd';
+import { Tag, Divider, Input, Select, Form } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -15,10 +16,19 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import config from '../../../../config';
+import { useLocation } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles);
 
 function MonHoc() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
 
     const [form] = Form.useForm();
     const [isUpdate, setIsUpdate] = useState(false);
@@ -155,7 +165,9 @@ function MonHoc() {
                             setShowModal(record);
                             setIsUpdate(true);
                             setShowModalDetail(false);
-                        }}>
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
                         Sửa
                     </ButtonCustom>
                 </div>
@@ -242,9 +254,18 @@ function MonHoc() {
                             setShowModal(true);
                             setIsUpdate(false);
                         }}
+                        isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('môn học', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportSubject(true)} />
+                    <Toolbar
+                        type={'Xóa'}
+                        onClick={() => deleteConfirm('môn học', handleDelete)}
+                        isVisible={permissionDetailData?.isDelete}
+                    />
+                    <Toolbar
+                        type={'Nhập file Excel'}
+                        onClick={() => setShowModalImportSubject(true)}
+                        isVisible={permissionDetailData?.isAdd}
+                    />
                     <Toolbar type={'Xuất file Excel'} />
                 </div>
 

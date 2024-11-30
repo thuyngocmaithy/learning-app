@@ -54,41 +54,40 @@ function ChatBox({ height = '60vh' }) {
     const [messagesList, setMessagesList] = useState([]);
     const { sendNotification } = useSocketNotification();
 
-    const fetchMessage = () => {
-        let messagesListConvert;
-        if (SRIdFromUrl) {
-            messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
-                return {
-                    id: message.id,
-                    text: message.content,
-                    user: {
-                        id: message.sender.userId,
-                        name: message.sender.fullname,
-                        avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
-                    },
-                    createdAt: new Date(message.createDate)
-                }
-            });
-        }
-        if (thesisIdFromUrl) {
-            messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
-                return {
-                    id: message.id,
-                    text: message.content,
-                    user: {
-                        id: message.sender.userId,
-                        name: message.sender.fullname,
-                        avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
-                    },
-                    createdAt: new Date(message.createDate)
-                }
-            });
-        }
-        console.log(messagesListConvert);
-
-        setMessagesList(messagesListConvert);
-    }
     useEffect(() => {
+        const fetchMessage = () => {
+            let messagesListConvert;
+            if (SRIdFromUrl) {
+                messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
+                    return {
+                        id: message.id,
+                        text: message.content,
+                        user: {
+                            id: message.sender.userId,
+                            name: message.sender.fullname,
+                            avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
+                        },
+                        createdAt: new Date(message.createDate)
+                    }
+                });
+            }
+            if (thesisIdFromUrl) {
+                messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
+                    return {
+                        id: message.id,
+                        text: message.content,
+                        user: {
+                            id: message.sender.userId,
+                            name: message.sender.fullname,
+                            avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
+                        },
+                        createdAt: new Date(message.createDate)
+                    }
+                });
+            }
+            setMessagesList(messagesListConvert);
+        }
+
         if (messagesMap && Object.keys(messagesMap).length !== 0 && (SRIdFromUrl || thesisIdFromUrl)) {
             fetchMessage();
         }

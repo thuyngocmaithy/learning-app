@@ -12,7 +12,6 @@ import classNames from 'classnames/bind';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
 import { MenuContext } from '../../../context/MenuContext';
-import TreeFeature from '../../TreeFeature';
 
 const cx = classNames.bind(styles)
 
@@ -24,75 +23,75 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
     const [dataFeature, setDataFeature] = useState([]);
     const { permission } = useContext(AccountLoginContext);
     const { fetchDataMenu } = useContext(MenuContext);
-    const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
 
 
-    const getFeature = async () => {
-        try {
-            const response = await getAll()
-
-            if (response.status === 200) {
-                const promise = response.data.data.map(async (feature) => {
-                    const responseAuthorization = await getWhere({ permission: showModal.permissionId, feature: feature.featureId })
-
-                    feature.permissionDetail =
-                        (responseAuthorization.status === 200 && responseAuthorization.data.data !== null)
-                            ? responseAuthorization.data.data[0].permissionDetail
-                            : {
-                                isAdd: false,
-                                isView: false,
-                                isEdit: false,
-                                isDelete: false
-                            };
-                    feature.id = feature.featureId;
-                    return feature;
-                })
-                const featureAuthorization = await Promise.all(promise);
-                // Nhóm tính năng theo cha, tạo một map với key là featureId của tính năng cha
-                const featureMap = new Map();
-                const rootFeatures = [];  // Danh sách tính năng gốc (không có cha)
-
-                featureAuthorization.forEach((feature) => {
-                    if (feature.parent) {
-                        // Nếu tính năng có cha, thêm vào danh sách con của cha
-                        if (!featureMap.has(feature.parent.featureId)) {
-                            featureMap.set(feature.parent.featureId, []);
-                        }
-                        featureMap.get(feature.parent.featureId).push(feature);
-                    } else {
-                        // Nếu không có cha, thêm vào danh sách tính năng gốc
-                        rootFeatures.push(feature);
-                    }
-                });
-
-                // Hàm đệ quy để gắn các tính năng con vào cha của chúng
-                const attachChildren = (features) => {
-                    features.forEach((feature) => {
-                        if (featureMap.has(feature.featureId)) {
-                            feature.children = featureMap.get(feature.featureId).map((child) => ({
-                                ...child,
-                                key: `${feature.featureId}-${child.featureId}`, // Tạo key duy nhất
-                            }));
-                            attachChildren(feature.children);  // Đệ quy gắn con cho tất cả các cấp
-                        }
-                    });
-                };
-
-                // Gắn các tính năng con vào các tính năng gốc
-                attachChildren(rootFeatures);
-                setDataFeature(rootFeatures);  // Cập nhật dữ liệu tính năng có cấu trúc cha-con vào state
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-
-    }
 
     useEffect(() => {
+        const getFeature = async () => {
+            try {
+                const response = await getAll()
+
+                if (response.status === 200) {
+                    const promise = response.data.data.map(async (feature) => {
+                        const responseAuthorization = await getWhere({ permission: showModal.permissionId, feature: feature.featureId })
+
+                        feature.permissionDetail =
+                            (responseAuthorization.status === 200 && responseAuthorization.data.data !== null)
+                                ? responseAuthorization.data.data[0].permissionDetail
+                                : {
+                                    isAdd: false,
+                                    isView: false,
+                                    isEdit: false,
+                                    isDelete: false
+                                };
+                        feature.id = feature.featureId;
+                        return feature;
+                    })
+                    const featureAuthorization = await Promise.all(promise);
+                    // Nhóm tính năng theo cha, tạo một map với key là featureId của tính năng cha
+                    const featureMap = new Map();
+                    const rootFeatures = [];  // Danh sách tính năng gốc (không có cha)
+
+                    featureAuthorization.forEach((feature) => {
+                        if (feature.parent) {
+                            // Nếu tính năng có cha, thêm vào danh sách con của cha
+                            if (!featureMap.has(feature.parent.featureId)) {
+                                featureMap.set(feature.parent.featureId, []);
+                            }
+                            featureMap.get(feature.parent.featureId).push(feature);
+                        } else {
+                            // Nếu không có cha, thêm vào danh sách tính năng gốc
+                            rootFeatures.push(feature);
+                        }
+                    });
+
+                    // Hàm đệ quy để gắn các tính năng con vào cha của chúng
+                    const attachChildren = (features) => {
+                        features.forEach((feature) => {
+                            if (featureMap.has(feature.featureId)) {
+                                feature.children = featureMap.get(feature.featureId).map((child) => ({
+                                    ...child,
+                                    key: `${feature.featureId}-${child.featureId}`, // Tạo key duy nhất
+                                }));
+                                attachChildren(feature.children);  // Đệ quy gắn con cho tất cả các cấp
+                            }
+                        });
+                    };
+
+                    // Gắn các tính năng con vào các tính năng gốc
+                    attachChildren(rootFeatures);
+                    setDataFeature(rootFeatures);  // Cập nhật dữ liệu tính năng có cấu trúc cha-con vào state
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+            }
+
+        }
+
         if (showModal.permissionId) {
             getFeature();
         }
@@ -197,11 +196,6 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
                     feature: item.feature,
                     permissionDetail: item.permissionDetail,
                 }));
-                setListFeature((prevListFeature) => [
-                    ...prevListFeature,
-                    ...features
-                ]);
-
                 updatePermissionDetails(features);
 
             }
@@ -210,48 +204,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
         }
     };
 
-    const handleChangeCheckbox = (event) => {
-        const { name, value, checked } = event.target;
-        // Tìm vị trí của dấu "_" cuối cùng
-        const lastUnderscoreIndex = value.lastIndexOf('_');
-
-        // Cắt chuỗi để lấy featureId và permissionType
-        const featureId = value.substring(0, lastUnderscoreIndex);
-        const permissionType = value.substring(lastUnderscoreIndex + 1);
-
-        // Cập nhật dataFeature
-        const updatedDataFeature = dataFeature.map((feature) => {
-            if (feature.featureId === featureId) {
-                return {
-                    ...feature,
-                    permissionDetail: {
-                        ...feature.permissionDetail,
-                        [permissionType]: checked, // Cập nhật trạng thái checked cho loại permission tương ứng
-                    },
-                };
-            }
-            return feature;
-        });
-
-        // Cập nhật lại state
-        setDataFeature(updatedDataFeature);
-    };
-
-
-
-    const handleSelectAll = (type) => {
-        const allChecked = dataFeature.every(record => record.permissionDetail?.[type] ?? false);
-        const newData = dataFeature.map(record => ({
-            ...record,
-            permissionDetail: {
-                ...record.permissionDetail,
-                [type]: !allChecked, // Đảo ngược trạng thái
-            },
-        }));
-        setDataFeature(newData);
-    };
-
-    const updateFeatureRecursively = (features, targetFeatureId, updateCallback) => {
+    const updateFeatureRecursively = useCallback((features, targetFeatureId, updateCallback) => {
         return features.map(feature => {
             if (feature.featureId === targetFeatureId) {
                 // Nếu tìm thấy tính năng cần cập nhật
@@ -268,10 +221,50 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
 
             return feature; // Trả lại tính năng không bị thay đổi
         });
-    };
+    }, []);
+
+    const handleChangeCheckbox = useCallback((event) => {
+        // eslint-disable-next-line no-unused-vars
+        const { name, value, checked } = event.target;
+        // Tìm vị trí của dấu "_" cuối cùng
+        const lastUnderscoreIndex = value.lastIndexOf('_');
+
+        // Cắt chuỗi để lấy featureId và permissionType
+        const featureId = value.substring(0, lastUnderscoreIndex);
+        const permissionType = value.substring(lastUnderscoreIndex + 1);
+
+        // Hàm callback để cập nhật trạng thái `permissionDetail`
+        const updateCallback = (feature) => ({
+            ...feature,
+            permissionDetail: {
+                ...feature.permissionDetail,
+                [permissionType]: checked,
+            },
+        });
+
+        // Cập nhật dữ liệu bằng hàm đệ quy cho cả cấp cha và con
+        const updatedDataFeature = updateFeatureRecursively(dataFeature, featureId, updateCallback);
+
+        // Cập nhật lại state
+        setDataFeature(updatedDataFeature);
+    }, [dataFeature, updateFeatureRecursively]);
 
 
-    const handleSelectRow = (record) => {
+
+    const handleSelectAll = useCallback((type) => {
+        const allChecked = dataFeature.every(record => record.permissionDetail?.[type] ?? false);
+        const newData = dataFeature.map(record => ({
+            ...record,
+            permissionDetail: {
+                ...record.permissionDetail,
+                [type]: !allChecked, // Đảo ngược trạng thái
+            },
+        }));
+        setDataFeature(newData);
+    }, [dataFeature]);
+
+
+    const handleSelectRow = useCallback((record) => {
         const allChecked = Object.keys(record.permissionDetail).every(
             (key) => record.permissionDetail?.[key] ?? false
         );
@@ -292,7 +285,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
         const updatedDataFeature = updateFeatureRecursively(dataFeature, record.featureId, updateCallback);
 
         setDataFeature(updatedDataFeature);
-    };
+    }, [dataFeature, updateFeatureRecursively]);
 
 
     const columns = useCallback(
@@ -489,7 +482,7 @@ const PhanQuyenUpdate = memo(function PhanQuyenUpdate({
             }
 
         ],
-        [dataFeature],
+        [dataFeature, handleChangeCheckbox, handleSelectAll, handleSelectRow],
     );
 
     return (

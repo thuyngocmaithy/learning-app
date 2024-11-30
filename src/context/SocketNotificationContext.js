@@ -13,6 +13,32 @@ export const SocketNotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const { userId } = useContext(AccountLoginContext);
 
+    // Function để lấy danh sách thông báo
+    const getNotifications = (socketIo) => {
+        if (!socket || !userId) return;
+        return new Promise((resolve, reject) => {
+            if (socketIo) {
+                socketIo.emit('getNotifications', userId);
+
+                socketIo.on('notificationsList', (notifications) => {
+                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
+                    resolve(notifications);
+                });
+
+            } else if (socket) {
+                socket.emit('getNotifications', userId);
+
+                socket.on('notificationsList', (notifications) => {
+                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
+                    resolve(notifications);
+                });
+            }
+            else {
+                reject(new Error('Socket is not initialized'));
+            }
+        });
+    };
+
     useEffect(() => {
         let socketIo;
 
@@ -77,33 +103,8 @@ export const SocketNotificationProvider = ({ children }) => {
             };
         }
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userId]);
-
-
-    // Function để lấy danh sách thông báo
-    const getNotifications = (socketIo) => {
-        return new Promise((resolve, reject) => {
-            if (socketIo) {
-                socketIo.emit('getNotifications', userId);
-
-                socketIo.on('notificationsList', (notifications) => {
-                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
-                    resolve(notifications);
-                });
-
-            } else if (socket) {
-                socket.emit('getNotifications', userId);
-
-                socket.on('notificationsList', (notifications) => {
-                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
-                    resolve(notifications);
-                });
-            }
-            else {
-                reject(new Error('Socket is not initialized'));
-            }
-        });
-    };
 
 
     // Function để gửi thông báo đến một user cụ thể

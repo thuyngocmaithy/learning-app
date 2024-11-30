@@ -1,5 +1,6 @@
-import React, { useState, memo, useEffect, useContext } from 'react';
-import { Input, InputNumber, Select, Form, message, DatePicker } from 'antd';
+import React, { useState, memo, useEffect, useContext, useCallback } from 'react';
+import { Input, InputNumber, Select, Form, DatePicker } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -54,7 +55,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     };
 
     //lấy danh sách giảng viên theo ngành
-    const fetchInstructors = async (ThesisGroupIdInput) => {
+    const fetchInstructors = useCallback(async (ThesisGroupIdInput) => {
         const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput);
         const response = await getUsersByFaculty(ThesisGroup.data.data.faculty?.facultyId);
         if (response && response.data) {
@@ -64,7 +65,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             }));
             setInstructorOptions(options);
         }
-    };
+    }, [ThesisGroupIdFromUrl]);
 
     useEffect(() => {
         if (showModal) {
@@ -76,7 +77,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             }
         }
 
-    }, [showModal, ThesisGroupIdFromUrl]);
+    }, [showModal, ThesisGroupIdFromUrl, fetchInstructors]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"

@@ -1,8 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './ThanhPhanKhungDT.module.scss';
-import { Divider, Input, message, Select } from 'antd';
+import { Divider, Input, Select } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -15,10 +16,21 @@ import ThanhPhanKhungDTDetail from '../../../../components/FormDetail/ThanhPhanK
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getAll } from '../../../../services/majorService';
+import { useLocation } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
 function ThanhPhanKhungDT() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [showModalDetail, setShowModalDetail] = useState(false); // hiển thị model detail
@@ -45,8 +57,8 @@ function ThanhPhanKhungDT() {
                         label: major.majorId + " - " + major.majorName,
                     }));
 
-                    setMajorOptions([
-                        ...majorOptions,  // Phần tử trống được thêm vào đầu
+                    setMajorOptions(prevMajorOptions => [
+                        ...prevMajorOptions,
                         ...options
                     ]);
                 }
@@ -111,6 +123,7 @@ function ThanhPhanKhungDT() {
                             showModalUpdate(record);
                             setIsUpdate(true);
                         }}
+                        disabled={!permissionDetailData?.isEdit}
                     >
                         Sửa
                     </ButtonCustom>
@@ -273,21 +286,25 @@ function ThanhPhanKhungDT() {
                             setShowModalUpdate(true);
                             setIsUpdate(false);
                         }}
+                        isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => {
-                        // Kiểm tra các khối kiến thức không được xóa
-                        // Danh sách ID không cho phép xóa
-                        const restrictedIds = ['MAKHUNG2', 'GDDC_BB', 'GDDC_TC', 'GDDC', 'CSN', 'NGANH', 'CHUYENNGANH', 'CHUYENNGHIEP'];
+                    <Toolbar
+                        type={'Xóa'}
+                        onClick={() => {
+                            // Kiểm tra các khối kiến thức không được xóa
+                            // Danh sách ID không cho phép xóa
+                            const restrictedIds = ['MAKHUNG2', 'GDDC_BB', 'GDDC_TC', 'GDDC', 'CSN', 'NGANH', 'CHUYENNGANH', 'CHUYENNGHIEP'];
 
-                        // Kiểm tra xem selectedRowKeys có chứa bất kỳ ID nào trong restrictedIds không
-                        const hasRestrictedId = selectedRowKeys.some((id) => restrictedIds.includes(id));
+                            // Kiểm tra xem selectedRowKeys có chứa bất kỳ ID nào trong restrictedIds không
+                            const hasRestrictedId = selectedRowKeys.some((id) => restrictedIds.includes(id));
 
-                        if (hasRestrictedId) {
-                            message.warning('Không thể xóa các khối kiến thức hệ thống!');
-                            return;
-                        }
-                        deleteConfirm('khối kiến thức', handleDelete)
-                    }}
+                            if (hasRestrictedId) {
+                                message.warning('Không thể xóa các khối kiến thức hệ thống!');
+                                return;
+                            }
+                            deleteConfirm('khối kiến thức', handleDelete)
+                        }}
+                        isVisible={permissionDetailData?.isDelete}
                     />
                 </div>
             </div>

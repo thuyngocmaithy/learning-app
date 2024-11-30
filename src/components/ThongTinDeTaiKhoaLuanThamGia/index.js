@@ -1,6 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './ThongTinDeTaiKhoaLuanThamGia.module.scss';
-import { Descriptions, Dropdown, message, Tag } from 'antd';
+import { Descriptions, Dropdown, Tag } from 'antd';
+import { message } from '../../hooks/useAntdApp';
 import { useEffect, useState } from 'react';
 import { getStatusByType } from '../../services/statusService';
 import { updateThesisById } from '../../services/thesisService';
@@ -75,10 +76,6 @@ function ThongTinDeTaiKhoaLuanThamGia({ thesis }) {
                     }));
 
                     setStatusOptions(options);
-                    // Nếu có giá trị đã chọn, set lại giá trị đó
-                    if (statusSelected) {
-                        setStatusSelected(statusSelected);
-                    }
                 }
             } catch (error) {
                 console.error(error);

@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState, useContext, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Breadcrumb, Card, List, message, Skeleton, Tabs, Tag } from 'antd';
+import { Breadcrumb, Card, List, Skeleton, Tabs, Tag } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
 import config from '../../../config';
@@ -56,14 +57,15 @@ function DeTaiNCKH() {
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
+    const getInitialTabIndex = useCallback(() => {
         const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
         setTabActive(tab);
-    }
+    }, [tabIndexFromUrl]);
+
 
     useEffect(() => {
         getInitialTabIndex();
-    }, [tabIndexFromUrl])
+    }, [getInitialTabIndex])
 
     // Cập nhật URL khi tab thay đổi
     const handleTabChange = (tabId) => {
@@ -88,7 +90,7 @@ function DeTaiNCKH() {
     const SRGIdFromUrl = queryParams.get('SRGId');
 
 
-    const fetchscientificResearchs = async () => {
+    const fetchscientificResearchs = useCallback(async () => {
         try {
             const response = await getBySRGIdAndCheckApprove({ userId: userId, SRGId: SRGIdFromUrl });
 
@@ -101,9 +103,9 @@ function DeTaiNCKH() {
             console.error('Error fetching scientificResearchs:', error);
             setIsLoading(false);
         }
-    };
+    }, [SRGIdFromUrl, userId]);
 
-    const checkRegisterscientificResearch = async () => {
+    const checkRegisterscientificResearch = useCallback(async () => {
         try {
             const response = await getWhere({ userId: userId, srgroupId: SRGIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
@@ -113,20 +115,21 @@ function DeTaiNCKH() {
             console.error('Error fetching registered scientificResearchs:', error);
             setIsLoading(false);
         }
-    };
+    }, [SRGIdFromUrl, userId]);
 
-    const getSRGName = async () => {
-        try {
-            const SRG = await getScientificResearchGroupById(SRGIdFromUrl)
 
-            if (SRG.status === 200) {
-                setSRGName(SRG.data.data.scientificResearchGroupName);
-            }
-        } catch (error) {
-            console.error("Lỗi lấy tên SRG")
-        }
-    }
     useEffect(() => {
+        const getSRGName = async () => {
+            try {
+                const SRG = await getScientificResearchGroupById(SRGIdFromUrl)
+
+                if (SRG.status === 200) {
+                    setSRGName(SRG.data.data.scientificResearchGroupName);
+                }
+            } catch (error) {
+                console.error("Lỗi lấy tên SRG")
+            }
+        }
         if (SRGIdFromUrl) {
             getSRGName();
         }
@@ -135,7 +138,7 @@ function DeTaiNCKH() {
     useEffect(() => {
         checkRegisterscientificResearch();
         fetchscientificResearchs();
-    }, [showModalRegister]);
+    }, [showModalRegister, checkRegisterscientificResearch, fetchscientificResearchs]);
 
 
     const handleCancelNotification = async () => {
@@ -233,7 +236,7 @@ function DeTaiNCKH() {
                                 </Button>,
                                 listscientificResearchRegister && listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
                                     <Button
-                                        redColor
+                                        colorRed
                                         outline
                                         verysmall
                                         onClick={() => {

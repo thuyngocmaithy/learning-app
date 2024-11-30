@@ -1,5 +1,6 @@
 import React, { useState, memo, useEffect } from 'react';
-import { Input, Select, Form, message } from 'antd';
+import { Input, Select, Form } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';

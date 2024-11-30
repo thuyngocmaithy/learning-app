@@ -44,7 +44,7 @@ const getThemeConfig = (theme) => ({
 
         // Title phân chia
         colorBgTitle: theme === 'dark' ? '#3d7c43' : '#f6ffed', // nền title
-        colorTextTitle: theme === 'dark' ? '#093b0e' : '#389e0d', // chữ title
+        colorTextTitle: theme === 'dark' ? 'rgb(216 234 218)' : '#389e0d', // chữ title
 
 
     },
