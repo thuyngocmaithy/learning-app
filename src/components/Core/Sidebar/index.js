@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './Sidebar.module.scss';
-import logo from '../../../assets/images/logo.png';
+import logo from '../../../assets/images/logo-sgu.jpg';
 import { useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import { Menu } from 'antd';
 import Sider from 'antd/es/layout/Sider';

@@ -540,7 +540,7 @@ function MoHocPhan() {
                 align: 'center',
             },
         ],
-        [exportTreeToExcel, fetchFrameComponents, handleArrange, handleDelete, switchStates],
+        [exportTreeToExcel, handleArrange, handleDelete, switchStates],
     );
 
     return (

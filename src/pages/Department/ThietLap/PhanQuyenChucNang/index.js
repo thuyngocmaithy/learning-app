@@ -190,7 +190,7 @@ function PhanQuyenChucNang() {
                 align: 'center',
             },
         ],
-        [],
+        [permissionDetailData],
     );
 
     // Hàm xử lý xóa các quyền đã chọn
