@@ -21,6 +21,7 @@ import config from '../../../../config';
 import FormItem from '../../../../components/Core/FormItem';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -66,7 +67,7 @@ function NganhChuyenNganh() {
 
 
     // Fetch Functions
-    const fetchNgànhData = async () => {
+    const fetchfacultyData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
@@ -106,7 +107,7 @@ function NganhChuyenNganh() {
     };
 
     useEffect(() => {
-        fetchNgànhData();
+        fetchfacultyData();
         fetchMajorData();
     }, []);
 
@@ -390,7 +391,7 @@ function NganhChuyenNganh() {
                         <SearchForm
                             getFields={filterFieldsFaculty}
                             onSearch={onSearchFaculty}
-                            onReset={fetchNgànhData}
+                            onReset={fetchfacultyData}
                         />
                         <Divider />
                     </div>
@@ -433,6 +434,43 @@ function NganhChuyenNganh() {
         },
     ];
 
+
+    // export ngành
+    // Export 
+    const schemasNganh = [
+        { label: "Mã ngành", prop: "facultyId" },
+        { label: "Tên ngành", prop: "facultyName" },
+        { label: "Số tín chỉ của ngành ", prop: "creditHourTotal" },
+    ];
+
+
+    const handleExportExcelNganh = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nganh",
+            data: facultyData,
+            schemas: schemasNganh,
+            headerContent: "DANH SÁCH NGÀNH",
+
+        });
+    };
+
+    // Export Chuyên ngành
+    const schemasChuyenNganh = [
+        { label: "Mã chuyên ngành", prop: "majorId" },
+        { label: "Tên chuyên ngành", prop: "majorName" },
+        { label: "Tên ngành ", prop: "facultyName" },
+    ];
+
+    const handleExportExcelChuyenNganh = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_chuyen_nganh",
+            data: majorData,
+            schemas: schemasChuyenNganh,
+            headerContent: "DANH SÁCH NGÀNH",
+
+        });
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -470,7 +508,7 @@ function NganhChuyenNganh() {
                                 onClick={() => setShowModalImportNgành(true)}
                                 isVisible={permissionDetailData?.isAdd}
                             />
-                            <Toolbar type={'Xuất file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} onClick={handleExportExcelNganh} />
                         </>
                     ) : (
                         <>
@@ -498,7 +536,7 @@ function NganhChuyenNganh() {
                                 onClick={() => setShowModalImportChuyenNganh(true)}
                                 isVisible={permissionDetailData?.isAdd}
                             />
-                            <Toolbar type={'Xuất file Excel'} />
+                            <Toolbar type={'Xuất file Excel'} onClick={handleExportExcelChuyenNganh} />
                         </>
                     )}
                 </div>
@@ -524,7 +562,7 @@ function NganhChuyenNganh() {
                 title={'Ngành'}
                 showModal={showModalImportNgành}
                 setShowModal={setShowModalImportNgành}
-                reLoad={fetchNgànhData}
+                reLoad={fetchfacultyData}
                 type={config.imports.FACULTY}
                 onImport={importFaculty}
             />

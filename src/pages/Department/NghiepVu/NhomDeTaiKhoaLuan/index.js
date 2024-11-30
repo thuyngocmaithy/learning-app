@@ -10,7 +10,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/NhomDeTaiKhoaLuanUpdate';
-import { deleteThesisGroups, getAllThesisGroup, getWhere, updateThesisGroupByIds } from '../../../../services/thesisGroupService';
+import { deleteThesisGroups, getAllThesisGroup, getWhere, updateThesisGroupByIds, importThesisGroup } from '../../../../services/thesisGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereThesis } from '../../../../services/thesisService';
@@ -20,6 +20,8 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -38,6 +40,7 @@ function NhomDeTaiKhoaLuan() {
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
 
 
 
@@ -475,6 +478,32 @@ function NhomDeTaiKhoaLuan() {
         },
     ];
 
+
+
+    // Export 
+    const schemas = [
+        { label: "Mã nhóm đề tài", prop: "thesisGroupId" },
+        { label: "Tên nhóm đề tài", prop: "thesisGroupName" },
+        { label: "Ngành", prop: "faculty" },
+        { label: "Năm thực hiện", prop: "startYear" },
+        { label: "Năm kết thúc", prop: "finishYear" },
+        { label: "Trạng thái", prop: "status" }
+    ];
+
+    const processedData = data.map(item => ({
+        ...item,
+        status: item.status?.statusName
+    }));
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nhomdetaiKhoaluan",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH NHÓM ĐỀ TÀI KHOÁ LUẬN",
+        });
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -514,14 +543,8 @@ function NhomDeTaiKhoaLuan() {
                             onClick={() => enableConfirm('nhóm đề tài khóa luận', handleEnable)}
                             isVisible={permissionDetailData?.isEdit}
                         />
-                        <Toolbar
-                            type={'Nhập file Excel'}
-                            isVisible={permissionDetailData.isAdd}
-                        />
-                        <Toolbar
-                            type={'Xuất file Excel'}
-                            isVisible={permissionDetailData.isExport}
-                        />
+                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isAdd} onClick={() => setShowModalImport(true)} />
+                        <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
                     </div>
                 )}
             </div>
@@ -539,6 +562,14 @@ function NhomDeTaiKhoaLuan() {
             />
 
             {NhomDeTaiKhoaLuanUpdateMemoized}
+            <ImportExcel
+                title={'nhóm đề tài khoá luận'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.THESISGROUP}
+                onImport={importThesisGroup}
+            />
         </div>
     );
 }

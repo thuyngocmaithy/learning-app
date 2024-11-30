@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllSRGroup = async () => {
     try {
@@ -70,6 +71,21 @@ export const getWhere = async (conditions) => {
         const response = await api.get(url);
         return response;
     } catch (error) {
+        throw error;
+    }
+};
+
+
+export const importScientificResearchGroup = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/scientificResearchGroups/import', {
+            data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearchGroupServive - importScientificResearch - error]:', error);
         throw error;
     }
 };

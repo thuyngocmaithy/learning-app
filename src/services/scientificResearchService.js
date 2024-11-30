@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllSR = async () => {
     try {
@@ -98,3 +99,19 @@ export const getBySRGIdAndCheckApprove = async (conditions) => {
         throw error;
     }
 };
+
+
+export const importScientificResearch = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/scientificResearchs/import', {
+            data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearchServive - importScientificResearch - error]:', error);
+        throw error;
+    }
+};
+

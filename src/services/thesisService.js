@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllThesis = async () => {
     try {
@@ -95,6 +96,20 @@ export const getByThesisGroupIdAndCheckApprove = async (conditions) => {
         const response = await api.get(url);
         return response;
     } catch (error) {
+        throw error;
+    }
+};
+
+export const importThesis = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/thesis/import', {
+            data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[thesisServive - importThesis - error]:', error);
         throw error;
     }
 };

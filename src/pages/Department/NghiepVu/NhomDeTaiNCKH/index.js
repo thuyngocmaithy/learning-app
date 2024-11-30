@@ -10,7 +10,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds, importScientificResearchGroup } from '../../../../services/scientificResearchGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
@@ -20,7 +20,8 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
-
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 const cx = classNames.bind(styles);
 
 
@@ -38,6 +39,7 @@ function NhomDeTaiNCKH() {
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
 
 
 
@@ -487,6 +489,32 @@ function NhomDeTaiNCKH() {
         },
     ];
 
+
+    // Export 
+    const schemas = [
+        { label: "Mã nhóm đề tài", prop: "scientificResearchGroupId" },
+        { label: "Tên nhóm đề tài", prop: "scientificResearchGroupName" },
+        { label: "Ngành", prop: "faculty" },
+        { label: "Năm thực hiện", prop: "startYear" },
+        { label: "Năm kết thúc", prop: "finishYear" },
+        { label: "Trạng thái", prop: "status" }
+    ];
+
+    const processedData = data.map(item => ({
+        ...item,
+        status: item.status?.statusName
+    }));
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nhomdetai",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH NHÓM ĐỀ TÀI NGHIÊN CỨU KHOA HỌC",
+
+        });
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -527,8 +555,8 @@ function NhomDeTaiNCKH() {
                             onClick={() => enableConfirm('nhóm đề tài nghiên cứu', handleEnable)}
                             isVisible={permissionDetailData.isEdit}
                         />
-                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isAdd} />
-                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isView} />
+                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isAdd} onClick={() => setShowModalImport(true)} />
+                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isView} onClick={handleExportExcel} />
                     </div>
                 )}
             </div>
@@ -546,6 +574,14 @@ function NhomDeTaiNCKH() {
             />
 
             {NhomDeTaiNCKHUpdateMemoized}
+            <ImportExcel
+                title={'nhóm đề tài nghiên cứu khoa học'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.SCIENRESEARCHGROUP}
+                onImport={importScientificResearchGroup}
+            />
         </div>
     );
 }

@@ -15,6 +15,7 @@ import { getAllStatus, deleteStatusById, getWhereStatus, importStatus } from '..
 import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpdate';
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
 import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 import config from '../../../../config';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
@@ -274,6 +275,25 @@ function TrangThai() {
         }
     ];
 
+
+    const schemas = [
+        { label: "Mã trạng thái", prop: "statusId" },
+        { label: "Tên trạng thái", prop: "statusName" },
+        { label: "Loại trạng thái", prop: "type" },
+        { label: "Mã màu sắc (hex)", prop: "color" },
+
+    ];
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_trang_thai",
+            data,
+            schemas,
+            headerContent: "DANH SÁCH TRẠNG THÁI",
+
+        });
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -306,7 +326,7 @@ function TrangThai() {
                         onClick={() => setShowModalImportStatus(true)}
                         isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xuất file Excel'} />
+                    <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
                 </div>
             </div>
             <div className={`slide ${showFilter ? 'open' : ''}`}>

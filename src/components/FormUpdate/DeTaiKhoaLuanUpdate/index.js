@@ -55,17 +55,39 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     };
 
     //lấy danh sách giảng viên theo ngành
-    const fetchInstructors = useCallback(async (ThesisGroupIdInput) => {
-        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput);
-        const response = await getUsersByFaculty(ThesisGroup.data.data.faculty?.facultyId);
-        if (response && response.data) {
-            const options = response.data.map((user) => ({
-                value: user.userId,
-                label: `${user.fullname}`,
-            }));
-            setInstructorOptions(options);
+    const fetchInstructors = async (ThesisGroupIdInput) => {
+        const groupId = ThesisGroupIdFromUrl || ThesisGroupIdInput.key;
+        if (!groupId) {
+            console.error("Invalid Thesis Group ID");
+            return;
         }
-    }, [ThesisGroupIdFromUrl]);
+
+        try {
+            const ThesisGroup = await getThesisGroupById(groupId);
+
+            if (!ThesisGroup || ThesisGroup.status === 204) {
+                console.error("No data returned from getThesisGroupById");
+                return;
+            }
+
+            const facultyId = ThesisGroup?.data?.data?.faculty?.facultyId;
+            if (!facultyId) {
+                console.error("Faculty not found in ThesisGroup data");
+                return;
+            }
+
+            const response = await getUsersByFaculty(facultyId);
+            if (response && response.data) {
+                const options = response.data.map((user) => ({
+                    value: user.userId,
+                    label: `${user.fullname}`,
+                }));
+                setInstructorOptions(options);
+            }
+        } catch (error) {
+            console.error("Error fetching instructors:", error);
+        }
+    };
 
     useEffect(() => {
         if (showModal) {

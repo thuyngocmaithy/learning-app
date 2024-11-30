@@ -21,7 +21,7 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
-
+import ExportExcel from '../../../../components/Core/ExportExcel';
 
 const cx = classNames.bind(styles);
 
@@ -191,7 +191,7 @@ function NguoiDung() {
 
     useEffect(() => {
         fetchData();
-        fetchNgànhData();
+        fetchFacultyData();
     }, []);
 
     useEffect(() => {
@@ -271,7 +271,7 @@ function NguoiDung() {
     ];
 
 
-    const fetchNgànhData = async () => {
+    const fetchFacultyData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
@@ -401,7 +401,63 @@ function NguoiDung() {
         <FormItem name="lastAcademicYear" label="Năm kết thúc">
             <Input />
         </FormItem>,
-    ]
+    ];
+
+
+    // Export 
+    const schemas = [
+        { label: "Mã người dùng", prop: "userId" },
+        { label: "Tên người dùng", prop: "fullname" },
+        { label: "Lớp", prop: "class" },
+        { label: "Chức danh", prop: "isStudent" },
+        { label: "Giới tính", prop: "sex" },
+        { label: "Ngành", prop: "facultyName" },
+        { label: "Chuyên ngành", prop: "majorName" },
+        { label: "Năm học", prop: "firstAcademicYear" },
+        { label: "Năm kết thúc", prop: "lastAcademicYear" },
+        { label: "Email", prop: "email" },
+        { label: "Số điện thoại", prop: "phone" },
+        { label: "Ngày sinh", prop: "dateOfBirth" },
+        { label: "Nơi sinh", prop: "placeOfBirth" },
+        // { label: "Dân tộc", prop: "dan_toc" },
+        // { label: "Tôn giáo", prop: "ton_giao" },
+        // { label: "CCCD/CMND", prop: "cccd" },
+        // { label: "Hộ khẩu", prop: "ho_khau_thuong_tru" },
+        // { label: "Khu vực", prop: "khu_vuc" },
+        { label: "Khối", prop: "khoi" },
+        { label: "Bậc hệ đào tạo", prop: "bac_he_dao_tao" },
+        // { label: "Cố vấn học tập", prop: "ho_ten_cvht" },
+        { label: "Học vị", prop: "hoc_vi" }
+
+    ];
+
+    const formatDate = (isoDate) => {
+        const date = new Date(isoDate); // Chuyển chuỗi ISO thành đối tượng Date
+        const day = String(date.getDate()).padStart(2, '0'); // Lấy ngày, thêm 0 nếu cần
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Lấy tháng (0-indexed)
+        const year = date.getFullYear(); // Lấy năm
+        return `${day}/${month}/${year}`; // Định dạng dd/mm/yyyy
+    };
+
+    const processedData = data.map(item => ({
+        ...item,
+        isStudent: item.isStudent ? 'Sinh viên' : 'Giảng viên',
+        facultyName: item.faculty?.facultyName,
+        majorName: item.major?.majorName,
+        ho_ten_cvht: item?.ho_ten_cvht,
+        dateOfBirth: formatDate(item.dateOfBirth)
+    }));
+
+    console.log(processedData);
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nguoidung",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH NGƯỜI DÙNG",
+        });
+    };
 
     return (
         <div className={cx('wrapper')}>
@@ -435,7 +491,7 @@ function NguoiDung() {
                         onClick={() => setShowModalImport(true)}
                         isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xuất file Excel'} />
+                    <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
                 </div>
 
             </div>
