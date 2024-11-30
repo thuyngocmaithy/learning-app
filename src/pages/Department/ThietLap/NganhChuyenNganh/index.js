@@ -67,7 +67,7 @@ function NganhChuyenNganh() {
 
 
     // Fetch Functions
-    const fetchfacultyData = async () => {
+    const fetchFacultyData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
@@ -107,7 +107,7 @@ function NganhChuyenNganh() {
     };
 
     useEffect(() => {
-        fetchfacultyData();
+        fetchFacultyData();
         fetchMajorData();
     }, []);
 
@@ -115,7 +115,7 @@ function NganhChuyenNganh() {
     const handleNgànhDelete = async () => {
         try {
             await deleteFacultyById({ ids: nganhSelectedKeys.join(',') });
-            fetchNgànhData();
+            fetchFacultyData();
             setNganhSelectedKeys([]);
             message.success('Xoá ngành thành công');
         } catch (error) {
@@ -349,7 +349,7 @@ function NganhChuyenNganh() {
             isUpdate={nganhIsUpdate}
             showModal={nganhShowModal}
             setShowModal={setNganhShowModal}
-            reLoad={fetchNgànhData}
+            reLoad={fetchFacultyData}
         />
     ), [nganhShowModal, nganhIsUpdate]);
 
@@ -391,7 +391,7 @@ function NganhChuyenNganh() {
                         <SearchForm
                             getFields={filterFieldsFaculty}
                             onSearch={onSearchFaculty}
-                            onReset={fetchfacultyData}
+                            onReset={fetchFacultyData}
                         />
                         <Divider />
                     </div>
@@ -447,7 +447,7 @@ function NganhChuyenNganh() {
     const handleExportExcelNganh = async () => {
         ExportExcel({
             fileName: "Danh_sach_nganh",
-            data: facultyData,
+            data: nganhData,
             schemas: schemasNganh,
             headerContent: "DANH SÁCH NGÀNH",
 
@@ -562,7 +562,7 @@ function NganhChuyenNganh() {
                 title={'Ngành'}
                 showModal={showModalImportNgành}
                 setShowModal={setShowModalImportNgành}
-                reLoad={fetchfacultyData}
+                reLoad={fetchFacultyData}
                 type={config.imports.FACULTY}
                 onImport={importFaculty}
             />
