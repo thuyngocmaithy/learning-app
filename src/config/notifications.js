@@ -108,6 +108,44 @@ const notifications = {
         return notifications;
     },
 
+    getNhomNCKHNotification: async (operation, data, fromUser, listUserReceived = []) => {
+        const messages = {
+            create: `Nhóm đề tài NCKH ${data.scientificResearchGroupId} được giảng viên ${fromUser.fullname} khởi tạo`,
+        };
+
+        const notifications = [];
+        const addNotification = (title, type, url, toUsers, content = null) => {
+            if (toUsers.length > 0) {
+                notifications.push({
+                    title,
+                    type,
+                    url,
+                    toUsers,
+                    createUser: fromUser.userId,
+                    ...(content && { content })
+                });
+            }
+        };
+
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+
+        switch (operation) {
+            case 'create':
+                addNotification(
+                    messages.create,
+                    'info',
+                    `${config.routes.NhomDeTaiNCKH_Department}`,
+                    filteredUsers.map((member) => member.userId)
+                );
+                break;
+
+            default:
+                break;
+        }
+
+        return notifications;
+    },
+
 
     getKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = [], content) => {
         const messages = {
@@ -203,6 +241,44 @@ const notifications = {
                     getUrl(config.routes.DeTaiKhoaLuanThamGia, 2),
                     filteredUsers.map((member) => member.userId),
                     content
+                );
+                break;
+
+            default:
+                break;
+        }
+
+        return notifications;
+    },
+
+    getNhomKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = []) => {
+        const messages = {
+            create: `Nhóm đề tài khóa luận ${data.thesisGroupId} được giảng viên ${fromUser.fullname} khởi tạo`,
+        };
+
+        const notifications = [];
+        const addNotification = (title, type, url, toUsers, content = null) => {
+            if (toUsers.length > 0) {
+                notifications.push({
+                    title,
+                    type,
+                    url,
+                    toUsers,
+                    createUser: fromUser.userId,
+                    ...(content && { content })
+                });
+            }
+        };
+
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+
+        switch (operation) {
+            case 'create':
+                addNotification(
+                    messages.create,
+                    'info',
+                    `${config.routes.NhomDeTaiKhoaLuan_Department}`,
+                    filteredUsers.map((member) => member.userId)
                 );
                 break;
 
