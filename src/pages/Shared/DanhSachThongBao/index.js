@@ -14,7 +14,7 @@ import config from '../../../config';
 import { message } from '../../../hooks/useAntdApp';
 import ThongBaoUpdate from '../../../components/FormUpdate/ThongBaoUpdate';
 import Button from '../../../components/Core/Button';
-import { DownOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseCircleOutlined, DownOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import SearchForm from '../../../components/Core/SearchForm';
 import FormItem from '../../../components/Core/FormItem';
 
@@ -168,29 +168,41 @@ function DanhSachThongBao() {
     };
 
 
-    const getItemsAction = (item) => [
-        {
-            label: (
-                <div
-                    onClick={(e) => {
-                        setIsUpdate(true);
-                        setShowModalUpdate(item);
-                    }}
-                >
-                    Sửa
-                </div>
-            ),
-            key: '0',
-        },
-        {
-            label: (
-                <div onClick={() => deleteConfirm('thông báo', () => handleDelete(item.id))}>
-                    Xóa
-                </div>
-            ),
-            key: '1',
-        },
-    ];
+    const getItemsAction = (item) => {
+        const actions = [];
+
+        // Hành động "Sửa" chỉ hiện nếu có quyền isEdit
+        if (permissionDetailData?.isEdit) {
+            actions.push({
+                label: (
+                    <div
+                        onClick={() => {
+                            setIsUpdate(true);
+                            setShowModalUpdate(item);
+                        }}
+                    >
+                        Sửa
+                    </div>
+                ),
+                key: '0',
+            });
+        }
+
+        // Hành động "Xóa" chỉ hiện nếu có quyền isDelete
+        if (permissionDetailData?.isDelete) {
+            actions.push({
+                label: (
+                    <div onClick={() => deleteConfirm('thông báo', () => handleDelete(item.id))}>
+                        Xóa
+                    </div>
+                ),
+                key: '1',
+            });
+        }
+
+        return actions;
+    };
+
 
     return (
         <div className={cx('wrapper')}>
@@ -238,21 +250,23 @@ function DanhSachThongBao() {
                     renderItem={(item, index) => (
                         <List.Item
                             key={item.id}
-                            actions={item.isSystem && item.createUser.userId === userId && [
-                                <Dropdown
-                                    menu={{
-                                        items: getItemsAction(item),
-                                    }}
-                                    trigger={['click']}
-                                >
-                                    <Button primary verysmall>
-                                        <Space>
-                                            Thực hiện
-                                            <DownOutlined />
-                                        </Space>
-                                    </Button>
-                                </Dropdown>
-                            ]}
+                            actions={
+                                item.isSystem && item.createUser.userId === userId && (permissionDetailData?.Edit || permissionDetailData?.Delete)
+                                && [
+                                    <Dropdown
+                                        menu={{
+                                            items: getItemsAction(item),
+                                        }}
+                                        trigger={['click']}
+                                    >
+                                        <Button primary verysmall>
+                                            <Space>
+                                                Thực hiện
+                                                <DownOutlined />
+                                            </Space>
+                                        </Button>
+                                    </Dropdown>
+                                ]}
                         >
 
                             <List.Item.Meta
@@ -269,7 +283,16 @@ function DanhSachThongBao() {
                                         <p>Hiển thị:
                                             <Switch
                                                 style={{ marginLeft: "10px" }}
-                                                disabled={(item.isSystem && item.createUser.userId === userId) ? false : true}
+                                                disabled={
+                                                    (
+                                                        item.isSystem &&
+                                                        item.createUser.userId === userId
+                                                    )
+                                                        ? permissionDetailData?.isEdit
+                                                            ? false
+                                                            : true
+                                                        : true
+                                                }
                                                 checked={!item.disabled} // Hiển thị "true" nếu `disabled` là `false`
                                                 onChange={async (checked) => {
                                                     try {
@@ -303,6 +326,25 @@ function DanhSachThongBao() {
                                 className={cx('container-deadline-register')}
                                 style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
                             >
+                                <div className={cx(`item-type`)}>
+                                    {item.type === 'success' ? (
+                                        <CheckCircleOutlined
+                                            style={{ color: '#52c41a', background: 'var(--color-bg-title)', borderRadius: '50%' }}
+                                        />
+                                    ) : item.type === 'warning' ? (
+                                        <ExclamationCircleOutlined
+                                            style={{ color: '#faad14', background: '#fffbe6', borderRadius: '50%' }}
+                                        />
+                                    ) : item.type === 'error' ? (
+                                        <CloseCircleOutlined
+                                            style={{ color: '#ff4d4f', background: '#fff2f0', borderRadius: '50%' }}
+                                        />
+                                    ) : item.type === 'info' ? (
+                                        <InfoCircleOutlined
+                                            style={{ color: '#1890ff', background: '#e6f7ff', borderRadius: '50%' }}
+                                        />
+                                    ) : null}
+                                </div>
                                 <p style={{ marginRight: '10px' }}>Ngày tạo: {item.createDate && dayjs(item.createDate).format('DD/MM/YYYY HH:mm:ss')}</p>
                             </div>
 
