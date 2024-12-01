@@ -68,7 +68,7 @@ const DeTaiKhoaLuanRegister = memo(function DeTaiKhoaLuanRegister({
             const ListNotification = await notifications.getKhoaLuanNotification('register', showModal, user.data, values.listMember);
 
             ListNotification.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUsers, itemNoti);
+                await sendNotification(itemNoti);
             })
 
         } catch (err) {

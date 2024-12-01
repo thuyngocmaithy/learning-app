@@ -56,8 +56,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     //lấy danh sách giảng viên theo ngành
     const fetchInstructors = useCallback(async (SRGIdInput) => {
-        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput);
-        const response = await getUsersByFaculty(SRG.data.faculty?.facultyId);
+        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput.value);
+        const response = await getUsersByFaculty(SRG.data.data?.faculty?.facultyId);
         if (response && response.data) {
             const options = response.data.map((user) => ({
                 value: user.userId,
@@ -207,7 +207,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} đề tài thành công!`);
-                if (isUpdate) handleSendNotification(response.data);
+                if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
 
@@ -222,7 +222,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             const ListNotification = await notifications.getNCKHNotification('create', scientificResearchData, user.data);
 
             ListNotification.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUsers, itemNoti);
+                await sendNotification(itemNoti);
             })
 
         } catch (err) {

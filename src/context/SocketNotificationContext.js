@@ -76,9 +76,9 @@ export const SocketNotificationProvider = ({ children }) => {
                         return !deletedNotificationIds.includes(notification.id);
                     });
 
-                    // Thêm thông báo mới vào danh sách
+                    // Thêm thông báo mới vào đầu danh sách
                     if (newNotification) {
-                        updatedNotifications.push(newNotification);
+                        updatedNotifications.unshift(newNotification);
                     }
 
                     return updatedNotifications;

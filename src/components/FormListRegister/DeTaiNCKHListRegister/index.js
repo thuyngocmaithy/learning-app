@@ -75,7 +75,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
             const ListNotification = await notifications.getNCKHNotification('approve', showModal, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await sendNotification(itemNoti.toUsers, itemNoti);
+                await sendNotification(itemNoti);
             })
         } catch (err) {
             console.error(err)
