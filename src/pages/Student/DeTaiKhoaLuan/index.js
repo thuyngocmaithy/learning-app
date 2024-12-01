@@ -254,7 +254,7 @@ function DeTaiKhoaLuan() {
                             <Skeleton avatar title={false} loading={isLoading} active>
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.thesisName}</div>}
+                                    title={<div className={cx('name')}>{item.thesisId} - {item.thesisName}</div>}
                                     description={
                                         <div>
                                             <p>Lượt đăng ký: {item.count} </p>
@@ -299,7 +299,7 @@ function DeTaiKhoaLuan() {
                                 className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.thesis.thesisName}
+                                title={item.thesis.thesisId + " - " + item.thesis.thesisName}
                                 extra={
                                     <Button primary verysmall
                                         onClick={() => {

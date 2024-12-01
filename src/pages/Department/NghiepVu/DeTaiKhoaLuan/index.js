@@ -24,6 +24,7 @@ import { getStatusByType } from '../../../../services/statusService';
 import { getThesisGroupById } from '../../../../services/thesisGroupService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
+import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
@@ -431,7 +432,7 @@ function DeTaiKhoaLuan() {
                                 className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.thesisName}
+                                title={item.thesisId + " - " + item.thesisName}
                                 extra={
                                     <ButtonCustom
                                         primary
@@ -446,10 +447,19 @@ function DeTaiKhoaLuan() {
                                     </ButtonCustom>
                                 }
                             >
-                                Trạng thái:
-                                <Tag color={color} className={cx('tag-status')}>
-                                    {item.status.statusName}
-                                </Tag>
+                                <div className={cx('container-detail')}>
+                                    <p className={cx('label-detail')}>Thời gian thực hiện: </p>
+                                    {item.startDate && item.finishDate
+                                        ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                        : <p>Chưa có</p>
+                                    }
+                                </div>
+                                <div className={cx('container-detail')}>
+                                    <p className={cx('label-detail')}>Trạng thái: </p>
+                                    <Tag color={color} className={cx('tag-status')}>
+                                        {item.status.statusName}
+                                    </Tag>
+                                </div>
                             </Card >
                         );
                     })}

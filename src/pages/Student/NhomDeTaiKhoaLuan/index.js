@@ -126,7 +126,7 @@ function NhomDeTaiKhoaLuan() {
                             <Skeleton avatar title={false} loading={isLoading} active>
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{(currentPage - 1) * pageSize + index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.thesisGroupName}</div>}
+                                    title={<div className={cx('name')}>{item.thesisGroupId} - {item.thesisGroupName}</div>}
                                     description={
                                         <div>
                                             <p
@@ -169,7 +169,7 @@ function NhomDeTaiKhoaLuan() {
                                 className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.thesis.thesisName}
+                                title={item.thesis.thesisId + " - " + item.thesis.thesisName}
                                 extra={
                                     <Button primary verysmall
                                         onClick={() => {

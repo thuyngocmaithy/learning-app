@@ -255,7 +255,7 @@ function DeTaiNCKH() {
                             <Skeleton avatar title={false} loading={isLoading} active>
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.scientificResearchName}</div>}
+                                    title={<div className={cx('name')}>{item.scientificResearchId} - {item.scientificResearchName}</div>}
                                     description={
                                         <div>
                                             <p>Lượt đăng ký: {item.count} </p>
@@ -299,7 +299,7 @@ function DeTaiNCKH() {
                                 className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearch.scientificResearchName}
+                                title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
                                 extra={
                                     <Button primary verysmall
                                         onClick={() => {

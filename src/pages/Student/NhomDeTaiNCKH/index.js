@@ -128,7 +128,7 @@ function NhomDeTaiNCKH() {
                             <Skeleton avatar title={false} loading={isLoading} active>
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{(currentPage - 1) * pageSize + index + 1}</h2>}
-                                    title={<div className={cx('name')}>{item.scientificResearchGroupName}</div>}
+                                    title={<div className={cx('name')}>{item.scientificResearchGroupId} - {item.scientificResearchGroupName}</div>}
                                     description={
                                         <div>
                                             <div
@@ -173,7 +173,7 @@ function NhomDeTaiNCKH() {
                                 className={cx('card-DeTaiNCKHThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.scientificResearch.scientificResearchName}
+                                title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
                                 extra={
                                     <Button primary verysmall
                                         onClick={() => {
