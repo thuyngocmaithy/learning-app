@@ -75,7 +75,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
             const ListNotification = await notifications.getKhoaLuanNotification('approve', showModal, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)
@@ -96,7 +96,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
             const ListNotification = await notifications.getKhoaLuanNotification('approve', thesisCancel, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await deleteNotification(itemNoti.toUser, itemNoti);
+                await deleteNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)

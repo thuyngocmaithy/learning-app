@@ -1,22 +1,46 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DanhSachThongBao.module.scss';
-import { List, Skeleton } from 'antd';
+import { Divider, Dropdown, Input, List, Select, Skeleton, Space, Switch } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
-import Button from '../../../components/Core/Button';
+import { deleteConfirm } from '../../../components/Core/Delete';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { getByUserId } from '../../../services/notificationService';
+import { deleteNotifications, getWhere, updateNotificationByIds } from '../../../services/notificationService';
 import dayjs from 'dayjs';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Toolbar from '../../../components/Core/Toolbar';
+import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
+import config from '../../../config';
+import { message } from '../../../hooks/useAntdApp';
+import ThongBaoUpdate from '../../../components/FormUpdate/ThongBaoUpdate';
+import Button from '../../../components/Core/Button';
+import { DownOutlined } from '@ant-design/icons';
+import SearchForm from '../../../components/Core/SearchForm';
+import FormItem from '../../../components/Core/FormItem';
 
 const cx = classNames.bind(styles);
 
 function DanhSachThongBao() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
+    const navigate = useNavigate();
     const [list, setList] = useState([]);
+    const [originalList, setOriginalList] = useState([]); // Bản sao danh sách ban đầu
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // Số lượng mục trên mỗi trang
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [showFilter, setShowFilter] = useState(false);
+    const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
 
     // Sử dụng useEffect để theo dõi thay đổi của screenWidth
     useEffect(() => {
@@ -33,32 +57,174 @@ function DanhSachThongBao() {
         };
     }, []);
 
-    useEffect(() => {
-        const fetchDataNoti = async () => {
-            try {
-                const res = await getByUserId(userId);
-                if (res.status === 200) {
-                    setList(res.data.data);
-                }
-            } catch (error) {
-                console.error("Lỗi lấy thông báo: " + error);
+
+    const fetchDataNoti = useCallback(async () => {
+        if (!userId) return;
+        try {
+            const res = await getWhere({
+                toUsers: [{ userId }],
+                createUser: { userId }
+            });
+            if (res.status === 200) {
+                setList(res.data.data);
+                setOriginalList(res.data.data); // Lưu bản sao ban đầu
             }
-            finally {
-                setIsLoading(false);
-            }
+        } catch (error) {
+            console.error("Lỗi lấy thông báo: " + error);
         }
-        if (userId)
+        finally {
+            setIsLoading(false);
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        fetchDataNoti();
+    }, [fetchDataNoti])
+
+
+    const handleDelete = async (id) => {
+        try {
+            await deleteNotifications(id);
+            // Refresh dữ liệu sau khi xóa thành công
             fetchDataNoti();
-    }, [userId])
+            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            message.success('Xoá thành công');
+        } catch (error) {
+            message.error('Xoá thất bại');
+            console.error('Error [Nghiep vu - DeTaiNCKH - delete]:', error);
+        }
+    };
+
+    const ThongBaoUpdatedMemorized = useMemo(() => {
+        return (
+            <ThongBaoUpdate
+                title={'thông báo'}
+                isUpdate={isUpdate}
+                showModal={showModalUpdate}
+                setShowModal={setShowModalUpdate}
+                reLoad={fetchDataNoti}
+            />
+        );
+    }, [showModalUpdate, isUpdate]);
+
+    // Tạo field cho bộ lọc
+    const filterFields = [
+        <FormItem
+            name="title"
+            label="Tiêu đề"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="content"
+            label="Nội dung"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="url"
+            label="Đường dẫn"
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name="type"
+            label="Loại thông báo"
+        >
+            <Select>
+                <Select.Option value="info">Thông tin</Select.Option>
+                <Select.Option value="warning">Cảnh báo</Select.Option>
+                <Select.Option value="error">Lỗi</Select.Option>
+            </Select>
+        </FormItem>,
+        <FormItem
+            name="createUser"
+            label="Người tạo"
+        >
+            <Input />
+        </FormItem>
+    ];
+
+    // Hàm tìm kiếm dựa trên danh sách đã có
+    const onSearch = (values) => {
+        const { title, content, url, type, createUser } = values;
+
+        const filteredList = originalList.filter((item) => {
+            const matchesTitle = title ? item.title?.toLowerCase().includes(title.toLowerCase()) : true;
+            const matchesContent = content ? item.content?.toLowerCase().includes(content.toLowerCase()) : true;
+            const matchesUrl = url ? item.url?.toLowerCase().includes(url.toLowerCase()) : true;
+            const matchesType = type ? item.type === type : true;
+            const matchesCreateUser = createUser
+                ? item.createUser && ( // Kiểm tra nếu createUser tồn tại
+                    (item.createUser.fullname?.toLowerCase().includes(createUser.toLowerCase())) || // So khớp fullname
+                    (item.createUser.userId?.toLowerCase().includes(createUser.toLowerCase()))     // So khớp userId
+                )
+                : true; // Nếu không có createUser, mặc định trả về true
+
+            return matchesTitle && matchesContent && matchesUrl && matchesType && matchesCreateUser;
+        });
+
+        setList(filteredList);
+    };
+
+
+    const getItemsAction = (item) => [
+        {
+            label: (
+                <div
+                    onClick={(e) => {
+                        setIsUpdate(true);
+                        setShowModalUpdate(item);
+                    }}
+                >
+                    Sửa
+                </div>
+            ),
+            key: '0',
+        },
+        {
+            label: (
+                <div onClick={() => deleteConfirm('thông báo', () => handleDelete(item.id))}>
+                    Xóa
+                </div>
+            ),
+            key: '1',
+        },
+    ];
 
     return (
-
         <div className={cx('wrapper')}>
-            <div className={cx('info')}>
-                <span className={cx('icon')}>
-                    <ProjectIcon />
-                </span>
-                <h3 className={cx('title')}>Danh sách thông báo</h3>
+            <div className={cx('container-header')}>
+                <div className={cx('info')}>
+                    <span className={cx('icon')}>
+                        <ProjectIcon />
+                    </span>
+                    <h3 className={cx('title')}>Danh sách thông báo</h3>
+                </div>
+                <div className={cx('wrapper-toolbar')}>
+                    <Toolbar
+                        type={'Bộ lọc'}
+                        onClick={() => {
+                            setShowFilter(!showFilter);
+                        }}
+                    />
+                    <Toolbar
+                        type={'Tạo mới'}
+                        onClick={() => {
+                            setShowModalUpdate(true);
+                            setIsUpdate(false);
+                        }}
+                        isVisible={permissionDetailData?.isAdd}
+                    />
+                </div>
+            </div>
+            <div className={`slide ${showFilter ? 'open' : ''}`}>
+                <SearchForm
+                    getFields={filterFields}
+                    onSearch={onSearch}
+                    onReset={() => { setList(originalList) }}
+                />
+                <Divider />
             </div>
             <Skeleton avatar title={false} loading={isLoading} active>
                 <List
@@ -71,22 +237,65 @@ function DanhSachThongBao() {
                     dataSource={list}
                     renderItem={(item, index) => (
                         <List.Item
-                            actions={[
-                                <Button
-                                    primary
-                                    verysmall
+                            key={item.id}
+                            actions={item.isSystem && item.createUser.userId === userId && [
+                                <Dropdown
+                                    menu={{
+                                        items: getItemsAction(item),
+                                    }}
+                                    trigger={['click']}
                                 >
-                                    Danh sách
-                                </Button>,
+                                    <Button primary verysmall>
+                                        <Space>
+                                            Thực hiện
+                                            <DownOutlined />
+                                        </Space>
+                                    </Button>
+                                </Dropdown>
                             ]}
                         >
+
                             <List.Item.Meta
-                                avatar={<h2 className={cx('stt')}>{(currentPage - 1) * pageSize + index + 1}</h2>}
-                                title={<div className={cx('name')}>{item.title}</div>}
+                                avatar={
+                                    <h2 className={cx('stt')}>
+                                        {(currentPage - 1) * pageSize + index + 1}
+                                    </h2>
+                                }
+                                title={<div className={cx('name')} onClick={() => { navigate(item.url) }}>{item.title}</div>}
                                 description={
                                     <div>
                                         <p>Nội dung: {item.content}</p>
                                         <p>Người tạo: {item.createUser.userId} - {item.createUser.fullname}</p>
+                                        <p>Hiển thị:
+                                            <Switch
+                                                style={{ marginLeft: "10px" }}
+                                                disabled={(item.isSystem && item.createUser.userId === userId) ? false : true}
+                                                checked={!item.disabled} // Hiển thị "true" nếu `disabled` là `false`
+                                                onChange={async (checked) => {
+                                                    try {
+                                                        // Cập nhật danh sách ngay lập tức
+                                                        setList((prevList) =>
+                                                            prevList.map((i) =>
+                                                                i.id === item.id ? { ...i, disabled: !checked } : i
+                                                            )
+                                                        );
+
+                                                        // Gửi yêu cầu cập nhật trạng thái "disabled"
+                                                        await updateNotificationByIds(item.id, { disabled: !checked });
+                                                        message.success(checked ? `Hiển thị thành công` : `Ẩn thành công`);
+                                                    } catch (error) {
+                                                        console.error("Lỗi khi cập nhật trạng thái hiển thị:", error);
+
+                                                        // Khôi phục trạng thái cũ nếu API thất bại
+                                                        setList((prevList) =>
+                                                            prevList.map((i) =>
+                                                                i.id === item.id ? { ...i, disabled: checked } : i
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                        </p>
                                     </div>
                                 }
                             />
@@ -101,6 +310,7 @@ function DanhSachThongBao() {
                     )}
                 />
             </Skeleton>
+            {ThongBaoUpdatedMemorized}
         </div>
     );
 }

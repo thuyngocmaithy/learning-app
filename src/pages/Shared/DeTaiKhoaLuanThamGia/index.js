@@ -100,7 +100,7 @@ function DeTaiKhoaLuanThamGia() {
                 if (responsethesisUser.status === "success") {
 
                     setThesis(responsethesisUser.data)
-                    setDataFollower(responsethesisUser.data.follower[0].followerDetails)
+                    setDataFollower(responsethesisUser.data?.follower[0]?.followerDetails)
                 }
             } catch (error) {
                 console.error("Lỗi lấy thông tin đề tài" + error);

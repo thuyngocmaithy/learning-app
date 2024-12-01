@@ -462,7 +462,7 @@ body {
     }
 
     .slide.open {
-        max-height: 450px;
+        max-height: max-content;
         opacity: 1;
     }
 

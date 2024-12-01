@@ -99,7 +99,7 @@ function DeTaiNCKHThamGia() {
                 if (responsescientificResearchUser.status === "success") {
                     setScientificResearch(responsescientificResearchUser.data)
 
-                    setDataFollower(responsescientificResearchUser.data.follower[0].followerDetails)
+                    setDataFollower(responsescientificResearchUser.data?.follower[0]?.followerDetails)
                 }
             }
         } catch (error) {

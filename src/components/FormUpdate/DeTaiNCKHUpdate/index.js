@@ -222,7 +222,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             const ListNotification = await notifications.getNCKHNotification('create', scientificResearchData, user.data);
 
             ListNotification.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti.toUsers, itemNoti);
             })
 
         } catch (err) {

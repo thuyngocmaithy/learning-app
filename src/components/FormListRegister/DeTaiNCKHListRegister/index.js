@@ -75,7 +75,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
             const ListNotification = await notifications.getNCKHNotification('approve', showModal, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)
@@ -147,10 +147,10 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                 listMember.push(scientificResearchCancel.user);
             }
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('approve', scientificResearchCancel, user.data, listMember);
+            const ListNotification = await notifications.getNCKHNotification('approve', scientificResearchCancel[0].scientificResearch, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await deleteNotification(itemNoti.toUser, itemNoti);
+                await deleteNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)

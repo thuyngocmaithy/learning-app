@@ -122,7 +122,7 @@ export const registerSubject = async (userId, subjectId, semesterId) => {
 export const getUserRegisteredSubjects = async (userId) => {
   try {
     const response = await api.get(`/user-register-subject/user/${userId}`);
-    if (response.data && response.data.message === "success" && Array.isArray(response.data.data)) {
+    if (response.data && response.data.status === "success" && Array.isArray(response.data.data)) {
       return response.data.data;
     } else {
       console.error('[userServive - getUserRegisteredSubjects - errorFormatData]', response.data);

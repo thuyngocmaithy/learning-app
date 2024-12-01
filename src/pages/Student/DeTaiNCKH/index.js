@@ -157,7 +157,7 @@ function DeTaiNCKH() {
             const ListNotification = await notifications.getNCKHNotification('register', scientificResearchCancel, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await deleteNotification(itemNoti.toUser, itemNoti);
+                await deleteNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)

@@ -68,7 +68,7 @@ const FollowerUpdate = memo(function FollowerUpdate({
             const ListNotification = await notifications.getNCKHNotification('follow', SR, user.data);
 
             ListNotification.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)
@@ -91,7 +91,7 @@ const FollowerUpdate = memo(function FollowerUpdate({
                 // Thêm thông báo cho user được add follow
                 const user = await getUserById(values.userId);
                 const SR = await getSRById(SRIdFromUrl);
-                const dataSendNoti = { ...SR.data, toUser: user.data }
+                const dataSendNoti = { ...SR.data, toUsers: [user.data] }
                 handleSendNotification(dataSendNoti);
             }
 

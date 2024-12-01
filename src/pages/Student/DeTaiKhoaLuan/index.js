@@ -156,7 +156,7 @@ function DeTaiKhoaLuan() {
             const ListNotification = await notifications.getKhoaLuanNotification('register', thesisCancel, user.data, listMember);
 
             ListNotification.map(async (itemNoti) => {
-                await deleteNotification(itemNoti.toUser, itemNoti);
+                await deleteNotification(itemNoti.toUsers, itemNoti);
             })
         } catch (err) {
             console.error(err)

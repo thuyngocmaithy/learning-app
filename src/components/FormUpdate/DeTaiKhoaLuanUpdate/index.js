@@ -234,7 +234,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             const ListNotification = await notifications.getKhoaLuanNotification('create', thesisData, user.data);
 
             ListNotification?.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti.toUsers, itemNoti);
             })
 
         } catch (err) {

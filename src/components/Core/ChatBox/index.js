@@ -111,7 +111,7 @@ function ChatBox({ height = '60vh' }) {
                     const ListNotification = await notifications.getNCKHNotification('note', SRdata, user.data, listMember, inputValue);
 
                     ListNotification.map(async (itemNoti) => {
-                        await sendNotification(itemNoti.toUser, itemNoti);
+                        await sendNotification(itemNoti);
                     })
                 }
             }
@@ -131,7 +131,7 @@ function ChatBox({ height = '60vh' }) {
                     const ListNotification = await notifications.getKhoaLuanNotification('note', thesisdata, user.data, listMember, inputValue);
 
                     ListNotification.map(async (itemNoti) => {
-                        await sendNotification(itemNoti.toUser, itemNoti);
+                        await sendNotification(itemNoti);
                     })
                 }
             }
