@@ -175,6 +175,10 @@ body {
         padding: 20px;
     }
 
+    .ant-card-type-inner .ant-card-body {
+        padding: 10px 24px;
+    }
+
     .ant-card-bordered {
         box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     }
@@ -462,7 +466,7 @@ body {
     }
 
     .slide.open {
-        max-height: max-content;
+        max-height: 480px;
         opacity: 1;
     }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Breadcrumb, Card, List, Skeleton, Tabs, Tag } from 'antd';
+import { Breadcrumb, Card, Col, Divider, Input, List, Row, Select, Skeleton, Tabs, Tag } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
@@ -18,22 +18,33 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import notifications from '../../../config/notifications';
 import dayjs from 'dayjs';
+import SearchForm from '../../../components/Core/SearchForm';
+import Toolbar from '../../../components/Core/Toolbar';
+import FormItem from '../../../components/Core/FormItem';
+import { getStatusByType } from '../../../services/statusService';
 
 const cx = classNames.bind(styles);
 
 function DeTaiNCKH() {
     const [list, setList] = useState([]);
+    const [listOriginal, setListOriginal] = useState([]);
     const { userId } = useContext(AccountLoginContext);
-    const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
+    const [isLoading, setIsLoading] = useState(true); // load tất cả ds đề tài
+    const [isLoadingRegister, setIsLoadingRegister] = useState(false); // load ds đề tài tham gia
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
-    const [listscientificResearchRegister, setListscientificResearchRegister] = useState([]);
+    const [listSRRegister, setListSRRegister] = useState([]);
+    const [listSRRegisterOriginal, setListSRRegisterOriginal] = useState([]);
     const [SRGName, setSRGName] = useState();
     const scientificResearchCancelRef = useRef(null);
     const { deleteNotification } = useSocketNotification();
     const navigate = useNavigate();
     const location = useLocation();
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [isCalledTab2, setIsCalledTab2] = useState(false);
+    const [showFilter1, setShowFilter1] = useState(false);
+    const [showFilter2, setShowFilter2] = useState(false);
+    const [statusOptions, setStatusOptions] = useState([]);
 
     // Sử dụng useEffect để theo dõi thay đổi của screenWidth
     useEffect(() => {
@@ -85,35 +96,59 @@ function DeTaiNCKH() {
         setTabActive(tabId);
     };
 
+    const statusType = 'Tiến độ đề tài NCKH';
+    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
+    useEffect(() => {
+        const fetchStatusByType = async () => {
+            try {
+                const response = await getStatusByType(statusType);
+                if (response) {
+                    const options = response.map((status) => ({
+                        value: status.statusId,
+                        label: status.statusName,
+                    }));
+                    setStatusOptions(options);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchStatusByType();
+    }, [statusType]);
+
 
     // Xử lý lấy SRGId    
     const SRGIdFromUrl = queryParams.get('SRGId');
 
 
-    const fetchscientificResearchs = useCallback(async () => {
+    const fetchSR = useCallback(async () => {
         try {
             const response = await getBySRGIdAndCheckApprove({ userId: userId, SRGId: SRGIdFromUrl });
-
             if (response.status === 200) {
                 setList(response.data.data);
+                setListOriginal(response.data.data);
             }
-
-            setIsLoading(false);
         } catch (error) {
             console.error('Error fetching scientificResearchs:', error);
+        }
+        finally {
             setIsLoading(false);
         }
     }, [SRGIdFromUrl, userId]);
 
-    const checkRegisterscientificResearch = useCallback(async () => {
+    const checkRegisterSR = useCallback(async () => {
         try {
+            setIsLoadingRegister(true);
             const response = await getWhere({ userId: userId, srgroupId: SRGIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
-            setListscientificResearchRegister(response.data.data);
+            setListSRRegister(response.data.data);
+            setListSRRegisterOriginal(response.data.data)
         } catch (error) {
             console.error('Error fetching registered scientificResearchs:', error);
-            setIsLoading(false);
+        } finally {
+            setIsLoadingRegister(false);
         }
     }, [SRGIdFromUrl, userId]);
 
@@ -135,10 +170,18 @@ function DeTaiNCKH() {
         }
     }, [SRGIdFromUrl])
 
+
+
     useEffect(() => {
-        checkRegisterscientificResearch();
-        fetchscientificResearchs();
-    }, [showModalRegister, checkRegisterscientificResearch, fetchscientificResearchs]);
+        fetchSR()
+    }, [fetchSR]);
+
+    useEffect(() => {
+        if (tabActive === 2 && !isCalledTab2) {
+            checkRegisterSR();
+            setIsCalledTab2(true);
+        }
+    }, [tabActive, isCalledTab2, checkRegisterSR])
 
 
     const handleCancelNotification = async () => {
@@ -175,10 +218,8 @@ function DeTaiNCKH() {
                 if (responseCancel) {
                     message.success('Hủy đăng ký thành công');
                     // Cập nhật danh sách đề tài đã đăng ký
-                    await checkRegisterscientificResearch();
-                    await fetchscientificResearchs(); // Cập nhật danh sách đề tài
-
-
+                    await checkRegisterSR();
+                    await fetchSR(); // Cập nhật danh sách đề tài
                 }
             } catch (error) {
                 message.error('Hủy đăng ký thất bại');
@@ -216,49 +257,140 @@ function DeTaiNCKH() {
         setTabActive(index)
     };
 
+    // SEARCH ĐỀ TÀI NCKH
+    const levelOptions = [
+        { value: 'Cơ sở', label: 'Cơ sở' },
+        { value: 'Thành phố', label: 'Thành phố' },
+        { value: 'Bộ', label: 'Bộ' },
+        { value: 'Quốc gia', label: 'Quốc gia' },
+        { value: 'Quốc tế', label: 'Quốc tế' }
+    ]
+
+    // Tạo field cho bộ lọc
+    const filterFieldsDeTaiNCKH = [
+        <FormItem
+            name={'scientificResearchId'}
+            label={'Mã đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'scientificResearchName'}
+            label={'Tên đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'instructorName'}
+            label={'Chủ nhiệm đề tài'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
+            name={'level'}
+            label={'Cấp'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                options={levelOptions}
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+            />
+        </FormItem>,
+        <FormItem
+            name={'status'}
+            label={'Trạng thái'}
+        >
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={statusOptions}
+                labelInValue
+            />
+        </FormItem>,
+    ]
+
+    const onSearchDeTaiNCKH = (values) => {
+        const { scientificResearchId, scientificResearchName, instructorName, level } = values;
+        const originalList = showFilter2 ? listSRRegisterOriginal : listOriginal;
+        const filteredList = originalList.filter((SRRegister) => {
+            const item = showFilter2 ? SRRegister.scientificResearch : SRRegister;
+            const matchesSRId = scientificResearchId ? item.scientificResearchId?.toLowerCase().includes(scientificResearchId.toLowerCase()) : true;
+            const matchesSRName = scientificResearchName ? item.scientificResearchName?.toLowerCase().includes(scientificResearchName.toLowerCase()) : true;
+            const matchesInstructorName = instructorName ? item.instructor?.fullname?.toLowerCase().includes(instructorName.toLowerCase()) : true;
+            const matchesLevel = level ? item.level === level : true;
+
+            return matchesSRId && matchesSRName && matchesInstructorName && matchesLevel;
+        });
+        if (showFilter2) {
+            setListSRRegister(filteredList);
+        }
+        else {
+            setList(filteredList);
+        }
+    };
+
+
+
 
     const ITEM_TABS = [
         {
             id: 1,
             title: 'Danh sách đề tài',
             children: (
-                <List
-                    pagination={{
-                        position: 'bottom',
-                        align: 'end',
-                    }}
-                    dataSource={list}
-                    renderItem={(item, index) => (
-                        <List.Item
-                            actions={[
-                                <Button className={cx('btnDetail')} outline verysmall onClick={() => setShowModalDetail(item)}>
-                                    Chi tiết
-                                </Button>,
-                                listscientificResearchRegister && listscientificResearchRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
-                                    <Button
-                                        colorRed
-                                        outline
-                                        verysmall
-                                        onClick={() => {
-                                            scientificResearchCancelRef.current = item;
-                                            setTimeout(() => cancelRegisterConfirm('đề tài nghiên cứu', handleCancelWithConfirm), 0);
-                                        }}
-                                        disabled={item.approve}
-                                    >
-                                        Hủy đăng ký
-                                    </Button> :
-                                    <Button primary verysmall onClick={() => setShowModalRegister(item)}>
-                                        Đăng ký
+                <Skeleton title={false} loading={isLoading} paragraph={{ rows: 15 }} active>
+                    <div className={`slide ${showFilter1 ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={filterFieldsDeTaiNCKH}
+                            onSearch={onSearchDeTaiNCKH}
+                            onReset={() => { setList(listOriginal) }}
+                        />
+                        <Divider />
+                    </div>
+                    <List
+                        pagination={{
+                            position: 'bottom',
+                            align: 'end',
+                        }}
+                        dataSource={list}
+                        renderItem={(item, index) => (
+                            <List.Item
+                                actions={[
+                                    <Button className={cx('btnDetail')} outline verysmall onClick={() => setShowModalDetail(item)}>
+                                        Chi tiết
                                     </Button>,
-                            ]}
-                        >
-                            <Skeleton avatar title={false} loading={isLoading} active>
+                                    listSRRegister && listSRRegister.some(scientificResearchRegister => scientificResearchRegister.scientificResearch.scientificResearchId === item.scientificResearchId) ?
+                                        <Button
+                                            colorRed
+                                            outline
+                                            verysmall
+                                            onClick={() => {
+                                                scientificResearchCancelRef.current = item;
+                                                setTimeout(() => cancelRegisterConfirm('đề tài nghiên cứu', handleCancelWithConfirm), 0);
+                                            }}
+                                            disabled={item.approve}
+                                        >
+                                            Hủy đăng ký
+                                        </Button> :
+                                        <Button primary verysmall onClick={() => setShowModalRegister(item)}>
+                                            Đăng ký
+                                        </Button>,
+                                ]}
+                            >
+
                                 <List.Item.Meta
                                     avatar={<h2 className={cx('stt')}>{index + 1}</h2>}
                                     title={<div className={cx('name')}>{item.scientificResearchId} - {item.scientificResearchName}</div>}
                                     description={
                                         <div>
                                             <p>Lượt đăng ký: {item.count} </p>
+                                            <p>Cấp: {item.level}</p>
                                             <p>Giảng viên hướng dẫn: {item.instructor.fullname}</p>
                                             <p style={{ display: screenWidth < 768 ? 'block' : 'none' }}>
                                                 Thời gian thực hiện:
@@ -282,10 +414,11 @@ function DeTaiNCKH() {
                                         : <p>Chưa có</p>
                                     }
                                 </div>
-                            </Skeleton>
-                        </List.Item>
-                    )}
-                />
+
+                            </List.Item>
+                        )}
+                    />
+                </Skeleton>
             ),
         },
         {
@@ -293,49 +426,68 @@ function DeTaiNCKH() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
-                    {listscientificResearchRegister && listscientificResearchRegister.map((item, index) => {
-                        return (
-                            <Card
-                                className={cx('card-DeTaiNCKHThamGia')}
-                                key={index}
-                                type="inner"
-                                title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
-                                extra={
-                                    <Button primary verysmall
-                                        onClick={() => {
-                                            if (!item.isApprove) {
-                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
-                                                setShowModalDetail(item.scientificResearch);
-                                            }
-                                            else {
-                                                // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
-                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`);
-                                            }
-                                        }}
-                                    >
+                    <div className={`slide ${showFilter2 ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={filterFieldsDeTaiNCKH}
+                            onSearch={onSearchDeTaiNCKH}
+                            onReset={() => { setListSRRegister(listSRRegisterOriginal) }}
+                        />
+                        <Divider />
+                    </div>
+                    <Skeleton title={false} loading={isLoadingRegister} paragraph={{ rows: 15 }} active>
+                        {listSRRegister && listSRRegister.map((item, index) => {
+                            return (
+                                <Card
+                                    className={cx('card-DeTaiNCKHThamGia')}
+                                    key={index}
+                                    type="inner"
+                                    title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
+                                    extra={
+                                        <Button primary verysmall
+                                            onClick={() => {
+                                                if (!item.isApprove) {
+                                                    // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
+                                                    setShowModalDetail(item.scientificResearch);
+                                                }
+                                                else {
+                                                    // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
+                                                    navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`);
+                                                }
+                                            }}
+                                        >
 
-                                        Chi tiết
-                                    </Button>
-                                }
-                            >
-                                <div className={cx('container-detail')}>
-                                    <p className={cx('label-detail')}>Thời gian thực hiện: </p>
-                                    {item.startDate && item.finishDate
-                                        ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                        : <p>Chưa có</p>
+                                            Chi tiết
+                                        </Button>
                                     }
-                                </div>
-                                <div className={cx('container-detail')}>
-                                    <p className={cx('label-detail')}>Trạng thái: </p>
-                                    <Tag
-                                        color={item.isApprove ? item.scientificResearch.status.color : 'red'}
-                                    >
-                                        {item.isApprove ? item.scientificResearch.status.statusName : 'Chờ duyệt'}
-                                    </Tag>
-                                </div>
-                            </Card>
-                        );
-                    })}
+                                >
+                                    <Row gutter={[16]}>
+                                        <Col span={12}>
+                                            <p className={cx('item-description')}>Cấp: {item.scientificResearch?.level}</p>
+                                            <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.scientificResearch?.instructor?.fullname}</p>
+                                            <p className={cx('item-description')}>
+                                                Trạng thái:
+                                                <Tag color={item.isApprove ? item.scientificResearch?.status?.color : 'red'} className={cx('tag-status')}>
+                                                    {item.isApprove ? item.scientificResearch?.status?.statusName : 'Chờ duyệt'}
+                                                </Tag>
+                                            </p>
+                                        </Col>
+                                        <Col span={12}>
+                                            <div
+                                                className={cx('container-deadline-register')}
+                                                style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                            >
+                                                <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                                {item.scientificResearch.startDate && item.scientificResearch.finishDate
+                                                    ? <p>{dayjs(item.scientificResearch.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                                    : <p>Chưa có</p>
+                                                }
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                </Card>
+                            );
+                        })}
+                    </Skeleton>
                 </div>
             ),
         },
@@ -357,20 +509,36 @@ function DeTaiNCKH() {
                     ]}
                 />
             }
+            <div className={cx('container-header')}>
+                <div className={cx('info')}>
+                    <span className={cx('icon')}>
+                        <ProjectIcon />
+                    </span>
+                    <h3 className={cx('title')}>
+                        {
+                            SRGIdFromUrl
+                                ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
+                                : 'Danh sách đề tài nghiên cứu khoa học'
+                        }
+                    </h3>
+                </div>
 
-            <div className={cx('info')}>
-                <span className={cx('icon')}>
-                    <ProjectIcon />
-                </span>
+                <div className={cx('wrapper-toolbar')}>
+                    <Toolbar
+                        type={'Bộ lọc'}
+                        onClick={() => {
+                            if (tabActive === 1) {
+                                setShowFilter1(!showFilter1);
+                                if (showFilter2) setShowFilter2(false);
+                            }
+                            else {
+                                setShowFilter2(!showFilter2);
+                                if (showFilter1) setShowFilter1(false);
+                            }
 
-                <h3 className={cx('title')}>
-                    {
-                        SRGIdFromUrl
-                            ? `Danh sách đề tài nghiên cứu khoa học nhóm: ${SRGName}`
-                            : 'Danh sách đề tài nghiên cứu khoa học'
-                    }
-
-                </h3>
+                        }}
+                    />
+                </div>
             </div>
             <Tabs
                 activeKey={tabActive}

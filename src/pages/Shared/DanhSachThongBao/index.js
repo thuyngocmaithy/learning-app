@@ -40,7 +40,6 @@ function DanhSachThongBao() {
     const [showFilter, setShowFilter] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [isUpdate, setIsUpdate] = useState(false);
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
 
     // Sử dụng useEffect để theo dõi thay đổi của screenWidth
     useEffect(() => {
@@ -87,7 +86,6 @@ function DanhSachThongBao() {
             await deleteNotifications(id);
             // Refresh dữ liệu sau khi xóa thành công
             fetchDataNoti();
-            setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Xoá thành công');
         } catch (error) {
             message.error('Xoá thất bại');
@@ -234,7 +232,7 @@ function DanhSachThongBao() {
                 <SearchForm
                     getFields={filterFields}
                     onSearch={onSearch}
-                    onReset={() => { setList(originalList) }}
+                    onReset={() => { fetchDataNoti() }}
                 />
                 <Divider />
             </div>
