@@ -88,6 +88,21 @@ export const getWhere = async (conditions) => {
     }
 };
 
+
+export const getListSRJoined = async (instructorId, scientificResearchGroup) => {
+    try {
+        const conditions = { instructorId, scientificResearchGroup };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/scientificResearchs/getListSRJoined?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
 export const getBySRGIdAndCheckApprove = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();

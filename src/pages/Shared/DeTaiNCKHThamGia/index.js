@@ -229,7 +229,7 @@ function DeTaiNCKHThamGia() {
         },
         {
             id: 2,
-            title: 'Ghi chú',
+            title: 'Thảo luận',
             children: <ChatBox />,
         },
         {
@@ -283,9 +283,9 @@ function DeTaiNCKHThamGia() {
                                 {
                                     title: <Link
                                         to={
-                                            location.pathname.split('/')[1] === "Department"
-                                                ? config.routes.NhomDeTaiNCKH_Department
-                                                : config.routes.NhomDeTaiNCKH
+                                            permission === "SINHVIEN"
+                                                ? config.routes.NhomDeTaiNCKH
+                                                : config.routes.NhomDeTaiNCKH_Department
                                         }>
                                         Nhóm đề tài nghiên cứu khoa học
                                     </Link>,
@@ -311,9 +311,9 @@ function DeTaiNCKHThamGia() {
                     [
                         {
                             title: <Link to={
-                                location.pathname.split('/')[1] === "Department"
-                                    ? config.routes.NhomDeTaiNCKH_Department
-                                    : config.routes.NhomDeTaiNCKH
+                                permission === "SINHVIEN"
+                                    ? config.routes.NhomDeTaiNCKH
+                                    : config.routes.NhomDeTaiNCKH_Department
                             } >
                                 Nhóm đề tài nghiên cứu khoa học
                             </Link>,

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Breadcrumb, Card, Col, Divider, Input, List, Row, Select, Skeleton, Tabs, Tag } from 'antd';
+import { Breadcrumb, Card, Col, Divider, Input, List, Row, Select, Tabs, Tag } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
@@ -30,7 +30,6 @@ function DeTaiNCKH() {
     const [listOriginal, setListOriginal] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); // load tất cả ds đề tài
-    const [isLoadingRegister, setIsLoadingRegister] = useState(false); // load ds đề tài tham gia
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [listSRRegister, setListSRRegister] = useState([]);
@@ -41,7 +40,6 @@ function DeTaiNCKH() {
     const navigate = useNavigate();
     const location = useLocation();
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-    const [isCalledTab2, setIsCalledTab2] = useState(false);
     const [showFilter1, setShowFilter1] = useState(false);
     const [showFilter2, setShowFilter2] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
@@ -139,7 +137,6 @@ function DeTaiNCKH() {
 
     const checkRegisterSR = useCallback(async () => {
         try {
-            setIsLoadingRegister(true);
             const response = await getWhere({ userId: userId, srgroupId: SRGIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             // const registeredscientificResearchs = response.data.data.map(data => data.scientificResearch.scientificResearchId);
@@ -147,8 +144,6 @@ function DeTaiNCKH() {
             setListSRRegisterOriginal(response.data.data)
         } catch (error) {
             console.error('Error fetching registered scientificResearchs:', error);
-        } finally {
-            setIsLoadingRegister(false);
         }
     }, [SRGIdFromUrl, userId]);
 
@@ -174,14 +169,8 @@ function DeTaiNCKH() {
 
     useEffect(() => {
         fetchSR()
-    }, [fetchSR]);
-
-    useEffect(() => {
-        if (tabActive === 2 && !isCalledTab2) {
-            checkRegisterSR();
-            setIsCalledTab2(true);
-        }
-    }, [tabActive, isCalledTab2, checkRegisterSR])
+        checkRegisterSR();
+    }, [fetchSR, checkRegisterSR]);
 
 
     const handleCancelNotification = async () => {
@@ -344,7 +333,7 @@ function DeTaiNCKH() {
             id: 1,
             title: 'Danh sách đề tài',
             children: (
-                <Skeleton title={false} loading={isLoading} paragraph={{ rows: 15 }} active>
+                <>
                     <div className={`slide ${showFilter1 ? 'open' : ''}`}>
                         <SearchForm
                             getFields={filterFieldsDeTaiNCKH}
@@ -354,6 +343,7 @@ function DeTaiNCKH() {
                         <Divider />
                     </div>
                     <List
+                        loading={isLoading}
                         pagination={{
                             position: 'bottom',
                             align: 'end',
@@ -418,7 +408,7 @@ function DeTaiNCKH() {
                             </List.Item>
                         )}
                     />
-                </Skeleton>
+                </>
             ),
         },
         {
@@ -434,61 +424,59 @@ function DeTaiNCKH() {
                         />
                         <Divider />
                     </div>
-                    <Skeleton title={false} loading={isLoadingRegister} paragraph={{ rows: 15 }} active>
-                        {listSRRegister && listSRRegister.map((item, index) => {
-                            return (
-                                <Card
-                                    className={cx('card-DeTaiNCKHThamGia')}
-                                    key={index}
-                                    type="inner"
-                                    title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
-                                    extra={
-                                        <Button primary verysmall
-                                            onClick={() => {
-                                                if (!item.isApprove) {
-                                                    // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
-                                                    setShowModalDetail(item.scientificResearch);
-                                                }
-                                                else {
-                                                    // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
-                                                    navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`);
-                                                }
-                                            }}
-                                        >
+                    {listSRRegister && listSRRegister.map((item, index) => {
+                        return (
+                            <Card
+                                className={cx('card-DeTaiNCKHThamGia')}
+                                key={index}
+                                type="inner"
+                                title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
+                                extra={
+                                    <Button primary verysmall
+                                        onClick={() => {
+                                            if (!item.isApprove) {
+                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
+                                                setShowModalDetail(item.scientificResearch);
+                                            }
+                                            else {
+                                                // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}`);
+                                            }
+                                        }}
+                                    >
 
-                                            Chi tiết
-                                        </Button>
-                                    }
-                                >
-                                    <Row gutter={[16]}>
-                                        <Col span={12}>
-                                            <p className={cx('item-description')}>Cấp: {item.scientificResearch?.level}</p>
-                                            <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.scientificResearch?.instructor?.fullname}</p>
-                                            <p className={cx('item-description')}>
-                                                Trạng thái:
-                                                <Tag color={item.isApprove ? item.scientificResearch?.status?.color : 'red'} className={cx('tag-status')}>
-                                                    {item.isApprove ? item.scientificResearch?.status?.statusName : 'Chờ duyệt'}
-                                                </Tag>
-                                            </p>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div
-                                                className={cx('container-deadline-register')}
-                                                style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
-                                            >
-                                                <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                                {item.scientificResearch.startDate && item.scientificResearch.finishDate
-                                                    ? <p>{dayjs(item.scientificResearch.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                                    : <p>Chưa có</p>
-                                                }
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </Card>
-                            );
-                        })}
-                    </Skeleton>
-                </div>
+                                        Chi tiết
+                                    </Button>
+                                }
+                            >
+                                <Row gutter={[16]}>
+                                    <Col span={12}>
+                                        <p className={cx('item-description')}>Cấp: {item.scientificResearch?.level}</p>
+                                        <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.scientificResearch?.instructor?.fullname}</p>
+                                        <p className={cx('item-description')}>
+                                            Trạng thái:
+                                            <Tag color={item.isApprove ? item.scientificResearch?.status?.color : 'red'} className={cx('tag-status')}>
+                                                {item.isApprove ? item.scientificResearch?.status?.statusName : 'Chờ duyệt'}
+                                            </Tag>
+                                        </p>
+                                    </Col>
+                                    <Col span={12}>
+                                        <div
+                                            className={cx('container-deadline-register')}
+                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                        >
+                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                            {item.scientificResearch.startDate && item.scientificResearch.finishDate
+                                                ? <p>{dayjs(item.scientificResearch.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                                : <p>Chưa có</p>
+                                            }
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Card>
+                        );
+                    })}
+                </div >
             ),
         },
     ];

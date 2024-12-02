@@ -236,7 +236,7 @@ function DeTaiKhoaLuanThamGia() {
         },
         {
             id: 2,
-            title: 'Ghi chú',
+            title: 'Thảo luận',
             children: <ChatBox />,
         },
         {
@@ -290,9 +290,9 @@ function DeTaiKhoaLuanThamGia() {
                                 {
                                     title: <Link
                                         to={
-                                            location.pathname.split('/')[1] === "Department"
-                                                ? config.routes.NhomDeTaiKhoaLuan_Department
-                                                : config.routes.NhomDeTaiKhoaLuan
+                                            permission === "SINHVIEN"
+                                                ? config.routes.NhomDeTaiKhoaLuan
+                                                : config.routes.NhomDeTaiKhoaLuan_Department
                                         }>
                                         Nhóm đề tài khóa luận
                                     </Link>,
@@ -318,9 +318,9 @@ function DeTaiKhoaLuanThamGia() {
                     [
                         {
                             title: <Link to={
-                                location.pathname.split('/')[1] === "Department"
-                                    ? config.routes.NhomDeTaiKhoaLuan_Department
-                                    : config.routes.NhomDeTaiKhoaLuan
+                                permission === "SINHVIEN"
+                                    ? config.routes.NhomDeTaiKhoaLuan
+                                    : config.routes.NhomDeTaiKhoaLuan_Department
                             } >
                                 Nhóm đề tài khóa luận
                             </Link>,

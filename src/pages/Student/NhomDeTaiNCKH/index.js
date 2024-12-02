@@ -25,7 +25,6 @@ function NhomDeTaiNCKH() {
     const [originalList, setOriginalList] = useState([]); // Bản sao danh sách ban đầu
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); // load ds nhóm đề tài NCKH
-    const [isLoadingRegister, setIsLoadingRegister] = useState(false); // load ds đề tài tham gia
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [listSRRegister, setListSRRegister] = useState([]);
@@ -38,7 +37,6 @@ function NhomDeTaiNCKH() {
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [nhomDeTaistatusOptions, setNhomDeTaiStatusOptions] = useState([]);
     const [deTaistatusOptions, setDeTaiStatusOptions] = useState([]);
-    const [isCalledTab2, setIsCalledTab2] = useState(false);
 
 
     //lấy danh sách các ngành ra ngoài thẻ select
@@ -148,28 +146,19 @@ function NhomDeTaiNCKH() {
 
     const checkRegisterSR = useCallback(async () => {
         try {
-            setIsLoadingRegister(true);
             const response = await getWhereSRU({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             setListSRRegister(response.data.data);
             setListSRRegisterOriginal(response.data.data)
         } catch (error) {
             console.error('Error fetching registered scientificResearchs:', error);
-        } finally {
-            setIsLoadingRegister(false);
         }
     }, [userId]);
 
     useEffect(() => {
         fetchSRG();
-    }, [fetchSRG]);
-
-    useEffect(() => {
-        if (tabActive === 2 && !isCalledTab2) {
-            checkRegisterSR();
-            setIsCalledTab2(true);
-        }
-    }, [tabActive, isCalledTab2, checkRegisterSR])
+        checkRegisterSR();
+    }, [fetchSRG, checkRegisterSR]);
 
     // SEARCH NHÓM ĐỀ TÀI NCKH
     // Tạo field cho bộ lọc nhóm đề tài NCKH
@@ -338,65 +327,64 @@ function NhomDeTaiNCKH() {
                         />
                         <Divider />
                     </div>
-                    <Skeleton title={false} loading={isLoading} paragraph={{ rows: 15 }} active>
-                        <List
-                            pagination={{
-                                position: 'bottom',
-                                align: 'end',
-                                onChange: (page) => setCurrentPage(page), // Lưu số trang hiện tại
-                                pageSize: pageSize, // Số mục trong một trang
-                            }}
-                            dataSource={list}
-                            renderItem={(item, index) => (
-                                <List.Item
-                                    actions={[
-                                        <Button
-                                            primary
-                                            verysmall
-                                            onClick={() => {
-                                                navigate(`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`,
-                                                    { state: { from: `${config.routes.NhomDeTaiNCKH}_active` } });
-                                            }}
-                                        >
-                                            Danh sách
-                                        </Button>,
-                                    ]}
-                                >
-                                    <Skeleton avatar title={false} loading={isLoading} active>
-                                        <List.Item.Meta
-                                            avatar={<h2 className={cx('stt')}>{(currentPage - 1) * pageSize + index + 1}</h2>}
-                                            title={<div className={cx('name')}>{item.scientificResearchGroupId} - {item.scientificResearchGroupName}</div>}
-                                            description={
-                                                <div>
-                                                    <div
-                                                        className={cx('container-deadline-register')}
-                                                        style={{ display: screenWidth < 768 ? 'flex' : 'none', margin: "7px 0" }}
-                                                    >
-                                                        <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                                        <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
-                                                    </div>
-                                                    <p>Ngành: {item.faculty.facultyName}</p>
-                                                    <p style={{ margin: "7px 0" }}>
-                                                        Trạng thái:
-                                                        <Tag color={item.status.color} className={cx('tag-status')}>
-                                                            {item.status.statusName}
-                                                        </Tag>
-                                                    </p>
+                    <List
+                        loading={isLoading}
+                        pagination={{
+                            position: 'bottom',
+                            align: 'end',
+                            onChange: (page) => setCurrentPage(page), // Lưu số trang hiện tại
+                            pageSize: pageSize, // Số mục trong một trang
+                        }}
+                        dataSource={list}
+                        renderItem={(item, index) => (
+                            <List.Item
+                                actions={[
+                                    <Button
+                                        primary
+                                        verysmall
+                                        onClick={() => {
+                                            navigate(`${config.routes.DeTaiNCKH}?SRGId=${item.scientificResearchGroupId}`,
+                                                { state: { from: `${config.routes.NhomDeTaiNCKH}_active` } });
+                                        }}
+                                    >
+                                        Danh sách
+                                    </Button>,
+                                ]}
+                            >
+                                <Skeleton avatar title={false} loading={isLoading} active>
+                                    <List.Item.Meta
+                                        avatar={<h2 className={cx('stt')}>{(currentPage - 1) * pageSize + index + 1}</h2>}
+                                        title={<div className={cx('name')}>{item.scientificResearchGroupId} - {item.scientificResearchGroupName}</div>}
+                                        description={
+                                            <div>
+                                                <div
+                                                    className={cx('container-deadline-register')}
+                                                    style={{ display: screenWidth < 768 ? 'flex' : 'none', margin: "7px 0" }}
+                                                >
+                                                    <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                                    <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
                                                 </div>
-                                            }
-                                        />
-                                        <div
-                                            className={cx('container-deadline-register')}
-                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
-                                        >
-                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                            <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
-                                        </div>
-                                    </Skeleton>
-                                </List.Item>
-                            )}
-                        />
-                    </Skeleton>
+                                                <p>Ngành: {item.faculty.facultyName}</p>
+                                                <p style={{ margin: "7px 0" }}>
+                                                    Trạng thái:
+                                                    <Tag color={item.status.color} className={cx('tag-status')}>
+                                                        {item.status.statusName}
+                                                    </Tag>
+                                                </p>
+                                            </div>
+                                        }
+                                    />
+                                    <div
+                                        className={cx('container-deadline-register')}
+                                        style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                    >
+                                        <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                        <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
+                                    </div>
+                                </Skeleton>
+                            </List.Item>
+                        )}
+                    />
                 </>
             ),
         },
@@ -405,70 +393,68 @@ function NhomDeTaiNCKH() {
             title: 'Tất cả đề tài tham gia',
             children: (
                 <div>
-                    <Skeleton title={false} loading={isLoadingRegister} paragraph={{ rows: 15 }} active>
-                        <div className={`slide ${showFilter2 ? 'open' : ''}`}>
-                            <SearchForm
-                                getFields={filterFieldsDeTaiNCKH}
-                                onSearch={onSearchDeTaiNCKH}
-                                onReset={() => { fetchSRG() }}
-                            />
-                            <Divider />
-                        </div>
-                        {listSRRegister?.map((item, index) => {
-                            let color = !item.isApprove ? 'red' : item.scientificResearch.status.color;
-                            return (
-                                <Card
-                                    className={cx('card-DeTaiNCKHThamGia')}
-                                    key={index}
-                                    type="inner"
-                                    title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
-                                    extra={
-                                        <Button primary verysmall
-                                            onClick={() => {
-                                                if (!item.isApprove) {
-                                                    // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
-                                                    setShowModalDetail(item.scientificResearch);
-                                                }
-                                                else {
-                                                    // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
-                                                    navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}&all=true`,
-                                                        { state: { from: `${location.pathname + location.search}_active` } });
-                                                }
-                                            }}
+                    <div className={`slide ${showFilter2 ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={filterFieldsDeTaiNCKH}
+                            onSearch={onSearchDeTaiNCKH}
+                            onReset={() => { fetchSRG() }}
+                        />
+                        <Divider />
+                    </div>
+                    {listSRRegister?.map((item, index) => {
+                        let color = !item.isApprove ? 'red' : item.scientificResearch.status.color;
+                        return (
+                            <Card
+                                className={cx('card-DeTaiNCKHThamGia')}
+                                key={index}
+                                type="inner"
+                                title={item.scientificResearch.scientificResearchId + " - " + item.scientificResearch.scientificResearchName}
+                                extra={
+                                    <Button primary verysmall
+                                        onClick={() => {
+                                            if (!item.isApprove) {
+                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
+                                                setShowModalDetail(item.scientificResearch);
+                                            }
+                                            else {
+                                                // Nếu đã được duyệt => Chuyển vào page DeTaiNCKHThamGia
+                                                navigate(`${config.routes.DeTaiNCKHThamGia}?scientificResearch=${item.scientificResearch.scientificResearchId}&all=true`,
+                                                    { state: { from: `${location.pathname + location.search}_active` } });
+                                            }
+                                        }}
 
+                                    >
+                                        Chi tiết
+                                    </Button>
+                                }
+                            >
+                                <Row gutter={[16]}>
+                                    <Col span={12}>
+                                        <p className={cx('item-description')}>Cấp: {item.scientificResearch?.level}</p>
+                                        <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.scientificResearch?.instructor?.fullname}</p>
+                                        <p className={cx('item-description')}>
+                                            Trạng thái:
+                                            <Tag color={color} className={cx('tag-status')}>
+                                                {item.isApprove ? item.scientificResearch?.status?.statusName : 'Chờ duyệt'}
+                                            </Tag>
+                                        </p>
+                                    </Col>
+                                    <Col span={12}>
+                                        <div
+                                            className={cx('container-deadline-register')}
+                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
                                         >
-                                            Chi tiết
-                                        </Button>
-                                    }
-                                >
-                                    <Row gutter={[16]}>
-                                        <Col span={12}>
-                                            <p className={cx('item-description')}>Cấp: {item.scientificResearch?.level}</p>
-                                            <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.scientificResearch?.instructor?.fullname}</p>
-                                            <p className={cx('item-description')}>
-                                                Trạng thái:
-                                                <Tag color={color} className={cx('tag-status')}>
-                                                    {item.isApprove ? item.scientificResearch?.status?.statusName : 'Chờ duyệt'}
-                                                </Tag>
-                                            </p>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div
-                                                className={cx('container-deadline-register')}
-                                                style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
-                                            >
-                                                <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                                {item.scientificResearch?.startDate && item.scientificResearch?.finishDate
-                                                    ? <p>{dayjs(item.scientificResearch?.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch?.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                                    : <p>Chưa có</p>
-                                                }
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </Card>
-                            );
-                        })}
-                    </Skeleton>
+                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                            {item.scientificResearch?.startDate && item.scientificResearch?.finishDate
+                                                ? <p>{dayjs(item.scientificResearch?.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch?.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                                : <p>Chưa có</p>
+                                            }
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Card>
+                        );
+                    })}
                 </div>
             ),
         },

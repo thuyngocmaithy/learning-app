@@ -25,7 +25,6 @@ function NhomDeTaiKhoaLuan() {
     const [originalList, setOriginalList] = useState([]); // Bản sao danh sách ban đầu
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); // load ds nhóm đề tài khóa luận
-    const [isLoadingRegister, setIsLoadingRegister] = useState(true); // load ds đề tài đăng ký
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [listThesisRegister, setListThesisRegister] = useState([]);
@@ -96,28 +95,20 @@ function NhomDeTaiKhoaLuan() {
 
     const checkRegisterThesis = useCallback(async () => {
         try {
-            setIsLoadingRegister(true);
             const response = await getWhereThesisUser({ userId: userId });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
             setListThesisRegister(response.data.data);
             setListThesisRegisterOriginal(response.data.data)
         } catch (error) {
             console.error('Error fetching registered Thesis:', error);
-        } finally {
-            setIsLoadingRegister(false)
         }
     }, [userId]);
 
     useEffect(() => {
         fetchThesis();
-    }, []);
+        checkRegisterThesis();
+    }, [checkRegisterThesis]);
 
-    useEffect(() => {
-        if (tabActive === 2 && !isCalledTab2) {
-            checkRegisterThesis();
-            setIsCalledTab2(true);
-        }
-    }, [tabActive, isCalledTab2, checkRegisterThesis])
 
     // SEARCH NHÓM ĐỀ TÀI KHÓA LUẬN
     //lấy danh sách các ngành ra ngoài thẻ select
@@ -301,7 +292,7 @@ function NhomDeTaiKhoaLuan() {
             id: 1,
             title: 'Danh sách nhóm đề tài',
             children: (
-                <Skeleton title={false} loading={isLoading} paragraph={{ rows: 15 }} active>
+                <>
                     <div className={`slide ${showFilter1 ? 'open' : ''}`}>
                         <SearchForm
                             getFields={filterFieldsNhomDeTaiKhoaLuan}
@@ -311,6 +302,7 @@ function NhomDeTaiKhoaLuan() {
                         <Divider />
                     </div>
                     <List
+                        loading={isLoading}
                         pagination={{
                             position: 'bottom',
                             align: 'end',
@@ -365,7 +357,7 @@ function NhomDeTaiKhoaLuan() {
                             </List.Item>
                         )}
                     />
-                </Skeleton>
+                </>
             ),
         },
         {
@@ -373,68 +365,66 @@ function NhomDeTaiKhoaLuan() {
             title: 'Tất cả đề tài tham gia',
             children: (
                 <div>
-                    <Skeleton title={false} loading={isLoadingRegister} paragraph={{ rows: 15 }} active>
-                        <div className={`slide ${showFilter2 ? 'open' : ''}`}>
-                            <SearchForm
-                                getFields={filterFieldsDeTaiKhoaLuan}
-                                onSearch={onSearchDeTaiKhoaLuan}
-                                onReset={() => { setListThesisRegister(listThesisRegisterOriginal) }}
-                            />
-                            <Divider />
-                        </div>
-                        {listThesisRegister?.map((item, index) => {
-                            return (
-                                <Card
-                                    className={cx('card-DeTaiKhoaLuanThamGia')}
-                                    key={index}
-                                    type="inner"
-                                    title={item.thesis.thesisId + " - " + item.thesis.thesisName}
-                                    extra={
-                                        <Button primary verysmall
-                                            onClick={() => {
-                                                if (!item.isApprove) {
-                                                    // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
-                                                    setShowModalDetail(item.thesis);
-                                                }
-                                                else {
-                                                    // Nếu đã được duyệt => Chuyển vào page DeTaiKhoaLuanThamGia
-                                                    navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesis.thesisId}&all=true`,
-                                                        { state: { from: `${location.pathname + location.search}_active` } });
-                                                }
-                                            }}
+                    <div className={`slide ${showFilter2 ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={filterFieldsDeTaiKhoaLuan}
+                            onSearch={onSearchDeTaiKhoaLuan}
+                            onReset={() => { setListThesisRegister(listThesisRegisterOriginal) }}
+                        />
+                        <Divider />
+                    </div>
+                    {listThesisRegister?.map((item, index) => {
+                        return (
+                            <Card
+                                className={cx('card-DeTaiKhoaLuanThamGia')}
+                                key={index}
+                                type="inner"
+                                title={item.thesis.thesisId + " - " + item.thesis.thesisName}
+                                extra={
+                                    <Button primary verysmall
+                                        onClick={() => {
+                                            if (!item.isApprove) {
+                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
+                                                setShowModalDetail(item.thesis);
+                                            }
+                                            else {
+                                                // Nếu đã được duyệt => Chuyển vào page DeTaiKhoaLuanThamGia
+                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesis.thesisId}&all=true`,
+                                                    { state: { from: `${location.pathname + location.search}_active` } });
+                                            }
+                                        }}
 
+                                    >
+                                        Chi tiết
+                                    </Button>
+                                }
+                            >
+                                <Row gutter={[16]}>
+                                    <Col span={12}>
+                                        <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.thesis?.instructor?.fullname}</p>
+                                        <p className={cx('item-description')}>
+                                            Trạng thái:
+                                            <Tag color={item.isApprove ? item.thesis?.status?.color : 'red'} className={cx('tag-status')}>
+                                                {item.isApprove ? item.thesis?.status?.statusName : 'Chờ duyệt'}
+                                            </Tag>
+                                        </p>
+                                    </Col>
+                                    <Col span={12}>
+                                        <div
+                                            className={cx('container-deadline-register')}
+                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
                                         >
-                                            Chi tiết
-                                        </Button>
-                                    }
-                                >
-                                    <Row gutter={[16]}>
-                                        <Col span={12}>
-                                            <p className={cx('item-description')}>Chủ nhiệm đề tài: {item.thesis?.instructor?.fullname}</p>
-                                            <p className={cx('item-description')}>
-                                                Trạng thái:
-                                                <Tag color={item.isApprove ? item.thesis?.status?.color : 'red'} className={cx('tag-status')}>
-                                                    {item.isApprove ? item.thesis?.status?.statusName : 'Chờ duyệt'}
-                                                </Tag>
-                                            </p>
-                                        </Col>
-                                        <Col span={12}>
-                                            <div
-                                                className={cx('container-deadline-register')}
-                                                style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
-                                            >
-                                                <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                                {item.thesis?.startDate && item.thesis?.finishDate
-                                                    ? <p>{dayjs(item.thesis?.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch?.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                                    : <p>Chưa có</p>
-                                                }
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </Card>
-                            );
-                        })}
-                    </Skeleton>
+                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                            {item.thesis?.startDate && item.thesis?.finishDate
+                                                ? <p>{dayjs(item.thesis?.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.scientificResearch?.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                                : <p>Chưa có</p>
+                                            }
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Card>
+                        );
+                    })}
                 </div>
             ),
         },

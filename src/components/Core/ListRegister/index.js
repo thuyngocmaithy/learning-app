@@ -28,6 +28,7 @@ function ListRegister({ title = '', children, showModal, onClose }) {
             title={title}
             onCancel={handleCancel}
             footer={null}
+            width={"650px"}
         >
             {children}
         </Modal>

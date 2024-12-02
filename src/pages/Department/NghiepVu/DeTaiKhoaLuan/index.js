@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Card, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Select } from 'antd';
+import { Card, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Select, Row, Col } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
@@ -49,6 +49,23 @@ function DeTaiKhoaLuan() {
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
     // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
     const [disableToolbar, setDisableToolbar] = useState(false);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const statusType = 'Tiến độ đề tài khóa luận';
 
@@ -426,7 +443,6 @@ function DeTaiKhoaLuan() {
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
                     {listThesisJoined.map((item, index) => {
-                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : item.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiKhoaLuanThamGia')}
@@ -447,19 +463,30 @@ function DeTaiKhoaLuan() {
                                     </ButtonCustom>
                                 }
                             >
-                                <div className={cx('container-detail')}>
-                                    <p className={cx('label-detail')}>Thời gian thực hiện: </p>
-                                    {item.startDate && item.finishDate
-                                        ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                        : <p>Chưa có</p>
-                                    }
-                                </div>
-                                <div className={cx('container-detail')}>
-                                    <p className={cx('label-detail')}>Trạng thái: </p>
-                                    <Tag color={color} className={cx('tag-status')}>
-                                        {item.status.statusName}
-                                    </Tag>
-                                </div>
+                                <Row gutter={[16]}>
+                                    <Col span={12}>
+                                        <p className={cx('item-description')}>Cấp: {item?.level}</p>
+                                        <p className={cx('item-description')}>Chủ nhiệm đề tài: {item?.instructor?.fullname}</p>
+                                        <p className={cx('item-description')}>
+                                            Trạng thái:
+                                            <Tag color={item?.status?.color} className={cx('tag-status')}>
+                                                {item?.status?.statusName}
+                                            </Tag>
+                                        </p>
+                                    </Col>
+                                    <Col span={12}>
+                                        <div
+                                            className={cx('container-deadline-register')}
+                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                        >
+                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                            {item.startDate && item.finishDate
+                                                ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                                : <p>Chưa có</p>
+                                            }
+                                        </div>
+                                    </Col>
+                                </Row>
                             </Card >
                         );
                     })}

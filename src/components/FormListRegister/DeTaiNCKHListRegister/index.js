@@ -25,6 +25,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
     const [listPersonal, setListPersonal] = useState([]);
     const [listGroup, setListGroup] = useState([]);
     const [listGroupRender, setListGroupRender] = useState([]); // List Group để hiển thị
+    const [activeKey, setActiveKey] = useState([]); // để mở rộng group
     const [showModalInfo, setShowModalInfo] = useState(false);
     const [typeApprove, setTypeApprove] = useState('group');
     const { userId } = useContext(AccountLoginContext);
@@ -295,8 +296,22 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
         });
 
         setListGroupRender(handleListG);
+        setActiveKey(handleListG.map(item => item.key));
 
     }, [handleApprove, handleCancelApprove, listGroup])
+
+    const handleCollapseChange = (keys) => {
+        // Xử lý chỉ các mục bị thay đổi, không ảnh hưởng đến các mục khác
+        setActiveKey((prevKeys) => {
+            // So sánh với trạng thái trước để cập nhật đúng
+            const newKeys = keys.filter((key) => !prevKeys.includes(key));
+            const removedKeys = prevKeys.filter((key) => !keys.includes(key));
+
+            // Giữ các mục cũ và cập nhật theo thao tác mới
+            return [...prevKeys.filter((key) => !removedKeys.includes(key)), ...newKeys];
+        });
+    };
+
 
     const ITEM_TABS = [
         {
@@ -314,7 +329,8 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                     children: item.children
                                 }
                             })}
-                            defaultActiveKey={listGroupRender.map(item => item.key)} // Mở tất cả các mục
+                            activeKey={activeKey} // Mở tất cả các mục
+                            onChange={handleCollapseChange}
                         />
 
                     ) : (
@@ -428,3 +444,4 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
 });
 
 export default DeTaiNCKHListRegister;
+

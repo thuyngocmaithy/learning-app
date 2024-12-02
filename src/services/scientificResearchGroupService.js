@@ -89,3 +89,17 @@ export const importScientificResearchGroup = async (data) => {
         throw error;
     }
 };
+
+export const checkValidDateCreateSR = async (scientificResearchGroupId) => {
+    try {
+        const conditions = { scientificResearchGroupId };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/scientificResearchGroups/checkValidDateCreateSR?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+

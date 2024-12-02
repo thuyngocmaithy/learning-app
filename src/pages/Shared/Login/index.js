@@ -17,11 +17,13 @@ import useDebounce from '../../../hooks/useDebounce';
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
+    const [form] = Form.useForm();
     const { updateUserInfo } = useContext(AccountLoginContext);
     const { updateSRAndThesisJoin } = useContext(SRAndThesisJoinContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isSync, setIsSync] = useState(false);
+    const [isSyncCheckboxValue, setIsSyncCheckboxvalue] = useState(false);
     const [accountValue, setAccountValue] = useState('');
     const debouncedAccountValue = useDebounce(accountValue, 1000);
 
@@ -37,6 +39,7 @@ const LoginForm = () => {
     const onFinish = async (values) => {
         setLoading(true);
         try {
+            setIsSyncCheckboxvalue(values.isSync);
             const response = await loginToSgu(values.username, values.password, values.isSync);
 
             if (response.status === 'success' && response.data?.user?.userId) {
@@ -94,6 +97,7 @@ const LoginForm = () => {
                             <div className={cx('title')}>SGU</div>
                             <Spin spinning={loading} indicator={<LoadingOutlined spin />} size='large' >
                                 <Form
+                                    form={form}
                                     name="normal_login"
                                     className={cx('login-form')}
                                     initialValues={{ remember: true }}
@@ -135,7 +139,7 @@ const LoginForm = () => {
                                         <div className={cx('btnLogin')}>
                                             <Button primary disabled={loading}>
                                                 {loading
-                                                    ? isSync
+                                                    ? isSyncCheckboxValue
                                                         ? 'Đang đồng bộ dữ liệu...'
                                                         : 'Đang đăng nhập...'
                                                     : 'Đăng nhập'}
