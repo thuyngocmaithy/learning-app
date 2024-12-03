@@ -322,11 +322,11 @@ function TrangThai() {
                         onClick={() => deleteConfirm('trạng thái', handleDelete)}
                         isVisible={permissionDetailData?.isDelete}
                     />
-                    <Toolbar
+                    {/* <Toolbar
                         type={'Nhập file Excel'}
                         onClick={() => setShowModalImportStatus(true)}
                         isVisible={permissionDetailData?.isAdd}
-                    />
+                    /> */}
                     {/* <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} /> */}
                 </div>
             </div>

@@ -80,7 +80,7 @@ export const importScientificResearchGroup = async (data) => {
     try {
         const createUserId = await getUseridFromLocalStorage();
         const response = await api.post('/scientificResearchGroups/import', {
-            data,
+            SRGs: data,
             createUserId,
         });
         return response.data;

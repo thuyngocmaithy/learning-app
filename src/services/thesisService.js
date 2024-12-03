@@ -67,7 +67,7 @@ export const updateThesisByIds = async (thesisIds, thesisData) => {
 
 export const getByThesisGroupId = async (thesisGroupId) => {
     try {
-        const url = `/thesis/getByThesisGroupId?ThesisGroupId=${thesisGroupId}`;
+        const url = `/thesis/getByThesisGroupId?thesisGroupId=${thesisGroupId}`;
 
         const response = await api.get(url);
         return response;

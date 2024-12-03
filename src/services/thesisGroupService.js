@@ -79,7 +79,7 @@ export const importThesisGroup = async (data) => {
     try {
         const createUserId = await getUseridFromLocalStorage();
         const response = await api.post('/thesisGroups/import', {
-            data,
+            thesisGroups: data,
             createUserId,
         });
         return response.data;
