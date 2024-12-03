@@ -88,3 +88,16 @@ export const importThesisGroup = async (data) => {
         throw error;
     }
 };
+
+export const checkValidDateCreateThesis = async (thesisGroupId) => {
+    try {
+        const conditions = { thesisGroupId };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/thesisGroups/checkValidDateCreateThesis?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

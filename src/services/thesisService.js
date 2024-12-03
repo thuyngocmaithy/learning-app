@@ -100,6 +100,21 @@ export const getByThesisGroupIdAndCheckApprove = async (conditions) => {
     }
 };
 
+export const getListThesisJoined = async (instructorId, thesisGroup) => {
+    try {
+        const conditions = { instructorId, thesisGroup };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/thesis/getListThesisJoined?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+
 export const importThesis = async (data) => {
     try {
         const createUserId = await getUseridFromLocalStorage();
