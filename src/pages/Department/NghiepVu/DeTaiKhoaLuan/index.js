@@ -267,7 +267,7 @@ function DeTaiKhoaLuan() {
 
             // Tạo Map với thesisId làm key
             const thesisMap = new Map();
-            allRegisters.forEach((item) => {
+            allRegisters?.forEach((item) => {
                 const thesisId = item.thesis.thesisId;
                 if (!thesisMap.has(thesisId)) {
                     thesisMap.set(thesisId, []);

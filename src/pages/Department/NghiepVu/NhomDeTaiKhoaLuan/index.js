@@ -101,8 +101,8 @@ function NhomDeTaiKhoaLuan() {
         },
         {
             title: 'Ngành',
-            dataIndex: ['faculty'],
-            key: 'faculty',
+            dataIndex: 'facultyName',
+            key: 'facultyName',
         },
         {
             title: 'Năm thực hiện',
@@ -118,8 +118,8 @@ function NhomDeTaiKhoaLuan() {
         },
         {
             title: 'Trạng thái',
-            key: 'status',
-            dataIndex: ['status'],
+            key: 'statusName',
+            dataIndex: 'statusName',
             align: 'center',
             width: '190px',
             render: (_, record) => (
@@ -196,7 +196,7 @@ function NhomDeTaiKhoaLuan() {
                 const resultData = result.data.data.map((item) => {
                     return {
                         ...item,
-                        faculty: item.faculty.facultyName,
+                        facultyName: item.faculty.facultyName,
                         // startCreateThesisDate và endCreateThesisDate đều null
                         // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh

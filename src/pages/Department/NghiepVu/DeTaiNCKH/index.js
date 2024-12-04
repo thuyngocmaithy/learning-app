@@ -285,7 +285,7 @@ function DeTaiNCKH() {
 
             // Tạo Map với SRId làm key
             const SRMap = new Map();
-            allRegisters.forEach((item) => {
+            allRegisters?.forEach((item) => {
                 const SRId = item.scientificResearch.scientificResearchId;
                 if (!SRMap.has(SRId)) {
                     SRMap.set(SRId, []);

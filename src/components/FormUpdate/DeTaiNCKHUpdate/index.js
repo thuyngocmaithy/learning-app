@@ -180,11 +180,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             let scientificResearchData = {
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
-                instructorId: values.instructor.value,
-                statusId: values.status.value,
+                instructor: values.instructor,
+                statusId: values.status,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
-                scientificResearchGroup: SRGId || values.srgroup.value,
+                scientificResearchGroup: SRGId || values.srgroup,
                 startDate: new Date(values.srDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.srDate[1].format('YYYY-MM-DD HH:mm')),
             };

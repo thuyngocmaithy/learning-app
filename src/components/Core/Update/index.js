@@ -17,8 +17,9 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
 
     const handleCancel = useCallback(() => {
         setOpen(false);
+        if (form) form.resetFields();
         if (onClose) onClose();
-    }, [onClose]);
+    }, [form, onClose]);
 
     const footer = useMemo(() => {
         return isUpdate || fullTitle

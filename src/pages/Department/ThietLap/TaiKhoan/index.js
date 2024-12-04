@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './TaiKhoan.module.scss';
-import { Tag } from 'antd';
+import { Input, Tag } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -40,11 +40,6 @@ function TaiKhoan() {
             key: 'username',
         },
         {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
-        },
-        {
             title: 'Quyền hệ thống',
             key: 'permission',
             dataIndex: ['permission', 'permissionName'],
@@ -58,6 +53,17 @@ function TaiKhoan() {
                     }>
                         {record.permission.permissionName.toUpperCase()}
                     </Tag >
+                )
+            },
+        },
+        {
+            title: 'Tài khoản do hệ thống tạo',
+            key: 'isSystem',
+            dataIndex: 'isSystem',
+            align: 'center',
+            render: (_, record) => {
+                return (
+                    <Input type='checkbox' checked={record.isSystem} readOnly />
                 )
             },
         },

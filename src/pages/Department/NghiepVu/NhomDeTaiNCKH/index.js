@@ -101,8 +101,8 @@ function NhomDeTaiNCKH() {
         },
         {
             title: 'Ngành',
-            dataIndex: ['faculty'],
-            key: 'faculty',
+            dataIndex: ['facultyName'],
+            key: 'facultyName',
         },
         {
             title: 'Năm thực hiện',
@@ -118,7 +118,7 @@ function NhomDeTaiNCKH() {
         },
         {
             title: 'Trạng thái',
-            key: 'status',
+            key: 'statusName',
             dataIndex: ['status', 'statusName'],
             align: 'center',
             width: '190px',
@@ -195,7 +195,8 @@ function NhomDeTaiNCKH() {
                 const resultData = result.data.data.map((item) => {
                     return {
                         ...item,
-                        faculty: item.faculty.facultyName,
+                        facultyName: item.faculty.facultyName,
+                        statusName: item.status.statusName,
                         // startCreateSRDate và endCreateSRDate đều null
                         // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh
@@ -598,3 +599,4 @@ function NhomDeTaiNCKH() {
 }
 
 export default NhomDeTaiNCKH;
+

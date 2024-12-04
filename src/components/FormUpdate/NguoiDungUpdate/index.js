@@ -165,12 +165,15 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleChangeIsStudent = (value) => {
         setIsStudent(value);
+        console.log(value);
+
     };
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const [startYear, endYear] = values.nien_khoa;
+            const [startYear, endYear] = values.nien_khoa || [];
+
             let response;
             let userData = {
                 userId: values.userId,
@@ -184,9 +187,9 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 class: values.class || '',
                 faculty: selectedFaculty,
                 major: selectedMajor,
-                nien_khoa: startYear.year() + "-" + endYear.year() || '',
-                firstAcademicYear: startYear.year(),
-                lastAcademicYear: endYear.year(),
+                nien_khoa: (startYear?.year() && endYear?.year()) ? startYear?.year() + "-" + endYear?.year() : null,
+                firstAcademicYear: startYear?.year(),
+                lastAcademicYear: endYear?.year(),
                 sex: values.sex || '',
                 cccd: values.cccd || '',
                 khoi: values.khoi || '',
@@ -383,7 +386,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             name="nien_khoa"
                             label="Niên khóa"
                             hidden={isStudent ? false : true}
-                            rules={[{ required: true, message: 'Vui lòng nhập niên khóa' }]}
+                            rules={isStudent ? [{ required: true, message: 'Vui lòng nhập niên khóa' }] : []}
                         >
                             <RangePicker
                                 picker="year"
@@ -400,11 +403,11 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Col span={12}>
                         <FormItem name="hoc_vi" label="Học vị (giảng viên)" hidden={isStudent ? true : false}>
                             <Select >
-                                <Option value="ThS">Thạc sĩ</Option>
-                                <Option value="NCS">Nghiên cứu sinh</Option>
-                                <Option value="TS">Tiến sĩ</Option>
-                                <Option value="PGS">Phó giáo sư</Option>
-                                <Option value="GS">Giáo sư</Option>
+                                <Option value="Thạc sĩ">Thạc sĩ</Option>
+                                <Option value="Nghiên cứu sinh">Nghiên cứu sinh</Option>
+                                <Option value="Tiến sĩ">Tiến sĩ</Option>
+                                <Option value="Phó giáo sư">Phó giáo sư</Option>
+                                <Option value="Giáo sư">Giáo sư</Option>
                             </Select>
                         </FormItem>
                     </Col>

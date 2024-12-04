@@ -253,10 +253,10 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 <FormItem
                     hidden={ThesisGroupIdFromUrl}
                     name="thesisgroup"
-                    label="Nhóm đề tài KhoaLuan"
+                    label="Nhóm đề tài khóa luận"
                     rules={ThesisGroupIdFromUrl ? [] : [
                         { required: true, message: 'Vui lòng chọn nhóm đề tài KhoaLuan!' },
-                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài KhoaLuan không được để trống!') }
+                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài khóa luận không được để trống!') }
                     ]}
                 >
                     <Select

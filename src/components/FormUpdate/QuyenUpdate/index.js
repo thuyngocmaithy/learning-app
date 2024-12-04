@@ -61,7 +61,6 @@ const QuyenUpdate = memo(function QuyenUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} quyền thành công!`);
-                handleCloseModal();
                 if (reLoad) reLoad(true);
             }
 
@@ -77,7 +76,7 @@ const QuyenUpdate = memo(function QuyenUpdate({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
-
+            form={form}
         >
             <Form form={form}>
 
