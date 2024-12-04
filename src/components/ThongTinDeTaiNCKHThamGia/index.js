@@ -2,7 +2,7 @@ import classNames from 'classnames/bind';
 import styles from './ThongTinDeTaiNCKHThamGia.module.scss';
 import { Descriptions, Dropdown, Tag } from 'antd';
 import { message } from '../../hooks/useAntdApp';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getStatusByType } from '../../services/statusService';
 import { updateSRById } from '../../services/scientificResearchService';
 import dayjs from 'dayjs';
@@ -84,7 +84,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
         fetchStatusByType();
     }, [statusSelected, statusType]);
 
-    const onClick = async ({ key }) => {
+    const onClick = useCallback(async ({ key }) => {
         const selectedItem = statusOptions.find((item) => item.key === key);
         if (selectedItem) {
             const selected = {
@@ -108,7 +108,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                 console.error(error);
             }
         }
-    };
+    }, [scientificResearch.scientificResearchId, statusOptions]);
 
     return (
         <div className={cx('wrapper-info-detail')}>
@@ -128,6 +128,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
                                         }}
                                         trigger={['click']}
                                         placement="bottom"
+                                        overlayStyle={{ width: 'fit-content', maxWidth: '200px' }}
                                         arrow={{
                                             pointAtCenter: true,
                                         }}

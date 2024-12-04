@@ -131,6 +131,7 @@ function ThongTinDeTaiKhoaLuanThamGia({ thesis }) {
                                         arrow={{
                                             pointAtCenter: true,
                                         }}
+                                        overlayStyle={{ width: 'fit-content', maxWidth: '200px' }}
                                     >
                                         <p>{statusSelected.label}</p>
                                     </Dropdown>

@@ -14,21 +14,6 @@ d.container-detail {
 
 }
 
-.container-description {
-    margin: 30px 10px;
-    box-shadow: var(--box-shadow-3);
-    border-radius: 17px;
-    padding: 20px;
-    font-size: 15px;
-    width: 700px;
-    min-height: 250px;
-
-    h4 {
-        color: var(--primary);
-        margin-bottom: 10px;
-    }
-}
-
 .btn-approve {
     z-index: 999;
 }
