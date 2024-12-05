@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllSRGroup = async () => {
     try {
@@ -73,3 +74,32 @@ export const getWhere = async (conditions) => {
         throw error;
     }
 };
+
+
+export const importScientificResearchGroup = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/scientificResearchGroups/import', {
+            SRGs: data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearchGroupServive - importScientificResearch - error]:', error);
+        throw error;
+    }
+};
+
+export const checkValidDateCreateSR = async (scientificResearchGroupId) => {
+    try {
+        const conditions = { scientificResearchGroupId };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/scientificResearchGroups/checkValidDateCreateSR?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+

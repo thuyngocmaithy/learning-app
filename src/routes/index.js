@@ -33,6 +33,7 @@ import TrangThai from '../pages/Department/ThietLap/TrangThai';
 import LoginForm from '../pages/Shared/Login';
 import DeTaiNCKHThamGia from '../pages/Shared/DeTaiNCKHThamGia';
 import DeTaiKhoaLuanThamGia from '../pages/Shared/DeTaiKhoaLuanThamGia';
+import DanhSachThongBao from '../pages/Shared/DanhSachThongBao';
 
 // LAYOUT
 import { DepartmentLayout } from '../layouts';
@@ -71,6 +72,10 @@ const privateRoutes = [
     { path: config.routes.ThanhPhanKhungDT, component: ThanhPhanKhungDT, layout: DepartmentLayout },
     { path: config.routes.NganhChuyenNganh, component: NganhChuyenNganh, layout: DepartmentLayout },
     { path: config.routes.TrangThai, component: TrangThai, layout: DepartmentLayout },
+
+    // DÙNG CHUNG
+    { path: config.routes.ThongBao, component: DanhSachThongBao },
+
 
 ];
 

@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import { Checkbox, Input, Spin } from 'antd';
+import { Checkbox, Input } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableDepartment.module.scss';
-import { callKhungCTDT } from '../../services/studyFrameService';
-import { getWhere } from '../../services/semesterService';
 import { debounce } from 'lodash';  // Sử dụng lodash để debounce input
 
 const cx = classNames.bind(styles);
@@ -54,65 +52,25 @@ const MemoizedInput = memo(({ semesterId, subjectId, value, onChange }) => {
 });
 
 const TableDepartment = ({
-    data,
+    frameComponents,
+    totalSubject,
+    listSemester,
+    reRenderProgress,
     selectedSemesters,
     setSelectedSemesters,
     teacherAssignments,
     setTeacherAssignments,
     setPercentArrange,
+    setReRenderProgress,
     height = 600
 }) => {
-    const [frameComponents, setFrameComponents] = useState([]); // Dữ liệu cấu trúc chương trình
-    const [listSemester, setListSemester] = useState([]); // Danh sách các học kỳ
-    const [isLoading, setIsLoading] = useState(true); // Trạng thái loading
-    const [totalSubject, setTotalSubject] = useState(null);
     const [subjectArranged, setSubjectArranged] = useState(null);
 
     useEffect(() => {
         if (totalSubject && subjectArranged) {
             setPercentArrange(((parseInt(subjectArranged) / parseInt(totalSubject)) * 100).toFixed(2))
         }
-    }, [totalSubject, subjectArranged])
-
-    // Hàm tải danh sách học kỳ
-    const fetchSemester = useCallback(async () => {
-        try {
-            const response = await getWhere({ cycle: data.cycle.cycleId });
-            if (response.status === 200) {
-                setListSemester(response.data.data.filter(item => item.semesterName !== 3));
-            }
-        } catch (error) {
-            console.error('Lỗi khi tải danh sách học kỳ:', error);
-        }
-    }, [data]);
-
-    // Hàm tải dữ liệu cấu trúc chương trình
-    const fetchFrameComponents = useCallback(async () => {
-        try {
-            const response = await callKhungCTDT(data.frameId);
-            if (Array.isArray(response)) {
-                // Đếm tổng số lượng subject trong tất cả subjectInfo
-                const totalSubjects = response.reduce((count, item) => {
-                    // Kiểm tra nếu subjectInfo là một mảng và thêm độ dài của nó vào count
-                    return count + (Array.isArray(item.subjectInfo) ? item.subjectInfo.length : 0);
-                }, 0);
-                setTotalSubject(totalSubjects);
-                setFrameComponents(response);
-            }
-        } catch (error) {
-            console.error('Lỗi khi tải cấu trúc chương trình:', error);
-        }
-    }, [data]);
-
-    // Gộp 2 hàm tải dữ liệu vào useEffect
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            await Promise.all([fetchSemester(), fetchFrameComponents()]);
-            setIsLoading(false);
-        };
-        fetchData();
-    }, [fetchSemester, fetchFrameComponents]);
+    }, [totalSubject, subjectArranged, setPercentArrange])
 
     // Tối ưu cập nhật state bằng Set
     const handleCheckboxChange = useCallback((idSelect) => {
@@ -125,7 +83,7 @@ const TableDepartment = ({
             }
             return new Set(updated);  // Đảm bảo tạo ra một Set mới để React nhận diện sự thay đổi
         });
-    }, []);
+    }, [setSelectedSemesters]);
 
     // Tối ưu cập nhật state bằng Map
     const handleTeacherChange = useCallback((semesterId, subjectId, teacherName) => {
@@ -134,7 +92,7 @@ const TableDepartment = ({
             updated.set(`${semesterId}-${subjectId}`, teacherName);
             return new Map(updated);  // Đảm bảo tạo ra một Map mới để React nhận diện sự thay đổi
         });
-    }, []);
+    }, [setTeacherAssignments]);
 
     // Chuẩn bị dữ liệu đã xử lý để giảm tính toán khi render
     const processedData = useMemo(() => {
@@ -150,7 +108,7 @@ const TableDepartment = ({
     }, [frameComponents]);
 
     useEffect(() => {
-        if (processedData && listSemester && selectedSemesters) {
+        if (processedData && listSemester && selectedSemesters && reRenderProgress) {
             let totalSubjects = 0;
             const listSubject = [];
 
@@ -175,8 +133,10 @@ const TableDepartment = ({
 
             // Cập nhật số lượng môn đã mở
             setSubjectArranged(totalSubjects);
+            // Set lại ReRenderProgress
+            setReRenderProgress(false);
         }
-    }, [processedData, listSemester, selectedSemesters]);
+    }, [processedData, listSemester, selectedSemesters, reRenderProgress, setReRenderProgress]);
 
 
     // Đệ quy để render dữ liệu
@@ -297,15 +257,6 @@ const TableDepartment = ({
             ...semesterColumns,
         ];
     }, [listSemester]);
-
-    // Hiển thị loading khi dữ liệu chưa sẵn sàng
-    if (isLoading) {
-        return (
-            <div className={cx('container-loading')} style={{ height }}>
-                <Spin size="large" />
-            </div>
-        );
-    }
 
     // Render bảng
     return (

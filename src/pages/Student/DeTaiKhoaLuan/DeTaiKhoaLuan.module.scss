@@ -2,23 +2,43 @@
     margin-bottom: 30px;
 }
 
-.info {
+
+.container-header {
     display: flex;
+    justify-content: space-between;
     margin-bottom: 30px;
-}
 
-.title {
-    margin-left: 15px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    text-align: left;
-}
+    .info {
+        display: flex;
+        margin-bottom: 30px;
 
-.icon {
-    display: flex;
-    width: 30px;
-    color: var(--primary);
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            max-width: 900px;
+            line-height: 2;
+            text-align: left;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+
+    .wrapper-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        >div {
+            margin-bottom: 10px;
+        }
+    }
+
 }
 
 // list scientificResearch

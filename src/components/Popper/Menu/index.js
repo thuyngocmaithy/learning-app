@@ -32,6 +32,7 @@ function Menu({ children, items = [], hideOnClick = true, onChange = defaultFn }
                             onChange(item);
                         }
                     }}
+                    disabled={item.disabled}
                 />
             );
         });

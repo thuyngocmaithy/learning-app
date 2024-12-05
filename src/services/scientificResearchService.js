@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllSR = async () => {
     try {
@@ -87,6 +88,21 @@ export const getWhere = async (conditions) => {
     }
 };
 
+
+export const getListSRJoined = async (instructorId, scientificResearchGroup) => {
+    try {
+        const conditions = { instructorId, scientificResearchGroup };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/scientificResearchs/getListSRJoined?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
 export const getBySRGIdAndCheckApprove = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
@@ -98,3 +114,19 @@ export const getBySRGIdAndCheckApprove = async (conditions) => {
         throw error;
     }
 };
+
+
+export const importScientificResearch = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/scientificResearchs/import', {
+            data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearchServive - importScientificResearch - error]:', error);
+        throw error;
+    }
+};
+

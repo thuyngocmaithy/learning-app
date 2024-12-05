@@ -98,3 +98,14 @@ export const getWhere = async (conditions) => {
         throw error;
     }
 };
+
+export const getByListSRId = async (scientificResearchIds) => {
+    try {
+        const response = await api.get(`/scientificResearch-user/getByListSRId/${scientificResearchIds}`);
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearch-userServive - getByListSRId - error] : ', error);
+        throw error;
+    }
+}
+

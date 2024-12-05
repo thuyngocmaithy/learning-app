@@ -36,7 +36,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
 
     return (
         <Form form={form} className={cx("advanced_search")} style={formStyle} onFinish={onSearch}>
-            <Row gutter={[16, 16]} className={cx('row-filter')}>
+            <Row gutter={[16, 0]} className={cx('row-filter')}>
                 {getFields && getFields.map((field, index) => (
                     <Col xs={24} sm={12} md={8} lg={6} key={index}>
                         {field}
@@ -45,7 +45,7 @@ function SearchForm({ getFields, onSearch, onReset }) {
             </Row>
             <div
                 style={{
-                    marginTop: "30px",
+                    marginTop: "20px",
                     textAlign: 'right',
                 }}
             >

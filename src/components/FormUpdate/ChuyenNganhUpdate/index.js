@@ -3,8 +3,8 @@ import {
     Input,
     Select,
     Form,
-    message,
 } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { getAllFaculty } from '../../../services/facultyService';
@@ -14,14 +14,6 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
     const [form] = Form.useForm();
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [selectedFaculty, setSelectedFaculty] = useState(null);
-
-
-    useEffect(() => {
-        if (!showModal) {
-            form.resetFields();
-        }
-    }, [showModal, form]);
-
 
     useEffect(() => {
         const fetchFaculties = async () => {
@@ -34,18 +26,20 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                     }));
                     setFacultyOptions(options);
 
-                    if (showModal && isUpdate && showModal.faculty) {
-                        const facultyId = showModal.faculty.facultyId;
-                        setSelectedFaculty(facultyId);
-                        form.setFieldValue('facultyId', facultyId);
-                    }
+                    const facultyId = showModal.faculty.facultyId;
+                    setSelectedFaculty(facultyId);
+                    form.setFieldValue('facultyId', facultyId);
+
                 }
             } catch (error) {
                 console.error('Error fetching faculties:', error);
             }
         };
-        fetchFaculties();
-    }, [showModal, form]);
+
+        if (showModal && isUpdate)
+            fetchFaculties();
+
+    }, [showModal, form, isUpdate]);
 
 
     useEffect(() => {

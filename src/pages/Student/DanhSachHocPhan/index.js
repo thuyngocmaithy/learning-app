@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, memo } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
@@ -8,7 +8,8 @@ import {
     getUserById,
     saveRegisterSubjects
 } from '../../../services/userService';
-import { Descriptions, message, Radio, Spin } from 'antd';
+import { Descriptions, Empty, Radio, Spin } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { findKhungCTDTByUserId } from '../../../services/studyFrameService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { createSemester, getSemesterById } from '../../../services/semesterService';
@@ -19,15 +20,17 @@ function DanhSachHocPhan() {
     const { userId } = useContext(AccountLoginContext);
     const [registeredSubjects, setRegisteredSubjects] = useState({});
     const [frameId, setFrameId] = useState();
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [valueStatus, setValueSatus] = useState('Tất cả');
 
     useEffect(() => {
         const fetchKhungCTDT = async () => {
+            setIsLoading(true);
             try {
                 const res = await findKhungCTDTByUserId(userId);
                 if (res.status === 200) {
-                    setFrameId(res.data.data.frameId);
+                    console.log(res.data?.data?.frameId)
+                    setFrameId(res.data?.data?.frameId);
                 }
             } catch (error) {
                 console.error(error);
@@ -37,7 +40,8 @@ function DanhSachHocPhan() {
             }
 
         }
-        fetchKhungCTDT();
+        if (userId)
+            fetchKhungCTDT();
     }, [userId])
 
     const handleSave = async () => {
@@ -161,14 +165,17 @@ function DanhSachHocPhan() {
                 </div>
             </div>
             <Descriptions items={items} className={cx('description')} />
-            <Table
-                frameId={frameId}
-                registeredSubjects={registeredSubjects}
-                setRegisteredSubjects={setRegisteredSubjects}
-                status={valueStatus}
-            />
+            {frameId
+                ? <Table
+                    frameId={frameId}
+                    registeredSubjects={registeredSubjects}
+                    setRegisteredSubjects={setRegisteredSubjects}
+                    status={valueStatus}
+                />
+                : <Empty className={cx("empty")} description="Chưa có dữ liệu cho chương trình đào tạo của bạn" />
+            }
         </div >
     );
 }
 
-export default DanhSachHocPhan;
+export default memo(DanhSachHocPhan);

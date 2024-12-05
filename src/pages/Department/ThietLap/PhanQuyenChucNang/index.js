@@ -3,11 +3,12 @@ import styles from './PhanQuyenChucNang.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo, useContext } from 'react';
 import { deletePermissions, getAll as getAllPermission } from '../../../../services/permissionService';
 import { deleteFeatures, saveTreeFeature } from '../../../../services/featureService';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
-import { message, Tabs } from 'antd';
+import { Tabs } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import ChucNangUpdate from '../../../../components/FormUpdate/ChucNangUpdate';
@@ -16,10 +17,20 @@ import TreeFeature from '../../../../components/TreeFeature';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ChucNangDetail from '../../../../components/FormDetail/ChucNangDetail';
 import PhanQuyenUpdate from '../../../../components/FormUpdate/PhanQuyenUpdate';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
 function PhanQuyenChucNang() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
     const [isLoadingPermission, setIsLoadingPermission] = useState(true);
     const heightContainerLoadingRef = useRef(0);
     const [showModalFeature, setShowModalFeature] = useState(false);
@@ -33,18 +44,16 @@ function PhanQuyenChucNang() {
     const [reLoadStructureFeature, setReLoadStructureFeature] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -171,6 +180,7 @@ function PhanQuyenChucNang() {
                                 });
                                 setIsUpdatePermission(true);
                             }}
+                            disabled={!permissionDetailData?.isEdit}
                         >
                             Sửa
                         </Button>
@@ -180,7 +190,7 @@ function PhanQuyenChucNang() {
                 align: 'center',
             },
         ],
-        [],
+        [permissionDetailData],
     );
 
     // Hàm xử lý xóa các quyền đã chọn
@@ -265,7 +275,6 @@ function PhanQuyenChucNang() {
                     </div>
                 </div>
                 <div className={cx('wrapper-toolbar')}>
-
                     <Toolbar
                         type={'Tạo mới'}
                         onClick={() => {
@@ -277,18 +286,28 @@ function PhanQuyenChucNang() {
                                 setIsUpdatePermission(false);
                             }
                         }}
+                        isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => {
-                        if (tabActive === 2) {
-                            deleteConfirm('chức năng', handleDeleteFeature)
-                        }
-                        if (tabActive === 1) {
-                            deleteConfirm('quyền', handledeletePermissions)
-                        }
+                    <Toolbar
+                        type={'Xóa'}
+                        onClick={() => {
+                            if (tabActive === 2) {
+                                deleteConfirm('chức năng', handleDeleteFeature)
+                            }
+                            if (tabActive === 1) {
+                                deleteConfirm('quyền', handledeletePermissions)
+                            }
+                        }}
+                        isVisible={permissionDetailData?.isDelete}
+                    />
+                    {tabActive === 2 &&
+                        <Toolbar
+                            type={'Lưu cấu trúc'}
+                            backgroundCustom="#FF9F9F"
+                            onClick={handleSaveFeature}
+                            isVisible={permissionDetailData?.isAdd && permissionDetailData?.isEdit}
+                        />
                     }
-                    } />
-
-                    {tabActive === 2 && <Toolbar type={'Lưu cấu trúc'} backgroundCustom="#FF9F9F" onClick={handleSaveFeature} />}
                 </div>
             </div>
             <Tabs

@@ -1,15 +1,18 @@
 import React, { useState, memo, useEffect, useContext } from 'react';
-import { Input, InputNumber, Select, Form, message, Col, DatePicker, Row } from 'antd';
+import { Input, InputNumber, Select, Form, Col, DatePicker, Row } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getUserById } from '../../../services/userService';
+import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getAllFaculty } from '../../../services/facultyService';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import notifications from '../../../config/notifications';
+import { useSocketNotification } from '../../../context/SocketNotificationContext';
 
 const { RangePicker } = DatePicker;
 dayjs.extend(utc);
@@ -21,12 +24,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     setShowModal,
     reLoad
 }) {
+    const { sendNotification } = useSocketNotification();
     const [form] = useForm(); // Sử dụng hook useForm
     const [statusOptions, setStatusOptions] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState(null);
     const { userId } = useContext(AccountLoginContext);
     const [facultyOptions, setFacultyOptions] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
 
     const statusType = 'Tiến độ nhóm đề tài NCKH';
 
@@ -41,10 +43,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         label: status.statusName,
                     }));
                     setStatusOptions(options);
-                    // Nếu có giá trị đã chọn, set lại giá trị đó
-                    if (selectedStatus) {
-                        setSelectedStatus(selectedStatus);
-                    }
                 }
             } catch (error) {
                 console.error(' [ Ngànhluanupdate - fetchStatusByType - Error ] :', error);
@@ -52,7 +50,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         };
 
         fetchStatusByType();
-    }, [statusType, selectedStatus]);
+    }, [statusType]);
 
     // Fetch data khi component được mount
     //lấy danh sách các ngành ra ngoài thẻ select
@@ -62,26 +60,16 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             if (response && response.data) {
                 const options = response.data.map((faculty) => ({
                     value: faculty.facultyId,
-                    label: faculty.facultyName,
+                    label: faculty.facultyId + " - " + faculty.facultyName,
                 }));
                 setFacultyOptions(options);
-
-                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
-                if (selectedFaculty) {
-                    const selectedOption = options.find((option) => option.value === selectedFaculty);
-                    if (selectedOption) {
-                        setSelectedFaculty(selectedOption.value);
-                    }
-                }
             }
         };
 
         fetchFaculties();
-    }, [selectedFaculty]);
+    }, []);
 
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-    };
+
 
 
     useEffect(() => {
@@ -92,16 +80,22 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             form.setFieldsValue({
                 scientificResearchGroupName: showModal.scientificResearchGroupName,
                 description: showModal.description,
-                faculty: showModal.faculty.facultyName,
-                status: showModal.status.statusId,
+                ...(showModal.faculty && {
+                    faculty: {
+                        value: showModal.faculty.facultyId,
+                    }
+                }),
+                ...(showModal.status && {
+                    status: {
+                        value: showModal.status.statusId,
+                    }
+                }),
                 startYear: showModal.startYear,
                 finishYear: showModal.finishYear,
                 ...(showModal.startCreateSRDate && showModal.endCreateSRDate) && {
                     createSRDate: [startCreateSRDate, endCreateSRDate]
                 }
             });
-            setSelectedFaculty(showModal.faculty.facultyId);
-            setSelectedStatus(showModal.status.statusId);
         }
     }, [showModal, isUpdate, form]);
 
@@ -118,10 +112,10 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             const values = await form.validateFields();
             let scientificResearchGroupData = {
                 scientificResearchGroupName: values.scientificResearchGroupName,
-                statusId: selectedStatus,
+                statusId: values.status.value,
                 startYear: values.startYear,
                 finishYear: values.finishYear,
-                facultyId: selectedFaculty,
+                facultyId: values.faculty.value,
                 startCreateSRDate: new Date(values.createSRDate[0].$d),
                 endCreateSRDate: new Date(values.createSRDate[1].$d),
             };
@@ -143,11 +137,34 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} nhóm đề tài thành công!`);
+                if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
 
         } catch (error) {
             console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearchGroup `, error);
+        }
+    };
+
+    const handleSendNotification = async (SRGData) => {
+        try {
+            const user = await getUserById(userId);
+
+            //lấy danh sách giảng viên theo ngành
+            const responseIntructor = await getUsersByFaculty(SRGData.faculty.facultyId);
+            if (responseIntructor && responseIntructor.data) {
+                var listUserReceived = responseIntructor.data;
+
+            }
+
+            const ListNotification = await notifications.getNhomNCKHNotification('create', SRGData, user.data, listUserReceived);
+
+            ListNotification.forEach(async (itemNoti) => {
+                await sendNotification(itemNoti);
+            })
+
+        } catch (err) {
+            console.error(err)
         }
     };
 
@@ -193,12 +210,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                                 showSearch
                                 placeholder="Chọn ngành"
                                 optionFilterProp="children"
-                                onChange={handleFacultySelect}
-                                value={selectedFaculty}
                                 filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={facultyOptions}
+                                labelInValue
                             />
                         </FormItem>
 
@@ -211,12 +227,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                                 showSearch
                                 placeholder="Chọn trạng thái"
                                 optionFilterProp="children"
-                                value={selectedStatus}
-                                onChange={(value) => setSelectedStatus(value)}
                                 filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={statusOptions}
+                                labelInValue
                             />
                         </FormItem>
 

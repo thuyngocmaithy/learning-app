@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllThesisGroup = async () => {
     try {
@@ -66,6 +67,33 @@ export const getWhere = async (conditions) => {
     try {
         const queryParams = new URLSearchParams(conditions).toString();
         const url = `/thesisGroups/getWhere?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const importThesisGroup = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/thesisGroups/import', {
+            thesisGroups: data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[thesisGroupService - importThesisGroup - error]:', error);
+        throw error;
+    }
+};
+
+export const checkValidDateCreateThesis = async (thesisGroupId) => {
+    try {
+        const conditions = { thesisGroupId };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/thesisGroups/checkValidDateCreateThesis?${queryParams}`;
 
         const response = await api.get(url);
         return response;

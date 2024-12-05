@@ -13,10 +13,17 @@
     }
 }
 
+.wrapper-toolbar {
+    cursor: pointer;
+}
+
 .wrapper-toolbar+.wrapper-toolbar {
     margin-left: 20px;
 }
 
 .icon {
     color: var(--blue-900);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }

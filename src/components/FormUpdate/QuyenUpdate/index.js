@@ -1,5 +1,6 @@
 import React, { memo, useContext, useEffect } from 'react';
-import { Input, Form, message } from 'antd';
+import { Input, Form } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -60,7 +61,6 @@ const QuyenUpdate = memo(function QuyenUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} quyền thành công!`);
-                handleCloseModal();
                 if (reLoad) reLoad(true);
             }
 
@@ -76,7 +76,7 @@ const QuyenUpdate = memo(function QuyenUpdate({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
-
+            form={form}
         >
             <Form form={form}>
 

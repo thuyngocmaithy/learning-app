@@ -78,6 +78,21 @@
     margin-left: 10px;
 }
 
+.container-detail {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.label-detail {
+    margin-right: 10px;
+}
+
+.item-description {
+    margin-top: 7px;
+}
+
+
 @media only screen and (max-width: 768px) {
     .container-header {
         flex-direction: column;

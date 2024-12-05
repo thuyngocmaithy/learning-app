@@ -1,8 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './TaiKhoan.module.scss';
-import { message, Tag } from 'antd';
+import { Input, Tag } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
@@ -10,10 +11,21 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm } from '../../../../components/Core/Delete';
 import TaiKhoanUpdate from '../../../../components/FormUpdate/TaiKhoanUpdate';
 import { deleteAccounts, getAllAccount } from '../../../../services/accountService';
+import { useLocation } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import config from '../../../../config';
 
 const cx = classNames.bind(styles);
 
 function TaiKhoan() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
@@ -26,11 +38,6 @@ function TaiKhoan() {
             title: 'Tên tài khoản',
             dataIndex: 'username',
             key: 'username',
-        },
-        {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
         },
         {
             title: 'Quyền hệ thống',
@@ -50,6 +57,17 @@ function TaiKhoan() {
             },
         },
         {
+            title: 'Tài khoản do hệ thống tạo',
+            key: 'isSystem',
+            dataIndex: 'isSystem',
+            align: 'center',
+            render: (_, record) => {
+                return (
+                    <Input type='checkbox' checked={record.isSystem} readOnly />
+                )
+            },
+        },
+        {
             title: 'Action',
             key: 'action',
             align: 'center',
@@ -65,6 +83,7 @@ function TaiKhoan() {
                             showModal(record);
                             setIsUpdate(true);
                         }}
+                        disabled={!permissionDetailData?.isEdit}
                     >
                         Sửa
                     </ButtonCustom>
@@ -140,8 +159,13 @@ function TaiKhoan() {
                             setShowModal(true);
                             setIsUpdate(false);
                         }}
+                        isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('tài khoản', handleDelete)} />
+                    <Toolbar
+                        type={'Xóa'}
+                        onClick={() => deleteConfirm('tài khoản', handleDelete)}
+                        isVisible={permissionDetailData?.isDelete}
+                    />
                 </div>
 
             </div>

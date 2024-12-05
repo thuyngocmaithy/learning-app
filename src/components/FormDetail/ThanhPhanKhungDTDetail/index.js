@@ -43,14 +43,13 @@ const ThanhPhanKhungDTDetail = memo(function ThanhPhanKhungDTDetail({
                             subjectBeforeId: item.subject.subjectBefore?.subjectId,
                         };
                     });
-                    console.log(subjects); // Check for unique keys here
                     setListSubject(subjects);
                 }
                 else {
                     setListSubject([])
                 }
             } catch (error) {
-                console.log('ThanhPhanKhungDTDetail - fetchSubjectOfFC - error:', error);
+                console.error('ThanhPhanKhungDTDetail - fetchSubjectOfFC - error:', error);
 
             }
             finally {

@@ -2,130 +2,103 @@ import config from ".";
 import { getUserById } from "../services/userService";
 
 const notifications = {
-    getNCKHNotification: async (operation, data, fromUser, listUserReceived = []) => {
+    getNCKHNotification: async (operation, data, fromUser, listUserReceived = [], content) => {
         const messages = {
-            // Gửi thông báo tạo cho giảng viên hướng dẫn
             create: `Đề tài NCKH ${data.scientificResearchId} đã được giảng viên ${fromUser.fullname} tạo`,
-            // Gửi thông báo đăng ký của sinh viên cho giảng viên
             registerForInstructor: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}`,
-            // Gửi thông báo sinh viên đăng ký cho thành viên cùng nhóm
             registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}, với sự tham gia của bạn`,
-            // Gửi thông báo duyệt cho sinh viên được duyệt
             approveForStudent: `Bạn được duyệt tham gia đề tài NCKH ${data.scientificResearchId}`,
-            // Gửi thông báo duyệt cho giảng viên hướng dẫn nếu ngành duyệt
             approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài NCKH ${data.scientificResearchId}`,
-            // Gửi thông báo add người theo dõi
             follow: `Bạn được thêm theo dõi đề tài NCKH ${data.scientificResearchId}`,
-            // Gửi thông báo ghi chú cho người theo dõi
             note: `${fromUser.fullname} vừa ghi chú đề tài NCKH ${data.scientificResearchId}`
         };
 
-        let notifications = [];
+        const notifications = [];
+        const addNotification = (title, type, url, toUsers, content = null) => {
+            if (toUsers.length > 0) {
+                notifications.push({
+                    title,
+                    type,
+                    url,
+                    toUsers,
+                    createUser: fromUser.userId,
+                    ...(content && { content })
+                });
+            }
+        };
+
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+        const getUrl = (base, tabIndex = null) =>
+            `${base}?scientificResearch=${data.scientificResearchId}${tabIndex ? `&tabIndex=${tabIndex}` : ''}`;
 
         switch (operation) {
             case 'create':
-                if (data.instructor && data.instructor.userId !== fromUser) {
-                    notifications.push({
-                        content: messages.create,
-                        type: 'info',
-                        url: `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
-                        toUser: data.instructor,
-                        createUser: fromUser,
-                    });
+                if (data.instructor?.userId !== fromUser.userId) {
+                    addNotification(
+                        messages.create,
+                        'info',
+                        `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
+                        [data.instructor.userId]
+                    );
                 }
                 break;
+
             case 'register':
-                // Thông báo cho GV hướng dẫn
-                notifications.push({
-                    content: messages.registerForInstructor,
-                    type: 'warning',
-                    url: `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
-                    toUser: data.instructor,
-                    createUser: fromUser,
-                });
+                addNotification(
+                    messages.registerForInstructor,
+                    'warning',
+                    `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
+                    [data.instructor.userId]
+                );
 
-                // Thông báo cho thành viên tham gia
-                if (listUserReceived.length > 0) {
-                    const notificationsToAdd = await Promise.all(
-                        listUserReceived.map(async (member) => {
-                            const toUser = await getUserById(member.userId);
-                            return {
-                                content: messages.registerWithMembers,
-                                type: 'warning',
-                                url: `${config.routes.DeTaiNCKH}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}&tabIndex=2`,
-                                toUser: toUser.data,
-                                createUser: fromUser,
-                            };
-                        })
-                    );
-                    // Thêm tất cả thông báo vào danh sách notifications
-                    notifications.push(...notificationsToAdd);
-                }
+                const memberNotifications = listUserReceived.map((member) => (
+                    addNotification(
+                        messages.registerWithMembers,
+                        'warning',
+                        getUrl(config.routes.DeTaiNCKH, 2),
+                        [member.userId]
+                    )
+                ));
 
+
+                notifications.push(...memberNotifications.filter(Boolean));
                 break;
 
             case 'approve':
-                // Thông báo cho sinh viên được duyệt
-                if (listUserReceived.length > 0) {
-                    const notificationsToAdd = await Promise.all(
-                        listUserReceived.map(async (member) => {
-                            const toUser = await getUserById(member.userId);
-                            return {
-                                content: messages.approveForStudent,
-                                type: 'success',
-                                url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}`,
-                                toUser: toUser.data,
-                                createUser: fromUser,
-                            };
-                        })
+                addNotification(
+                    messages.approveForStudent,
+                    'success',
+                    getUrl(config.routes.DeTaiNCKHThamGia),
+                    filteredUsers.map((member) => member.userId)
+                );
+
+                if (data.instructor?.userId !== fromUser.userId) {
+                    addNotification(
+                        messages.approveForInstructor(data.userId),
+                        'success',
+                        getUrl(config.routes.DeTaiNCKHThamGia),
+                        [data.instructor.userId]
                     );
-
-                    // Thêm tất cả thông báo vào danh sách notifications
-                    notifications.push(...notificationsToAdd);
-                }
-
-                // Thêm thông báo cho instructor
-                if (data.instructor && data.instructor.userId !== fromUser.userId) {
-                    notifications.push({
-                        content: messages.approveForInstructor(data.userId),
-                        type: 'success',
-                        url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}`,
-                        toUser: data.instructor,
-                        createUser: fromUser,
-                    });
                 }
                 break;
+
             case 'follow':
-                notifications.push({
-                    content: messages.follow,
-                    type: 'info',
-                    url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}`,
-                    toUser: data.toUser,
-                    createUser: fromUser,
-                });
+                addNotification(
+                    messages.follow,
+                    'info',
+                    getUrl(config.routes.DeTaiNCKHThamGia),
+                    data.toUsers.map((item) => item.userId)
+                );
                 break;
 
             case 'note':
-                // Lọc bỏ người gửi ra khỏi danh sách người nhận
-                const filteredList = listUserReceived.filter((member) => member.userId !== fromUser.userId);
-                // Thông báo cho sinh viên được duyệt
-                if (filteredList.length > 0) {
-                    const notificationsToAdd = await Promise.all(
-                        filteredList.map(async (member) => {
-                            const toUser = await getUserById(member.userId);
-                            return {
-                                content: messages.note,
-                                type: 'warning',
-                                url: `${config.routes.DeTaiNCKHThamGia}?scientificResearch=${data.scientificResearchId}&tabIndex=2`,
-                                toUser: toUser.data,
-                                createUser: fromUser,
-                            };
-                        })
-                    );
-
-                    // Thêm tất cả thông báo vào danh sách notifications
-                    notifications.push(...notificationsToAdd);
-                }
+                addNotification(
+                    messages.note,
+                    'warning',
+                    getUrl(config.routes.DeTaiNCKHThamGia, 2),
+                    filteredUsers.map((member) => member.userId),
+                    content
+                );
                 break;
 
             default:
@@ -135,130 +108,35 @@ const notifications = {
         return notifications;
     },
 
-    getKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = []) => {
+    getNhomNCKHNotification: async (operation, data, fromUser, listUserReceived = []) => {
         const messages = {
-            // Gửi thông báo tạo cho giảng viên hướng dẫn
-            create: `Đề tài khóa luận ${data.thesisId} đã được giảng viên ${fromUser.fullname} tạo`,
-            // Gửi thông báo đăng ký của sinh viên cho giảng viên
-            registerForInstructor: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}`,
-            // Gửi thông báo sinh viên đăng ký cho thành viên cùng nhóm
-            registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}, với sự tham gia của bạn`,
-            // Gửi thông báo duyệt cho sinh viên được duyệt
-            approveForStudent: `Bạn được duyệt tham gia đề tài khóa luận ${data.thesisId}`,
-            // Gửi thông báo duyệt cho giảng viên hướng dẫn nếu ngành duyệt
-            approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài khóa luận ${data.thesisId}`,
-            // Gửi thông báo add người theo dõi
-            follow: `Bạn được thêm theo dõi đề tài khóa luận ${data.thesisId}`,
-            // Gửi thông báo ghi chú cho người theo dõi
-            note: `${fromUser.fullname} vừa ghi chú đề tài khóa luận ${data.thesisId}`
+            create: `Nhóm đề tài NCKH ${data.scientificResearchGroupId} được giảng viên ${fromUser.fullname} khởi tạo`,
         };
 
-        let notifications = [];
+        const notifications = [];
+        const addNotification = (title, type, url, toUsers, content = null) => {
+            if (toUsers.length > 0) {
+                notifications.push({
+                    title,
+                    type,
+                    url,
+                    toUsers,
+                    createUser: fromUser.userId,
+                    ...(content && { content })
+                });
+            }
+        };
+
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
 
         switch (operation) {
             case 'create':
-                if (data.instructor && data.instructor.userId !== fromUser) {
-                    notifications.push({
-                        content: messages.create,
-                        type: 'info',
-                        url: `${config.routes.DeTaiKhoaLuan_Department}?ThesiGroupId=${data.thesisGroup.thesisGroupId}`,
-                        toUser: data.instructor,
-                        createUser: fromUser,
-                    });
-                }
-                break;
-            case 'register':
-                // Thông báo cho GV hướng dẫn
-                notifications.push({
-                    content: messages.registerForInstructor,
-                    type: 'warning',
-                    url: `${config.routes.DeTaiKhoaLuan_Department}?ThesiGroupId=${data.thesisGroup.thesisGroupId}`,
-                    toUser: data.instructor,
-                    createUser: fromUser,
-                });
-
-                // Thông báo cho thành viên tham gia
-                if (listUserReceived.length > 0) {
-                    const notificationsToAdd = await Promise.all(
-                        listUserReceived.map(async (member) => {
-                            const toUser = await getUserById(member.userId);
-                            return {
-                                content: messages.registerWithMembers,
-                                type: 'warning',
-                                url: `${config.routes.DeTaiKhoaLuan}?ThesiGroupId=${data.thesisGroup.thesisGroupId}&tabIndex=2`,
-                                toUser: toUser.data,
-                                createUser: fromUser,
-                            };
-                        })
-                    );
-                    // Thêm tất cả thông báo vào danh sách notifications
-                    notifications.push(...notificationsToAdd);
-                }
-
-                break;
-
-            case 'approve':
-                // Thông báo cho người theo dõi
-                if (listUserReceived.length > 0) {
-                    const notificationsToAdd = await Promise.all(
-                        listUserReceived.map(async (member) => {
-                            const toUser = await getUserById(member.userId);
-                            return {
-                                content: messages.approveForStudent,
-                                type: 'success',
-                                url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}`,
-                                toUser: toUser.data,
-                                createUser: fromUser,
-                            };
-                        })
-                    );
-
-                    // Thêm tất cả thông báo vào danh sách notifications
-                    notifications.push(...notificationsToAdd);
-                }
-
-                // Thêm thông báo cho instructor
-                if (data.instructor && data.instructor.userId !== fromUser.userId) {
-                    notifications.push({
-                        content: messages.approveForInstructor(data.userId),
-                        type: 'success',
-                        url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}`,
-                        toUser: data.instructor,
-                        createUser: fromUser,
-                    });
-                }
-                break;
-            case 'follow':
-                notifications.push({
-                    content: messages.follow,
-                    type: 'info',
-                    url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}`,
-                    toUser: data.toUser,
-                    createUser: fromUser,
-                });
-                break;
-
-            case 'note':
-                // Lọc bỏ người gửi ra khỏi danh sách người nhận
-                const filteredList = listUserReceived.filter((member) => member.userId !== fromUser.userId);
-                // Thông báo cho người theo dõi
-                if (filteredList.length > 0) {
-                    const notificationsToAdd = await Promise.all(
-                        filteredList.map(async (member) => {
-                            const toUser = await getUserById(member.userId);
-                            return {
-                                content: messages.note,
-                                type: 'warning',
-                                url: `${config.routes.DeTaiKhoaLuanThamGia}?thesis=${data.thesisId}&tabIndex=2`,
-                                toUser: toUser.data,
-                                createUser: fromUser,
-                            };
-                        })
-                    );
-
-                    // Thêm tất cả thông báo vào danh sách notifications
-                    notifications.push(...notificationsToAdd);
-                }
+                addNotification(
+                    messages.create,
+                    'info',
+                    `${config.routes.NhomDeTaiNCKH_Department}`,
+                    filteredUsers.map((member) => member.userId)
+                );
                 break;
 
             default:
@@ -266,7 +144,149 @@ const notifications = {
         }
 
         return notifications;
+    },
 
+
+    getKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = [], content) => {
+        const messages = {
+            create: `Đề tài khóa luận ${data.thesisId} đã được giảng viên ${fromUser.fullname} tạo`,
+            registerForInstructor: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}`,
+            registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}, với sự tham gia của bạn`,
+            approveForStudent: `Bạn được duyệt tham gia đề tài khóa luận ${data.thesisId}`,
+            approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài khóa luận ${data.thesisId}`,
+            follow: `Bạn được thêm theo dõi đề tài khóa luận ${data.thesisId}`,
+            note: `${fromUser.fullname} vừa ghi chú đề tài khóa luận ${data.thesisId}`
+        };
+
+        const notifications = [];
+
+        const addNotification = (title, type, url, toUsers, content = null) => {
+            if (toUsers.length > 0) {
+                notifications.push({
+                    title,
+                    type,
+                    url,
+                    toUsers,
+                    createUser: fromUser.userId,
+                    ...(content && { content })
+                });
+            }
+        };
+
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+        const getUrl = (base, tabIndex = null) =>
+            `${base}?thesis=${data.thesisId}${tabIndex ? `&tabIndex=${tabIndex}` : ''}`;
+
+        switch (operation) {
+            case 'create':
+                if (data.instructor?.userId !== fromUser.userId) {
+                    addNotification(
+                        messages.create,
+                        'info',
+                        `${config.routes.DeTaiKhoaLuan_Department}?ThesisGroupId=${data.thesisGroup.thesisGroupId}`,
+                        [data.instructor.userId]
+                    );
+                }
+                break;
+
+            case 'register':
+                addNotification(
+                    messages.registerForInstructor,
+                    'warning',
+                    `${config.routes.DeTaiKhoaLuan_Department}?ThesisGroupId=${data.thesisGroup.thesisGroupId}`,
+                    [data.instructor.userId]
+                );
+
+                listUserReceived.forEach((member) => {
+                    addNotification(
+                        messages.registerWithMembers,
+                        'warning',
+                        getUrl(config.routes.DeTaiKhoaLuan, 2),
+                        [member.userId]
+                    );
+                });
+                break;
+
+            case 'approve':
+                addNotification(
+                    messages.approveForStudent,
+                    'success',
+                    getUrl(config.routes.DeTaiKhoaLuanThamGia),
+                    filteredUsers.map((member) => member.userId)
+                );
+
+                if (data.instructor?.userId !== fromUser.userId) {
+                    addNotification(
+                        messages.approveForInstructor(data.userId),
+                        'success',
+                        getUrl(config.routes.DeTaiKhoaLuanThamGia),
+                        [data.instructor.userId]
+                    );
+                }
+                break;
+
+            case 'follow':
+                addNotification(
+                    messages.follow,
+                    'info',
+                    getUrl(config.routes.DeTaiKhoaLuanThamGia),
+                    data.toUsers.map((item) => item.userId)
+                );
+                break;
+
+            case 'note':
+                addNotification(
+                    messages.note,
+                    'warning',
+                    getUrl(config.routes.DeTaiKhoaLuanThamGia, 2),
+                    filteredUsers.map((member) => member.userId),
+                    content
+                );
+                break;
+
+            default:
+                break;
+        }
+
+        return notifications;
+    },
+
+    getNhomKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = []) => {
+        const messages = {
+            create: `Nhóm đề tài khóa luận ${data.thesisGroupId} được giảng viên ${fromUser.fullname} khởi tạo`,
+        };
+
+        const notifications = [];
+        const addNotification = (title, type, url, toUsers, content = null) => {
+            if (toUsers.length > 0) {
+                notifications.push({
+                    title,
+                    type,
+                    url,
+                    toUsers,
+                    createUser: fromUser.userId,
+                    ...(content && { content })
+                });
+            }
+        };
+
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+
+        switch (operation) {
+            case 'create':
+                addNotification(
+                    messages.create,
+                    'info',
+                    `${config.routes.NhomDeTaiKhoaLuan_Department}`,
+                    filteredUsers.map((member) => member.userId)
+                );
+                break;
+
+            default:
+                break;
+        }
+
+        return notifications;
     },
 };
 export default notifications;

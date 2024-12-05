@@ -1,5 +1,6 @@
-import React, { useState, memo, useEffect, useContext } from 'react';
-import { Input, InputNumber, Select, Form, message, DatePicker } from 'antd';
+import React, { useState, memo, useEffect, useContext, useCallback } from 'react';
+import { Input, InputNumber, Select, Form, DatePicker } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -54,9 +55,9 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     };
 
     //lấy danh sách giảng viên theo ngành
-    const fetchInstructors = async (SRGIdInput) => {
-        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput);
-        const response = await getUsersByFaculty(SRG.data.faculty?.facultyId);
+    const fetchInstructors = useCallback(async (SRGIdInput) => {
+        const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput.value);
+        const response = await getUsersByFaculty(SRG.data.data?.faculty?.facultyId);
         if (response && response.data) {
             const options = response.data.map((user) => ({
                 value: user.userId,
@@ -64,7 +65,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             }));
             setInstructorOptions(options);
         }
-    };
+    }, [SRGIdFromUrl]);
 
     useEffect(() => {
         if (showModal) {
@@ -76,7 +77,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             }
         }
 
-    }, [showModal, SRGIdFromUrl]);
+    }, [showModal, SRGIdFromUrl, fetchInstructors]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -179,11 +180,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             let scientificResearchData = {
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
-                instructorId: values.instructor.value,
-                statusId: values.status.value,
+                instructor: values.instructor,
+                statusId: values.status,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
-                scientificResearchGroup: SRGId || values.srgroup.value,
+                scientificResearchGroup: SRGId || values.srgroup,
                 startDate: new Date(values.srDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.srDate[1].format('YYYY-MM-DD HH:mm')),
             };
@@ -206,7 +207,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} đề tài thành công!`);
-                if (isUpdate) handleSendNotification(response.data);
+                if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
 
@@ -221,7 +222,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             const ListNotification = await notifications.getNCKHNotification('create', scientificResearchData, user.data);
 
             ListNotification.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti);
             })
 
         } catch (err) {

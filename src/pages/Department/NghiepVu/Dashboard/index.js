@@ -54,7 +54,10 @@ function Home() {
         },
     ];
     const { userId } = useContext(AccountLoginContext);
-    const [isLoadingSRAndThesis, setIsLoadingSRAndThesis] = useState(true);
+    const [isLoadingSRAndThesis_Group, setIsLoadingSRAndThesis_Group] = useState(true);
+    const [isLoadingScore, setIsLoadingScore] = useState(true);
+    const [isLoadingSRData, setIsLoadingSRData] = useState(true);
+    const [isLoadingThesisData, setIsLoadingThesisData] = useState(true);
     const [gradeScore, setGradeScore] = useState([]);
     const [gpaAverage, setGPAAverage] = useState(0);
     const [sv, setSV] = useState(0);
@@ -107,6 +110,7 @@ function Home() {
                     data
                 });
             }
+            setIsLoadingThesisData(false);
         };
 
         fetchThesisData();
@@ -139,9 +143,10 @@ function Home() {
                     data
                 });
             }
+            setIsLoadingSRData(false);
         };
-
-        fetchSRData();
+        if (userId)
+            fetchSRData();
     }, [userId]);
 
     // Lấy dữ liệu nhóm đề tài NCKH và khóa luận theo trạng thái
@@ -202,10 +207,10 @@ function Home() {
                 }
 
             } catch (error) {
-                console.log("Lỗi lấy dữ liệu Đề tài nghiên cứu/ Đề tài khóa luận được thực hiện: " + error);
+                console.error("Lỗi lấy dữ liệu Đề tài nghiên cứu/ Đề tài khóa luận được thực hiện: " + error);
             }
             finally {
-                setIsLoadingSRAndThesis(false);
+                setIsLoadingSRAndThesis_Group(false);
             }
         }
         if (userId) {
@@ -242,12 +247,15 @@ function Home() {
             } catch (error) {
                 console.error("Lỗi lấy dữ liệu điểm - dashboard: " + error);
             }
+            finally {
+                setIsLoadingScore(false);
+            }
         }
         if (userId) fetchDataScore();
     }, [userId])
 
 
-    return isLoadingSRAndThesis ? (
+    return isLoadingSRAndThesis_Group || isLoadingScore || isLoadingSRData || isLoadingThesisData ? (
         <div className={('container-loading')}>
             <Spin size="large" />
         </div>

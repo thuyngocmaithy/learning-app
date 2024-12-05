@@ -86,4 +86,4 @@ export const importSubject = async (data) => {
     console.error('[subjectService - importSubject - error]:', error);
     throw error;
   }
-}
+};

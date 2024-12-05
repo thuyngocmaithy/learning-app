@@ -6,37 +6,28 @@ import {
     DatePicker,
     ConfigProvider,
     Checkbox,
-    Steps,
     Row,
     Col,
-    message,
 } from 'antd';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import {
     createUser,
     updateUserById,
-    getUseridFromLocalStorage,
 } from '../../../services/userService';
-import classNames from 'classnames/bind';
-import styles from './NguoiDungUpdate.module.scss';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getWhere } from '../../../services/majorService';
 import moment from 'moment';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
-const cx = classNames.bind(styles);
 const { Option } = Select;
-const { Step } = Steps;
 const { RangePicker } = DatePicker;
 
 
 const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const { userId } = useContext(AccountLoginContext)
     const [form] = Form.useForm();
-    const [formData, setFormData] = useState({});
-    const [currentStep, setCurrentStep] = useState(0);
     const [isStudent, setIsStudent] = useState(true);
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -66,7 +57,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
             }
         };
         fetchFaculties();
-    }, [showModal, form]);
+    }, [showModal, form, isUpdate]);
 
     //lấy danh sách chuyên ngành theo ngành
     useEffect(() => {
@@ -156,7 +147,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
         if (showModal !== false) {
             setShowModal(false);
             form.resetFields();
-            setCurrentStep(0);
             setSelectedFaculty(null);
             setSelectedMajor(null);
         }
@@ -175,52 +165,38 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleChangeIsStudent = (value) => {
         setIsStudent(value);
-    };
+        console.log(value);
 
-
-    const next = () => {
-        form.validateFields()
-            .then((values) => {
-                setFormData((prev) => ({ ...prev, ...values }));
-                setCurrentStep(currentStep + 1);
-            })
-            .catch((error) => {
-                console.error('Validation failed:', error);
-            });
-    };
-
-    const prev = () => {
-        setCurrentStep(currentStep - 1);
     };
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const finalData = { ...formData, ...values };
-            const [startYear, endYear] = values.nien_khoa;
+            const [startYear, endYear] = values.nien_khoa || [];
+
             let response;
             let userData = {
-                userId: finalData.userId,
-                email: finalData.email,
-                password: finalData.password,
-                fullname: finalData.fullname,
-                dateOfBirth: finalData.dateOfBirth,
-                placeOfBirth: finalData.placeOfBirth,
-                phone: finalData.phone,
-                isStudent: finalData.isStudent,
-                class: finalData.class || '',
+                userId: values.userId,
+                email: values.email,
+                password: values.password,
+                fullname: values.fullname,
+                dateOfBirth: values.dateOfBirth,
+                placeOfBirth: values.placeOfBirth,
+                phone: values.phone,
+                isStudent: values.isStudent,
+                class: values.class || '',
                 faculty: selectedFaculty,
                 major: selectedMajor,
-                nien_khoa: startYear.year() + "-" + endYear.year() || '',
-                firstAcademicYear: startYear.year(),
-                lastAcademicYear: endYear.year(),
-                sex: finalData.sex || '',
-                cccd: finalData.cccd || '',
-                khoi: finalData.khoi || '',
-                bac_he_dao_tao: finalData.bac_he_dao_tao || '',
-                hoc_vi: finalData.hoc_vi || '',
-                isActive: finalData.isActive || undefined,
-                avatar: finalData.avatar || '',
+                nien_khoa: (startYear?.year() && endYear?.year()) ? startYear?.year() + "-" + endYear?.year() : null,
+                firstAcademicYear: startYear?.year(),
+                lastAcademicYear: endYear?.year(),
+                sex: values.sex || '',
+                cccd: values.cccd || '',
+                khoi: values.khoi || '',
+                bac_he_dao_tao: values.bac_he_dao_tao || '',
+                hoc_vi: values.hoc_vi || '',
+                isActive: values.isActive || undefined,
+                avatar: values.avatar || '',
                 createUser: userId || 'admin',
                 lastModifyUser: userId || 'admin',
             };
@@ -410,7 +386,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             name="nien_khoa"
                             label="Niên khóa"
                             hidden={isStudent ? false : true}
-                            rules={[{ required: true, message: 'Vui lòng nhập niên khóa' }]}
+                            rules={isStudent ? [{ required: true, message: 'Vui lòng nhập niên khóa' }] : []}
                         >
                             <RangePicker
                                 picker="year"
@@ -427,11 +403,11 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                     <Col span={12}>
                         <FormItem name="hoc_vi" label="Học vị (giảng viên)" hidden={isStudent ? true : false}>
                             <Select >
-                                <Option value="ThS">Thạc sĩ</Option>
-                                <Option value="NCS">Nghiên cứu sinh</Option>
-                                <Option value="TS">Tiến sĩ</Option>
-                                <Option value="PGS">Phó giáo sư</Option>
-                                <Option value="GS">Giáo sư</Option>
+                                <Option value="Thạc sĩ">Thạc sĩ</Option>
+                                <Option value="Nghiên cứu sinh">Nghiên cứu sinh</Option>
+                                <Option value="Tiến sĩ">Tiến sĩ</Option>
+                                <Option value="Phó giáo sư">Phó giáo sư</Option>
+                                <Option value="Giáo sư">Giáo sư</Option>
                             </Select>
                         </FormItem>
                     </Col>

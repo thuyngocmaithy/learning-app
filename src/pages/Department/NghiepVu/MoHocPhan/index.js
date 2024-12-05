@@ -1,15 +1,20 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Empty, message, Progress, Switch, Tag } from 'antd';
+import { Empty, Progress, Skeleton, Switch, Tag } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableHP from '../../../../components/TableDepartment';
-import { useCallback, useEffect, useState } from 'react'; //
-import { getAll, getById } from '../../../../services/studyFrameService';
-import { deleteSubjectCourseOpening, getAll as getAllCourseOpening, getTeacherAssignmentsAndSemesters, getWhere, saveMulti, updateSubjectCourseOpening } from '../../../../services/subject_course_openingService';
+import { useCallback, useEffect, useRef, useState } from 'react'; //
+import { callKhungCTDT, getAll, getById } from '../../../../services/studyFrameService';
+import { deleteSubjectCourseOpening, getAll as getAllCourseOpening, getTeacherAssignmentsAndSemesters, getWhere as getWhereCourseOpen, saveMulti, updateSubjectCourseOpening } from '../../../../services/subject_course_openingService';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { CloseSquareOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { deleteConfirm } from '../../../../components/Core/Delete';
+import Toolbar from '../../../../components/Core/Toolbar';
+import ExcelJS from "exceljs"
+import { saveAs } from "file-saver";
+import { getWhere as getWhereSemester } from '../../../../services/semesterService';
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
@@ -21,9 +26,68 @@ function MoHocPhan() {
     const [percentArrange, setPercentArrange] = useState(0);
     const [switchStates, setSwitchStates] = useState({});  // Lưu trạng thái của các Switches
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
+    const [isLoadingFrame, setIsLoadingFrame] = useState(true); //đang load dữ liệu khung đào tạo
+    const [frameComponents, setFrameComponents] = useState([]); // Dữ liệu cấu trúc chương trình
+    const [listSemester, setListSemester] = useState([]); // Danh sách các học kỳ
+    const [totalSubject, setTotalSubject] = useState(null);
+    const [reRenderProgress, setReRenderProgress] = useState(true);
+    const fileInputRef = useRef(null);
+    const [semesterList, setSemesterList] = useState([]);
+
+    useEffect(() => {
+        if (dataArrange?.cycle) {
+            setSemesterList(generateSemesterMap(dataArrange.cycle.startYear, dataArrange.cycle.endYear))
+        }
+    }, [dataArrange])
 
 
+    const generateSemesterMap = (firstYear, lastYear) => {
+        const semesterMap = {};
+        let counter = 1;
 
+        for (let year = firstYear; year <= lastYear; year++) {
+            for (let semester = 1; semester <= 3; semester++) {
+                semesterMap[counter] = `${year}${semester}`;
+                counter++;
+            }
+        }
+        return semesterMap;
+    };
+
+
+    // Hàm tải danh sách học kỳ
+    const fetchSemester = useCallback(async (cycleId) => {
+        try {
+            const response = await getWhereSemester({ cycle: cycleId });
+            if (response.status === 200) {
+                setListSemester(response.data.data.filter(item => item.semesterName !== 3));
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách học kỳ:', error);
+        }
+    }, []);
+
+    // Hàm tải dữ liệu cấu trúc chương trình
+    const fetchFrameComponents = useCallback(async (frameId) => {
+        try {
+            const response = await callKhungCTDT(frameId);
+            if (Array.isArray(response)) {
+                // Đếm tổng số lượng subject trong tất cả subjectInfo
+                const totalSubjects = response.reduce((count, item) => {
+                    // Kiểm tra nếu subjectInfo là một mảng và thêm độ dài của nó vào count
+                    return count + (Array.isArray(item.subjectInfo) ? item.subjectInfo.length : 0);
+                }, 0);
+                setTotalSubject(totalSubjects);
+                setFrameComponents(response);
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải cấu trúc chương trình:', error);
+        }
+    }, []);
+
+    const fetchDataFrameArrange = useCallback(async (data) => {
+        await Promise.all([fetchSemester(data.cycle?.cycleId), fetchFrameComponents(data.frameId)]);
+    }, [fetchFrameComponents, fetchSemester]);
 
     const fetchDataFrame = async () => {
         try {
@@ -43,6 +107,8 @@ function MoHocPhan() {
                         ...item,
                         facultyName: item.faculty.facultyName,
                         cycleName: item.cycle.cycleName,
+                        facultyId: item.faculty.facultyId,
+                        cycleId: item.cycle.cycleId,
                         status: isFrameOpen,
                         disabled: isFrameOpen?.disabled
                     }
@@ -75,12 +141,13 @@ function MoHocPhan() {
         setPercentArrange(0)
     };
 
-    const handleArrange = async (frameId) => {
+    const handleArrange = useCallback(async (frameId) => {
         try {
             const response = await getById(frameId);
 
             if (response.status === 200 && response.data.data !== null) {
                 setDataArrange(response.data.data);
+                fetchDataFrameArrange(response.data.data);
                 fetchDataAssignment();
             }
             else {
@@ -90,7 +157,7 @@ function MoHocPhan() {
             if (error.errorFields.length === 0)
                 console.error(`[ MoHocPhan - handleArrange - error]: ${error}`);
         }
-    }
+    }, [fetchDataAssignment, fetchDataFrameArrange]);
 
     const handleOpeningCourse = async () => {
         const dataSave = [];
@@ -106,7 +173,7 @@ function MoHocPhan() {
                 subject: subjectId,
                 semester: semesterId,
                 instructor: teacher,
-                cycle: dataArrange.cycleId,
+                cycle: dataArrange.cycle?.cycleId,
                 studyFrame: dataArrange.frameId
             });
         });
@@ -115,18 +182,17 @@ function MoHocPhan() {
             const response = await saveMulti(dataSave);
             if (response.status === 201) {
                 fetchDataFrame();
+                setReRenderProgress(true);
                 message.success('Mở học phần thành công');
             }
         } catch (error) {
             message.error('Mở học phần thất bại')
             console.error(error);
-
         }
-
     };
 
     // Xóa năm học đã sắp xếp
-    const handleDelete = async (cycleId, studyFrameId) => {
+    const handleDelete = useCallback(async (cycleId, studyFrameId) => {
         try {
             const response = await deleteSubjectCourseOpening(cycleId, studyFrameId);
             fetchDataFrame();
@@ -141,14 +207,14 @@ function MoHocPhan() {
             message.error('Xoá thất bại');
             console.error(' [MoHocPhan - handleDelete - deleted] - Error', error);
         }
-    };
+    }, [dataArrange]);
 
     const toggleViewIntructor = async (checked, studyFrameId, cycleId) => {
         try {
-            const listDataUpdate = await getWhere({ studyFrame: studyFrameId, cycle: cycleId });
+            const listDataUpdate = await getWhereCourseOpen({ studyFrame: studyFrameId, cycle: cycleId });
             if (listDataUpdate.status === 200) {
                 listDataUpdate.data.data.forEach(async (item) => {
-                    await updateSubjectCourseOpening(item.id, { disabled: checked });
+                    await updateSubjectCourseOpening(item.id, { disabled: !checked });
                 });
                 // Sau khi cập nhật, bạn cần cập nhật lại trạng thái checked cho switch
                 setSwitchStates((prevState) => ({
@@ -160,6 +226,211 @@ function MoHocPhan() {
         } catch (error) {
             console.error("Lỗi hiển thị giảng viên: " + error);
             message.error("Hiển thị giảng viên thất bại")
+        }
+    };
+
+    // Hàm đệ quy để xử lý dữ liệu cây, kèm danh sách môn học
+    const processTreeForExcel = useCallback((treeData, level = 0, result = []) => {
+        treeData.forEach(node => {
+            // Thêm dòng cho node chính
+            result.push({
+                name: `${" ".repeat(level * 4)}${node.frameComponentName}`,
+                description: node.description,
+                creditHour: node.creditHour,
+                type: "component", // Đánh dấu loại node (thành phần chính)
+            });
+
+            // Thêm dòng cho danh sách môn học (nếu có)
+            if (node.subjectInfo && node.subjectInfo.length > 0) {
+                node.subjectInfo.forEach(subject => {
+                    result.push({
+                        subjectId: subject.subjectId,
+                        name: `${" ".repeat((level + 1) * 4)}${subject.subjectId}`,
+                        description: subject.subjectName,
+                        creditHour: subject.creditHour,
+                        type: "subject", // Đánh dấu loại node (môn học)
+                    });
+                });
+            }
+
+            // Đệ quy xử lý các con của node
+            if (node.children && node.children.length > 0) {
+                processTreeForExcel(node.children, level + 1, result);
+            }
+        });
+        return result;
+    }, []);
+
+
+    const exportTreeToExcel = useCallback(async (record) => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Cấu trúc cây");
+
+        // Thêm tiêu đề trên cùng
+        worksheet.mergeCells("A1:L1");
+        const titleCell = worksheet.getRow(1).getCell(1);
+        titleCell.value = `Khung chương trình đào tạo: ${record.frameName}`;
+        titleCell.font = { bold: true, size: 16 };
+        titleCell.alignment = { vertical: "middle", horizontal: "center" };
+
+        // Thêm chú thích
+        const descriptionCell = worksheet.getRow(2).getCell(1);
+        descriptionCell.value = `* Đánh dấu x vào học kỳ mở`;
+        descriptionCell.font = { bold: true, size: 14, color: { argb: "FF0000" } };
+        descriptionCell.alignment = { vertical: "middle", horizontal: "left" };
+
+        // Cấu hình cột (không thêm `header`)
+        const semesterColumns = listSemester.flatMap((_, index) => [
+            { key: `semester-${index + 1}`, width: 15 },
+            { key: `teacher-${index + 1}`, width: 20 },
+        ]);
+
+        worksheet.columns = [
+            { key: "name", width: 30 },
+            { key: "description", width: 40 },
+            { key: "creditHour", width: 15 },
+            ...semesterColumns,
+        ];
+
+        // Thêm tiêu đề cột (Dòng 4)
+        const headerRow = worksheet.getRow(4);
+        headerRow.values = [
+            "Tên",
+            "Mô tả",
+            "Số tín chỉ",
+            ...listSemester.flatMap((_, index) => [`Học kỳ ${index + 1}`, `Giảng viên`]),
+        ];
+        headerRow.font = { bold: true };
+        headerRow.alignment = { vertical: "middle", horizontal: "center" };
+
+        // Cố định 3 cột đầu tiên (Tên, Mô tả, số tín chỉ) và dòng tiêu đề
+        worksheet.views = [
+            { state: "frozen", xSplit: 3, ySplit: 4 }
+        ];
+
+        // Xử lý dữ liệu cây và thêm vào Excel
+        const flatTreeData = processTreeForExcel(frameComponents);
+        flatTreeData.forEach((row, rowIndex) => {
+            const newRow = worksheet.addRow(row);
+
+            // Lặp qua các học kỳ và nạp dữ liệu
+            listSemester.forEach((semester, index) => {
+                const semesterColIndex = 4 + index * 2; // Bắt đầu từ cột thứ 4 (sau 3 cột đầu)
+                const teacherColIndex = semesterColIndex + 1;
+
+                const key = `${semester.semesterId}-${row.subjectId}`;
+                if (selectedSemesters.has(key)) {
+                    newRow.getCell(semesterColIndex).value = "X"; // Đánh dấu học kỳ mở
+                }
+
+                if (teacherAssignments.has(key)) {
+                    newRow.getCell(teacherColIndex).value = teacherAssignments.get(key); // Điền tên giảng viên
+                }
+            });
+
+            // Định dạng cấp bậc
+            if (row.type === "component") {
+                newRow.font = { bold: true }; // Thành phần chính -> In đậm
+            } else if (row.type === "subject") {
+                newRow.font = { italic: true }; // Môn học -> In nghiêng
+            }
+            newRow.alignment = { wrapText: true };
+        });
+
+        // Xuất file Excel
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, `ChuongTrinhDaoTao_${record.facultyId}_${record.cycleId}.xlsx`);
+    }, [frameComponents, listSemester, processTreeForExcel, selectedSemesters, teacherAssignments]);
+
+
+    const processExcelFile = async (arrayBuffer) => {
+        const dataSelectSemester = new Set();
+        const dataAssignTeacher = new Map();
+
+        try {
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(arrayBuffer);
+
+            const worksheet = workbook.worksheets[0];
+            const headerRow = worksheet.getRow(4);
+
+            const semesterColumns = [];
+            const teacherColumns = [];
+
+            headerRow.eachCell((cell, colNumber) => {
+                if (cell.value && cell.value.toString().includes("Học kỳ")) {
+                    semesterColumns.push(colNumber);
+                    teacherColumns.push(colNumber + 1);
+                }
+            });
+
+            worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+                if (rowNumber < 5) return;
+
+                const subjectId = row.getCell(1)?.value?.toString()?.trim();
+                if (!subjectId) return;
+
+                semesterColumns.forEach((colIndex, idx) => {
+                    const semesterId = semesterList[idx + 1];
+                    const isSelected = row.getCell(colIndex)?.value?.toString().toLowerCase() === "x";
+                    const teacherName = row.getCell(teacherColumns[idx])?.value?.toString()?.trim() || "";
+
+                    if (isSelected) {
+                        dataSelectSemester.add(`${semesterId}-${subjectId}`);
+                        dataAssignTeacher.set(`${semesterId}-${subjectId}`, teacherName);
+                    }
+                });
+            });
+
+            return { dataSelectSemester, dataAssignTeacher };
+        } catch (error) {
+            console.error("Error processing Excel file:", error);
+            throw error;
+        }
+    };
+
+
+
+
+    // Hàm để xử lý upload file
+    const handleUpload = async (data) => {
+        const file = data[0];
+        if (!file) {
+            message.warning("Vui lòng chọn file đính kèm");
+            return;
+        }
+
+        try {
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const arrayBuffer = e.target.result;
+                    // Gọi hàm xử lý file Excel
+                    const { dataSelectSemester, dataAssignTeacher } = await processExcelFile(arrayBuffer);
+
+                    // Cập nhật state
+                    setSelectedSemesters(dataSelectSemester); // Cập nhật danh sách học kỳ
+
+                    setTeacherAssignments(dataAssignTeacher); // Cập nhật thông tin giảng viên
+
+                    message.success("File đã được tải lên thành công");
+                } catch (error) {
+                    console.error("Lỗi khi xử lý file:", error);
+                    message.error("Tải file lên thất bại.");
+                }
+            };
+
+            reader.readAsArrayBuffer(file); // Đọc file dưới dạng ArrayBuffer
+        } catch (error) {
+            console.error("Error handling upload:", error);
+            message.error("Có lỗi khi tải file.");
+        } finally {
+            // Clear input file
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
 
@@ -197,7 +468,11 @@ function MoHocPhan() {
                 render: (_, record) => {
                     const { frameId, cycle: { cycleId }, status } = record;
                     const key = `${frameId}-${cycleId}`;
-                    const checked = switchStates[key] !== undefined ? switchStates[key] : record.disabled;  // Dùng state để kiểm tra trạng thái `checked`
+                    const checked = switchStates[key] !== undefined
+                        ? switchStates[key]
+                        : record.disabled === 0
+                            ? true
+                            : false;  // Dùng state để kiểm tra trạng thái `checked`
 
                     return (
                         <Switch
@@ -205,6 +480,29 @@ function MoHocPhan() {
                             onChange={(checked) => toggleViewIntructor(checked, frameId, cycleId)}
                             disabled={!status}  // Disable switch nếu chưa mở học phần
                         />
+                    );
+                },
+                align: 'center',
+            },
+            {
+                title: 'Xuất excel',
+                dataIndex: 'disabled',
+                key: 'disabled',
+                render: (_, record) => {
+                    return (
+                        <ButtonCustom
+                            onClick={async () => {
+                                // fetchDataFrameArrange({
+                                //     cycle: { cycleId: record.cycleId },
+                                //     frameId: record.frameId
+                                // })
+                                // fetchDataAssignment();
+                                await handleArrange(record.frameId)
+                                exportTreeToExcel(record)
+                            }}
+                        >
+                            Xuất excel
+                        </ButtonCustom>
                     );
                 },
                 align: 'center',
@@ -229,8 +527,10 @@ function MoHocPhan() {
                             leftIcon={<EditOutlined />}
                             primary
                             verysmall
-                            onClick={() => {
-                                handleArrange(record.frameId);
+                            onClick={async () => {
+                                setIsLoadingFrame(true);
+                                await handleArrange(record.frameId);
+                                setIsLoadingFrame(false);
                             }}
                         >
                             Sắp xếp
@@ -240,7 +540,7 @@ function MoHocPhan() {
                 align: 'center',
             },
         ],
-        [switchStates],
+        [exportTreeToExcel, handleArrange, handleDelete, switchStates],
     );
 
     return (
@@ -265,6 +565,16 @@ function MoHocPhan() {
                 <div className={cx('table-arrange')}>
                     <div className={cx('title-list-course-opening')}>
                         <h3>{dataArrange ? dataArrange.frameName : 'Khung đào tạo'}</h3>
+                        {dataArrange &&
+                            <ButtonCustom
+                                outline
+                                text
+                                className={cx('btnClose')}
+                                onClick={onReset}
+                                leftIcon={<CloseSquareOutlined />}
+                            >
+                            </ButtonCustom>
+                        }
                     </div>
                     {dataArrange ? (
                         <>
@@ -278,31 +588,39 @@ function MoHocPhan() {
                                     size={['100%', 15]}
                                     style={{ margin: "50px 0" }}
                                 />
-                                <ButtonCustom
-                                    outline
-                                    className={cx('btnClose')}
-                                    onClick={onReset}
-                                >
-                                    Đóng
-                                </ButtonCustom>
-                                <ButtonCustom
-                                    outline
-                                    colorRed
-                                    className={cx('btnSave')}
-                                    onClick={handleOpeningCourse}
-                                >
-                                    Lưu
-                                </ButtonCustom>
+                                <div className={cx('action-toolbar')}>
+                                    <Toolbar
+                                        className={cx('btnImport')}
+                                        type={'Upload'}
+                                        onClick={handleUpload}
+                                        fileInputRef={fileInputRef}
+                                    />
+                                    <ButtonCustom
+                                        outline
+                                        colorRed
+                                        className={cx('btnSave')}
+                                        onClick={handleOpeningCourse}
+                                    >
+                                        Lưu
+                                    </ButtonCustom>
+                                </div>
                             </div>
                             {/* Hiển thị bảng nếu chọn khung đào tạo*/}
-                            <TableHP
-                                data={dataArrange}
-                                selectedSemesters={selectedSemesters}
-                                setSelectedSemesters={setSelectedSemesters}
-                                teacherAssignments={teacherAssignments}
-                                setTeacherAssignments={setTeacherAssignments}
-                                setPercentArrange={setPercentArrange}
-                            />
+                            {isLoadingFrame
+                                ? <Skeleton />
+                                : <TableHP
+                                    frameComponents={frameComponents}
+                                    totalSubject={totalSubject}
+                                    listSemester={listSemester}
+                                    reRenderProgress={reRenderProgress}
+                                    selectedSemesters={selectedSemesters}
+                                    setSelectedSemesters={setSelectedSemesters}
+                                    teacherAssignments={teacherAssignments}
+                                    setTeacherAssignments={setTeacherAssignments}
+                                    setPercentArrange={setPercentArrange}
+                                    setReRenderProgress={setReRenderProgress}
+                                />
+                            }
                         </>
                     ) : (
                         // Hiển thị thông báo khi chưa chọn khung đào tạo
@@ -318,3 +636,6 @@ function MoHocPhan() {
 }
 
 export default MoHocPhan;
+
+
+

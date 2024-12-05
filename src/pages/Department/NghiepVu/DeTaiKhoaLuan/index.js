@@ -1,17 +1,18 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Card, message, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Col, Select } from 'antd';
+import { Card, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Select, Row, Col } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
-import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds } from '../../../../services/thesisService';
-import { getByThesisId } from '../../../../services/thesisUserService';
+import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds, importThesis, getListThesisJoined } from '../../../../services/thesisService';
+import { getByListThesisId, getByThesisId } from '../../../../services/thesisUserService';
 import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
 import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
@@ -20,7 +21,10 @@ import { PermissionDetailContext } from '../../../../context/PermissionDetailCon
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
-import { getThesisGroupById } from '../../../../services/thesisGroupService';
+import { checkValidDateCreateThesis } from '../../../../services/thesisGroupService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
+import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
@@ -30,20 +34,42 @@ function DeTaiKhoaLuan() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [showModalListRegister, setShowModalListRegister] = useState(false)
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
     const { userId } = useContext(AccountLoginContext);
-    const [listThesisJoined, setListthesisJoined] = useState([]);
+    const [listThesisJoined, setListThesisJoined] = useState([]);
+    const [listThesisJoinOriginal, setListThesisJoinOriginal] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
-    const [showFilter, setShowFilter] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
     // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
     const [disableToolbar, setDisableToolbar] = useState(false);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [showFilter1, setShowFilter1] = useState(false);
+    const [showFilter2, setShowFilter2] = useState(false);
+
+
+    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
+    useEffect(() => {
+        // Hàm xử lý khi screenWidth thay đổi
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        }
+
+        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
+        window.addEventListener('resize', handleResize);
+
+        // Loại bỏ sự kiện lắng nghe khi component bị hủy
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     const statusType = 'Tiến độ đề tài khóa luận';
 
@@ -64,13 +90,13 @@ function DeTaiKhoaLuan() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
+
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -183,7 +209,7 @@ function DeTaiKhoaLuan() {
                             showModalUpdate(record);
                             setIsUpdate(true);
                         }}
-                    // disabled={record.validDate !== true}
+                        disabled={!permissionDetailData?.isEdit}
                     >
                         Sửa
                     </ButtonCustom>
@@ -191,89 +217,91 @@ function DeTaiKhoaLuan() {
             ),
         }
     ];
-    const listRegisterthesisJoined = async () => {
+    const listRegisterthesisJoined = useCallback(async () => {
         try {
-            const response = await getWhere({ instructorId: userId, thesisGroup: ThesisGroupIdFromUrl });
+            const response = await getListThesisJoined(userId, ThesisGroupIdFromUrl);
             if (response.status === 200 && response.data.data) {
-                setListthesisJoined(response.data.data);
+                setListThesisJoined(response.data.data);
+                setListThesisJoinOriginal(response.data.data)
             }
 
         } catch (error) {
             console.error('Error fetching registered thesiss:', error);
             setIsLoading(false);
         }
-    };
+    }, [ThesisGroupIdFromUrl, userId]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
-            let result = null;
+            // Bật trạng thái loading
+            setIsLoading(true);
+
+            let thesisData = []; // Dữ liệu khóa luận
 
             if (ThesisGroupIdFromUrl) {
-                // Kiểm tra ThesisGroup còn hạn tạo đề tài
-                const resultThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl)
+                // Nếu có ID nhóm khóa luận trong URL
+
+                // Gọi API để kiểm tra ngày hợp lệ (còn hạn tạo đề tài)
+                const resultThesisGroup = await checkValidDateCreateThesis(ThesisGroupIdFromUrl);
                 if (resultThesisGroup.status === 200) {
                     const dataThesisGroup = resultThesisGroup.data.data;
-
-                    const currentDate = new Date();
-                    const validDate = (dataThesisGroup.startCreateThesisDate === null && dataThesisGroup.endCreateThesisDate === null) ||
-                        (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate && new Date(dataThesisGroup.endCreateThesisDate) > currentDate)
-                        ? true
-                        : false
-                    setDisableToolbar(!validDate);
+                    setDisableToolbar(!dataThesisGroup); // Cập nhật trạng thái của toolbar (vô hiệu hóa nếu ngày không hợp lệ)
                 }
 
-                //     if (validDate) {
-                //         result = await getByThesisGroupId(ThesisGroupIdFromUrl);
-                //     } else {
-                //         result = { status: 'NotValid' }
-                //     }
-                // }
-                result = await getByThesisGroupId(ThesisGroupIdFromUrl);
-            }
-            else {
-                result = await getAllThesis();
-            }
-
-            if (result.status === 200) {
-                const thesiss = await Promise.all((result.data.data || result.data).map(async (data) => {
-                    // Kiểm tra ThesisGroup còn hạn tạo đề tài
-                    // const currentDate = new Date();
-                    // const dataThesisGroup = data.thesisGroup;
-                    // const validDate = (dataThesisGroup.startCreateThesisDate === null && dataThesisGroup.endCreateThesisDate === null) ||
-                    //     (new Date(dataThesisGroup.startCreateThesisDate) <= currentDate && new Date(dataThesisGroup.endCreateThesisDate) > currentDate)
-                    //     ? true
-                    //     : false
-                    // lấy số sinh viên đăng ký
-                    const numberOfRegister = await getByThesisId({ thesis: data.thesisId });
-
-                    return {
-                        ...data,
-                        numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
-                        // validDate: validDate
-                    };
-                }));
-                setData(thesiss);
+                // Gọi API để lấy danh sách khóa luận thuộc nhóm
+                const result = await getByThesisGroupId(ThesisGroupIdFromUrl);
+                if (result.status === 200) {
+                    thesisData = result.data.data || result.data;
+                }
+            } else {
+                // Nếu không có ID nhóm, lấy tất cả khóa luận
+                const result = await getAllThesis();
+                if (result.status === 200) {
+                    thesisData = result.data.data || result.data;
+                }
             }
 
+            // Gọi API để lấy số lượng sinh viên đăng ký cho từng khóa luận
+            const allRegistersRes = await getByListThesisId(thesisData.map((item) => item.thesisId));
+            const allRegisters = allRegistersRes.data;
+
+            // Tạo Map với thesisId làm key
+            const thesisMap = new Map();
+            allRegisters?.forEach((item) => {
+                const thesisId = item.thesis.thesisId;
+                if (!thesisMap.has(thesisId)) {
+                    thesisMap.set(thesisId, []);
+                }
+                // Đưa từng `ThesisUser` vào danh sách tương ứng của thesisId
+                thesisMap.get(thesisId).push(item);
+            });
+
+            // Kết hợp dữ liệu khóa luận và số lượng đăng ký
+            const thesiss = thesisData.map((data) => ({
+                ...data,
+                numberOfRegister: thesisMap.get(data.thesisId) || 0, // Mặc định là 0 nếu không tìm thấy
+            }));
+
+            // Lưu dữ liệu vào state
+            setData(thesiss);
+            setDataOriginal(thesiss);
         } catch (error) {
+            // Log lỗi nếu xảy ra
             console.error('Error fetching data:', error);
-        }
-        finally {
+        } finally {
+            // Tắt trạng thái loading
             setIsLoading(false);
         }
-    };
+    }, [ThesisGroupIdFromUrl]);
+
 
     useEffect(() => {
         fetchData();
         listRegisterthesisJoined();
-    }, []);
-
-    useEffect(() => {
         if (isChangeStatus) {
-            fetchData();
             setIsChangeStatus(false);
         }
-    }, [isChangeStatus]);
+    }, [fetchData, listRegisterthesisJoined, isChangeStatus]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài khóa luận"
     useEffect(() => {
@@ -346,33 +374,23 @@ function DeTaiKhoaLuan() {
     ];
 
     const onSearch = async (values) => {
-        setIsLoading(true)
-        try {
-            values.faculty = values.faculty?.value || undefined;
-            values.status = values.status?.value || undefined;
+        const { thesisId, thesisName, instructorName, status, isDisable } = values;
+        const originalList = showFilter2 ? listThesisJoinOriginal : dataOriginal;
+        const filteredList = originalList.filter((thesisRegister) => {
+            const item = thesisRegister;
+            const matchesThesisId = thesisId ? item.thesisId?.toLowerCase().includes(thesisId.toLowerCase()) : true;
+            const matchesThesisName = thesisName ? item.thesisName?.toLowerCase().includes(thesisName.toLowerCase()) : true;
+            const matchesInstructorName = instructorName ? item.instructor?.fullname?.toLowerCase().includes(instructorName.toLowerCase()) : true;
+            const matchesStatus = status?.value ? item.status.statusId === status?.value : true;
+            const matchesDisabled = isDisable?.value ? item.isDisable === isDisable?.value : true;
 
-            const response = await getWhere(values);
-
-            if (response.status === 200) {
-                const thesiss = await Promise.all((response.data.data).map(async (data) => {
-                    // lấy số sinh viên đăng ký
-                    const numberOfRegister = await getByThesisId({ thesis: data.thesisId });
-
-                    return {
-                        ...data,
-                        numberOfRegister: numberOfRegister.data.data || [], // Khởi tạo là mảng trống nếu không có dữ liệu
-                    };
-                }));
-                setData(thesiss);
-            }
-            if (response.status === 204) {
-                setData([]);
-            }
-        } catch (error) {
-            console.error(error);
+            return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled;
+        });
+        if (showFilter2) {
+            setListThesisJoined(filteredList);
         }
-        finally {
-            setIsLoading(false)
+        else {
+            setData(filteredList);
         }
     };
 
@@ -382,11 +400,11 @@ function DeTaiKhoaLuan() {
             title: 'Danh sách đề tài',
             children: (
                 <>
-                    <div className={`slide ${showFilter ? 'open' : ''}`}>
+                    <div className={`slide ${showFilter1 ? 'open' : ''}`}>
                         <SearchForm
                             getFields={filterFields}
                             onSearch={onSearch}
-                            onReset={fetchData}
+                            onReset={() => { setData(dataOriginal) }}
                         />
                         <Divider />
                     </div>
@@ -407,17 +425,24 @@ function DeTaiKhoaLuan() {
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
                 <div>
+                    <div className={`slide ${showFilter2 ? 'open' : ''}`}>
+                        <SearchForm
+                            getFields={filterFields}
+                            onSearch={onSearch}
+                            onReset={() => { setListThesisJoined(listThesisJoinOriginal) }}
+                        />
+                        <Divider />
+                    </div>
                     {listThesisJoined.length === 0 &&
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }
                     {listThesisJoined.map((item, index) => {
-                        let color = item.status.statusName === 'Chờ duyệt' ? 'red' : item.status.color;
                         return (
                             <Card
                                 className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.thesisName}
+                                title={item.thesisId + " - " + item.thesisName}
                                 extra={
                                     <ButtonCustom
                                         primary
@@ -432,10 +457,30 @@ function DeTaiKhoaLuan() {
                                     </ButtonCustom>
                                 }
                             >
-                                Trạng thái:
-                                <Tag color={color} className={cx('tag-status')}>
-                                    {item.status.statusName}
-                                </Tag>
+                                <Row gutter={[16]}>
+                                    <Col span={12}>
+                                        <p className={cx('item-description')}>Cấp: {item?.level}</p>
+                                        <p className={cx('item-description')}>Chủ nhiệm đề tài: {item?.instructor?.fullname}</p>
+                                        <p className={cx('item-description')}>
+                                            Trạng thái:
+                                            <Tag color={item?.status?.color} className={cx('tag-status')}>
+                                                {item?.status?.statusName}
+                                            </Tag>
+                                        </p>
+                                    </Col>
+                                    <Col span={12}>
+                                        <div
+                                            className={cx('container-deadline-register')}
+                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
+                                        >
+                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
+                                            {item.startDate && item.finishDate
+                                                ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                                : <p>Chưa có</p>
+                                            }
+                                        </div>
+                                    </Col>
+                                </Row>
                             </Card >
                         );
                     })}
@@ -503,7 +548,7 @@ function DeTaiKhoaLuan() {
                 ThesisGroupId={ThesisGroupIdFromUrl}
             />
         );
-    }, [showModalUpdate, isUpdate, ThesisGroupIdFromUrl])
+    }, [isUpdate, showModalUpdate, fetchData, ThesisGroupIdFromUrl])
 
     const DeTaiKhoaLuanListRegisterMemoized = useMemo(() => {
         return (
@@ -523,6 +568,44 @@ function DeTaiKhoaLuan() {
             setShowModal={setShowModalDetail}
         />
     ), [showModalDetail]);
+
+
+    const schemas = [
+        { label: "Mã đề tài", prop: "thesisId" },
+        { label: "Tên đề tài", prop: "thesisName" },
+        { label: "Chủ nhiệm đề tài", prop: "instructor" },
+        { label: "Số lượng thành viên", prop: "numberOfMember" },
+        { label: "Trạng thái", prop: "status" },
+        { label: "Thời điểm bắt đầu", prop: "startDate" },
+        { label: "Thời điểm hoàn thành", prop: "finishDate" },
+
+    ];
+
+    const formatDate = (isoDate) => {
+        const date = new Date(isoDate); // Chuyển chuỗi ISO thành đối tượng Date
+        const day = String(date.getDate()).padStart(2, '0'); // Lấy ngày, thêm 0 nếu cần
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Lấy tháng (0-indexed)
+        const year = date.getFullYear(); // Lấy năm
+        return `${day}/${month}/${year}`; // Định dạng dd/mm/yyyy
+    };
+    const processedData = data.map(item => ({
+        ...item, // Giữ nguyên các trường khác
+        status: item.status?.statusName,
+        instructor: item.instructor?.fullname || "",
+        startDate: formatDate(item.startDate), // Định dạng ngày bắt đầu
+        finishDate: formatDate(item.finishDate), // Định dạng ngày hoàn thành
+    }));
+
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_detaikhoaluan",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH ĐỀ TÀI KHOÁ LUẬN",
+
+        });
+    };
 
     return (
         <>
@@ -549,37 +632,56 @@ function DeTaiKhoaLuan() {
                         </span>
                         <h3 className={cx('title')}>Danh sách đề tài khóa luận</h3>
                     </div>
-                    {tabActive === 1 ? (
-                        <div className={cx('wrapper-toolbar')}>
-                            <Toolbar
-                                type={'Bộ lọc'}
-                                onClick={() => {
-                                    setShowFilter(!showFilter);
-                                }}
-                            />
-                            {!disableToolbar &&
+
+                    <div className={cx('wrapper-toolbar')}>
+                        <Toolbar
+                            type={'Bộ lọc'}
+                            onClick={() => {
+                                if (tabActive === 1) {
+                                    setShowFilter1(!showFilter1);
+                                    if (showFilter2) setShowFilter2(false);
+                                }
+                                else {
+                                    setShowFilter2(!showFilter2);
+                                    if (showFilter1) setShowFilter1(false);
+                                }
+
+                            }}
+                        />
+                        {tabActive === 1 ? (
+                            <>
+                                {!disableToolbar &&
+                                    <Toolbar
+                                        type={'Tạo mới'}
+                                        onClick={() => {
+                                            setShowModalUpdate(true);
+                                            setIsUpdate(false);
+                                        }}
+                                        isVisible={permissionDetailData?.isAdd}
+                                    />
+                                }
                                 <Toolbar
-                                    type={'Tạo mới'}
-                                    onClick={() => {
-                                        setShowModalUpdate(true);
-                                        setIsUpdate(false);
-                                    }}
-                                    isVisible={permissionDetailData?.isAdd}
+                                    type={'Xóa'}
+                                    onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
+                                    isVisible={permissionDetailData?.isDelete}
                                 />
-                            }
-                            <Toolbar
-                                type={'Xóa'}
-                                onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
-                                isVisible={permissionDetailData?.isDelete}
-                            />
-                            <Toolbar type={'Ẩn'} onClick={() => disableConfirm('đề tài khóa luận', handleDisable)} />
-                            <Toolbar type={'Hiện'} onClick={() => enableConfirm('đề tài khóa luận', handleEnable)} />
-                            {!disableToolbar &&
-                                <Toolbar type={'Nhập file Excel'} />
-                            }
-                            <Toolbar type={'Xuất file Excel'} />
-                        </div>
-                    ) : null}
+                                <Toolbar
+                                    type={'Ẩn'}
+                                    onClick={() => disableConfirm('đề tài khóa luận', handleDisable)}
+                                    isVisible={permissionDetailData?.isEdit}
+                                />
+                                <Toolbar
+                                    type={'Hiện'}
+                                    onClick={() => enableConfirm('đề tài khóa luận', handleEnable)}
+                                    isVisible={permissionDetailData?.isEdit}
+                                />
+                                {!disableToolbar &&
+                                    <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData?.isAdd} onClick={() => setShowModalImport(true)} />
+                                }
+                                <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
+                            </>
+                        ) : null}
+                    </div>
                 </div>
 
                 <Tabs
@@ -601,6 +703,14 @@ function DeTaiKhoaLuan() {
             {DeTaiKhoaLuanUpdateMemoized}
             {DeTaiKhoaLuanListRegisterMemoized}
             {DeTaiKhoaLuanDetailMemoized}
+            <ImportExcel
+                title={'đề tài khoá luận'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.THESIS}
+                onImport={importThesis}
+            />
         </>
     );
 }

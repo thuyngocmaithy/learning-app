@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio } from '@mui/material';
-import { Spin, message } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
+import { message } from '../../hooks/useAntdApp';
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
 import { callKhungCTDT } from '../../services/studyFrameService';
@@ -25,47 +26,52 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
     const [currentSemester, setCurrentSemester] = useState(1);
 
     // Tính học kỳ hiện tại
-    const calculateCurrentSemester = (startYear) => {
-        // Lấy năm hiện tại và tháng hiện tại
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth() + 1; // Tháng trong JS tính từ 0
+    const calculateCurrentSemester = useMemo(() => {
+        return (startYear) => {
+            // Lấy năm hiện tại và tháng hiện tại
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth() + 1; // Tháng trong JS tính từ 0
 
-        // Tính số năm đã trôi qua từ startYear
-        const yearsPassed = currentYear - startYear;
+            // Tính số năm đã trôi qua từ startYear
+            const yearsPassed = currentYear - startYear;
 
-        // Tính số học kỳ đã trôi qua
-        let semestersPassed = yearsPassed * 3; // Mỗi năm có 3 học kỳ
+            // Tính số học kỳ đã trôi qua
+            let semestersPassed = yearsPassed * 3; // Mỗi năm có 3 học kỳ
 
-        // Xác định học kỳ của năm hiện tại dựa trên tháng
-        if (currentMonth >= 9 && currentMonth <= 12) {
-            // Tháng 9, 10, 11, 12 là học kỳ thứ 3 của năm
-            semestersPassed += 3;
-        } else if (currentMonth >= 5 && currentMonth <= 8) {
-            // Tháng 5, 6, 7, 8 là học kỳ thứ 2 của năm
-            semestersPassed += 2;
-        } else if (currentMonth >= 1 && currentMonth <= 4) {
-            // Tháng 1, 2, 3, 4 là học kỳ thứ 1 của năm
-            semestersPassed += 1;
-        }
-
-        return semestersPassed;
-    }
-
-
-    const generateSemesterMap = (firstYear, lastYear) => {
-        const semesterMap = {};
-        let counter = 1;
-
-        for (let year = firstYear; year <= lastYear; year++) {
-            for (let semester = 1; semester <= 3; semester++) {
-                semesterMap[counter] = `${year}${semester}`;
-                counter++;
+            // Xác định học kỳ của năm hiện tại dựa trên tháng
+            if (currentMonth >= 9 && currentMonth <= 12) {
+                // Tháng 9, 10, 11, 12 là học kỳ thứ 3 của năm
+                semestersPassed += 3;
+            } else if (currentMonth >= 5 && currentMonth <= 8) {
+                // Tháng 5, 6, 7, 8 là học kỳ thứ 2 của năm
+                semestersPassed += 2;
+            } else if (currentMonth >= 1 && currentMonth <= 4) {
+                // Tháng 1, 2, 3, 4 là học kỳ thứ 1 của năm
+                semestersPassed += 1;
             }
-        }
-        return semesterMap;
-    };
 
+            return semestersPassed;
+        };
+    }, []); // useMemo để tránh tính toán lại khi không thay đổi
+
+
+    const generateSemesterMap = useMemo(() => {
+        return (firstYear, lastYear) => {
+            const semesterMap = {};
+            let counter = 1;
+
+            for (let year = firstYear; year <= lastYear; year++) {
+                for (let semester = 1; semester <= 3; semester++) {
+                    semesterMap[counter] = `${year}${semester}`;
+                    counter++;
+                }
+            }
+            return semesterMap;
+        };
+    }, []);
+
+    // useEffect để tính toán học kỳ hiện tại và tạo danh sách học kỳ
     useEffect(() => {
         if (studentInfo) {
             const firstYear = studentInfo?.firstAcademicYear;
@@ -74,36 +80,38 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
                 setCurrentSemester(calculateCurrentSemester(firstYear));
             }
             if (firstYear && lastYear) {
-                setSemesterList(generateSemesterMap(firstYear, lastYear))
+                setSemesterList(generateSemesterMap(firstYear, lastYear));
             }
         }
-    }, [studentInfo])
+    }, [studentInfo, calculateCurrentSemester, generateSemesterMap]); // Thay đổi khi studentInfo thay đổi
 
 
-    const getSemesterIndex = (semesterId) => {
+    // Hàm lấy index của học kỳ từ semesterId
+    const getSemesterIndex = useCallback((semesterId) => {
         const firstYear = studentInfo?.firstAcademicYear;
         if (!semesterId || !firstYear) return;
         const year = parseInt(semesterId.substring(0, 4));
         const semester = parseInt(semesterId.substring(4));
         return ((year - firstYear) * 3) + (semester - 1);
-    };
+    }, [studentInfo]);
 
-    const getSubjectCourseOpening = (async (studyFrameId) => {
+    // Hàm lấy danh sách môn học mở từ API
+    const getSubjectCourseOpening = useCallback(async (studyFrameId) => {
         try {
             const response = await getWhere({ studyFrame: studyFrameId });
-            return response.data.data.map((item) => {
-                return {
-                    subjectId: item.subject?.subjectId,
-                    semesterId: getSemesterIndex(item.semester?.semesterId)
-                }
-            });
+            return response.data.data.map((item) => ({
+                subjectId: item.subject?.subjectId,
+                semesterId: getSemesterIndex(item.semester?.semesterId),
+                instructor: item.instructor,
+                disabled: item.disabled,
+            }));
         } catch (error) {
             console.error('Error fetching subject course opening:', error);
             return [];
         }
-    });
+    }, [getSemesterIndex]); // getSubjectCourseOpening chỉ thay đổi khi getSemesterIndex thay đổi
 
-    // useEffect để fetch danh sách môn học mở khi studentInfo được cập nhật
+    // useEffect để tải danh sách môn học mở khi studentInfo hoặc frameId thay đổi
     useEffect(() => {
         if (!frameId || !studentInfo) return;
 
@@ -111,84 +119,84 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
             try {
                 const [registeredSubjectsRes, courseOpenRes] = await Promise.all([
                     getUserRegisteredSubjects(userId),
-                    getSubjectCourseOpening(frameId)
+                    getSubjectCourseOpening(frameId),
                 ]);
-                // Set danh sách môn học mở
-                setCourseOpen(courseOpenRes);
 
+                setCourseOpen(courseOpenRes); // Cập nhật môn học mở
+
+                // Tạo danh sách môn học đã đăng ký
                 const registeredMap = {};
                 if (registeredSubjectsRes?.length) {
-                    registeredSubjectsRes?.forEach(registration => {
+                    registeredSubjectsRes.forEach((registration) => {
                         const semesterIndex = getSemesterIndex(registration.semester.semesterId);
                         registeredMap[registration.subject.subjectId] = {
                             semesterIndex,
                             semesterId: registration.semester.semesterId,
-                            registerDate: registration.registerDate
+                            registerDate: registration.registerDate,
                         };
                     });
                 }
-                // Set danh sách môn học đăng ký
-                setRegisteredSubjects(registeredMap);
+                setRegisteredSubjects(registeredMap); // Cập nhật danh sách môn học đăng ký
             } catch (error) {
                 console.error('Lỗi khi tải danh sách môn học mở:', error);
-            }
-            finally {
-                setIsLoading(false);
+            } finally {
+                setIsLoading(false); // Đánh dấu kết thúc việc tải dữ liệu
             }
         };
 
-        fetchCourseOpen();
-    }, [frameId, studentInfo]);
+        fetchCourseOpen(); // Gọi hàm fetchCourseOpen khi studentInfo hoặc frameId thay đổi
+    }, [frameId, studentInfo, getSubjectCourseOpening, getSemesterIndex, userId, setRegisteredSubjects]);
 
 
 
-    const fetchData = (async () => {
-        setIsLoading(true);
-        try {
-            const userData = await getUserById(userId);
-            const [frameComponentsRes, scoresRes] = await Promise.all([
-                callKhungCTDT(frameId),
-                getScoreByStudentId(userId),
-            ]);
-
-            // set thông tin info trước
-            if (scoresRes?.length) {
-                setStudentInfo({
-                    ...scoresRes[0].student,
-                    firstAcademicYear: userData.data.firstAcademicYear,
-                    lastAcademicYear: userData.data.lastAcademicYear
-                });
-            }
-
-            // Tạo danh sách các subjectId đã có điểm
-            const scoredSubjects = new Set(
-                scoresRes?.map((score) => score.subject.subjectId) || []
-            );
-
-            // Lọc các subjectInfo trong frameComponentsRes
-            let filteredFrameComponents = [];
-
-            if (status === 'Tất cả') {
-                filteredFrameComponents = frameComponentsRes;
-            }
-            else {
-                filteredFrameComponents = frameComponentsRes.map((component) => ({
-                    ...component,
-                    subjectInfo: component.subjectInfo.filter((subject) =>
-                        status === 'Chưa học' ? !scoredSubjects.has(subject.subjectId) : scoredSubjects.has(subject.subjectId)
-                    ),
-                }));
-            }
-
-            setFrameComponents(filteredFrameComponents || []);
-            setScores(scoresRes || []);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            message.error('Failed to load data');
-        }
-    });
 
     useEffect(() => {
+        const fetchData = (async () => {
+            setIsLoading(true);
+            try {
+                const userData = await getUserById(userId);
+                const [frameComponentsRes, scoresRes] = await Promise.all([
+                    callKhungCTDT(frameId),
+                    getScoreByStudentId(userId),
+                ]);
+
+                // set thông tin info trước
+                if (scoresRes?.length) {
+                    setStudentInfo({
+                        ...scoresRes[0].student,
+                        firstAcademicYear: userData.data.firstAcademicYear,
+                        lastAcademicYear: userData.data.lastAcademicYear
+                    });
+                }
+
+                // Tạo danh sách các subjectId đã có điểm
+                const scoredSubjects = new Set(
+                    scoresRes?.map((score) => score.subject.subjectId) || []
+                );
+
+                // Lọc các subjectInfo trong frameComponentsRes
+                let filteredFrameComponents = [];
+
+                if (status === 'Tất cả') {
+                    filteredFrameComponents = frameComponentsRes;
+                }
+                else {
+                    filteredFrameComponents = frameComponentsRes.map((component) => ({
+                        ...component,
+                        subjectInfo: component.subjectInfo.filter((subject) =>
+                            status === 'Chưa học' ? !scoredSubjects.has(subject.subjectId) : scoredSubjects.has(subject.subjectId)
+                        ),
+                    }));
+                }
+
+                setFrameComponents(filteredFrameComponents || []);
+                setScores(scoresRes || []);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                message.error('Failed to load data');
+            }
+        });
+
         if (userId && frameId && status)
             fetchData();
     }, [userId, frameId, status]);
@@ -242,47 +250,58 @@ const SubjectCell = React.memo(({
         const isRegistered = registeredInfo?.semesterIndex === semesterIndex;
         const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
         // Kiểm tra môn học đang mở kì này
-        const isOpen = courseOpen?.some(
+        const findIsScoreOpen = courseOpen?.find(
             open => open.subjectId === subject.subjectId && open.semesterId === semesterIndex
-        );
-        return { isRegistered, hasScore, isOpen };
+        ); // Tìm môn học được mở        
+
+        const instructor = findIsScoreOpen?.instructor; // Giảng viên dạy
+        const isOpen = findIsScoreOpen; // Mở
+
+        return { isRegistered, hasScore, isOpen, instructor };
     }, [registeredInfo?.semesterIndex, semesterIndex, scoreInfo, courseOpen, subject.subjectId]);
 
-    const { isRegistered, hasScore, isOpen } = cellState;
+    const { isRegistered, hasScore, isOpen, instructor } = cellState;
+    const isShowTeacher = !courseOpen[0]?.disabled;
+
+    const radioElement = useMemo(() => {
+        const radioProps = {
+            checked: hasScore || isRegistered,
+            onChange: () => handleChange(subject.subjectId, semesterIndex),
+            disabled: hasScore || disableCheckbox,
+            size: "small",
+            style: {
+                color: theme === "dark" ? "rgb(39 61 157)" : "#000",
+                opacity: (hasScore || disableCheckbox) ? "0.3" : "1",
+            },
+        };
+
+        return hasScore ? (
+            <div className={cx('radio-check')}>
+                <Radio {...radioProps} />
+                <span>{scoreInfo.finalScore10}</span>
+            </div>
+        ) : (
+            <Radio {...radioProps} />
+        );
+    }, [hasScore, isRegistered, scoreInfo, disableCheckbox, theme, subject.subjectId, semesterIndex, handleChange]);
+
+    const renderCellContent = isShowTeacher ? (
+        <Tooltip title={instructor} color={'#108ee9'} key={`tooltip-${subject.subjectId}-${semesterIndex}`}>
+            <div>{radioElement}</div>
+        </Tooltip>
+    ) : (
+        radioElement
+    );
 
     return (
         <TableCell
             align="center"
             style={{
                 backgroundColor: isOpen ? 'var(--color-subject-open)' : 'transparent',
-                color: isOpen ? '#000' : 'var(--color-text-base)'
+                color: isOpen ? '#000' : 'var(--color-text-base)',
             }}
         >
-            {hasScore
-                ? <div className={cx('radio-check')}>
-                    <Radio
-                        checked={hasScore || isRegistered} // Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
-                        onChange={() => handleChange(subject.subjectId, semesterIndex)}
-                        disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
-                        size="small"
-                        style={{
-                            color: theme === 'dark' ? 'rgb(39 61 157)' : '#000',
-                            opacity: (hasScore || disableCheckbox) ? '0.3' : '1'
-                        }}
-                    />
-                    <span>{scoreInfo.finalScore10}</span>
-                </div>
-                : <Radio
-                    checked={hasScore || isRegistered} // Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
-                    onChange={() => handleChange(subject.subjectId, semesterIndex)}
-                    disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
-                    size="small"
-                    style={{
-                        color: theme === 'dark' ? 'rgb(39 61 157)' : '#000',
-                        opacity: (hasScore || disableCheckbox) ? '0.3' : '1'
-                    }}
-                />
-            }
+            {renderCellContent}
         </TableCell>
     );
 }, (prevProps, nextProps) => {
@@ -308,25 +327,34 @@ const SubjectRow = React.memo(({
     const { theme } = useContext(ThemeContext)
     const registeredInfo = registeredSubjects[subject?.subjectId];
 
-    // Kiểm tra xem có học kỳ nào đã có điểm trước học kỳ đăng ký không
+    // Tối ưu hóa việc tính toán chỉ số cần vô hiệu hóa checkbox và các trạng thái tô màu dòng
     const disableCheckboxIndexes = useMemo(() => {
         const indexes = [];
         let highlightRow = false;
         let redRow = false;
 
+        // Sử dụng Map để lưu trữ thông tin điểm của các học kỳ, tránh việc tìm kiếm lặp lại.
+        const subjectScoresMap = new Map();
+
+        // Duyệt qua tất cả các điểm của môn học này và lưu trữ vào subjectScoresMap.
+        scores.forEach(score => {
+            if (score.subject.subjectId === subject.subjectId) {
+                const semesterIndex = getSemesterIndex(score.semester.semesterId);
+                subjectScoresMap.set(semesterIndex, score);
+            }
+        });
+
+        // Duyệt qua các học kỳ và tính toán trạng thái vô hiệu hóa checkbox và tô màu dòng
         for (let i = 0; i < repeatHK; i++) {
-            const scoreInfo = scores.find(score =>
-                score.subject.subjectId === subject.subjectId &&
-                getSemesterIndex(score.semester.semesterId) === i
-            );
+            const scoreInfo = subjectScoresMap.get(i); // Lấy thông tin điểm từ Map
 
             if (scoreInfo && scoreInfo.finalScore10 !== undefined) {
-                // Đánh dấu tất cả các cột trước cột có điểm là cần disable
+                // Nếu có điểm, vô hiệu hóa checkbox ở tất cả các cột trước cột có điểm
                 for (let j = 0; j <= i; j++) {
                     indexes.push(j);
                 }
 
-                // Nếu có điểm, kiểm tra xem học kỳ đăng ký có nhỏ hơn học kỳ có điểm không
+                // Kiểm tra xem học kỳ đăng ký có nhỏ hơn học kỳ có điểm không
                 if (i >= registeredInfo?.semesterIndex) {
                     highlightRow = true; // Đánh dấu dòng cần tô màu
                 }
@@ -338,12 +366,14 @@ const SubjectRow = React.memo(({
             }
         }
 
-        return { indexes, highlightRow, redRow }; // Trả về cả chỉ số cần disable và trạng thái cần tô màu
+        return { indexes, highlightRow, redRow }; // Trả về các chỉ số cần vô hiệu hóa và trạng thái tô màu
     }, [subject, repeatHK, scores, currentSemester, getSemesterIndex, registeredInfo]);
 
+    // Sử dụng useMemo để tối ưu việc render các ô trong bảng (SemesterCells)
     const semesterCells = useMemo(() => {
-        if (!subject) return null;
+        if (!subject) return null; // Nếu không có môn học thì không render gì
 
+        // Duyệt qua các học kỳ và render các ô cho mỗi học kỳ
         return Array.from({ length: repeatHK }).map((_, i) => {
             const scoreInfo = scores.find(score =>
                 score.subject.subjectId === subject.subjectId &&
@@ -352,12 +382,12 @@ const SubjectRow = React.memo(({
 
             return (
                 <SubjectCell
-                    key={`cell-${subject.subjectId}-${i}`}
+                    key={`cell-${subject.subjectId}-${i}`} // Key là sự kết hợp của subjectId và học kỳ
                     subject={subject}
                     semesterIndex={i}
                     registeredInfo={registeredInfo}
                     scoreInfo={scoreInfo}
-                    disableCheckbox={disableCheckboxIndexes.indexes.includes(i)} // Vô hiệu hóa checkbox nếu nằm trong các cột có điểm hoặc trước cột đó
+                    disableCheckbox={disableCheckboxIndexes.indexes.includes(i)} // Vô hiệu hóa checkbox nếu là cột có điểm
                     handleChange={handleChangeCell}
                     courseOpen={courseOpen}
                 />
@@ -365,49 +395,62 @@ const SubjectRow = React.memo(({
         });
     }, [subject, repeatHK, registeredInfo, scores, courseOpen, getSemesterIndex, disableCheckboxIndexes.indexes, handleChangeCell]);
 
+    // Nếu không có môn học thì không render gì
     if (!subject) return null;
 
+    const RowMemoized = React.memo(({ index, subject, disableCheckboxIndexes, theme }) => {
+        return (
+            <TableRow
+                style={{
+                    backgroundColor: disableCheckboxIndexes.highlightRow
+                        ? 'var(--color-subject-correct)' // Dòng có điểm sẽ tô màu xanh
+                        : disableCheckboxIndexes.redRow
+                            ? 'var(--color-subject-error)' // Dòng cần tô màu đỏ
+                            : theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff', // Màu nền tùy thuộc vào chế độ
+                }}>
+                <TableCell
+                    align="center"
+                    style={{ position: "sticky", left: "0", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+                >
+                    {index + 1} {/* Chỉ mục dòng */}
+                </TableCell>
+                <TableCell
+                    align="center"
+                    style={{ position: "sticky", left: "50px", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+                >
+                    {subject.subjectId} {/* Mã môn học */}
+                </TableCell>
+                <TableCell
+                    align="left"
+                    style={{ position: "sticky", left: "150px", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+                >
+                    {subject.subjectName} {/* Tên môn học */}
+                </TableCell>
+                <TableCell
+                    align="center"
+                    style={{ color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+                >
+                    {subject.creditHour} {/* Số tín chỉ */}
+                </TableCell>
+                <TableCell
+                    align="center"
+                    style={{ color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
+                >
+                    {subject.subjectBeforeId || '-'} {/* Mã môn học trước đó nếu có */}
+                </TableCell>
+                {semesterCells}
+            </TableRow>
+        );
+    });
+
+    // Sử dụng RowMemoized trong render chính để tận dụng memo hóa
     return (
-        <TableRow
-            style={{
-                backgroundColor: disableCheckboxIndexes.highlightRow
-                    ? 'var(--color-subject-correct)'
-                    : disableCheckboxIndexes.redRow
-                        ? 'var(--color-subject-error)'
-                        : theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
-            }}>
-            <TableCell
-                align="center"
-                style={{ position: "sticky", left: "0", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
-            >
-                {index + 1}
-            </TableCell>
-            <TableCell
-                align="center"
-                style={{ position: "sticky", left: "50px", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
-            >
-                {subject.subjectId}
-            </TableCell>
-            <TableCell
-                align="left"
-                style={{ position: "sticky", left: "150px", zIndex: '99', color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
-            >
-                {subject.subjectName}
-            </TableCell>
-            <TableCell
-                align="center"
-                style={{ color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
-            >
-                {subject.creditHour}
-            </TableCell>
-            <TableCell
-                align="center"
-                style={{ color: (disableCheckboxIndexes.highlightRow || disableCheckboxIndexes.redRow) ? '#000 !important' : 'var(--color-text-base)' }}
-            >
-                {subject.subjectBeforeId || '-'}
-            </TableCell>
-            {semesterCells}
-        </TableRow>
+        <RowMemoized
+            index={index}
+            subject={subject}
+            disableCheckboxIndexes={disableCheckboxIndexes}
+            theme={theme}
+        />
     );
 });
 
@@ -419,8 +462,26 @@ const FrameComponentRow = React.memo(({
     repeatHK,
     renderSubjectRow
 }) => {
-    const { theme } = useContext(ThemeContext)
-    const paddingLeft = 50 + (level * 50);
+    const { theme } = useContext(ThemeContext);
+
+    // Memo hóa giá trị paddingLeft để tránh tính toán lại trong mỗi lần render
+    const paddingLeft = useMemo(() => 50 + (level * 50), [level]);
+
+    // Memo hóa style của TableCell dựa trên giá trị theme và paddingLeft
+    const tableCellStyle = useMemo(() => ({
+        paddingLeft: `${paddingLeft}px`,
+        position: "sticky",
+        left: "0",
+        zIndex: '50',
+        background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff', // Thay đổi style dựa trên theme
+        color: 'var(--color-text-base)',
+    }), [paddingLeft, theme]);
+
+    // Memo hóa hàm renderSubjectRow để tránh render lại không cần thiết
+    const renderMemoizedSubjectRow = useCallback((subject, index) => {
+        subject.studyFrameComponentId = frameComponent.frameComponentId;
+        return renderSubjectRow(subject, index);
+    }, [frameComponent.frameComponentId, renderSubjectRow]); // Chỉ thay đổi khi frameComponent.frameComponentId hoặc renderSubjectRow thay đổi
 
     return (
         <>
@@ -429,15 +490,7 @@ const FrameComponentRow = React.memo(({
                     className={cx('title')}
                     align="left"
                     colSpan={5}
-                    style={{
-                        paddingLeft: `${paddingLeft}px`,
-                        position: "sticky",
-                        left: "0",
-                        zIndex: '50',
-                        background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
-                        color: 'var(--color-text-base)'
-                    }}
-
+                    style={tableCellStyle} // Sử dụng style đã memo hóa
                 >
                     {frameComponent.frameComponentName}
                     {frameComponent.creditHour ? ` (${frameComponent.creditHour})` : ''}
@@ -450,33 +503,30 @@ const FrameComponentRow = React.memo(({
                         background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
                         color: 'var(--color-text-base)'
                     }}
-                >
-                </TableCell>
-            </TableRow >
+                />
+            </TableRow>
             {
                 frameComponent.subjectInfo?.map((subject, index) => {
+                    // Thêm thuộc tính studyFrameComponentId vào từng subject
                     subject.studyFrameComponentId = frameComponent.frameComponentId;
-                    return renderSubjectRow(subject, index)
-                }
-                )
+                    // Sử dụng hàm renderMemoizedSubjectRow thay vì gọi trực tiếp renderSubjectRow
+                    return renderMemoizedSubjectRow(subject, index);
+                })
             }
         </>
     );
 });
 
+
 const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubjects, status }) => {
     const { userId } = useContext(AccountLoginContext);
-    const {
-        frameComponents,
-        scores,
-        isLoading,
-        repeatHK,
-        currentSemester,
-        courseOpen,
-        getSemesterIndex,
-        handleSelectSubject
-    } = useTableLogic(userId, frameId, status, registeredSubjects, setRegisteredSubjects);
-    const { theme } = useContext(ThemeContext)
+    const { frameComponents, scores, isLoading, repeatHK, currentSemester, courseOpen, getSemesterIndex, handleSelectSubject } = useTableLogic(userId, frameId, status, registeredSubjects, setRegisteredSubjects);
+    const { theme } = useContext(ThemeContext);
+
+    const calculateLeft = (columns, currentIndex) => {
+        return columns.slice(0, currentIndex).reduce((total, column) => total + (column.minWidth || 0), 0);
+    };
+
     const columns = useMemo(() => [
         { id: 'id', label: 'TT', minWidth: 50, align: 'center' },
         { id: 'code', label: 'Mã HP', minWidth: 100, align: 'center' },
@@ -506,14 +556,18 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
         />
     ), [repeatHK, registeredSubjects, scores, currentSemester, courseOpen, handleSelectSubject, getSemesterIndex]);
 
-    const calculateLeft = (columns, currentIndex) => {
-        return columns.slice(0, currentIndex).reduce((total, column) => total + (column.minWidth || 0), 0);
-    };
+    const stickyHeaderStyle = useMemo(() => ({
+        top: 0,
+        position: 'sticky',
+        left: '0',
+        zIndex: '999',
+        background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
+    }), [theme]);
 
     if (isLoading) {
         return (
             <div className={cx('container-loading')} style={{ height: 880 }}>
-                <Spin size="large" />
+                <Skeleton paragraph={{ rows: 10 }} />
             </div>
         );
     }
@@ -524,27 +578,8 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="center" colSpan={5}
-                                style={{
-                                    top: 0,
-                                    position: 'sticky',
-                                    left: '0',
-                                    zIndex: "999",
-                                    background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff'
-                                }}>
-                            </TableCell>
-                            <TableCell
-                                className={cx('title')}
-                                align="center"
-                                colSpan={repeatHK}
-                                style={{
-                                    top: 0,
-                                    position: 'sticky',
-                                    left: '0',
-                                    zIndex: "999",
-                                    background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff'
-                                }}
-                            >
+                            <TableCell align="center" colSpan={5} style={stickyHeaderStyle}></TableCell>
+                            <TableCell className={cx('title')} align="center" colSpan={repeatHK} style={stickyHeaderStyle}>
                                 Học kỳ thực hiện
                             </TableCell>
                         </TableRow>
@@ -561,13 +596,13 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
                                             minWidth: column.minWidth,
                                             position: 'sticky',
                                             left: isSticky ? `${calculateLeft(columns, index)}px` : '0',
-                                            zIndex: isSticky ? "999" : '998',
-                                            background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff'
+                                            zIndex: isSticky ? '999' : '998',
+                                            background: theme === 'dark' ? 'rgb(16, 37, 57)' : '#ffffff',
                                         }}
                                     >
                                         {column.label}
                                     </TableCell>
-                                )
+                                );
                             })}
                         </TableRow>
                     </TableHead>
@@ -587,5 +622,4 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
         </Paper>
     );
 };
-
 export default ColumnGroupingTable;

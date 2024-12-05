@@ -1,15 +1,18 @@
 import React, { useState, memo, useEffect, useContext } from 'react';
-import { Input, InputNumber, Select, Form, message, Col, DatePicker, Row } from 'antd';
+import { Input, InputNumber, Select, Form, Col, DatePicker, Row } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getUserById } from '../../../services/userService';
+import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createThesisGroup, updateThesisGroupById } from '../../../services/thesisGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { getAllFaculty } from '../../../services/facultyService';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import notifications from '../../../config/notifications';
+import { useSocketNotification } from '../../../context/SocketNotificationContext';
 
 const { RangePicker } = DatePicker;
 dayjs.extend(utc);
@@ -21,12 +24,11 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     setShowModal,
     reLoad
 }) {
+    const { sendNotification } = useSocketNotification();
     const [form] = useForm(); // Sử dụng hook useForm
     const [statusOptions, setStatusOptions] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState(null);
     const { userId } = useContext(AccountLoginContext);
     const [facultyOptions, setFacultyOptions] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
 
     const statusType = 'Tiến độ nhóm đề tài khóa luận';
 
@@ -41,10 +43,6 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                         label: status.statusName,
                     }));
                     setStatusOptions(options);
-                    // Nếu có giá trị đã chọn, set lại giá trị đó
-                    if (selectedStatus) {
-                        setSelectedStatus(selectedStatus);
-                    }
                 }
             } catch (error) {
                 console.error(' [ Ngànhluanupdate - fetchStatusByType - Error ] :', error);
@@ -52,7 +50,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
         };
 
         fetchStatusByType();
-    }, [statusType, selectedStatus]);
+    }, [statusType]);
 
     // Fetch data khi component được mount
     //lấy danh sách các ngành ra ngoài thẻ select
@@ -62,46 +60,39 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             if (response && response.data) {
                 const options = response.data.map((faculty) => ({
                     value: faculty.facultyId,
-                    label: faculty.facultyName,
+                    label: faculty.facultyId + " - " + faculty.facultyName,
                 }));
                 setFacultyOptions(options);
-
-                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
-                if (selectedFaculty) {
-                    const selectedOption = options.find((option) => option.value === selectedFaculty);
-                    if (selectedOption) {
-                        setSelectedFaculty(selectedOption.value);
-                    }
-                }
             }
         };
 
         fetchFaculties();
-    }, [selectedFaculty]);
-
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-    };
-
+    }, []);
 
     useEffect(() => {
         if (showModal && isUpdate) {
-            const startCreateSRDate = showModal.startCreateSRDate ? dayjs.utc(showModal.startCreateSRDate).local() : '';
-            const endCreateSRDate = showModal.endCreateSRDate ? dayjs.utc(showModal.endCreateSRDate).local() : '';
+            const startCreateThesisDate = showModal.startCreateThesisDate ? dayjs.utc(showModal.startCreateThesisDate).local() : '';
+            const endCreateThesisDate = showModal.endCreateThesisDate ? dayjs.utc(showModal.endCreateThesisDate).local() : '';
 
             form.setFieldsValue({
                 thesisGroupName: showModal.thesisGroupName,
                 description: showModal.description,
-                faculty: showModal.faculty.facultyName,
-                status: showModal.status.statusId,
+                ...(showModal.faculty && {
+                    faculty: {
+                        value: showModal.faculty.facultyId,
+                    }
+                }),
+                ...(showModal.status && {
+                    status: {
+                        value: showModal.status.statusId,
+                    }
+                }),
                 startYear: showModal.startYear,
                 finishYear: showModal.finishYear,
-                ...(showModal.startCreateSRDate && showModal.endCreateSRDate) && {
-                    createSRDate: [startCreateSRDate, endCreateSRDate]
+                ...(showModal.startCreateThesisDate && showModal.endCreateThesisDate) && {
+                    createThesisDate: [startCreateThesisDate, endCreateThesisDate]
                 }
             });
-            setSelectedFaculty(showModal.faculty.facultyId);
-            setSelectedStatus(showModal.status.statusId);
         }
     }, [showModal, isUpdate, form]);
 
@@ -118,12 +109,12 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             const values = await form.validateFields();
             let thesisGroupData = {
                 thesisGroupName: values.thesisGroupName,
-                statusId: selectedStatus,
+                statusId: values.status.value,
                 startYear: values.startYear,
                 finishYear: values.finishYear,
-                facultyId: selectedFaculty,
-                startCreateSRDate: new Date(values.createSRDate[0].$d),
-                endCreateSRDate: new Date(values.createSRDate[1].$d),
+                facultyId: values.faculty.value,
+                startCreateThesisDate: new Date(values.createThesisDate[0].$d),
+                endCreateThesisDate: new Date(values.createThesisDate[1].$d),
             };
 
             let response;
@@ -143,11 +134,34 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} nhóm đề tài thành công!`);
+                if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
 
         } catch (error) {
             console.error(`[ DeTaiKhoaLuan - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesisGroup `, error);
+        }
+    };
+
+    const handleSendNotification = async (thesisGroupData) => {
+        try {
+            const user = await getUserById(userId);
+
+            //lấy danh sách giảng viên theo ngành
+            const responseIntructor = await getUsersByFaculty(thesisGroupData.faculty.facultyId);
+            if (responseIntructor && responseIntructor.data) {
+                var listUserReceived = responseIntructor.data;
+
+            }
+
+            const ListNotification = await notifications.getNhomKhoaLuanNotification('create', thesisGroupData, user.data, listUserReceived);
+
+            ListNotification.forEach(async (itemNoti) => {
+                await sendNotification(itemNoti);
+            })
+
+        } catch (err) {
+            console.error(err)
         }
     };
 
@@ -193,12 +207,11 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                                 showSearch
                                 placeholder="Chọn ngành"
                                 optionFilterProp="children"
-                                onChange={handleFacultySelect}
-                                value={selectedFaculty}
                                 filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={facultyOptions}
+                                labelInValue
                             />
                         </FormItem>
 
@@ -211,12 +224,11 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                                 showSearch
                                 placeholder="Chọn trạng thái"
                                 optionFilterProp="children"
-                                value={selectedStatus}
-                                onChange={(value) => setSelectedStatus(value)}
                                 filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={statusOptions}
+                                labelInValue
                             />
                         </FormItem>
 
@@ -237,7 +249,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                             />
                         </FormItem>
                         <FormItem
-                            name="createSRDate"
+                            name="createThesisDate"
                             label="Thời gian tạo đề tài"
                             rules={[{ type: 'array', required: true, message: 'Vui lòng chọn thời gian tạo đề tài!' }]}
                         >

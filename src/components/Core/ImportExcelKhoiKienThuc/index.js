@@ -2,11 +2,11 @@ import classNames from 'classnames/bind';
 import styles from './ImportExcelKhoiKienThuc.module.scss';
 import { useState, useCallback } from 'react';
 import ExcelJS from 'exceljs';
-import { App, Button, Modal, Spin, Upload } from 'antd';
+import { Button, Modal, Spin, Upload } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import ButtonCustom from '../Button';
 import { downloadTemplate } from '../../../services/fileService';
 import { UploadOutlined } from '@ant-design/icons';
-import { message } from '../../../hooks/useAntdApp';
 
 const cx = classNames.bind(styles);
 
@@ -23,15 +23,13 @@ function ImportExcelKhoiKienThuc({
     setListSubject,
     setListSubjectSelected,
     ...props }) {
-
-    const { message } = App.useApp();
     const [file, setFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleCancel = useCallback(() => {
         setShowModal(false);
         if (onClose) onClose();
-    }, [onClose]);
+    }, [onClose, setShowModal]);
 
     const handleUpload = async () => {
         if (!file) return;
@@ -84,7 +82,6 @@ function ImportExcelKhoiKienThuc({
                 });
                 if (onImport && dataImport.length > 0) {
                     const response = await onImport(dataImport); // Gọi hàm onImport để xử lý dữ liệu
-                    console.log(response.data);
                     if (response.message === 'success' && response.data && response.data.length > 0) {
                         const listSubjectAdded = response.data.map((item) => {
                             return {

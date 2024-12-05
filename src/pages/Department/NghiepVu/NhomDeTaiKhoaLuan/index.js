@@ -1,15 +1,16 @@
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiKhoaLuan.module.scss';
-import { Card, Col, Divider, Empty, Input, message, Select, Tabs, Tag } from 'antd';
+import { Card, Divider, Empty, Input, Select, Tabs, Tag } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import NhomDeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/NhomDeTaiKhoaLuanUpdate';
-import { deleteThesisGroups, getAllThesisGroup, getWhere, updateThesisGroupByIds } from '../../../../services/thesisGroupService';
+import { deleteThesisGroups, getAllThesisGroup, getWhere, updateThesisGroupByIds, importThesisGroup } from '../../../../services/thesisGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereThesis } from '../../../../services/thesisService';
@@ -19,6 +20,9 @@ import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
 import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
+import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
+import dayjs from 'dayjs';
 
 const cx = classNames.bind(styles);
 
@@ -37,6 +41,7 @@ function NhomDeTaiKhoaLuan() {
     const [facultyOptions, setFacultyOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
+    const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
 
 
 
@@ -52,13 +57,13 @@ function NhomDeTaiKhoaLuan() {
     const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
     const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
-    // Lấy tabIndex từ URL nếu có
-    function getInitialTabIndex() {
-        const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
-        setTabActive(tab);
-    }
-
     useEffect(() => {
+        // Lấy tabIndex từ URL nếu có
+        function getInitialTabIndex() {
+            const tab = tabIndexFromUrl || 1; // Mặc định là tab đầu tiên
+            setTabActive(tab);
+        }
+
         getInitialTabIndex();
     }, [tabIndexFromUrl])
 
@@ -96,8 +101,8 @@ function NhomDeTaiKhoaLuan() {
         },
         {
             title: 'Ngành',
-            dataIndex: ['faculty'],
-            key: 'faculty',
+            dataIndex: 'facultyName',
+            key: 'facultyName',
         },
         {
             title: 'Năm thực hiện',
@@ -113,8 +118,8 @@ function NhomDeTaiKhoaLuan() {
         },
         {
             title: 'Trạng thái',
-            key: 'status',
-            dataIndex: ['status'],
+            key: 'statusName',
+            dataIndex: 'statusName',
             align: 'center',
             width: '190px',
             render: (_, record) => (
@@ -162,22 +167,20 @@ function NhomDeTaiKhoaLuan() {
                     >
                         Danh sách
                     </ButtonCustom>
-                    {
-                        // có quyền edit
-                        permissionDetailData.isEdit
-                        && <ButtonCustom
-                            className={cx('btnEdit')}
-                            leftIcon={<EditOutlined />}
-                            primary
-                            verysmall
-                            onClick={() => {
-                                setShowModalUpdate(record);
-                                setIsUpdate(true)
-                            }}
-                        >
-                            Sửa
-                        </ButtonCustom>
-                    }
+                    <ButtonCustom
+                        className={cx('btnEdit')}
+                        leftIcon={<EditOutlined />}
+                        primary
+                        verysmall
+                        onClick={() => {
+                            setShowModalUpdate(record);
+                            setIsUpdate(true)
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
+                        Sửa
+                    </ButtonCustom>
+
                 </div>
             ),
         }
@@ -193,7 +196,7 @@ function NhomDeTaiKhoaLuan() {
                 const resultData = result.data.data.map((item) => {
                     return {
                         ...item,
-                        faculty: item.faculty.facultyName,
+                        facultyName: item.faculty.facultyName,
                         // startCreateThesisDate và endCreateThesisDate đều null
                         // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh
@@ -214,7 +217,8 @@ function NhomDeTaiKhoaLuan() {
     };
 
     // Lấy danh sách đề tài làm người hướng dẫn => Giảng viên
-    const fetchListThesisJoined = async () => {
+    const fetchListThesisJoined = useCallback(async () => {
+        if (!userId) return;
         try {
             const response = await getWhereThesis({ instructorId: userId });
             if (response.status === 200 && response.data.data) {
@@ -225,12 +229,12 @@ function NhomDeTaiKhoaLuan() {
             console.error('Error fetching listThesisJoined:', error);
             setIsLoading(false);
         }
-    };
+    }, [userId]);
 
     useEffect(() => {
         fetchData();
         fetchListThesisJoined();
-    }, []);
+    }, [fetchListThesisJoined]);
 
     // Xóa nhóm đề tài KhoaLuan
     const handleDelete = async () => {
@@ -449,7 +453,7 @@ function NhomDeTaiKhoaLuan() {
                                 className={cx('card-DeTaiKhoaLuanThamGia')}
                                 key={index}
                                 type="inner"
-                                title={item.thesisName}
+                                title={`${item.thesisId} - ${item.thesisName}`}
                                 extra={
                                     <ButtonCustom
                                         primary
@@ -463,10 +467,19 @@ function NhomDeTaiKhoaLuan() {
                                     </ButtonCustom>
                                 }
                             >
-                                Trạng thái:
-                                <Tag color={color} className={cx('tag-status')}>
-                                    {item.status.statusName}
-                                </Tag>
+                                <div className={cx('container-detail')}>
+                                    <p className={cx('label-detail')}>Thời gian thực hiện: </p>
+                                    {item.startDate && item.finishDate
+                                        ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
+                                        : <p>Chưa có</p>
+                                    }
+                                </div>
+                                <div className={cx('container-detail')}>
+                                    <p className={cx('label-detail')}>Trạng thái: </p>
+                                    <Tag color={color} className={cx('tag-status')}>
+                                        {item.status.statusName}
+                                    </Tag>
+                                </div>
                             </Card>
                         );
                     })}
@@ -474,6 +487,32 @@ function NhomDeTaiKhoaLuan() {
             ),
         },
     ];
+
+
+
+    // Export 
+    const schemas = [
+        { label: "Mã nhóm đề tài", prop: "thesisGroupId" },
+        { label: "Tên nhóm đề tài", prop: "thesisGroupName" },
+        { label: "Ngành", prop: "faculty" },
+        { label: "Năm thực hiện", prop: "startYear" },
+        { label: "Năm kết thúc", prop: "finishYear" },
+        { label: "Trạng thái", prop: "status" }
+    ];
+
+    const processedData = data.map(item => ({
+        ...item,
+        status: item.status?.statusName
+    }));
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nhomdetaiKhoaluan",
+            data: processedData,
+            schemas,
+            headerContent: "DANH SÁCH NHÓM ĐỀ TÀI KHOÁ LUẬN",
+        });
+    };
 
     return (
         <div className={cx('wrapper')}>
@@ -504,10 +543,18 @@ function NhomDeTaiKhoaLuan() {
                             type={'Xóa'}
                             onClick={() => deleteConfirm('đề tài khóa luận', handleDelete)}
                             isVisible={permissionDetailData.isDelete} />
-                        <Toolbar type={'Ẩn'} onClick={() => disableConfirm('nhóm đề tài khóa luận', handleDisable)} />
-                        <Toolbar type={'Hiện'} onClick={() => enableConfirm('nhóm đề tài khóa luận', handleEnable)} />
-                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isImport} />
-                        <Toolbar type={'Xuất file Excel'} isVisible={permissionDetailData.isExport} />
+                        <Toolbar
+                            type={'Ẩn'}
+                            onClick={() => disableConfirm('nhóm đề tài khóa luận', handleDisable)}
+                            isVisible={permissionDetailData?.isEdit}
+                        />
+                        <Toolbar
+                            type={'Hiện'}
+                            onClick={() => enableConfirm('nhóm đề tài khóa luận', handleEnable)}
+                            isVisible={permissionDetailData?.isEdit}
+                        />
+                        <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData.isAdd} onClick={() => setShowModalImport(true)} />
+                        <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
                     </div>
                 )}
             </div>
@@ -525,6 +572,14 @@ function NhomDeTaiKhoaLuan() {
             />
 
             {NhomDeTaiKhoaLuanUpdateMemoized}
+            <ImportExcel
+                title={'nhóm đề tài khoá luận'}
+                showModal={showModalImport}
+                setShowModal={setShowModalImport}
+                reLoad={fetchData}
+                type={config.imports.THESISGROUP}
+                onImport={importThesisGroup}
+            />
         </div>
     );
 }

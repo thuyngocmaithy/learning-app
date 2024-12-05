@@ -1,5 +1,6 @@
 import React, { useState, memo, useEffect } from 'react';
-import { Input, Select, Form, message } from 'antd';
+import { Input, Select, Form } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -79,7 +80,6 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
             } else {
                 let accountData = {
                     username: values.username,
-                    email: values.email,
                     password: values.password,
                     permission: selectedPermisison,
                     isSystem: true
@@ -114,13 +114,6 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
                             name="username"
                             label="Tên tài khoản"
                             rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản' }]}
-                        >
-                            <Input />
-                        </FormItem>
-                        <FormItem
-                            name="email"
-                            label="Email"
-                            rules={[{ required: true, message: 'Vui lòng nhập email' }]}
                         >
                             <Input />
                         </FormItem>

@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './System.module.scss';
-import { Avatar, List, message } from 'antd';
+import { Avatar, List } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Toolbar from '../Toolbar';
 import FollowerUpdate from '../../FormUpdate/FollowerUpdate';
@@ -8,6 +8,7 @@ import noImage from '../../../assets/images/no-image.png';
 import { CloseOutlined } from '@ant-design/icons';
 import { deleteConfirm } from '../Delete';
 import { deleteFollowerDetail } from '../../../services/followerDetailService';
+import { message } from '../../../hooks/useAntdApp';
 
 const cx = classNames.bind(styles);
 
@@ -16,18 +17,20 @@ function System({ dataInfoSystem, dataFollower, reLoad }) {
     const followerCancelRef = useRef(null);
     const [showModal, setShowModal] = useState(false);
 
-    const handleListFollower = async () => {
 
-        const promises = dataFollower.map(async (item) => {
-            return { id: item.id, title: item.user.fullname, image: item.user.avatar };
-        });
-
-        const processed = await Promise.all(promises);
-        setProcessedFollower(processed)
-    }
 
     useEffect(() => {
-        handleListFollower();
+        const handleListFollower = async () => {
+
+            const promises = dataFollower.map(async (item) => {
+                return { id: item.id, title: item.user.fullname, image: item.user.avatar };
+            });
+
+            const processed = await Promise.all(promises);
+            setProcessedFollower(processed)
+        }
+        if (dataFollower)
+            handleListFollower();
     }, [dataFollower])
 
     const handleRemoveFollower = async () => {
@@ -36,7 +39,7 @@ function System({ dataInfoSystem, dataFollower, reLoad }) {
             message.success("Xóa người theo dõi thành công");
 
         } catch (error) {
-            console.log(`Lỗi xóa người theo dõi: ${error}`);
+            console.error(`Lỗi xóa người theo dõi: ${error}`);
         }
         finally {
             followerCancelRef.current = null;
@@ -54,7 +57,7 @@ function System({ dataInfoSystem, dataFollower, reLoad }) {
                 reLoad={reLoad}
             />
         );
-    }, [showModal]);
+    }, [reLoad, showModal]);
 
 
     return (

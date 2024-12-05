@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 import { Tree } from 'antd';
 import { getAll } from '../../services/featureService';
 import classNames from 'classnames/bind';
@@ -6,16 +6,27 @@ import styles from "./TreeFeature.module.scss"
 import Button from '../Core/Button';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import ChucNangUpdate from '../FormUpdate/ChucNangUpdate';
+import { useLocation } from 'react-router-dom';
+import config from '../../config';
+import { PermissionDetailContext } from '../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles)
 
 const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setShowModalDetail }) => {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
     const [expandedKeys, setExpandedKeys] = useState([]);
     const [showModalFeature, setShowModalFeature] = useState(false);
     const [isUpdateFeature, setIsUpdateFeature] = useState(false);
     const [isLoadingFeature, setIsLoadingFeature] = useState(true);
 
-    const buildTreeData = (list, parentId = null) => {
+    const buildTreeData = useCallback((list, parentId = null) => {
         return list
             .filter(item => item.parent?.featureId === parentId || (!item.parent && parentId === null))
             .sort((a, b) => a.orderNo - b.orderNo)
@@ -41,6 +52,7 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
                                 });
                                 setIsUpdateFeature(true);
                             }}
+                            disabled={!permissionDetailData?.isEdit}
                         >
                             Sửa
                         </Button>
@@ -55,8 +67,9 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
                 parentFeatureId: item.parent ? item.parent.featureId : null,
                 children: buildTreeData(list, item.featureId),
             }));
-    };
-    const fetchData = async () => {
+    }, [permissionDetailData, setShowModalDetail]);
+
+    const fetchData = useCallback(async () => {
         try {
             const response = await getAll();
             if (response.status === 200) {
@@ -69,16 +82,17 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
         finally {
             setIsLoadingFeature(false)
         }
-    };
+    }, [buildTreeData, setTreeData]);
+
     useEffect(() => {
         if (reLoad) {
             fetchData();
         }
-    }, [reLoad]);
+    }, [fetchData, reLoad]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
 
     const onDrop = (info) => {
@@ -165,7 +179,7 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
                 reLoad={fetchData}
             />
         );
-    }, [showModalFeature, isUpdateFeature]);
+    }, [isUpdateFeature, showModalFeature, fetchData]);
 
     const onCheck = (checkedKeys) => {
         setSelectedFeature(checkedKeys)

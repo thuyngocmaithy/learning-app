@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Checkbox, Form, Input, message, Spin } from 'antd';
+import { Checkbox, Form, Input, Spin } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { UserOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { loginToSgu } from '../../../services/userService';
@@ -10,17 +11,19 @@ import Button from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { SRAndThesisJoinContext } from '../../../context/SRAndThesisJoinContext';
 import FormItem from '../../../components/Core/FormItem';
-import { getAccountById, getWhere } from '../../../services/accountService';
+import { getAccountById } from '../../../services/accountService';
 import useDebounce from '../../../hooks/useDebounce';
 
 const cx = classNames.bind(styles);
 
 const LoginForm = () => {
+    const [form] = Form.useForm();
     const { updateUserInfo } = useContext(AccountLoginContext);
     const { updateSRAndThesisJoin } = useContext(SRAndThesisJoinContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isSync, setIsSync] = useState(false);
+    const [isSyncCheckboxValue, setIsSyncCheckboxvalue] = useState(false);
     const [accountValue, setAccountValue] = useState('');
     const debouncedAccountValue = useDebounce(accountValue, 1000);
 
@@ -36,6 +39,7 @@ const LoginForm = () => {
     const onFinish = async (values) => {
         setLoading(true);
         try {
+            setIsSyncCheckboxvalue(values.isSync);
             const response = await loginToSgu(values.username, values.password, values.isSync);
 
             if (response.status === 'success' && response.data?.user?.userId) {
@@ -44,7 +48,7 @@ const LoginForm = () => {
                     userId: response.data.user.userId,
                     token: response.data.accessToken,
                     permission: response.data.user.roles,
-                    facultyId: response.data.user.faculty,
+                    facultyId: response.data.user?.faculty || "",
                     avatar: response.data.user.avatar
                 }));
                 await updateUserInfo();
@@ -93,6 +97,7 @@ const LoginForm = () => {
                             <div className={cx('title')}>SGU</div>
                             <Spin spinning={loading} indicator={<LoadingOutlined spin />} size='large' >
                                 <Form
+                                    form={form}
                                     name="normal_login"
                                     className={cx('login-form')}
                                     initialValues={{ remember: true }}
@@ -133,7 +138,11 @@ const LoginForm = () => {
                                         }
                                         <div className={cx('btnLogin')}>
                                             <Button primary disabled={loading}>
-                                                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                                                {loading
+                                                    ? isSyncCheckboxValue
+                                                        ? 'Đang đồng bộ dữ liệu...'
+                                                        : 'Đang đăng nhập...'
+                                                    : 'Đăng nhập'}
                                             </Button>
                                         </div>
                                     </div>

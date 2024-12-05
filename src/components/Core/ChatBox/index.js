@@ -54,47 +54,46 @@ function ChatBox({ height = '60vh' }) {
     const [messagesList, setMessagesList] = useState([]);
     const { sendNotification } = useSocketNotification();
 
-    const fetchMessage = () => {
-        let messagesListConvert;
-        if (SRIdFromUrl) {
-            messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
-                return {
-                    id: message.id,
-                    text: message.content,
-                    user: {
-                        id: message.sender.userId,
-                        name: message.sender.fullname,
-                        avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
-                    },
-                    createdAt: new Date(message.createDate)
-                }
-            });
-        }
-        if (thesisIdFromUrl) {
-            messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
-                return {
-                    id: message.id,
-                    text: message.content,
-                    user: {
-                        id: message.sender.userId,
-                        name: message.sender.fullname,
-                        avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
-                    },
-                    createdAt: new Date(message.createDate)
-                }
-            });
-        }
-        console.log(messagesListConvert);
-
-        setMessagesList(messagesListConvert);
-    }
     useEffect(() => {
+        const fetchMessage = () => {
+            let messagesListConvert;
+            if (SRIdFromUrl) {
+                messagesListConvert = messagesMap[SRIdFromUrl]?.map((message) => {
+                    return {
+                        id: message.id,
+                        text: message.content,
+                        user: {
+                            id: message.sender.userId,
+                            name: message.sender.fullname,
+                            avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
+                        },
+                        createdAt: new Date(message.createDate)
+                    }
+                });
+            }
+            if (thesisIdFromUrl) {
+                messagesListConvert = messagesMap[thesisIdFromUrl]?.map((message) => {
+                    return {
+                        id: message.id,
+                        text: message.content,
+                        user: {
+                            id: message.sender.userId,
+                            name: message.sender.fullname,
+                            avatar: message.sender.avatar ? `data:image/jpeg;base64,${message.sender.avatar}` : null,
+                        },
+                        createdAt: new Date(message.createDate)
+                    }
+                });
+            }
+            setMessagesList(messagesListConvert);
+        }
+
         if (messagesMap && Object.keys(messagesMap).length !== 0 && (SRIdFromUrl || thesisIdFromUrl)) {
             fetchMessage();
         }
     }, [messagesMap, SRIdFromUrl, thesisIdFromUrl])
 
-    const handleSendNotificationNote = async () => {
+    const handleSendNotificationNote = async (inputValue) => {
         try {
             if (SRIdFromUrl) {
                 const responsescientificResearch = await getSRById(SRIdFromUrl);
@@ -109,10 +108,10 @@ function ChatBox({ height = '60vh' }) {
                     // Người gửi
                     const user = await getUserById(userId);
 
-                    const ListNotification = await notifications.getNCKHNotification('note', SRdata, user.data, listMember);
+                    const ListNotification = await notifications.getNCKHNotification('note', SRdata, user.data, listMember, inputValue);
 
                     ListNotification.map(async (itemNoti) => {
-                        await sendNotification(itemNoti.toUser, itemNoti);
+                        await sendNotification(itemNoti);
                     })
                 }
             }
@@ -129,10 +128,10 @@ function ChatBox({ height = '60vh' }) {
                     // Người gửi
                     const user = await getUserById(userId);
 
-                    const ListNotification = await notifications.getKhoaLuanNotification('note', thesisdata, user.data, listMember);
+                    const ListNotification = await notifications.getKhoaLuanNotification('note', thesisdata, user.data, listMember, inputValue);
 
                     ListNotification.map(async (itemNoti) => {
-                        await sendNotification(itemNoti.toUser, itemNoti);
+                        await sendNotification(itemNoti);
                     })
                 }
             }
@@ -147,7 +146,7 @@ function ChatBox({ height = '60vh' }) {
     const handleEnterPress = async (event) => {
         if (event.key === 'Enter') {
             sendMessage(SRIdFromUrl || thesisIdFromUrl, inputValue);
-            await handleSendNotificationNote();
+            await handleSendNotificationNote(inputValue);
             setInputValue('')
         }
     };

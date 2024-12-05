@@ -1,6 +1,7 @@
 const routes = {
     // SHARED
     Login: '/',
+    ThongBao: '/ThongBao',
 
     // STUDENT
     Dashboard: '/Dashboard',
@@ -18,7 +19,6 @@ const routes = {
     ChuanDauRa: '/ChuanDauRa',
 
     // NGHIỆP VỤ
-
     NghiepVu: '/NghiepVu',
     Dashboard_Department: '/Department/Dashboard',
     MoHocPhan: '/Department/NghiepVu/MoHocPhan',

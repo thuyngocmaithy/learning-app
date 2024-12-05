@@ -1,5 +1,6 @@
-import React, { useState, memo, useEffect, useContext } from 'react';
-import { Input, InputNumber, Select, Form, message, DatePicker } from 'antd';
+import React, { useState, memo, useEffect, useContext, useCallback } from 'react';
+import { Input, InputNumber, Select, Form, DatePicker } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -54,9 +55,9 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     };
 
     //lấy danh sách giảng viên theo ngành
-    const fetchInstructors = async (ThesisGroupIdInput) => {
-        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput);
-        const response = await getUsersByFaculty(ThesisGroup.data.data.faculty?.facultyId);
+    const fetchInstructors = useCallback(async (ThesisGroupIdInput) => {
+        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
+        const response = await getUsersByFaculty(ThesisGroup?.data?.data?.faculty?.facultyId);
         if (response && response.data) {
             const options = response.data.map((user) => ({
                 value: user.userId,
@@ -64,7 +65,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             }));
             setInstructorOptions(options);
         }
-    };
+    }, [ThesisGroupIdFromUrl]);
 
     useEffect(() => {
         if (showModal) {
@@ -76,7 +77,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             }
         }
 
-    }, [showModal, ThesisGroupIdFromUrl]);
+    }, [showModal, ThesisGroupIdFromUrl, fetchInstructors]);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
@@ -211,7 +212,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             const ListNotification = await notifications.getKhoaLuanNotification('create', thesisData, user.data);
 
             ListNotification?.forEach(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
+                await sendNotification(itemNoti);
             })
 
         } catch (err) {
@@ -252,10 +253,10 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 <FormItem
                     hidden={ThesisGroupIdFromUrl}
                     name="thesisgroup"
-                    label="Nhóm đề tài KhoaLuan"
+                    label="Nhóm đề tài khóa luận"
                     rules={ThesisGroupIdFromUrl ? [] : [
                         { required: true, message: 'Vui lòng chọn nhóm đề tài KhoaLuan!' },
-                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài KhoaLuan không được để trống!') }
+                        { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài khóa luận không được để trống!') }
                     ]}
                 >
                     <Select

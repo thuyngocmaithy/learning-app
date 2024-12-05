@@ -54,3 +54,17 @@ export const updateExpectedScore = async (subjectId, studentId, data) => {
         // throw error;
     }
 };
+
+
+
+export const importScore = async (data) => {
+    try {
+        const response = await api.post('/scores/import', {
+            scores: data,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[scoreService - importScore - error]:', error);
+        throw error;
+    }
+}

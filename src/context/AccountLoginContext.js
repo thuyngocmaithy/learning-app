@@ -40,26 +40,28 @@ function AccountLoginProvider({ children }) {
 
     const [isTokenExpired, setIsTokenExpired] = useState(false);
 
-    const checkTokenExpiration = () => {
-        if (access_token) {
-            try {
-                const decodedToken = jwtDecode(access_token);
-                const currentTime = Date.now() / 1000;
-                if (decodedToken.exp < currentTime) {
-                    setUserId(null); // Clear user data
-                    localStorage.removeItem('authToken'); // Remove token from localStorage
-                    setIsTokenExpired(true);
-                }
-            } catch (error) {
-                console.error('Error decoding token:', error);
-                setIsTokenExpired(true);
-            }
-        }
-    };
+
 
     // Kiểm tra token khi component khởi tạo
     useEffect(() => {
-        checkTokenExpiration();
+        const checkTokenExpiration = () => {
+            if (access_token) {
+                try {
+                    const decodedToken = jwtDecode(access_token);
+                    const currentTime = Date.now() / 1000;
+                    if (decodedToken.exp < currentTime) {
+                        setUserId(null); // Clear user data
+                        localStorage.removeItem('authToken'); // Remove token from localStorage
+                        setIsTokenExpired(true);
+                    }
+                } catch (error) {
+                    console.error('Error decoding token:', error);
+                    setIsTokenExpired(true);
+                }
+            }
+        };
+        if (access_token)
+            checkTokenExpiration();
     }, [access_token]);
 
 

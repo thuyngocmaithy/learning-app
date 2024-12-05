@@ -1,19 +1,20 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DiemTotNghiep.module.scss';
-import { InputNumber, message } from 'antd';
+import { InputNumber } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { GraduateActiveIcon } from '../../../assets/icons';
 import TableScore from '../../../components/TableScore';
 import TableCustomAnt from '../../../components/Core/TableCustomAnt';
 import ButtonCustom from '../../../components/Core/Button';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { createExpectedScore, deleteExpectedScoreBySubjectAndStudent, updateExpectedScore } from '../../../services/scoreService';
-import { getScore, getUserById } from '../../../services/userService';
+import { getUserById } from '../../../services/userService';
 
 const cx = classNames.bind(styles);
 
 function DiemTotNghiep() {
-    const { userId, access_token } = useContext(AccountLoginContext);
+    const { userId } = useContext(AccountLoginContext);
     const [currentGPA, setCurrentGPA] = useState(0);
     const [totalCredits, setTotalCredits] = useState(0);
     const [creditsA, setCreditsA] = useState(0);
@@ -25,7 +26,6 @@ function DiemTotNghiep() {
     const [remainingCredits, setRemainingCredits] = useState(0);
     const [totalscientificResearchedCredits, setTotalscientificResearchedCredits] = useState(0);
     const [graduationType, setGraduationType] = useState('');
-    const [gradeTotals, setGradeTotals] = useState({ A: 0, B: 0, C: 0, D: 0 });
     const [currentCredits, setCurrentCredits] = useState(0);
     const [expectedSubjects, setexpectedSubjects] = useState([]);
     const [prevScores, setPrevScores] = useState([]);
@@ -104,7 +104,6 @@ function DiemTotNghiep() {
     }, [calculateResults]);
 
     const handleGradesChange = useCallback((totals) => {
-        setGradeTotals(totals);
         setCreditsA(totals.A || 0);
         setCreditsB(totals.B || 0);
         setCreditsC(totals.C || 0);

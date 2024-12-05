@@ -1,4 +1,5 @@
 import { api } from '../utils/apiConfig';
+import { getUseridFromLocalStorage } from './userService';
 
 export const getAllThesis = async () => {
     try {
@@ -66,7 +67,7 @@ export const updateThesisByIds = async (thesisIds, thesisData) => {
 
 export const getByThesisGroupId = async (thesisGroupId) => {
     try {
-        const url = `/thesis/getByThesisGroupId?ThesisGroupId=${thesisGroupId}`;
+        const url = `/thesis/getByThesisGroupId?thesisGroupId=${thesisGroupId}`;
 
         const response = await api.get(url);
         return response;
@@ -95,6 +96,35 @@ export const getByThesisGroupIdAndCheckApprove = async (conditions) => {
         const response = await api.get(url);
         return response;
     } catch (error) {
+        throw error;
+    }
+};
+
+export const getListThesisJoined = async (instructorId, thesisGroup) => {
+    try {
+        const conditions = { instructorId, thesisGroup };
+        const queryParams = new URLSearchParams(conditions).toString();
+        const url = `/thesis/getListThesisJoined?${queryParams}`;
+
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+
+export const importThesis = async (data) => {
+    try {
+        const createUserId = await getUseridFromLocalStorage();
+        const response = await api.post('/thesis/import', {
+            data,
+            createUserId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('[thesisServive - importThesis - error]:', error);
         throw error;
     }
 };

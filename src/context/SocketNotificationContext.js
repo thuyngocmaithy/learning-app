@@ -13,6 +13,32 @@ export const SocketNotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const { userId } = useContext(AccountLoginContext);
 
+    // Function để lấy danh sách thông báo
+    const getNotifications = (socketIo) => {
+        if (!socket && !userId) return;
+        return new Promise((resolve, reject) => {
+            if (socketIo) {
+                socketIo.emit('getNotifications', userId);
+
+                socketIo.on('notificationsList', (notifications) => {
+                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
+                    resolve(notifications);
+                });
+
+            } else if (socket) {
+                socket.emit('getNotifications', userId);
+
+                socket.on('notificationsList', (notifications) => {
+                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
+                    resolve(notifications);
+                });
+            }
+            else {
+                reject(new Error('Socket is not initialized'));
+            }
+        });
+    };
+
     useEffect(() => {
         let socketIo;
 
@@ -42,22 +68,23 @@ export const SocketNotificationProvider = ({ children }) => {
             socketIo.emit('joinRoom', `user-${userId}`);
 
             // Lắng nghe thông báo mới
-            socketIo.on('receiveNotification', ({ newNotification, disabledNotifications }) => {
+            socketIo.on('receiveNotification', ({ newNotification, deletedNotificationIds }) => {
                 setNotifications((prevNotifications) => {
-                    // Lọc bỏ các thông báo đã bị ẩn khỏi danh sách cũ
+                    // Lọc bỏ các thông báo đã bị xóa khỏi danh sách cũ
                     const updatedNotifications = prevNotifications.filter(notification => {
-                        // Kiểm tra nếu thông báo này không có trong danh sách các thông báo bị ẩn
-                        return !disabledNotifications.some(disabledNoti => disabledNoti.id === notification.id);
+                        // Giữ lại những thông báo không có trong danh sách ID đã bị xóa
+                        return !deletedNotificationIds.includes(notification.id);
                     });
 
-                    // Thêm thông báo mới vào danh sách, nhưng chỉ thêm nếu thông báo đó không bị ẩn
-                    if (newNotification && !disabledNotifications.some(disabledNoti => disabledNoti.id === newNotification.id)) {
-                        updatedNotifications.push(newNotification);
+                    // Thêm thông báo mới vào đầu danh sách
+                    if (newNotification) {
+                        updatedNotifications.unshift(newNotification);
                     }
 
                     return updatedNotifications;
                 });
             });
+
 
 
 
@@ -77,42 +104,21 @@ export const SocketNotificationProvider = ({ children }) => {
             };
         }
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userId]);
 
 
-    // Function để lấy danh sách thông báo
-    const getNotifications = (socketIo) => {
-        return new Promise((resolve, reject) => {
-            if (socketIo) {
-                socketIo.emit('getNotifications', userId);
-
-                socketIo.on('notificationsList', (notifications) => {
-                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
-                    resolve(notifications);
-                });
-
-            } else if (socket) {
-                socket.emit('getNotifications', userId);
-
-                socket.on('notificationsList', (notifications) => {
-                    setNotifications(notifications); // Cập nhật danh sách thông báo                    
-                    resolve(notifications);
-                });
-            }
-            else {
-                reject(new Error('Socket is not initialized'));
-            }
-        });
-    };
-
-
     // Function để gửi thông báo đến một user cụ thể
-    const sendNotification = (toUserId, notificationData) => {
+    const sendNotification = (notificationData) => {
         return new Promise((resolve, reject) => {
             if (socket) {
-                const room = `user-${toUserId.userId}`;
-                socket.emit('sendNotification', { room, notificationData }, (response) => {
-                    resolve(response);
+                // Emit gửi thông báo
+                socket.emit('sendNotification', { notificationData }, (response) => {
+                    if (response.error) {
+                        reject(response.error);
+                    } else {
+                        resolve(response);
+                    }
                 });
             } else {
                 reject(new Error('Socket is not initialized'));
@@ -120,11 +126,12 @@ export const SocketNotificationProvider = ({ children }) => {
         });
     };
 
+
     // Function để xóa thông báo
-    const deleteNotification = (toUserId, deleteNotification) => {
+    const deleteNotification = (toUsersId, deleteNotification) => {
         return new Promise((resolve, reject) => {
             if (socket) {
-                const room = `user-${toUserId.userId}`;
+                const room = `user-${toUsersId.userId}`;
                 // Gửi sự kiện 'deleteNotification' cùng với ID thông báo cần xóa tới server    
                 socket.emit('deleteNotification', { room, deleteNotification }, (response) => {
                     resolve(response);

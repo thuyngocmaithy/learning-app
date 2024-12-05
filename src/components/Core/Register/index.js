@@ -13,7 +13,7 @@ function Register({ title = '', children, showModal, onClose, onRegister, isRegi
         if (showModal !== open) {
             setOpen(showModal);
         }
-    }, [showModal]);
+    }, [showModal, open]);
 
     const handleCancel = useCallback(() => {
         setOpen(false);

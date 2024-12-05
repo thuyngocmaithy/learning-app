@@ -3,27 +3,17 @@ import {
     Input,
     Select,
     Form,
-    message,
     InputNumber,
     ColorPicker,
 } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { getUseridFromLocalStorage } from '../../../services/userService';
 import { createStatus, updateStatusById } from '../../../services/statusService';
-import classNames from 'classnames/bind';
-import styles from './TrangThaiUpdate.module.scss';
-
-const cx = classNames.bind(styles);
 
 export const TrangThaiUpdate = memo(function TrangThaiUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const [form] = Form.useForm();
-
-    useEffect(() => {
-        if (!showModal) {
-            form.resetFields();
-        }
-    }, [showModal, form]);
 
     useEffect(() => {
         if (showModal && isUpdate && form) {

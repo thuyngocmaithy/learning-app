@@ -2,25 +2,15 @@ import React, { memo, useEffect } from 'react';
 import {
     Input,
     Form,
-    message,
     InputNumber,
 } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { createFaculty, updateFacultyById, } from '../../../services/facultyService';
-import classNames from 'classnames/bind';
-import styles from './NganhUpdate.module.scss'
-
-const cx = classNames.bind(styles);
 
 export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const [form] = Form.useForm();
-
-    useEffect(() => {
-        if (!showModal) {
-            form.resetFields();
-        }
-    }, [showModal, form]);
 
     useEffect(() => {
         if (showModal && isUpdate && form) {

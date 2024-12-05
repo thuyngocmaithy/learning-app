@@ -5,11 +5,12 @@ import styles from './Menu.module.scss';
 
 const cx = classNames.bind(styles);
 
-function MenuItem({ data, onClick }) {
+function MenuItem({ data, disabled, onClick }) {
     const classes = cx('menu-item', { separate: data.separate });
 
     return (
         <Button className={classes} leftIcon={data.icon} to={data.to}
+            style={{ display: disabled ? "none" : "flex" }}
             onClick={() => {
                 onClick();
                 data.onClick && data.onClick();

@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Input, Form, message, InputNumber, Space, Select } from 'antd';
+import { Input, Form, InputNumber, Space, Select } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
@@ -75,9 +76,9 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                         label: major.majorId + " - " + major.majorName,
                     }));
 
-                    setMajorOptions([
-                        ...majorOptions,  // Phần tử trống được thêm vào đầu
-                        ...options
+                    setMajorOptions(prevMajorOptions => [
+                        ...prevMajorOptions,
+                        ...options            // Thêm options mới vào cuối
                     ]);
                 }
             } catch (error) {

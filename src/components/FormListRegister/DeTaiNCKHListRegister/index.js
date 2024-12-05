@@ -1,8 +1,9 @@
-import React, { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKHListRegister.module.scss';
 import ListRegister from '../../Core/ListRegister';
-import { Avatar, Collapse, Empty, List, message, Skeleton, Tabs } from 'antd';
+import { Avatar, Collapse, Empty, List, Skeleton, Tabs } from 'antd';
+import { message } from '../../../hooks/useAntdApp';
 import Button from '../../Core/Button';
 import { getUserById } from '../../../services/userService';
 import { updateSRUById } from '../../../services/scientificResearchUserService';
@@ -24,6 +25,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
     const [listPersonal, setListPersonal] = useState([]);
     const [listGroup, setListGroup] = useState([]);
     const [listGroupRender, setListGroupRender] = useState([]); // List Group để hiển thị
+    const [activeKey, setActiveKey] = useState([]); // để mở rộng group
     const [showModalInfo, setShowModalInfo] = useState(false);
     const [typeApprove, setTypeApprove] = useState('group');
     const { userId } = useContext(AccountLoginContext);
@@ -55,13 +57,164 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                         listG[groupKey].isApprove = listG[groupKey][0].isApprove; // Thêm isApprove cho nhóm
                     }
                 });
-                console.log(listG);
-
                 setListGroup(listG)
             }
             if (showModal?.numberOfRegister) fetchList();
         }
     }, [showModal]);
+
+    const handleSendNotificationApprove = useCallback(async (item) => {
+        try {
+            let listMember = [];
+            if (item.group !== 0) {
+                listMember = item.map((SRU) => SRU.user);
+            }
+            else {
+                listMember.push(item.user);
+            }
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getNCKHNotification('approve', showModal, user.data, listMember);
+
+            ListNotification.map(async (itemNoti) => {
+                await sendNotification(itemNoti);
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    }, [sendNotification, showModal, userId]);
+
+    const handleApprove = useCallback(async (item) => {
+        try {
+            const appoveData =
+            {
+                isApprove: true,
+            }
+            let responseApprove = null;
+            if (typeApprove === "personal") {
+                responseApprove = await updateSRUById([item.id], appoveData);
+            }
+            else {
+                const listIdUpdated = item.map((item) => item.id);
+                responseApprove = await updateSRUById(listIdUpdated, appoveData);
+            }
+            if (responseApprove) {
+                message.success('Duyệt thành công');
+
+                // Cập nhật trạng thái isApprove của item trong danh sách
+                if (typeApprove === 'personal')
+                    setListPersonal((prevList) =>
+                        prevList.map((listItem) =>
+                            listItem.id === item.id
+                                ? { ...listItem, isApprove: true }
+                                : listItem
+                        )
+                    );
+
+                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
+                if (typeApprove === 'group') {
+                    setListGroup((prevList) => {
+                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
+
+                        // Lặp qua từng nhóm trong listGroup
+                        Object.keys(updatedList).forEach((groupKey) => {
+                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
+                                groupItem.id === item[0].id
+                                    ? { ...groupItem, isApprove: true } // Cập nhật isApprove cho item có id tương ứng
+                                    : groupItem
+                            );
+                        });
+
+                        return updatedList;
+                    });
+                }
+
+                // Gửi thông báo
+                handleSendNotificationApprove(item);
+                changeStatus(true);
+            }
+        } catch (error) {
+            console.error("Lỗi duyệt đăng ký đề tài: " + error);
+        }
+    }, [changeStatus, handleSendNotificationApprove, typeApprove]);
+
+    const handleCancelNotification = useCallback(async () => {
+        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
+        try {
+            let listMember = [];
+            if (scientificResearchCancel.group !== 0) {
+                listMember = scientificResearchCancel.map((SRU) => SRU.user);
+            }
+            else {
+                listMember.push(scientificResearchCancel.user);
+            }
+            const user = await getUserById(userId);
+            const ListNotification = await notifications.getNCKHNotification('approve', scientificResearchCancel[0].scientificResearch, user.data, listMember);
+
+            ListNotification.map(async (itemNoti) => {
+                await deleteNotification(itemNoti.toUsers, itemNoti);
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    }, [deleteNotification, userId]);;
+
+    const handleCancelApprove = useCallback(async () => {
+        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
+        try {
+            const appoveData = {
+                isApprove: false,
+            }
+            const id = scientificResearchCancel.map((item) => item.id);
+
+            const responseApprove = await updateSRUById(id, appoveData);
+            if (responseApprove) {
+                message.success('Hủy duyệt thành công');
+
+                // Cập nhật trạng thái isApprove của item trong danh sách
+                if (typeApprove === 'personal')
+                    setListPersonal((prevList) =>
+                        prevList.map((listItem) =>
+                            // Kiểm tra nếu id của listItem có trong mảng scientificResearchCancel
+                            scientificResearchCancel.some(item => item.id === listItem.id)
+                                ? { ...listItem, isApprove: false }
+                                : listItem
+                        )
+                    );
+
+
+                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
+                if (typeApprove === 'group') {
+                    setListGroup((prevList) => {
+                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
+
+                        // Lặp qua từng nhóm trong listGroup
+                        Object.keys(updatedList).forEach((groupKey) => {
+                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
+                                groupItem.id === scientificResearchCancel[0].id
+                                    ? { ...groupItem, isApprove: false } // Cập nhật isApprove cho item có id tương ứng
+                                    : groupItem
+                            );
+                        });
+
+                        return updatedList;
+                    });
+                }
+
+                // Xóa người theo dõi
+                scientificResearchCancel.forEach(async (item) => {
+                    await deleteFollowerDetailBySRIdAndUserId({ srId: item.scientificResearch.scientificResearchId, userId: item.user.userId })
+                })
+
+                // Hủy thông báo
+                scientificResearchCancel.forEach((item) => {
+                    handleCancelNotification(item);
+                })
+                changeStatus(true);
+            }
+        } catch (error) {
+            console.error("Lỗi duyệt đăng ký đề tài: " + error);
+        }
+    }, [changeStatus, handleCancelNotification, typeApprove]);
 
 
     // useEffect xử lý hiển thị các danh sách sinh viên đăng ký theo nhóm
@@ -143,165 +296,20 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
         });
 
         setListGroupRender(handleListG);
+        setActiveKey(handleListG.map(item => item.key));
 
-    }, [listGroup])
+    }, [handleApprove, handleCancelApprove, listGroup])
 
-    const handleApprove = async (item) => {
-        console.log(item);
+    const handleCollapseChange = (keys) => {
+        // Xử lý chỉ các mục bị thay đổi, không ảnh hưởng đến các mục khác
+        setActiveKey((prevKeys) => {
+            // So sánh với trạng thái trước để cập nhật đúng
+            const newKeys = keys.filter((key) => !prevKeys.includes(key));
+            const removedKeys = prevKeys.filter((key) => !keys.includes(key));
 
-        try {
-            const appoveData =
-            {
-                isApprove: true,
-            }
-            let responseApprove = null;
-            if (typeApprove === "personal") {
-                responseApprove = await updateSRUById([item.id], appoveData);
-            }
-            else {
-                const listIdUpdated = item.map((item) => item.id);
-                responseApprove = await updateSRUById(listIdUpdated, appoveData);
-            }
-            if (responseApprove) {
-                message.success('Duyệt thành công');
-
-                // Cập nhật trạng thái isApprove của item trong danh sách
-                if (typeApprove === 'personal')
-                    setListPersonal((prevList) =>
-                        prevList.map((listItem) =>
-                            listItem.id === item.id
-                                ? { ...listItem, isApprove: true }
-                                : listItem
-                        )
-                    );
-
-                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
-                if (typeApprove === 'group') {
-                    setListGroup((prevList) => {
-                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
-
-                        // Lặp qua từng nhóm trong listGroup
-                        Object.keys(updatedList).forEach((groupKey) => {
-                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
-                                groupItem.id === item[0].id
-                                    ? { ...groupItem, isApprove: true } // Cập nhật isApprove cho item có id tương ứng
-                                    : groupItem
-                            );
-                        });
-
-                        return updatedList;
-                    });
-                }
-
-                // Gửi thông báo
-                handleSendNotificationApprove(item);
-                changeStatus(true);
-            }
-        } catch (error) {
-            console.error("Lỗi duyệt đăng ký đề tài: " + error);
-        }
-    };
-
-
-    const handleSendNotificationApprove = async (item) => {
-        try {
-            let listMember = [];
-            if (item.group !== 0) {
-                listMember = item.map((SRU) => SRU.user);
-            }
-            else {
-                listMember.push(item.user);
-            }
-            const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('approve', showModal, user.data, listMember);
-
-            ListNotification.map(async (itemNoti) => {
-                await sendNotification(itemNoti.toUser, itemNoti);
-            })
-        } catch (err) {
-            console.error(err)
-        }
-    };
-
-
-    const handleCancelApprove = async () => {
-        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
-        try {
-            const appoveData = {
-                isApprove: false,
-            }
-            const id = scientificResearchCancel.map((item) => item.id);
-
-            const responseApprove = await updateSRUById(id, appoveData);
-            if (responseApprove) {
-                message.success('Hủy duyệt thành công');
-
-                // Cập nhật trạng thái isApprove của item trong danh sách
-                if (typeApprove === 'personal')
-                    setListPersonal((prevList) =>
-                        prevList.map((listItem) =>
-                            // Kiểm tra nếu id của listItem có trong mảng scientificResearchCancel
-                            scientificResearchCancel.some(item => item.id === listItem.id)
-                                ? { ...listItem, isApprove: false }
-                                : listItem
-                        )
-                    );
-
-
-                // Cập nhật trạng thái isApprove của các item trong danh sách nhóm
-                if (typeApprove === 'group') {
-                    setListGroup((prevList) => {
-                        const updatedList = { ...prevList }; // Sao chép danh sách cũ để tránh sửa trực tiếp
-
-                        // Lặp qua từng nhóm trong listGroup
-                        Object.keys(updatedList).forEach((groupKey) => {
-                            updatedList[groupKey] = updatedList[groupKey].map((groupItem) =>
-                                groupItem.id === scientificResearchCancel[0].id
-                                    ? { ...groupItem, isApprove: false } // Cập nhật isApprove cho item có id tương ứng
-                                    : groupItem
-                            );
-                        });
-
-                        return updatedList;
-                    });
-                }
-
-                // Xóa người theo dõi
-                scientificResearchCancel.forEach(async (item) => {
-                    await deleteFollowerDetailBySRIdAndUserId({ srId: item.scientificResearch.scientificResearchId, userId: item.user.userId })
-                })
-
-                // Hủy thông báo
-                scientificResearchCancel.forEach((item) => {
-                    handleCancelNotification(item);
-                })
-                changeStatus(true);
-            }
-        } catch (error) {
-            console.error("Lỗi duyệt đăng ký đề tài: " + error);
-        }
-    };
-
-
-    const handleCancelNotification = async () => {
-        const scientificResearchCancel = scientificResearchCancelApproveRef.current;
-        try {
-            let listMember = [];
-            if (scientificResearchCancel.group !== 0) {
-                listMember = scientificResearchCancel.map((SRU) => SRU.user);
-            }
-            else {
-                listMember.push(scientificResearchCancel.user);
-            }
-            const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('approve', scientificResearchCancel, user.data, listMember);
-
-            ListNotification.map(async (itemNoti) => {
-                await deleteNotification(itemNoti.toUser, itemNoti);
-            })
-        } catch (err) {
-            console.error(err)
-        }
+            // Giữ các mục cũ và cập nhật theo thao tác mới
+            return [...prevKeys.filter((key) => !removedKeys.includes(key)), ...newKeys];
+        });
     };
 
 
@@ -321,7 +329,8 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                     children: item.children
                                 }
                             })}
-                            defaultActiveKey={listGroupRender.map(item => item.key)} // Mở tất cả các mục
+                            activeKey={activeKey} // Mở tất cả các mục
+                            onChange={handleCollapseChange}
                         />
 
                     ) : (
@@ -435,3 +444,4 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
 });
 
 export default DeTaiNCKHListRegister;
+

@@ -13,7 +13,7 @@ function FormSelect({ title = '', children, width = "auto", showModal, onClose, 
         if (showModal !== open) {
             setOpen(!open);
         }
-    }, [showModal]);
+    }, [showModal, open]);
 
     const handleCancel = useCallback(() => {
         setOpen(false);

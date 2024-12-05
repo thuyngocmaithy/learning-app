@@ -1,8 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './MonHoc.module.scss';
-import { message, Tag, Divider, Input, Select, Form } from 'antd';
+import { Tag, Divider, Input, Select, Form } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
@@ -14,11 +15,21 @@ import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import ImportExcel from '../../../../components/Core/ImportExcel';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 import config from '../../../../config';
+import { useLocation } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 
 const cx = classNames.bind(styles);
 
 function MonHoc() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
 
     const [form] = Form.useForm();
     const [isUpdate, setIsUpdate] = useState(false);
@@ -155,7 +166,9 @@ function MonHoc() {
                             setShowModal(record);
                             setIsUpdate(true);
                             setShowModalDetail(false);
-                        }}>
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
                         Sửa
                     </ButtonCustom>
                 </div>
@@ -220,7 +233,27 @@ function MonHoc() {
                 placeholder="Chọn loại trạng thái"
             />
         </FormItem >
-    ]
+    ];
+
+    const schemas = [
+        { label: "Mã môn học", prop: "subjectId" },
+        { label: "Tên môn học", prop: "subjectName" },
+        { label: "Bắt buộc", prop: "isCompulsory" },
+        { label: "Mã môn trước", prop: "subjectBefore" },
+        { label: "Số tín chỉ", prop: "creditHour" },
+    ];
+
+
+    const handleExportExcel = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_mon_hoc",
+            data,
+            schemas,
+            headerContent: "DANH SÁCH MÔN HỌC",
+        });
+    };
+
+
 
     return (
         <div className={cx('wrapper')}>
@@ -242,10 +275,22 @@ function MonHoc() {
                             setShowModal(true);
                             setIsUpdate(false);
                         }}
+                        isVisible={permissionDetailData?.isAdd}
                     />
-                    <Toolbar type={'Xóa'} onClick={() => deleteConfirm('môn học', handleDelete)} />
-                    <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportSubject(true)} />
-                    <Toolbar type={'Xuất file Excel'} />
+                    <Toolbar
+                        type={'Xóa'}
+                        onClick={() => deleteConfirm('môn học', handleDelete)}
+                        isVisible={permissionDetailData?.isDelete}
+                    />
+                    <Toolbar
+                        type={'Nhập file Excel'}
+                        onClick={() => setShowModalImportSubject(true)}
+                        isVisible={permissionDetailData?.isAdd}
+                    />
+                    <Toolbar
+                        type={'Xuất file Excel'}
+                        onClick={handleExportExcel}
+                    />
                 </div>
 
             </div>

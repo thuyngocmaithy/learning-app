@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Tabs, message, Divider, Input, Select } from 'antd';
+import { useState, useEffect, useMemo, useContext } from 'react';
+import { Tabs, Divider, Input, Select } from 'antd';
+import { message } from '../../../../hooks/useAntdApp';
 import classNames from 'classnames/bind';
 import styles from './NganhChuyenNganh.module.scss'
 import { ProjectIcon } from '../../../../assets/icons';
@@ -15,22 +16,33 @@ import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganh
 import { NganhDetail } from '../../../../components/FormDetail/NganhDetail';
 import { ChuyenNganhDetail } from '../../../../components/FormDetail/ChuyenNganhDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
-import FormItem from 'antd/es/form/FormItem';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import config from '../../../../config';
+import FormItem from '../../../../components/Core/FormItem';
+import { useLocation } from 'react-router-dom';
+import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import ExportExcel from '../../../../components/Core/ExportExcel';
 
 const cx = classNames.bind(styles);
 
 function NganhChuyenNganh() {
+    const location = useLocation();
+    const { permissionDetails } = useContext(PermissionDetailContext);
+    // Lấy keyRoute tương ứng từ URL
+    const currentPath = location.pathname;
+    const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
+    // Lấy permissionDetail từ Context dựa trên keyRoute
+    const permissionDetailData = permissionDetails[keyRoute];
+
     // Shared states
     const [activeTab, setActiveTab] = useState(1);
 
     // Ngành states
-    const [ngànhData, setNgànhData] = useState([]);
-    const [ngànhIsLoading, setNgànhIsLoading] = useState(true);
-    const [nganhSelectedKeys, setNgànhSelectedKeys] = useState([]);
-    const [ngànhShowModal, setNgànhShowModal] = useState(false);
-    const [ngànhIsUpdate, setNgànhIsUpdate] = useState(false);
+    const [nganhData, setNganhData] = useState([]);
+    const [nganhIsLoading, setNganhIsLoading] = useState(true);
+    const [nganhSelectedKeys, setNganhSelectedKeys] = useState([]);
+    const [nganhShowModal, setNganhShowModal] = useState(false);
+    const [nganhIsUpdate, setNganhIsUpdate] = useState(false);
     const [showModalDetailNgành, setShowModalDetailNgành] = useState(false);
 
 
@@ -55,7 +67,7 @@ function NganhChuyenNganh() {
 
 
     // Fetch Functions
-    const fetchNgànhData = async () => {
+    const fetchFacultyData = async () => {
         try {
             const result = await getAllFaculty();
             let listFaculty = Array.isArray(result.data)
@@ -66,12 +78,12 @@ function NganhChuyenNganh() {
                     facultyName: faculty.facultyName,
                     creditHourTotal: faculty.creditHourTotal
                 })) : [];
-            setNgànhData(listFaculty);
+            setNganhData(listFaculty);
             setFacultyOptions(listFaculty);
-            setNgànhIsLoading(false);
+            setNganhIsLoading(false);
         } catch (error) {
             console.error('Error fetching ngành data:', error);
-            setNgànhIsLoading(false);
+            setNganhIsLoading(false);
         }
     };
 
@@ -95,7 +107,7 @@ function NganhChuyenNganh() {
     };
 
     useEffect(() => {
-        fetchNgànhData();
+        fetchFacultyData();
         fetchMajorData();
     }, []);
 
@@ -103,8 +115,8 @@ function NganhChuyenNganh() {
     const handleNgànhDelete = async () => {
         try {
             await deleteFacultyById({ ids: nganhSelectedKeys.join(',') });
-            fetchNgànhData();
-            setNgànhSelectedKeys([]);
+            fetchFacultyData();
+            setNganhSelectedKeys([]);
             message.success('Xoá ngành thành công');
         } catch (error) {
             message.error('Xoá ngành thất bại');
@@ -139,15 +151,15 @@ function NganhChuyenNganh() {
             const response = await getWhereFaculty(searchParams);
 
             if (response.status === 200) {
-                setNgànhData(response.data.data);
+                setNganhData(response.data.data);
             } else if (response.status === 204) {
-                setNgànhData([]);
+                setNganhData([]);
                 message.info('Không tìm thấy kết quả phù hợp');
             }
         } catch (error) {
             console.error('[onSearch - error]: ', error);
             message.error('Có lỗi xảy ra khi tìm kiếm');
-            setNgànhData([]);
+            setNganhData([]);
         }
     };
 
@@ -267,9 +279,11 @@ function NganhChuyenNganh() {
                         primary
                         verysmall
                         onClick={() => {
-                            setNgànhShowModal(record);
-                            setNgànhIsUpdate(true);
-                        }}>
+                            setNganhShowModal(record);
+                            setNganhIsUpdate(true);
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
                         Sửa
                     </ButtonCustom>
                 </div>
@@ -318,7 +332,9 @@ function NganhChuyenNganh() {
                         onClick={() => {
                             setMajorShowModal(record);
                             setMajorIsUpdate(true);
-                        }}>
+                        }}
+                        disabled={!permissionDetailData?.isEdit}
+                    >
                         Sửa
                     </ButtonCustom>
                 </div>
@@ -330,12 +346,12 @@ function NganhChuyenNganh() {
     const NganhUpdateMemo = useMemo(() => (
         <NganhUpdate
             title={'ngành'}
-            isUpdate={ngànhIsUpdate}
-            showModal={ngànhShowModal}
-            setShowModal={setNgànhShowModal}
-            reLoad={fetchNgànhData}
+            isUpdate={nganhIsUpdate}
+            showModal={nganhShowModal}
+            setShowModal={setNganhShowModal}
+            reLoad={fetchFacultyData}
         />
-    ), [ngànhShowModal, ngànhIsUpdate]);
+    ), [nganhShowModal, nganhIsUpdate]);
 
     const ChuyenNganhUpdateMemo = useMemo(() => (
         <ChuyenNganhUpdate
@@ -375,17 +391,17 @@ function NganhChuyenNganh() {
                         <SearchForm
                             getFields={filterFieldsFaculty}
                             onSearch={onSearchFaculty}
-                            onReset={fetchNgànhData}
+                            onReset={fetchFacultyData}
                         />
                         <Divider />
                     </div>
                     <TableCustomAnt
                         height={'600px'}
                         columns={ngànhColumns}
-                        data={ngànhData}
+                        data={nganhData}
                         selectedRowKeys={nganhSelectedKeys}
-                        setSelectedRowKeys={setNgànhSelectedKeys}
-                        loading={ngànhIsLoading}
+                        setSelectedRowKeys={setNganhSelectedKeys}
+                        loading={nganhIsLoading}
                         keyIdChange="facultyId"
                     />
                 </div>
@@ -418,6 +434,43 @@ function NganhChuyenNganh() {
         },
     ];
 
+
+    // export ngành
+    // Export 
+    const schemasNganh = [
+        { label: "Mã ngành", prop: "facultyId" },
+        { label: "Tên ngành", prop: "facultyName" },
+        { label: "Số tín chỉ của ngành ", prop: "creditHourTotal" },
+    ];
+
+
+    const handleExportExcelNganh = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_nganh",
+            data: nganhData,
+            schemas: schemasNganh,
+            headerContent: "DANH SÁCH NGÀNH",
+
+        });
+    };
+
+    // Export Chuyên ngành
+    const schemasChuyenNganh = [
+        { label: "Mã chuyên ngành", prop: "majorId" },
+        { label: "Tên chuyên ngành", prop: "majorName" },
+        { label: "Tên ngành ", prop: "facultyName" },
+    ];
+
+    const handleExportExcelChuyenNganh = async () => {
+        ExportExcel({
+            fileName: "Danh_sach_chuyen_nganh",
+            data: majorData,
+            schemas: schemasChuyenNganh,
+            headerContent: "DANH SÁCH NGÀNH",
+
+        });
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('container-header')}>
@@ -440,16 +493,22 @@ function NganhChuyenNganh() {
                             <Toolbar
                                 type={'Tạo mới'}
                                 onClick={() => {
-                                    setNgànhShowModal(true);
-                                    setNgànhIsUpdate(false);
+                                    setNganhShowModal(true);
+                                    setNganhIsUpdate(false);
                                 }}
+                                isVisible={permissionDetailData?.isAdd}
                             />
                             <Toolbar
                                 type={'Xóa'}
                                 onClick={() => deleteConfirm('ngành', handleNgànhDelete)}
+                                isVisible={permissionDetailData?.isDelete}
                             />
-                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportNgành(true)} />
-                            <Toolbar type={'Xuất file Excel'} />
+                            <Toolbar
+                                type={'Nhập file Excel'}
+                                onClick={() => setShowModalImportNgành(true)}
+                                isVisible={permissionDetailData?.isAdd}
+                            />
+                            <Toolbar type={'Xuất file Excel'} onClick={handleExportExcelNganh} />
                         </>
                     ) : (
                         <>
@@ -465,13 +524,19 @@ function NganhChuyenNganh() {
                                     setMajorShowModal(true);
                                     setMajorIsUpdate(false);
                                 }}
+                                isVisible={permissionDetailData?.isAdd}
                             />
                             <Toolbar
                                 type={'Xóa'}
                                 onClick={() => deleteConfirm('chuyên ngành', handleMajorDelete)}
+                                isVisible={permissionDetailData?.isDelete}
                             />
-                            <Toolbar type={'Nhập file Excel'} onClick={() => setShowModalImportChuyenNganh(true)} />
-                            <Toolbar type={'Xuất file Excel'} />
+                            <Toolbar
+                                type={'Nhập file Excel'}
+                                onClick={() => setShowModalImportChuyenNganh(true)}
+                                isVisible={permissionDetailData?.isAdd}
+                            />
+                            <Toolbar type={'Xuất file Excel'} onClick={handleExportExcelChuyenNganh} />
                         </>
                     )}
                 </div>
@@ -497,7 +562,7 @@ function NganhChuyenNganh() {
                 title={'Ngành'}
                 showModal={showModalImportNgành}
                 setShowModal={setShowModalImportNgành}
-                reLoad={fetchNgànhData}
+                reLoad={fetchFacultyData}
                 type={config.imports.FACULTY}
                 onImport={importFaculty}
             />

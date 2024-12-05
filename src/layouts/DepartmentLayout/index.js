@@ -1,6 +1,4 @@
 import classNames from 'classnames/bind';
-// import Content from '../../../components/Content';
-
 import Header from '../../components/Core/Header';
 import Sidebar from '../../components/Core/Sidebar';
 import styles from './DepartmentLayout.module.scss';
@@ -10,17 +8,6 @@ import { Content } from 'antd/es/layout/layout';
 const cx = classNames.bind(styles);
 
 function DepartmentLayout({ children }) {
-    const siderStyle = {
-        overflow: 'auto',
-        height: '100vh',
-        position: 'fixed',
-        insetInlineStart: 0,
-        top: 0,
-        bottom: 0,
-        scrollbarWidth: 'thin',
-        scrollbarGutter: 'stable',
-    };
-
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
