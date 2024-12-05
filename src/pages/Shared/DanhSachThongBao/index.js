@@ -249,7 +249,7 @@ function DanhSachThongBao() {
                         <List.Item
                             key={item.id}
                             actions={
-                                item.isSystem && item.createUser.userId === userId && (permissionDetailData?.Edit || permissionDetailData?.Delete)
+                                item.isSystem && item.createUser.userId === userId && (permissionDetailData?.isEdit || permissionDetailData?.isDelete)
                                 && [
                                     <Dropdown
                                         menu={{

@@ -165,6 +165,9 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                 });
             } else {
                 form.resetFields();
+                form.setFieldsValue({
+                    totalCreditHour: maxCreditHour,
+                });
             }
         }
     }, [showModal, isUpdate, form, listSubjectSelected, maxCreditHour]);

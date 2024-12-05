@@ -61,6 +61,10 @@ function MoHocPhan() {
             const response = await getWhereSemester({ cycle: cycleId });
             if (response.status === 200) {
                 setListSemester(response.data.data.filter(item => item.semesterName !== 3));
+                return response.data.data.filter(item => item.semesterName !== 3);
+            }
+            else {
+                setListSemester([])
             }
         } catch (error) {
             console.error('Lỗi khi tải danh sách học kỳ:', error);
@@ -79,6 +83,10 @@ function MoHocPhan() {
                 }, 0);
                 setTotalSubject(totalSubjects);
                 setFrameComponents(response);
+                return { frameComponents_FUNC: response };
+            } else {
+                setTotalSubject(null);
+                setFrameComponents([])
             }
         } catch (error) {
             console.error('Lỗi khi tải cấu trúc chương trình:', error);
@@ -86,8 +94,20 @@ function MoHocPhan() {
     }, []);
 
     const fetchDataFrameArrange = useCallback(async (data) => {
-        await Promise.all([fetchSemester(data.cycle?.cycleId), fetchFrameComponents(data.frameId)]);
+        try {
+            const [listSemester_FUNC, frameComponentsResult] = await Promise.all([
+                fetchSemester(data.cycle?.cycleId),
+                fetchFrameComponents(data.frameId)
+            ]);
+
+            const { frameComponents_FUNC } = frameComponentsResult || {};
+            return { listSemester_FUNC, frameComponents_FUNC };
+        } catch (error) {
+            console.error('Lỗi khi tải dữ liệu:', error);
+            return { listSemester_FUNC: null, frameComponents_FUNC: null };
+        }
     }, [fetchFrameComponents, fetchSemester]);
+
 
     const fetchDataFrame = async () => {
         try {
@@ -131,6 +151,11 @@ function MoHocPhan() {
 
             setTeacherAssignments(new Map(teacherAssignments));
             setSelectedSemesters(new Set(selectedSemesters));
+
+            return {
+                teacherAssignments_FUNC: new Map(teacherAssignments),
+                selectedSemesters_FUNC: new Set(selectedSemesters)
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -147,8 +172,9 @@ function MoHocPhan() {
 
             if (response.status === 200 && response.data.data !== null) {
                 setDataArrange(response.data.data);
-                fetchDataFrameArrange(response.data.data);
-                fetchDataAssignment();
+                const { listSemester_FUNC, frameComponents_FUNC } = await fetchDataFrameArrange(response.data.data);
+                const { teacherAssignments_FUNC, selectedSemesters_FUNC } = await fetchDataAssignment();
+                return { listSemester_FUNC, frameComponents_FUNC, teacherAssignments_FUNC, selectedSemesters_FUNC }
             }
             else {
                 setDataArrange(null)
@@ -262,9 +288,9 @@ function MoHocPhan() {
     }, []);
 
 
-    const exportTreeToExcel = useCallback(async (record) => {
+    const exportTreeToExcel = useCallback(async (record, listSemester_FUNC, frameComponents_FUNC, teacherAssignments_FUNC, selectedSemesters_FUNC) => {
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Cấu trúc cây");
+        const worksheet = workbook.addWorksheet("Khung CTDT");
 
         // Thêm tiêu đề trên cùng
         worksheet.mergeCells("A1:L1");
@@ -280,10 +306,14 @@ function MoHocPhan() {
         descriptionCell.alignment = { vertical: "middle", horizontal: "left" };
 
         // Cấu hình cột (không thêm `header`)
-        const semesterColumns = listSemester.flatMap((_, index) => [
+        const semesterColumns = listSemester_FUNC?.flatMap((_, index) => [
             { key: `semester-${index + 1}`, width: 15 },
             { key: `teacher-${index + 1}`, width: 20 },
         ]);
+        if (!semesterColumns) {
+            message.warning("Chưa có danh sách học kỳ")
+            return;
+        }
 
         worksheet.columns = [
             { key: "name", width: 30 },
@@ -298,7 +328,7 @@ function MoHocPhan() {
             "Tên",
             "Mô tả",
             "Số tín chỉ",
-            ...listSemester.flatMap((_, index) => [`Học kỳ ${index + 1}`, `Giảng viên`]),
+            ...listSemester_FUNC?.flatMap((_, index) => [`Học kỳ ${index + 1}`, `Giảng viên`]),
         ];
         headerRow.font = { bold: true };
         headerRow.alignment = { vertical: "middle", horizontal: "center" };
@@ -309,22 +339,22 @@ function MoHocPhan() {
         ];
 
         // Xử lý dữ liệu cây và thêm vào Excel
-        const flatTreeData = processTreeForExcel(frameComponents);
+        const flatTreeData = processTreeForExcel(frameComponents_FUNC);
         flatTreeData.forEach((row, rowIndex) => {
             const newRow = worksheet.addRow(row);
 
             // Lặp qua các học kỳ và nạp dữ liệu
-            listSemester.forEach((semester, index) => {
+            listSemester_FUNC.forEach((semester, index) => {
                 const semesterColIndex = 4 + index * 2; // Bắt đầu từ cột thứ 4 (sau 3 cột đầu)
                 const teacherColIndex = semesterColIndex + 1;
 
                 const key = `${semester.semesterId}-${row.subjectId}`;
-                if (selectedSemesters.has(key)) {
+                if (selectedSemesters_FUNC.has(key)) {
                     newRow.getCell(semesterColIndex).value = "X"; // Đánh dấu học kỳ mở
                 }
 
-                if (teacherAssignments.has(key)) {
-                    newRow.getCell(teacherColIndex).value = teacherAssignments.get(key); // Điền tên giảng viên
+                if (teacherAssignments_FUNC.has(key)) {
+                    newRow.getCell(teacherColIndex).value = teacherAssignments_FUNC.get(key); // Điền tên giảng viên
                 }
             });
 
@@ -341,7 +371,7 @@ function MoHocPhan() {
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
         saveAs(blob, `ChuongTrinhDaoTao_${record.facultyId}_${record.cycleId}.xlsx`);
-    }, [frameComponents, listSemester, processTreeForExcel, selectedSemesters, teacherAssignments]);
+    }, [processTreeForExcel]);
 
 
     const processExcelFile = async (arrayBuffer) => {
@@ -434,6 +464,11 @@ function MoHocPhan() {
         }
     };
 
+    const handleArrangeAndExport = useCallback(async (record) => {
+        const { listSemester_FUNC, frameComponents_FUNC, teacherAssignments_FUNC, selectedSemesters_FUNC } = await handleArrange(record.frameId); // Xử lý sắp xếp
+        exportTreeToExcel(record, listSemester_FUNC, frameComponents_FUNC, teacherAssignments_FUNC, selectedSemesters_FUNC);          // Xuất sau khi dữ liệu sẵn sàng
+    }, [exportTreeToExcel, handleArrange]);
+
     const columnFrame = useCallback(
         () => [
             {
@@ -490,17 +525,7 @@ function MoHocPhan() {
                 key: 'disabled',
                 render: (_, record) => {
                     return (
-                        <ButtonCustom
-                            onClick={async () => {
-                                // fetchDataFrameArrange({
-                                //     cycle: { cycleId: record.cycleId },
-                                //     frameId: record.frameId
-                                // })
-                                // fetchDataAssignment();
-                                await handleArrange(record.frameId)
-                                exportTreeToExcel(record)
-                            }}
-                        >
+                        <ButtonCustom onClick={() => handleArrangeAndExport(record)}>
                             Xuất excel
                         </ButtonCustom>
                     );
@@ -540,7 +565,7 @@ function MoHocPhan() {
                 align: 'center',
             },
         ],
-        [exportTreeToExcel, handleArrange, handleDelete, switchStates],
+        [handleArrange, handleArrangeAndExport, handleDelete, switchStates],
     );
 
     return (
