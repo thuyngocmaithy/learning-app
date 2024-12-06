@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Checkbox, List, message } from 'antd';
 import Update from '../../Core/Update';
 import styles from "./DungKhungCTDTUpdate.module.scss"

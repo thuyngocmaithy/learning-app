@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Select, Tooltip } from 'antd';
 import listIcon from '../../../assets/icons/listIconAnt';
 

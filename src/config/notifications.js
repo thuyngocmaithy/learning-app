@@ -1,16 +1,15 @@
 import config from ".";
-import { getUserById } from "../services/userService";
 
 const notifications = {
     getNCKHNotification: async (operation, data, fromUser, listUserReceived = [], content) => {
         const messages = {
-            create: `Đề tài NCKH ${data.scientificResearchId} đã được giảng viên ${fromUser.fullname} tạo`,
-            registerForInstructor: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}`,
-            registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}, với sự tham gia của bạn`,
+            create: `Đề tài NCKH ${data.scientificResearchId} đã được giảng viên ${fromUser?.fullname} tạo`,
+            registerForInstructor: `Sinh viên ${fromUser?.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}`,
+            registerWithMembers: `Sinh viên ${fromUser?.fullname} đăng ký tham gia đề tài NCKH ${data.scientificResearchId}, với sự tham gia của bạn`,
             approveForStudent: `Bạn được duyệt tham gia đề tài NCKH ${data.scientificResearchId}`,
-            approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài NCKH ${data.scientificResearchId}`,
+            approveForInstructor: (studentName) => `Giảng viên ${fromUser?.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài NCKH ${data.scientificResearchId}`,
             follow: `Bạn được thêm theo dõi đề tài NCKH ${data.scientificResearchId}`,
-            note: `${fromUser.fullname} vừa ghi chú đề tài NCKH ${data.scientificResearchId}`
+            note: `${fromUser?.fullname} vừa ghi chú đề tài NCKH ${data.scientificResearchId}`
         };
 
         const notifications = [];
@@ -21,19 +20,19 @@ const notifications = {
                     type,
                     url,
                     toUsers,
-                    createUser: fromUser.userId,
+                    createUser: fromUser?.userId,
                     ...(content && { content })
                 });
             }
         };
 
-        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser?.userId);
         const getUrl = (base, tabIndex = null) =>
             `${base}?scientificResearch=${data.scientificResearchId}${tabIndex ? `&tabIndex=${tabIndex}` : ''}`;
 
         switch (operation) {
             case 'create':
-                if (data.instructor?.userId !== fromUser.userId) {
+                if (data.instructor?.userId !== fromUser?.userId) {
                     addNotification(
                         messages.create,
                         'info',
@@ -47,7 +46,7 @@ const notifications = {
                 addNotification(
                     messages.registerForInstructor,
                     'warning',
-                    `${config.routes.DeTaiNCKH_Department}?SRGId=${data.scientificResearchGroup.scientificResearchGroupId}`,
+                    `${config.routes.DeTaiNCKH_Department}}`,
                     [data.instructor.userId]
                 );
 
@@ -69,12 +68,12 @@ const notifications = {
                     messages.approveForStudent,
                     'success',
                     getUrl(config.routes.DeTaiNCKHThamGia),
-                    filteredUsers.map((member) => member.userId)
+                    filteredUsers.map((member) => member?.userId)
                 );
 
-                if (data.instructor?.userId !== fromUser.userId) {
+                if (data.instructor?.userId !== fromUser?.userId) {
                     addNotification(
-                        messages.approveForInstructor(data.userId),
+                        messages.approveForInstructor(data.instructor?.userId),
                         'success',
                         getUrl(config.routes.DeTaiNCKHThamGia),
                         [data.instructor.userId]
@@ -110,7 +109,7 @@ const notifications = {
 
     getNhomNCKHNotification: async (operation, data, fromUser, listUserReceived = []) => {
         const messages = {
-            create: `Nhóm đề tài NCKH ${data.scientificResearchGroupId} được giảng viên ${fromUser.fullname} khởi tạo`,
+            create: `Nhóm đề tài NCKH ${data.scientificResearchGroupId} được giảng viên ${fromUser?.fullname} khởi tạo`,
         };
 
         const notifications = [];
@@ -121,13 +120,13 @@ const notifications = {
                     type,
                     url,
                     toUsers,
-                    createUser: fromUser.userId,
+                    createUser: fromUser?.userId,
                     ...(content && { content })
                 });
             }
         };
 
-        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser?.userId);
 
         switch (operation) {
             case 'create':
@@ -149,13 +148,13 @@ const notifications = {
 
     getKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = [], content) => {
         const messages = {
-            create: `Đề tài khóa luận ${data.thesisId} đã được giảng viên ${fromUser.fullname} tạo`,
-            registerForInstructor: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}`,
-            registerWithMembers: `Sinh viên ${fromUser.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}, với sự tham gia của bạn`,
+            create: `Đề tài khóa luận ${data.thesisId} đã được giảng viên ${fromUser?.fullname} tạo`,
+            registerForInstructor: `Sinh viên ${fromUser?.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}`,
+            registerWithMembers: `Sinh viên ${fromUser?.fullname} đăng ký tham gia đề tài khóa luận ${data.thesisId}, với sự tham gia của bạn`,
             approveForStudent: `Bạn được duyệt tham gia đề tài khóa luận ${data.thesisId}`,
-            approveForInstructor: (studentName) => `Giảng viên ${fromUser.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài khóa luận ${data.thesisId}`,
+            approveForInstructor: (studentName) => `Giảng viên ${fromUser?.fullname} đã duyệt đăng ký của sinh viên ${studentName} tham gia đề tài khóa luận ${data.thesisId}`,
             follow: `Bạn được thêm theo dõi đề tài khóa luận ${data.thesisId}`,
-            note: `${fromUser.fullname} vừa ghi chú đề tài khóa luận ${data.thesisId}`
+            note: `${fromUser?.fullname} vừa ghi chú đề tài khóa luận ${data.thesisId}`
         };
 
         const notifications = [];
@@ -167,19 +166,19 @@ const notifications = {
                     type,
                     url,
                     toUsers,
-                    createUser: fromUser.userId,
+                    createUser: fromUser?.userId,
                     ...(content && { content })
                 });
             }
         };
 
-        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser?.userId);
         const getUrl = (base, tabIndex = null) =>
             `${base}?thesis=${data.thesisId}${tabIndex ? `&tabIndex=${tabIndex}` : ''}`;
 
         switch (operation) {
             case 'create':
-                if (data.instructor?.userId !== fromUser.userId) {
+                if (data.instructor?.userId !== fromUser?.userId) {
                     addNotification(
                         messages.create,
                         'info',
@@ -215,9 +214,9 @@ const notifications = {
                     filteredUsers.map((member) => member.userId)
                 );
 
-                if (data.instructor?.userId !== fromUser.userId) {
+                if (data.instructor?.userId !== fromUser?.userId) {
                     addNotification(
-                        messages.approveForInstructor(data.userId),
+                        messages.approveForInstructor(data.instructor?.userId),
                         'success',
                         getUrl(config.routes.DeTaiKhoaLuanThamGia),
                         [data.instructor.userId]
@@ -253,7 +252,7 @@ const notifications = {
 
     getNhomKhoaLuanNotification: async (operation, data, fromUser, listUserReceived = []) => {
         const messages = {
-            create: `Nhóm đề tài khóa luận ${data.thesisGroupId} được giảng viên ${fromUser.fullname} khởi tạo`,
+            create: `Nhóm đề tài khóa luận ${data.thesisGroupId} được giảng viên ${fromUser?.fullname} khởi tạo`,
         };
 
         const notifications = [];
@@ -264,13 +263,13 @@ const notifications = {
                     type,
                     url,
                     toUsers,
-                    createUser: fromUser.userId,
+                    createUser: fromUser?.userId,
                     ...(content && { content })
                 });
             }
         };
 
-        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser.userId);
+        const filteredUsers = listUserReceived.filter((member) => member.userId !== fromUser?.userId);
 
         switch (operation) {
             case 'create':

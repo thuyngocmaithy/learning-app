@@ -1,4 +1,4 @@
-import React, { useState, memo, useEffect, useContext, useCallback } from 'react';
+import { useState, memo, useEffect, useContext, useCallback } from 'react';
 import { Input, InputNumber, Select, Form, DatePicker } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
@@ -42,7 +42,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     // Xử lý lấy ThesisGroupId    
     const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId');
 
-    //lấy danh sách nhóm đề tài KhoaLuan
+    //lấy danh sách nhóm đề tài khóa luận
     const fetchThesisGroups = async () => {
         const response = await getWhere({ stillValue: true });
         if (response.status === 200) {
@@ -171,8 +171,8 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             let thesisData = {
                 thesisName: values.thesisName,
                 description: values.description,
-                instructorId: values.instructor.value,
-                statusId: values.status.value,
+                instructorId: values.instructor,
+                statusId: values.status,
                 numberOfMember: values.numberOfMember,
                 thesisGroup: ThesisGroupId || values.thesisgroup.value,
                 startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),
@@ -255,13 +255,13 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                     name="thesisgroup"
                     label="Nhóm đề tài khóa luận"
                     rules={ThesisGroupIdFromUrl ? [] : [
-                        { required: true, message: 'Vui lòng chọn nhóm đề tài KhoaLuan!' },
+                        { required: true, message: 'Vui lòng chọn nhóm đề tài khóa luận!' },
                         { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Nhóm đề tài khóa luận không được để trống!') }
                     ]}
                 >
                     <Select
                         showSearch
-                        placeholder="Chọn nhóm đề tài KhoaLuan"
+                        placeholder="Chọn nhóm đề tài khóa luận"
                         optionFilterProp="children"
                         onChange={handleChangeThesisGroup}
                         filterOption={(input, option) =>

@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import FormItem from '../../Core/FormItem';
 import Register from '../../Core/Register';
 import { Button, Form, Radio, Select, Space } from 'antd';

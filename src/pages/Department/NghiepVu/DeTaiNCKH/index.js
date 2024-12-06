@@ -294,6 +294,18 @@ function DeTaiNCKH() {
                 SRMap.get(SRId).push(item);
             });
 
+            // Thêm thông tin instructor vào từng object trong SRMap
+            scientificResearchData.forEach((data) => {
+                const SRId = data.scientificResearchId;
+                const instructor = data.instructor; // Giả sử `instructor` là thuộc tính của `scientificResearchData`
+
+                if (SRMap.has(SRId)) {
+                    SRMap.get(SRId).forEach((item) => {
+                        item.scientificResearch.instructor = instructor; // Gán thông tin instructor vào từng object
+                    });
+                }
+            });
+
             // Kết hợp dữ liệu khóa luận và số lượng đăng ký
             const SRs = scientificResearchData.map((data) => ({
                 ...data,

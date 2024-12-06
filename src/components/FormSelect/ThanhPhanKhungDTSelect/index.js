@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import FormSelect from '../../Core/FormSelect';
 import TableCustomAnt from '../../Core/TableCustomAnt';
 import { getAllStudyFrameComponent } from '../../../services/studyFrameCompService';

@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { Input, Form, InputNumber } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
@@ -47,7 +47,7 @@ const ChuKyUpdate = memo(function ChuKyUpdate({
                     endYear: values.endYear
                 };
 
-                response = await updateCycle(showModal.id, cycleData);
+                response = await updateCycle(showModal.cycleId, cycleData);
             } else {
                 let cycleData = {
                     cycleName: values.cycleName,

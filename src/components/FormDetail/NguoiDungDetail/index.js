@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import moment from 'moment';
 import FormItem from '../../Core/FormItem';
 import Detail from '../../Core/Detail';

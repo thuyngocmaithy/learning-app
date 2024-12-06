@@ -23,7 +23,7 @@
         "@tippyjs/react": "^4.2.6",
         "ajv": "^6.12.6",
         "ajv-keywords": "^3.5.2",
-        "antd": "^5.17.3",
+        "antd": "^5.22.3",
         "apexcharts": "^3.44.2",
         "axios": "^1.7.2",
         "classnames": "^2.3.2",

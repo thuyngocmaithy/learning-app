@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
 import { Breadcrumb, Card, Col, Divider, Input, List, Row, Select, Tabs, Tag } from 'antd';
@@ -238,8 +238,9 @@ function DeTaiNCKH() {
             }
             showModal={showModalRegister}
             setShowModal={setShowModalRegister}
+            checkRegisterSR={checkRegisterSR}
         />
-    ), [showModalRegister]);
+    ), [showModalRegister, checkRegisterSR]);
 
     // Set tab được chọn vào state 
     const handleTabClick = (index) => {

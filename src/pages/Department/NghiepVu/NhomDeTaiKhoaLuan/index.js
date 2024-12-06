@@ -186,7 +186,7 @@ function NhomDeTaiKhoaLuan() {
         }
     ];
 
-    // Lấy dữ liệu nhóm đề tài KhoaLuan
+    // Lấy dữ liệu nhóm đề tài khóa luận
     const fetchData = async () => {
         setIsLoading(true);
         try {
@@ -236,7 +236,7 @@ function NhomDeTaiKhoaLuan() {
         fetchListThesisJoined();
     }, [fetchListThesisJoined]);
 
-    // Xóa nhóm đề tài KhoaLuan
+    // Xóa nhóm đề tài khóa luận
     const handleDelete = async () => {
         try {
             await deleteThesisGroups(selectedRowKeys);
@@ -500,12 +500,14 @@ function NhomDeTaiKhoaLuan() {
         { label: "Trạng thái", prop: "status" }
     ];
 
-    const processedData = data.map(item => ({
-        ...item,
-        status: item.status?.statusName
-    }));
 
     const handleExportExcel = async () => {
+        const processedData = data.map(item => ({
+            ...item,
+            status: item.status?.statusName,
+            faculty: item.facultyName
+        }));
+
         ExportExcel({
             fileName: "Danh_sach_nhomdetaiKhoaluan",
             data: processedData,

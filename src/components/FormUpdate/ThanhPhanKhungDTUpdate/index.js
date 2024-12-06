@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Input, Form, InputNumber, Space, Select } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';

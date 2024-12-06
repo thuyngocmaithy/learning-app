@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useContext, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useContext, useMemo, memo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Button from "../../components/Core/Button"
 import { Spin, Input, Empty } from 'antd';
@@ -411,4 +411,4 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
 
 };
 
-export default React.memo(TableScore);
+export default memo(TableScore);

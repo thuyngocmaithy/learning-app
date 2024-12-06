@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
+import { useState, useEffect, useCallback, useMemo, useContext, memo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio } from '@mui/material';
 import { Skeleton } from 'antd';
 import { message } from "../../hooks/useAntdApp"
@@ -229,7 +229,7 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
     };
 };
 
-const SubjectCell = React.memo(({
+const SubjectCell = memo(({
     subject,
     semesterIndex,
     registeredInfo,
@@ -295,7 +295,7 @@ const SubjectCell = React.memo(({
 });
 
 
-const SubjectRow = React.memo(({
+const SubjectRow = memo(({
     subject,
     index,
     repeatHK,
@@ -414,7 +414,7 @@ const SubjectRow = React.memo(({
 
 
 
-const FrameComponentRow = React.memo(({
+const FrameComponentRow = memo(({
     frameComponent,
     level,
     repeatHK,

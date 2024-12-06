@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import FormItem from '../../Core/FormItem';
 import Register from '../../Core/Register';
 import { Button, Form, Radio, Select, Space } from 'antd';
@@ -14,6 +14,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
     title,
     showModal,
     setShowModal,
+    checkRegisterSR
 }) {
     const [form] = Form.useForm();
     const { userId } = useContext(AccountLoginContext);
@@ -102,6 +103,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
             }
             const responseAdd = await createSRU(registerData);
             if (responseAdd) {
+                await checkRegisterSR();
                 message.success(`Đăng ký thành công`);
                 await handleSendNotification();
             }

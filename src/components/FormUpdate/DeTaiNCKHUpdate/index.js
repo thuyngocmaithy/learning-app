@@ -1,4 +1,4 @@
-import React, { useState, memo, useEffect, useContext, useCallback } from 'react';
+import { useState, memo, useEffect, useContext, useCallback } from 'react';
 import { Input, InputNumber, Select, Form, DatePicker } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
@@ -180,11 +180,11 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             let scientificResearchData = {
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
-                instructor: values.instructor,
+                instructorId: values.instructor,
                 statusId: values.status,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
-                scientificResearchGroup: SRGId || values.srgroup,
+                scientificResearchGroup: SRGId || values.srgroup.value,
                 startDate: new Date(values.srDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.srDate[1].format('YYYY-MM-DD HH:mm')),
             };

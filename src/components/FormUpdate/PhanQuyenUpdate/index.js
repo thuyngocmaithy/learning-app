@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { message } from '../../../hooks/useAntdApp';
 import Update from '../../Core/Update';
 import TableCustomAnt from '../../Core/TableCustomAnt';

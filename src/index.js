@@ -1,22 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import GlobalStyles from './components/Core/GlobalStyles';
 import { ThemeContext, ThemeProvider } from './context/ThemeContext';
-import { AccountLoginProvider } from './context/AccountLoginContext';
-import { SocketNotificationProvider } from './context/SocketNotificationContext';
-import { SocketMessagesProvider } from './context/SocketMessagesContext';
-import { PermissionDetailProvider } from './context/PermissionDetailContext';
-import { SRAndThesisJoinProvider } from './context/SRAndThesisJoinContext';
-import { MenuProvider } from './context/MenuContext';
 import { BrowserRouter } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
 import getThemeConfig from './config/themeConfig';
 import { App as AppAnt } from 'antd';
+import Providers from './context/Providers';
+import React from 'react';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>
     <AppAnt>
@@ -29,19 +24,11 @@ root.render(
                             return (
                                 <ConfigProvider
                                     theme={themeConfig}>
-                                    <AccountLoginProvider>
-                                        <PermissionDetailProvider>
-                                            <MenuProvider>
-                                                <SRAndThesisJoinProvider>
-                                                    <SocketNotificationProvider>
-                                                        <SocketMessagesProvider>
-                                                            <App />
-                                                        </SocketMessagesProvider>
-                                                    </SocketNotificationProvider>
-                                                </SRAndThesisJoinProvider>
-                                            </MenuProvider>
-                                        </PermissionDetailProvider>
-                                    </AccountLoginProvider>
+                                    <Providers>
+                                        <React.Suspense fallback={''}>
+                                            <App />
+                                        </React.Suspense>
+                                    </Providers>
                                 </ConfigProvider>
                             );
                         }}

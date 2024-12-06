@@ -276,6 +276,18 @@ function DeTaiKhoaLuan() {
                 thesisMap.get(thesisId).push(item);
             });
 
+            // Thêm thông tin instructor vào từng object trong thesisMap
+            thesisData.forEach((data) => {
+                const SRId = data.thesisId;
+                const instructor = data.instructor; // Giả sử `instructor` là thuộc tính của `thesisData`
+
+                if (thesisMap.has(SRId)) {
+                    thesisMap.get(SRId).forEach((item) => {
+                        item.thesis.instructor = instructor; // Gán thông tin instructor vào từng object
+                    });
+                }
+            });
+
             // Kết hợp dữ liệu khóa luận và số lượng đăng ký
             const thesiss = thesisData.map((data) => ({
                 ...data,

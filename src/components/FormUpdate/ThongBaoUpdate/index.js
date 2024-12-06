@@ -1,4 +1,4 @@
-import React, { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import { Input, Form, Select } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
@@ -163,7 +163,6 @@ const ThongBaoUpdate = memo(function ThongBaoUpdate({
                         mode="multiple"
                         style={{ width: '100%' }}
                         options={optionUser}
-                        labelInValue
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }

@@ -1,4 +1,4 @@
-import React, { useState, memo, useEffect } from 'react';
+import { useState, memo, useEffect } from 'react';
 import { Input, Select, Form, InputNumber } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { useForm } from 'antd/es/form/Form';
@@ -111,6 +111,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
+            form={form}
         >
             <Form form={form}>
                 <FormItem

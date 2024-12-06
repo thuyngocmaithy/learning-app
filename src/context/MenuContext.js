@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { getById } from '../services/featureService';
 import { getWhere } from '../services/permissionFeatureService';
 import listIcon from '../assets/icons/listIconAnt';

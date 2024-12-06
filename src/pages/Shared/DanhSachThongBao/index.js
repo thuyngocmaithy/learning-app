@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
+import { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DanhSachThongBao.module.scss';
 import { Divider, Dropdown, Input, List, Select, Skeleton, Space, Switch } from 'antd';
@@ -17,6 +17,7 @@ import Button from '../../../components/Core/Button';
 import { CheckCircleOutlined, CloseCircleOutlined, DownOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import SearchForm from '../../../components/Core/SearchForm';
 import FormItem from '../../../components/Core/FormItem';
+
 
 const cx = classNames.bind(styles);
 
@@ -251,19 +252,22 @@ function DanhSachThongBao() {
                             actions={
                                 item.isSystem && item.createUser.userId === userId && (permissionDetailData?.isEdit || permissionDetailData?.isDelete)
                                 && [
-                                    <Dropdown
-                                        menu={{
-                                            items: getItemsAction(item),
-                                        }}
-                                        trigger={['click']}
-                                    >
-                                        <Button primary verysmall>
-                                            <Space>
-                                                Thực hiện
-                                                <DownOutlined />
-                                            </Space>
-                                        </Button>
-                                    </Dropdown>
+                                    <div>
+                                        <Dropdown
+                                            menu={{
+                                                items: getItemsAction(item),
+                                            }}
+                                            trigger={['click']}
+                                            getPopupContainer={(triggerNode) => document.body}
+                                        >
+                                            <Button primary verysmall>
+                                                <Space>
+                                                    Thực hiện
+                                                    <DownOutlined />
+                                                </Space>
+                                            </Button>
+                                        </Dropdown>
+                                    </div>
                                 ]}
                         >
 
