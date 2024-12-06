@@ -37,12 +37,12 @@ export const MonHocDetail = memo(function MonHocDetail({
                 <FormItem label={'Số tín chỉ'} name="creditHour">
                     <p>{showModal?.creditHour || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên chuyên ngành'} name="majorName">
+                {/* <FormItem label={'Tên chuyên ngành'} name="majorName">
                     <p>{showModal?.majorName || ''}</p>
                 </FormItem>
                 <FormItem label={'Tên ngành'} name="facultyName">
                     <p>{showModal?.facultyName || ''}</p>
-                </FormItem>
+                </FormItem> */}
                 <FormItem label={'Bắt buộc'} name="isCompulsory">
                     {showModal?.isCompulsory === 1 ? <p>Có</p> : <p>Không</p>}
                 </FormItem>
