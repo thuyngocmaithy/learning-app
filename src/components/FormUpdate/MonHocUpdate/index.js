@@ -17,7 +17,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
     const [optionSubject, setOptionSubject] = useState();
 
     useEffect(() => {
-        // Fetch danh sách tất cả môn học
+        // Fetch Data môn học
         const fetchSubject = async () => {
             try {
                 const response = await getAllSubject();
@@ -27,15 +27,27 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                         label: subject.subjectId + " - " + subject.subjectName,
                     }));
                     setOptionSubject(options);
+
+                    // Kiểm tra và cập nhật subjectBefore
+                    if (showModal?.subjectBefore) {
+                        const selectedSubjectBefore = options.find(option => option.value === showModal.subjectBefore);
+                        if (selectedSubjectBefore) {
+                            form.setFieldsValue({
+                                subjectBefore: selectedSubjectBefore,
+                            });
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('ThanhPhanKhungDTUpdate - fetchSubject - error:', error);
+                console.error('MonHocUpdate - fetchSubject - error:', error);
             }
         };
+
         if (showModal) {
             fetchSubject();
         }
-    }, [showModal]);
+    }, [showModal, form]);
+
 
     useEffect(() => {
         if (showModal && isUpdate && form) {
@@ -53,6 +65,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
             });
         }
     }, [showModal, isUpdate, form]);
+
 
     const handleCloseModal = () => {
         setShowModal(false);
