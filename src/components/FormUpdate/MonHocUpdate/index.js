@@ -78,6 +78,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                 subjectId: values.subjectId,
                 subjectName: values.subjectName,
                 creditHour: values.creditHour,
+                isCompulsory: values.isCompulsory,
                 createUser: userId || 'admin',
                 lastModifyUser: userId || 'admin',
                 subjectBefore: values.subjectBefore?.value,

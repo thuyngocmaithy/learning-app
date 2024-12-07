@@ -202,6 +202,9 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                     subjectId: subject.subjectId,
                     subjectName: subject.subjectName,
                     improvementCanceled: true,
+                    // Reset to original grade when canceling improvement
+                    expectedScore10: null,
+                    expectedScoreLetter: null
                 });
             } else {
                 newImprovementSubjects[subjectId] = true;

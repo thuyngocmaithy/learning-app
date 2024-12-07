@@ -178,7 +178,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.thesisDate[1].format('YYYY-MM-DD HH:mm')),
             };
-
+            console.log(thesisData);
             let response;
             if (isUpdate) {
                 response = await updateThesisById(showModal.thesisId, thesisData);
