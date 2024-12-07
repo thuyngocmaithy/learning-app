@@ -118,18 +118,18 @@ function MonHoc() {
             dataIndex: 'subjectName',
             key: 'subjectName',
         },
-        {
-            title: 'Bắt buộc',
-            dataIndex: 'isCompulsory',
-            key: 'isCompulsory',
-            render: (_, record) => {
-                return (
-                    record.isCompulsory === 1
-                        ? <Tag color='green'>Có</Tag>
-                        : <Tag color='red'>Không</Tag>
-                )
-            },
-        },
+        // {
+        //     title: 'Bắt buộc',
+        //     dataIndex: 'isCompulsory',
+        //     key: 'isCompulsory',
+        //     render: (_, record) => {
+        //         return (
+        //             record.isCompulsory === 1
+        //                 ? <Tag color='green'>Có</Tag>
+        //                 : <Tag color='red'>Không</Tag>
+        //         )
+        //     },
+        // },
         {
             title: 'Mã môn trước',
             dataIndex: 'subjectBefore',
@@ -225,20 +225,19 @@ function MonHoc() {
         <FormItem name="creditHour" label="Số tín chỉ">
             <Input />
         </FormItem>,
-        <FormItem name="isCompulsory" label="Bắt buộc" >
-            <Select
-                style={{ width: '100%' }}
-                options={typeOptions}
-                allowClear
-                placeholder="Chọn loại trạng thái"
-            />
-        </FormItem >
+        // <FormItem name="isCompulsory" label="Bắt buộc" >
+        //     <Select
+        //         style={{ width: '100%' }}
+        //         options={typeOptions}
+        //         allowClear
+        //         placeholder="Chọn loại trạng thái"
+        //     />
+        // </FormItem >
     ];
 
     const schemas = [
         { label: "Mã môn học", prop: "subjectId" },
         { label: "Tên môn học", prop: "subjectName" },
-        { label: "Bắt buộc", prop: "isCompulsory" },
         { label: "Mã môn trước", prop: "subjectBefore" },
         { label: "Số tín chỉ", prop: "creditHour" },
     ];

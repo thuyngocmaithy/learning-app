@@ -55,7 +55,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                 subjectId: showModal.subjectId,
                 subjectName: showModal.subjectName,
                 creditHour: showModal.creditHour,
-                isCompulsory: showModal.isCompulsory === 1 ? true : false,
+                // isCompulsory: showModal.isCompulsory === 1 ? true : false,
                 ...(showModal.subjectBefore && {
                     subjectBefore: {
                         value: showModal.subjectBefore.subjectId,
@@ -79,7 +79,7 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                 subjectId: values.subjectId,
                 subjectName: values.subjectName,
                 creditHour: values.creditHour,
-                isCompulsory: values.isCompulsory,
+                // isCompulsory: values.isCompulsory,
                 createUser: userId || 'admin',
                 lastModifyUser: userId || 'admin',
                 subjectBefore: values.subjectBefore?.value,
@@ -158,13 +158,6 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                         }
                         options={optionSubject}
                     />
-                </FormItem>
-                <FormItem
-                    name="isCompulsory"
-                    valuePropName="checked"
-                    label="Bắt buộc"
-                >
-                    <Checkbox />
                 </FormItem>
             </Form>
         </Update>

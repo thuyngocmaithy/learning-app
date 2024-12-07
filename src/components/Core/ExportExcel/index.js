@@ -7,21 +7,21 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
         const worksheet = workbook.addWorksheet("Sheet1");
 
         // **1. Thiết lập Header chính**
-        worksheet.mergeCells("A1:B2");
+        worksheet.mergeCells("A1:B3");
         const headerCell = worksheet.getCell("B1");
         headerCell.value = "UBND THÀNH PHỐ HỒ CHÍ MINH\nTRƯỜNG ĐẠI HỌC SÀI GÒN";
         headerCell.font = { bold: true, size: 12 };
         headerCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
 
-        worksheet.mergeCells("E1:F2");
+        worksheet.mergeCells("E1:I3");
         const subHeaderCell = worksheet.getCell("F2");
         subHeaderCell.value = "Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam\nĐộc lập - Tự do - Hạnh phúc";
         subHeaderCell.font = { bold: true, size: 12 };
         subHeaderCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
 
         if (headerContent) {
-            worksheet.mergeCells("A3:F4");
-            const titleCell = worksheet.getCell("A3");
+            worksheet.mergeCells("A4:I5");
+            const titleCell = worksheet.getCell("A4");
             titleCell.value = headerContent;
             titleCell.font = { bold: true, size: 16 };
             titleCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
@@ -61,7 +61,7 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
         });
 
         // **4. Thêm viền đậm cho toàn bộ bảng**
-        const startRow = headerContent ? 6 : 5; // Dòng tiêu đề bắt đầu
+        const startRow = headerContent ? 7 : 6; // Dòng tiêu đề bắt đầu
         const endRow = headerRowIndex + data.length; // Dòng cuối cùng (bao gồm dữ liệu)
         const totalCols = schemas.length;
 
