@@ -278,12 +278,13 @@ function DanhSachThongBao() {
                                         {(currentPage - 1) * pageSize + index + 1}
                                     </h2>
                                 }
-                                title={<div className={cx('name')} onClick={() => { navigate(item.url) }}>{item.title}</div>}
+                                title={<div className={cx('name')} onClick={() => window.open(item.url, '_blank')}>{item.title}</div>}
                                 description={
                                     <div>
-                                        <p>Nội dung: {item.content}</p>
-                                        <p>Người tạo: {item.createUser.userId} - {item.createUser.fullname}</p>
-                                        <p>Hiển thị:
+                                        <p className={cx("item-description")}>Nội dung: {item.content}</p>
+                                        <p className={cx("item-description")}>Người tạo: {item.createUser.userId} - {item.createUser.fullname}</p>
+                                        <p className={cx("item-description")}>
+                                            Hiển thị:
                                             <Switch
                                                 style={{ marginLeft: "10px" }}
                                                 disabled={
@@ -356,7 +357,7 @@ function DanhSachThongBao() {
                 />
             </Skeleton>
             {ThongBaoUpdatedMemorized}
-        </div>
+        </div >
     );
 }
 
