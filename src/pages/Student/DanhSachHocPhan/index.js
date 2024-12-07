@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, memo } from 'react';
+import { useState, useEffect, useContext, memo, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
@@ -8,20 +8,28 @@ import {
     getUserById,
     saveRegisterSubjects
 } from '../../../services/userService';
-import { Descriptions, Empty, Radio, Spin } from 'antd';
+import { Descriptions, Empty, Radio, Spin, Tabs } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { findKhungCTDTByUserId } from '../../../services/studyFrameService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { createSemester, getSemesterById } from '../../../services/semesterService';
 import { createCycle, getWhere } from '../../../services/cycleService';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ThoiKhoaBieu from '../../../components/ThoiKhoaBieu';
 
 const cx = classNames.bind(styles);
 function DanhSachHocPhan() {
     const { userId } = useContext(AccountLoginContext);
     const [registeredSubjects, setRegisteredSubjects] = useState({});
     const [frameId, setFrameId] = useState();
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [valueStatus, setValueSatus] = useState('Tất cả');
+    // Xử lý active tab từ url
+    const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const tabIndexFromUrl = Number(queryParams.get('tabIndex'));
+    const [tabActive, setTabActive] = useState(tabIndexFromUrl || 1);
 
     useEffect(() => {
         const fetchKhungCTDT = async () => {
@@ -29,7 +37,6 @@ function DanhSachHocPhan() {
             try {
                 const res = await findKhungCTDTByUserId(userId);
                 if (res.status === 200) {
-                    console.log(res.data?.data?.frameId)
                     setFrameId(res.data?.data?.frameId);
                 }
             } catch (error) {
@@ -136,13 +143,69 @@ function DanhSachHocPhan() {
         setValueSatus(e.target.value); // Cập nhật giá trị khi chọn
     };
 
-    if (isLoading) {
-        return (
-            <div className={cx('container-loading')}>
-                <Spin size="large" />
-            </div>
-        );
-    }
+    // Set tab được chọn vào state 
+    const handleTabClick = (index) => {
+        setTabActive(index)
+    };
+
+
+    // Cập nhật URL khi tab thay đổi
+    const handleTabChange = (tabId) => {
+        const currentUrl = new URL(window.location.href);
+        const params = new URLSearchParams(currentUrl.search);
+
+        // Kiểm tra nếu tabIndex chưa có trong URL thì thêm mới
+        if (!params.has('tabIndex')) {
+            params.append('tabIndex', tabId);
+        } else {
+            params.set('tabIndex', tabId); // Cập nhật giá trị mới cho tabIndex nếu đã có
+        }
+
+        // Cập nhật URL với params mới        
+        navigate(`${currentUrl.pathname}?${params.toString()}`);
+
+        setTabActive(tabId);
+    };
+
+    const ITEM_TABS = [
+        {
+            id: 1,
+            title: 'Quản lý tiến độ',
+            children: (
+                <>
+                    <Descriptions items={items} className={cx('description')} />
+                    <Table
+                        frameId={frameId}
+                        registeredSubjects={registeredSubjects}
+                        setRegisteredSubjects={setRegisteredSubjects}
+                        status={valueStatus}
+                    />
+                </>
+            ),
+        },
+        {
+            id: 2,
+            title: 'Thời khóa biểu theo kỳ sắp xếp',
+            children: (
+                <>
+                    <ThoiKhoaBieu
+                        registeredSubjects={registeredSubjects}
+                        frameId={frameId}
+                    />
+                </>
+            ),
+        },
+    ];
+
+
+
+    // if (isLoading) {
+    //     return (
+    //         <div className={cx('container-loading')}>
+    //             <Spin size="large" />
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className={cx('wrapper')}>
@@ -164,15 +227,22 @@ function DanhSachHocPhan() {
                     </div>
                 </div>
             </div>
-            <Descriptions items={items} className={cx('description')} />
             {frameId
-                ? <Table
-                    frameId={frameId}
-                    registeredSubjects={registeredSubjects}
-                    setRegisteredSubjects={setRegisteredSubjects}
-                    status={valueStatus}
+                ? <Tabs
+                    activeKey={tabActive}
+                    onChange={handleTabChange}
+                    centered
+                    onTabClick={(index) => handleTabClick(index)}
+                    items={ITEM_TABS.map((item, index) => ({
+                        label: item.title,
+                        key: index + 1,
+                        children: item.children,
+                    }))}
                 />
-                : <Empty className={cx("empty")} description="Chưa có dữ liệu cho chương trình đào tạo của bạn" />
+                :
+                !isLoading
+                    ? <Empty className={cx("empty")} description="Chưa có dữ liệu cho chương trình đào tạo của bạn" />
+                    : null
             }
         </div >
     );

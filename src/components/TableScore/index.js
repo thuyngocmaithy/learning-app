@@ -25,7 +25,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const [frameId, setFrameId] = useState(null);
     const [frameComponents, setFrameComponents] = useState([]);
     const [scores, setScores] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedGrades, setSelectedGrades] = useState({});
     const [improvementSubjects, setImprovementSubjects] = useState({});
     const [originalGrades, setOriginalGrades] = useState({});
@@ -117,10 +117,10 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const fetchData = useCallback(async () => {
         if (didMountRef.current) return;
         didMountRef.current = true;
+        setIsLoading(true);
         const responseKhungCTDT = await findKhungCTDTByUserId(userId);
         const frameId = responseKhungCTDT.data?.data?.frameId;
         setFrameId(frameId)
-        setIsLoading(true);
         try {
             const [frameComponentsResponse, scoresResponse, expectedScoreResponse] = await Promise.all([
                 callKhungCTDT(frameId),
@@ -164,8 +164,9 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
             }
         } catch (error) {
             console.error('Error fetching Score data:', error);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, [handleNumericGradeChange, userId]);
 
     // fetch data

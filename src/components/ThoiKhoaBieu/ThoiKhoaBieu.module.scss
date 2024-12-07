@@ -1,0 +1,18 @@
+.item-description {
+    margin-top: 7px;
+}
+
+:global .card-subject .ant-card-body {
+    padding: 10px !important;
+}
+
+.container-credit {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.title-tkb {
+    color: var(--color-primary) !important;
+    text-align: left;
+
+}
