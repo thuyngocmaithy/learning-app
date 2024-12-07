@@ -44,3 +44,15 @@ export const downloadFile = async (fileId) => {
         throw error; // Ném lỗi nếu có
     }
 };
+
+// Gọi API xóa nhiều file từ server
+export const deleteFiles = async (fileNames) => {
+    try {
+        const response = await api.delete('/mega/delete', {
+            data: { fileNames }
+        });
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

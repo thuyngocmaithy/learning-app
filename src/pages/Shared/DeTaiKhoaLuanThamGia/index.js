@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { getThesisById } from '../../../services/thesisService';
-import { uploadFile, downloadFile } from '../../../services/megaService';
+import { uploadFile, downloadFile, deleteFiles } from '../../../services/megaService';
 import config from '../../../config';
 import Toolbar from '../../../components/Core/Toolbar';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
@@ -19,6 +19,8 @@ import { getWhere } from '../../../services/attachService';
 import { ProjectIcon } from '../../../assets/icons';
 import dayjs from 'dayjs';
 import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
+import { deleteConfirm } from '../../../components/Core/Delete';
+
 
 const cx = classNames.bind(styles);
 
@@ -43,6 +45,7 @@ function DeTaiKhoaLuanThamGia() {
     const fileInputRef = useRef(null);
     const [loadingFiles, setLoadingFiles] = useState({}); // Trạng thái loading cho từng file
     const navigate = useNavigate();
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
 
     // Xử lý active tab từ url
     const [isToolbar, setIsToolbar] = useState(false);
@@ -158,7 +161,7 @@ function DeTaiKhoaLuanThamGia() {
             message.warning('Vui lòng chọn file đính kèm'); // Kiểm tra xem có file đã chọn hay không
             return;
         }
-
+        const loadingMessage = message.loading('Đang tải tệp lên', 0);
         try {
             await uploadFile(files, userId, ThesisIdFromUrl); // Gọi hàm upload file
             message.success('File đã được tải lên thành công');
@@ -166,6 +169,7 @@ function DeTaiKhoaLuanThamGia() {
             console.error('Upload failed:', error);
             message.error('Tải file lên thất bại.');
         } finally {
+            loadingMessage();
             getAttach();
         }
     };
@@ -176,12 +180,27 @@ function DeTaiKhoaLuanThamGia() {
         try {
             await downloadFile(file); // Gọi hàm download file            
         } catch (error) {
-            console.error('Download failed:', error);
+            message.error("Không tìm thấy file");
         } finally {
             setLoadingFiles(prev => ({ ...prev, [file]: false })); // Kết thúc tải file cho file cụ thể
         }
     }
 
+    // Hàm xóa file
+    const handleDelete = async () => {
+        const loadingMessage = message.loading('Đang tải tệp lên', 0);
+        try {
+            await deleteFiles(selectedRowKeys);
+            message.success('Xóa tệp thành công');
+        } catch (error) {
+            message.error('Không thể xóa tệp');
+            console.error('Lỗi khi xóa tệp:', error);
+        }
+        finally {
+            loadingMessage();
+            getAttach();
+        }
+    };
 
     const dataInfoSystem = useMemo(() => [
         { title: 'Người tạo', description: thesis ? thesis.createUser.fullname : '' },
@@ -242,7 +261,13 @@ function DeTaiKhoaLuanThamGia() {
         {
             id: 3,
             title: 'Đính kèm',
-            dren: <Attach columns={columns} data={dataAttach} />,
+            children:
+                <Attach
+                    columns={columns}
+                    data={dataAttach}
+                    selectedRowKeys={selectedRowKeys}
+                    setSelectedRowKeys={setSelectedRowKeys}
+                />,
         },
         {
             id: 4,
@@ -342,6 +367,10 @@ function DeTaiKhoaLuanThamGia() {
                 </div>
                 {isToolbar && (
                     <div className={cx('wrapper-toolbar')}>
+                        <Toolbar
+                            type={'Xóa'}
+                            onClick={() => deleteConfirm('tệp đính kèm', handleDelete)}
+                        />
                         <Toolbar
                             type={'Upload'}
                             onClick={handleUpload}

@@ -84,7 +84,7 @@ function TableCustomAnt({
                 className={cx('list-container-table-custom-ant')}
                 dataSource={data}
                 renderItem={(item, index) => {
-                    const key = item.id || item[keyIdChange]; // Lấy key để xác định row
+                    const key = item[keyIdChange] || item.id; // Lấy key để xác định row
 
                     return (
                         <List.Item
@@ -156,7 +156,7 @@ function TableCustomAnt({
                 rowSelection={isHaveRowSelection ? rowSelection : null}
                 columns={columnsWithSTT}
                 dataSource={data.map((item) => {
-                    const key = item.id || item[keyIdChange];
+                    const key = item[keyIdChange] || item.id;
                     return {
                         ...item,
                         key: key
