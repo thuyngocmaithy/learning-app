@@ -493,4 +493,10 @@ body {
         justify-content: center;
         align-items: center;
     }
+
+    // Phân trang
+    .ant-pagination {
+        background-color: var(--color-bg-container);
+        padding-bottom: 15px;
+    }
 }

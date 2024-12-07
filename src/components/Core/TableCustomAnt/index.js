@@ -82,7 +82,13 @@ function TableCustomAnt({
         return (
             <List
                 className={cx('list-container-table-custom-ant')}
-                dataSource={data}
+                dataSource={data.map((item) => {
+                    const key = item[keyIdChange] || item.id;
+                    return {
+                        ...item,
+                        key: key
+                    };
+                })}
                 renderItem={(item, index) => {
                     const key = item[keyIdChange] || item.id; // Lấy key để xác định row
 
@@ -118,7 +124,7 @@ function TableCustomAnt({
                             >
                                 <div className={cx('list-item')}>
                                     {/* Hiển thị các cột thông thường */}
-                                    {columnsWithSTT.forEach((col) => {
+                                    {columnsWithSTT.map((col) => {
                                         if (col.key !== 'action') {
                                             return (
                                                 <div key={col.key || col.dataIndex}>

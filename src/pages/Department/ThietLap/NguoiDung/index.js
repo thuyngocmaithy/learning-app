@@ -349,9 +349,6 @@ function NguoiDung() {
         <FormItem name="fullname" label="Họ tên">
             <Input />
         </FormItem>,
-        <FormItem name="class" label="Lớp">
-            <Input />
-        </FormItem>,
         <FormItem name="faculty" label="Ngành">
             <Select
                 style={{ width: '100%' }}
