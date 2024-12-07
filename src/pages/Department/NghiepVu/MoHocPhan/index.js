@@ -10,15 +10,16 @@ import { callKhungCTDT, getAll, getById } from '../../../../services/studyFrameS
 import { deleteSubjectCourseOpening, getAll as getAllCourseOpening, getTeacherAssignmentsAndSemesters, getWhere as getWhereCourseOpen, saveMulti, updateSubjectCourseOpening } from '../../../../services/subject_course_openingService';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { CloseSquareOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import Toolbar from '../../../../components/Core/Toolbar';
 import ExcelJS from "exceljs"
 import { saveAs } from "file-saver";
 import { getWhere as getWhereSemester } from '../../../../services/semesterService';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
 function MoHocPhan() {
+    const { deleteConfirm } = useConfirm();
     const [dataArrange, setDataArrange] = useState(null);
     const [selectedSemesters, setSelectedSemesters] = useState(new Set()); // Các học kỳ được chọn
     const [teacherAssignments, setTeacherAssignments] = useState(new Map()); // Ghi thông tin giảng viên

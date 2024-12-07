@@ -7,16 +7,17 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import HocKyUpdate from '../../../../components/FormUpdate/HocKyUpdate';
 import { deleteSemesters, getSemesters } from '../../../../services/semesterService';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import config from '../../../../config';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function HocKy() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -34,7 +35,12 @@ function HocKy() {
 
     const columns = (showModal) => [
         {
-            title: 'Học kỳ',
+            title: 'Mã học kỳ',
+            dataIndex: 'semesterId',
+            key: 'semesterId',
+        },
+        {
+            title: 'Tên học kỳ',
             dataIndex: 'semesterName',
             key: 'semesterName',
         },

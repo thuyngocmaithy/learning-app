@@ -11,7 +11,6 @@ import { deleteSRUByUserIdAndSRId, getWhere } from '../../../services/scientific
 import DeTaiNCKHDetail from '../../../components/FormDetail/DeTaiNCKHDetail';
 import DeTaiNCKHRegister from '../../../components/FormRegister/DeTaiNCKHRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { cancelRegisterConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { getUserById } from '../../../services/userService';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -22,10 +21,12 @@ import SearchForm from '../../../components/Core/SearchForm';
 import Toolbar from '../../../components/Core/Toolbar';
 import FormItem from '../../../components/Core/FormItem';
 import { getStatusByType } from '../../../services/statusService';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function DeTaiNCKH() {
+    const { cancelRegisterConfirm } = useConfirm();
     const [list, setList] = useState([]);
     const [listOriginal, setListOriginal] = useState([]);
     const { userId } = useContext(AccountLoginContext);

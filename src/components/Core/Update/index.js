@@ -6,7 +6,7 @@ import ButtonCustom from '../Button';
 
 const cx = classNames.bind(styles);
 
-function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFooter = false, width = "auto", showModal, onClose, onUpdate, ...props }) {
+function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFooter = false, width = "auto", showModal, onClose, onUpdate, clearAdditional, ...props }) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -18,8 +18,9 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
     const handleCancel = useCallback(() => {
         setOpen(false);
         if (form) form.resetFields();
+        if (clearAdditional) clearAdditional();
         if (onClose) onClose();
-    }, [form, onClose]);
+    }, [clearAdditional, form, onClose]);
 
     const footer = useMemo(() => {
         return isUpdate || fullTitle

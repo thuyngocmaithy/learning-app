@@ -7,16 +7,17 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import ChuKyUpdate from '../../../../components/FormUpdate/ChuKyUpdate';
 import { deleteCycles, getAll } from '../../../../services/cycleService';
 import config from '../../../../config';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function ChuKy() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

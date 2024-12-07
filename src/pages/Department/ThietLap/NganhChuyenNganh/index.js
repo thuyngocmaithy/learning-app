@@ -8,7 +8,6 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import { getAllFaculty, deleteFacultyById, getWhereFaculty, importFaculty } from '../../../../services/facultyService';
 import { getAll as getAllMajors, deleteMajorById, getWhere, importMajor } from '../../../../services/majorService';
 import { NganhUpdate } from '../../../../components/FormUpdate/NganhUpdate';
@@ -22,10 +21,12 @@ import FormItem from '../../../../components/Core/FormItem';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import ExportExcel from '../../../../components/Core/ExportExcel';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function NganhChuyenNganh() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

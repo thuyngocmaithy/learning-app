@@ -71,18 +71,15 @@ const HocKyUpdate = memo(function HocKyUpdate({
             const values = await form.validateFields();
             let response;
 
+            let semesterData = {
+                semesterName: values.semesterName,
+                cycle: values.cycle?.value,
+                academicYear: values.academicYear
+            };
+
             if (isUpdate) {
-                let semesterData = {
-                    cycle: values.cycle?.value,
-                    academicYear: values.academicYear
-                };
                 response = await updateSemester(showModal.semesterId, semesterData);
             } else {
-                let semesterData = {
-                    semesterName: values.semesterName,
-                    cycle: values.cycle?.value,
-                    academicYear: values.academicYear
-                };
                 response = await createSemester(semesterData);
             }
 

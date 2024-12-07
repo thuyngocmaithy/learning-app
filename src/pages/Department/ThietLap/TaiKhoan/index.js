@@ -8,16 +8,17 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import TaiKhoanUpdate from '../../../../components/FormUpdate/TaiKhoanUpdate';
 import { deleteAccounts, getAllAccount } from '../../../../services/accountService';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import config from '../../../../config';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function TaiKhoan() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

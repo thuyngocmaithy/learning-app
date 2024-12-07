@@ -13,17 +13,15 @@ import React from 'react';
 
 const root = createRoot(document.getElementById('root'));
 root.render(
-    // <React.StrictMode>
     <AppAnt>
         <ThemeProvider>
             <GlobalStyles>
                 <BrowserRouter>
                     <ThemeContext.Consumer>
                         {({ theme }) => {
-                            const themeConfig = getThemeConfig(theme); // Lấy cấu hình theme từ file config
+                            const themeConfig = getThemeConfig(theme);
                             return (
-                                <ConfigProvider
-                                    theme={themeConfig}>
+                                <ConfigProvider theme={themeConfig}>
                                     <Providers>
                                         <React.Suspense fallback={''}>
                                             <App />
@@ -37,10 +35,7 @@ root.render(
             </GlobalStyles>
         </ThemeProvider>
     </AppAnt>
-    // </React.StrictMode>,
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+// Measure performance
 reportWebVitals();

@@ -8,11 +8,11 @@ import { getUserById } from '../../../services/userService';
 import { updateThesisUserById } from '../../../services/thesisUserService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { cancelApproveConfirm } from '../../Core/Delete';
 import notifications from '../../../config/notifications';
 import { deleteFollowerDetailByThesisIdAndUserId } from '../../../services/followerDetailService';
 import UserInfo from '../../UserInfo';
 import { message } from '../../../hooks/useAntdApp';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +22,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
     setShowModal,
     changeStatus
 }) {
+    const { cancelApproveConfirm } = useConfirm();
     const [listPersonal, setListPersonal] = useState([]);
     const [listGroup, setListGroup] = useState([]);
     const [listGroupRender, setListGroupRender] = useState([]); // List Group để hiển thị
@@ -241,7 +242,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
                                     e.stopPropagation(); // Ngừng bọt sự kiện
                                     e.preventDefault();
                                     thesisCancelApproveRef.current = groupItems;
-                                    setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
+                                    setTimeout(() => cancelApproveConfirm('đề tài khóa luận', handleCancelApprove), 0);
                                 }}
                             >
                                 Hủy duyệt
@@ -360,6 +361,7 @@ const DeTaiKhoaLuanListRegister = memo(function DeTaiKhoaLuanListRegister({
                                     </Button>,
                                     item.isApprove
                                         ? <Button colorRed verysmall outline key="list-loadmore-more" onClick={() => {
+                                            item.instructor = item.thesis.instructor;
                                             thesisCancelApproveRef.current = [item];
                                             setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                         }}>

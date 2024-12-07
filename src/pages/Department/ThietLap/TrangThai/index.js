@@ -10,7 +10,6 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import { getAllStatus, deleteStatusById, getWhereStatus, importStatus } from '../../../../services/statusService';
 import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpdate';
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
@@ -19,10 +18,12 @@ import ExportExcel from '../../../../components/Core/ExportExcel';
 import config from '../../../../config';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function TrangThai() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

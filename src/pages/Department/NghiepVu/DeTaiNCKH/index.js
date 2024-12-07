@@ -9,7 +9,6 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
 import { deleteSRs, getAllSR, getBySRGId, updateSRByIds, importScientificResearch, getListSRJoined } from '../../../../services/scientificResearchService';
 import { getByListSRId } from '../../../../services/scientificResearchUserService';
@@ -25,12 +24,14 @@ import { checkValidDateCreateSR } from '../../../../services/scientificResearchG
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
 import dayjs from 'dayjs';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 
 
 function DeTaiNCKH() {
+    const { deleteConfirm, disableConfirm, enableConfirm } = useConfirm();
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);

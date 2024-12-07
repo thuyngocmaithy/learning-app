@@ -69,7 +69,7 @@ const ThongBaoUpdate = memo(function ThongBaoUpdate({
 
             // Xử lý danh sách người nhận thông báo (toUserss)
             // Lấy các ID người dùng từ values.toUsers (mảng chứa các đối tượng có giá trị là userId)
-            const userIds = values.toUsers?.map((item) => item.value);
+            const userIds = values.toUsers;
 
             // Cấu trúc dữ liệu thông báo
             let notificationData = {

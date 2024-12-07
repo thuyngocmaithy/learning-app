@@ -1,6 +1,6 @@
 {
-    "short_name": "React App",
-    "name": "Create React App Sample",
+    "short_name": "Quản lý tiến độ SGU",
+    "name": "Quản lý tiến độ SGU",
     "icons": [
         {
             "src": "favicon.ico",

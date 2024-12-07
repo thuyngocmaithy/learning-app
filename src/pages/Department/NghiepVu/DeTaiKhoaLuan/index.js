@@ -9,10 +9,9 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm, disableConfirm, enableConfirm } from '../../../../components/Core/Delete';
 import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
-import { deleteThesiss, getAllThesis, getByThesisGroupId, getWhere, updateThesisByIds, importThesis, getListThesisJoined } from '../../../../services/thesisService';
-import { getByListThesisId, getByThesisId } from '../../../../services/thesisUserService';
+import { deleteThesiss, getAllThesis, getByThesisGroupId, updateThesisByIds, importThesis, getListThesisJoined } from '../../../../services/thesisService';
+import { getByListThesisId } from '../../../../services/thesisUserService';
 import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
 import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
@@ -25,12 +24,12 @@ import { checkValidDateCreateThesis } from '../../../../services/thesisGroupServ
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
 import dayjs from 'dayjs';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
-
-
 function DeTaiKhoaLuan() {
+    const { deleteConfirm, disableConfirm, enableConfirm } = useConfirm();
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);

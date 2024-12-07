@@ -3,7 +3,6 @@ import classNames from 'classnames/bind';
 import styles from './DanhSachThongBao.module.scss';
 import { Divider, Dropdown, Input, List, Select, Skeleton, Space, Switch } from 'antd';
 import { ProjectIcon } from '../../../assets/icons';
-import { deleteConfirm } from '../../../components/Core/Delete';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { deleteNotifications, getWhere, updateNotificationByIds } from '../../../services/notificationService';
 import dayjs from 'dayjs';
@@ -17,11 +16,13 @@ import Button from '../../../components/Core/Button';
 import { CheckCircleOutlined, CloseCircleOutlined, DownOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import SearchForm from '../../../components/Core/SearchForm';
 import FormItem from '../../../components/Core/FormItem';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 
 const cx = classNames.bind(styles);
 
 function DanhSachThongBao() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

@@ -181,7 +181,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
                 instructorId: values.instructor,
-                statusId: values.status,
+                status: values.status,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
                 scientificResearchGroup: SRGId || values.srgroup.value,

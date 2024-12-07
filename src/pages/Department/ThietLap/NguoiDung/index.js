@@ -8,7 +8,6 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { NguoiDungDetail } from '../../../../components/FormDetail/NguoiDungDetail';
 import { deleteUserById, importUser } from '../../../../services/userService';
@@ -22,10 +21,12 @@ import FormItem from 'antd/es/form/FormItem';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import ExportExcel from '../../../../components/Core/ExportExcel';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function NguoiDung() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -447,8 +448,6 @@ function NguoiDung() {
         ho_ten_cvht: item?.ho_ten_cvht,
         dateOfBirth: formatDate(item.dateOfBirth)
     }));
-
-    console.log(processedData);
 
     const handleExportExcel = async () => {
         ExportExcel({

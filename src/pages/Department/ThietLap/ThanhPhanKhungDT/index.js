@@ -8,7 +8,6 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import ThanhPhanKhungDTUpdate from '../../../../components/FormUpdate/ThanhPhanKhungDTUpdate';
 import { deleteStudyFrameComponents, getWhere } from '../../../../services/studyFrameCompService';
 import { getAllStudyFrameComponent } from '../../../../services/studyFrameCompService';
@@ -19,10 +18,13 @@ import { getAll } from '../../../../services/majorService';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import config from '../../../../config';
+import { getWhereFrameStructures } from '../../../../services/frameStructureService';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function ThanhPhanKhungDT() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -166,12 +168,26 @@ function ThanhPhanKhungDT() {
 
     const handleDelete = async () => {
         try {
-            await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
-            // Refresh dữ liệu sau khi xóa thành công
-            fetchData();
-            setSelectedRowKeys([]); // Xóa các ID đã chọn
-
-            message.success('Xoá thành công');
+            if (selectedRowKeys.length === 0) return;
+            let checkUsed = false;
+            await Promise.all(
+                selectedRowKeys.map(async (item) => {
+                    // kiểm tra có sử dụng trong frame structure chưa
+                    const resCheckUsed = await getWhereFrameStructures({ studyFrameComponent: item });
+                    if (resCheckUsed?.data?.data?.length !== 0) {
+                        checkUsed = true;
+                    }
+                })
+            );
+            if (checkUsed) {
+                message.warning('Khối kiến thức đã được sử dụng. Bạn không thể xóa');
+            } else {
+                await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
+                // Refresh dữ liệu sau khi xóa thành công
+                fetchData();
+                setSelectedRowKeys([]); // Xóa các ID đã chọn
+                message.success('Xoá thành công');
+            }
         } catch (error) {
             message.error('Xoá thất bại');
             console.error(' [ThietLap - ThanhPhanKhungDT - handleDelete - Error]:', error);
@@ -251,7 +267,13 @@ function ThanhPhanKhungDT() {
                 if (response.data.data.length === 0) {
                     setData([]);
                 } else {
-                    setData(response.data.data);
+                    setData(
+                        response.data.data.map(({ id, ...item }) => ({
+                            ...item,
+                            majorId: item.major?.majorId,
+                            majorName: item.major?.majorName,
+                        }))
+                    );
                 }
             }
             else {

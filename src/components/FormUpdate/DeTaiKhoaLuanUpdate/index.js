@@ -172,7 +172,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 thesisName: values.thesisName,
                 description: values.description,
                 instructorId: values.instructor,
-                statusId: values.status,
+                status: values.status,
                 numberOfMember: values.numberOfMember,
                 thesisGroup: ThesisGroupId || values.thesisgroup.value,
                 startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),

@@ -59,7 +59,6 @@ export const getWhereSubject = async (params) => {
         subjectId: params?.subjectId || undefined,
         subjectName: params?.subjectName || undefined,
         creaditHour: params?.creaditHour || undefined,
-        isCompulsory: params?.isCompulsory,
         subjectBeforeId: params?.subjectBeforeId,
         majorId: params?.majorId,
         facultyId: params?.facultyId,

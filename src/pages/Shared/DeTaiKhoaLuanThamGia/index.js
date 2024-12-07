@@ -19,12 +19,13 @@ import { getWhere } from '../../../services/attachService';
 import { ProjectIcon } from '../../../assets/icons';
 import dayjs from 'dayjs';
 import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
-import { deleteConfirm } from '../../../components/Core/Delete';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 
 const cx = classNames.bind(styles);
 
 function DeTaiKhoaLuanThamGia() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

@@ -41,19 +41,15 @@ const ChuKyUpdate = memo(function ChuKyUpdate({
             const values = await form.validateFields();
             let response;
 
-            if (isUpdate) {
-                let cycleData = {
-                    startYear: values.startYear,
-                    endYear: values.endYear
-                };
 
+            let cycleData = {
+                cycleName: values.cycleName,
+                startYear: values.startYear,
+                endYear: values.endYear
+            };
+            if (isUpdate) {
                 response = await updateCycle(showModal.cycleId, cycleData);
             } else {
-                let cycleData = {
-                    cycleName: values.cycleName,
-                    startYear: values.startYear,
-                    endYear: values.endYear
-                };
                 response = await createCycle(cycleData);
             }
 

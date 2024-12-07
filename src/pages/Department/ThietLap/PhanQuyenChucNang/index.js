@@ -10,7 +10,6 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import ChucNangUpdate from '../../../../components/FormUpdate/ChucNangUpdate';
 import QuyenUpdate from '../../../../components/FormUpdate/QuyenUpdate';
 import TreeFeature from '../../../../components/TreeFeature';
@@ -19,10 +18,12 @@ import ChucNangDetail from '../../../../components/FormDetail/ChucNangDetail';
 import PhanQuyenUpdate from '../../../../components/FormUpdate/PhanQuyenUpdate';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import config from '../../../../config';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function PhanQuyenChucNang() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL

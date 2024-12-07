@@ -212,7 +212,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} người dùng thành công!`);
-                handleCloseModal();
                 if (reLoad) reLoad();
             }
         } catch (error) {
@@ -260,8 +259,9 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                             name="userId"
                             label="Mã người dùng"
                             rules={[{ required: true, message: 'Vui lòng nhập mã người dùng' }]}
+
                         >
-                            <Input maxLength={10} />
+                            <Input maxLength={10} disabled={isUpdate ? true : false} />
                         </FormItem>
                     </Col>
                 </Row>

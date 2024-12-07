@@ -9,10 +9,10 @@ import { getUserById } from '../../../services/userService';
 import { updateSRUById } from '../../../services/scientificResearchUserService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
-import { cancelApproveConfirm } from '../../Core/Delete';
 import notifications from '../../../config/notifications';
 import { deleteFollowerDetailBySRIdAndUserId } from '../../../services/followerDetailService';
 import UserInfo from '../../UserInfo';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
@@ -22,6 +22,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
     setShowModal,
     changeStatus
 }) {
+    const { cancelApproveConfirm } = useConfirm();
     const [listPersonal, setListPersonal] = useState([]);
     const [listGroup, setListGroup] = useState([]);
     const [listGroupRender, setListGroupRender] = useState([]); // List Group để hiển thị
@@ -364,6 +365,7 @@ const DeTaiNCKHListRegister = memo(function DeTaiNCKHListRegister({
                                     </Button>,
                                     item.isApprove
                                         ? <Button colorRed verysmall outline key="list-loadmore-more" onClick={() => {
+                                            item.instructor = item.scientificResearch.instructor;
                                             scientificResearchCancelApproveRef.current = [item];
                                             setTimeout(() => cancelApproveConfirm('đề tài nghiên cứu', handleCancelApprove), 0);
                                         }}>

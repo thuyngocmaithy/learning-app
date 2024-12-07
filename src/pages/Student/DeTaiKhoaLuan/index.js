@@ -11,7 +11,6 @@ import { deleteThesisUserByUserIdAndThesisId, getWhere } from '../../../services
 import DeTaiKhoaLuanDetail from '../../../components/FormDetail/DeTaiKhoaLuanDetail';
 import DeTaiKhoaLuanRegister from '../../../components/FormRegister/DeTaiKhoaLuanRegister';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { cancelRegisterConfirm } from '../../../components/Core/Delete';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { getUserById } from '../../../services/userService';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -22,11 +21,13 @@ import FormItem from '../../../components/Core/FormItem';
 import { getStatusByType } from '../../../services/statusService';
 import SearchForm from '../../../components/Core/SearchForm';
 import Toolbar from '../../../components/Core/Toolbar';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function DeTaiKhoaLuan() {
     const [list, setList] = useState([]);
+    const { cancelRegisterConfirm } = useConfirm();
     const [listOriginal, setListOriginal] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false

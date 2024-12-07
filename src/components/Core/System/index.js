@@ -6,18 +6,17 @@ import Toolbar from '../Toolbar';
 import FollowerUpdate from '../../FormUpdate/FollowerUpdate';
 import noImage from '../../../assets/images/no-image.png';
 import { CloseOutlined } from '@ant-design/icons';
-import { deleteConfirm } from '../Delete';
 import { deleteFollowerDetail } from '../../../services/followerDetailService';
 import { message } from '../../../hooks/useAntdApp';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function System({ dataInfoSystem, dataFollower, reLoad }) {
+    const { deleteConfirm } = useConfirm();
     const [processedFollower, setProcessedFollower] = useState([]);
     const followerCancelRef = useRef(null);
     const [showModal, setShowModal] = useState(false);
-
-
 
     useEffect(() => {
         const handleListFollower = async () => {

@@ -54,12 +54,7 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
     const [form] = useForm();
     const [listSubject, setListSubject] = useState([]);
     const [listSubjectSelected, setListSubjectSelected] = useState([]);
-    const [majorOptions, setMajorOptions] = useState([
-        {
-            value: "",
-            label: ""
-        }
-    ]);
+    const [majorOptions, setMajorOptions] = useState([]);
     const [maxCreditHour, setMaxCreditHour] = useState(0); // Lưu số tín chỉ tối đa được nhập
     // Import 
     const [showModalImportSubject, setShowModalImportSubject] = useState(false);
@@ -76,9 +71,12 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                         label: major.majorId + " - " + major.majorName,
                     }));
 
-                    setMajorOptions(prevMajorOptions => [
-                        ...prevMajorOptions,
-                        ...options            // Thêm options mới vào cuối
+                    setMajorOptions([
+                        {
+                            value: "",
+                            label: ""
+                        },
+                        ...options
                     ]);
                 }
             } catch (error) {
@@ -149,7 +147,6 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
     useEffect(() => {
         if (form && showModal) {
             if (isUpdate) {
-                form.resetFields();
                 // Cập nhật lại requiredCreditHour và totalCreditHour khi listSubjectSelected thay đổi
                 form.setFieldsValue({
                     frameComponentId: showModal.frameComponentId,
@@ -164,7 +161,6 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                         } : null
                 });
             } else {
-                form.resetFields();
                 form.setFieldsValue({
                     totalCreditHour: maxCreditHour,
                 });
@@ -262,6 +258,8 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
 
     return (
         <Update
+            form={form}
+            clearAdditional={() => { setListSubjectSelected([]) }}
             title={title}
             isUpdate={isUpdate}
             showModal={showModal !== false ? true : false}

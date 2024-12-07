@@ -8,7 +8,6 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteConfirm } from '../../../../components/Core/Delete';
 import { deleteSubjectById, getAll, getWhereSubject, importSubject } from '../../../../services/subjectService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
 import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
@@ -19,10 +18,12 @@ import ExportExcel from '../../../../components/Core/ExportExcel';
 import config from '../../../../config';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
+import { useConfirm } from '../../../../hooks/useConfirm';
 
 const cx = classNames.bind(styles);
 
 function MonHoc() {
+    const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -119,18 +120,6 @@ function MonHoc() {
             key: 'subjectName',
         },
         {
-            title: 'Bắt buộc',
-            dataIndex: 'isCompulsory',
-            key: 'isCompulsory',
-            render: (_, record) => {
-                return (
-                    record.isCompulsory === 1
-                        ? <Tag color='green'>Có</Tag>
-                        : <Tag color='red'>Không</Tag>
-                )
-            },
-        },
-        {
             title: 'Mã môn trước',
             dataIndex: 'subjectBefore',
             key: 'subjectBefore',
@@ -182,7 +171,6 @@ function MonHoc() {
             let searchParams = {
                 subjectId: values.subjectId?.trim() || undefined,
                 subjectName: values.subjectName?.trim() || undefined,
-                isCompulsory: values.isCompulsory === undefined ? undefined : values.isCompulsory ? 1 : 0,
                 creditHour: values.creditHour?.trim() || undefined,
             };
 
@@ -225,20 +213,11 @@ function MonHoc() {
         <FormItem name="creditHour" label="Số tín chỉ">
             <Input />
         </FormItem>,
-        <FormItem name="isCompulsory" label="Bắt buộc" >
-            <Select
-                style={{ width: '100%' }}
-                options={typeOptions}
-                allowClear
-                placeholder="Chọn loại trạng thái"
-            />
-        </FormItem >
     ];
 
     const schemas = [
         { label: "Mã môn học", prop: "subjectId" },
         { label: "Tên môn học", prop: "subjectName" },
-        { label: "Bắt buộc", prop: "isCompulsory" },
         { label: "Mã môn trước", prop: "subjectBefore" },
         { label: "Số tín chỉ", prop: "creditHour" },
     ];

@@ -211,7 +211,7 @@ const notifications = {
                     messages.approveForStudent,
                     'success',
                     getUrl(config.routes.DeTaiKhoaLuanThamGia),
-                    filteredUsers.map((member) => member.userId)
+                    filteredUsers.map((member) => member?.userId)
                 );
 
                 if (data.instructor?.userId !== fromUser?.userId) {
@@ -219,7 +219,7 @@ const notifications = {
                         messages.approveForInstructor(data.instructor?.userId),
                         'success',
                         getUrl(config.routes.DeTaiKhoaLuanThamGia),
-                        [data.instructor.userId]
+                        [data.instructor?.userId]
                     );
                 }
                 break;
