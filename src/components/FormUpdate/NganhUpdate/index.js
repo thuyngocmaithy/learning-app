@@ -45,9 +45,14 @@ export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModa
                 if (reLoad) reLoad();
                 if (isUpdate) setShowModal(false)
             }
+            return true;
         } catch (error) {
-            console.error(`Failed to ${isUpdate ? 'update' : 'create'} faculty:`, error);
             message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} ngành thất bại!`);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

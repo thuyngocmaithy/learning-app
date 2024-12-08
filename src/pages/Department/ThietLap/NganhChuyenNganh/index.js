@@ -142,20 +142,12 @@ function NganhChuyenNganh() {
                 facultyId: values.facultyId?.trim() || undefined,
                 facultyName: values.facultyName?.trim() || undefined
             };
-
-            if (!searchParams.facultyId && !searchParams.facultyName) {
-                // Có thể thêm thông báo yêu cầu nhập điều kiện tìm kiếm
-                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
-                return;
-            }
-
             const response = await getWhereFaculty(searchParams);
 
             if (response.status === 200) {
                 setNganhData(response.data.data);
-            } else if (response.status === 204) {
+            } else {
                 setNganhData([]);
-                message.info('Không tìm thấy kết quả phù hợp');
             }
         } catch (error) {
             console.error('[onSearch - error]: ', error);
@@ -172,27 +164,18 @@ function NganhChuyenNganh() {
                 facultyId: values.faculty?.value || undefined, // Lấy value từ Select
             };
 
-            // Kiểm tra có ít nhất 1 điều kiện tìm kiếm
-            if (!searchParams.majorId && !searchParams.majorName && !searchParams.facultyId) {
-                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
-                return;
-            }
-
             const response = await getWhere(searchParams)
 
             if (response.status === 200) {
-                if (response.data.data.length === 0) {
-                    setMajorData([]);
-                    message.info('Không tìm thấy kết quả phù hợp');
-                } else {
-                    const formattedData = response.data.data.map(item => ({
-                        ...item,
-                        facultyName: item.faculty?.facultyName
-                    }));
-                    setMajorData(formattedData);
-                }
+                const formattedData = response?.data?.data?.map(item => ({
+                    ...item,
+                    facultyName: item.faculty?.facultyName
+                }));
+                setMajorData(formattedData);
             }
-
+            else {
+                setMajorData([]);
+            }
         } catch (error) {
             console.error('[onSearch - error]: ', error);
             message.error('Có lỗi xảy ra khi tìm kiếm');

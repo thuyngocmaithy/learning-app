@@ -9,6 +9,7 @@ import { callKhungCTDT, findKhungCTDTByUserId } from '../../services/studyFrameS
 import { AccountLoginContext } from '../../context/AccountLoginContext';
 import { DiemDetail } from '../FormDetail/DiemDetail';
 import { EyeOutlined } from '@ant-design/icons';
+import Loader from '../Loader';
 const cx = classNames.bind(styles);
 
 // Hàm chuyển đổi điểm số sang điểm chữ
@@ -382,8 +383,8 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     // Hiện loading
     if (isLoading) {
         return (
-            <div className={cx('container-loading')} style={{ height }}>
-                <Spin size="large" />
+            <div className={cx('container-loading')} style={{ height: '40vh' }}>
+                <Loader />
             </div>
         );
     }

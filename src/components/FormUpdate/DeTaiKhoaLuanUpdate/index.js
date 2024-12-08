@@ -98,7 +98,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
         };
 
         fetchStatusByType();
-    }, [statusType]);
+    }, []);
 
     useEffect(() => {
         const setDataInitial = async () => {
@@ -172,13 +172,12 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 thesisName: values.thesisName,
                 description: values.description,
                 instructorId: values.instructor,
-                status: values.status,
+                status: values.status?.value || values.status,
                 numberOfMember: values.numberOfMember,
                 thesisGroup: ThesisGroupId || values.thesisgroup.value,
                 startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.thesisDate[1].format('YYYY-MM-DD HH:mm')),
             };
-            console.log(thesisData);
             let response;
             if (isUpdate) {
                 response = await updateThesisById(showModal.thesisId, thesisData);
@@ -200,9 +199,13 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            console.error(error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

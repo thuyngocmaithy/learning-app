@@ -58,10 +58,13 @@ const ChuKyUpdate = memo(function ChuKyUpdate({
                 if (isUpdate) handleCloseModal();
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            if (error.errorFields.length === 0)
-                console.error(`[ ChuKy - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} ChuKy `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

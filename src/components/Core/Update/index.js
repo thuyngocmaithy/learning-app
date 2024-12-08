@@ -25,15 +25,18 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
     const footer = useMemo(() => {
         return isUpdate || fullTitle
             ? [
-                <ButtonCustom key={'save'} primary small onClick={onUpdate}>
+                <ButtonCustom key={'save'} primary small onClick={async () => {
+                    await onUpdate();
+                    handleCancel();
+                }}>
                     Lưu
                 </ButtonCustom>,
             ]
             : [
                 <ButtonCustom key={'saveClose'} outline small
                     onClick={async () => {
-                        await onUpdate();  // Đảm bảo rằng onUpdate được gọi và hoàn thành
-                        if (form) form.resetFields();  // Reset form sau khi hoàn thành onUpdate
+                        const resUpdate = await onUpdate();  // Đảm bảo rằng onUpdate được gọi và hoàn thành
+                        if (form && resUpdate) form.resetFields();  // Reset form sau khi hoàn thành onUpdate
                     }}>
                     Lưu & Nhập tiếp
                 </ButtonCustom >,

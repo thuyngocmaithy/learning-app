@@ -83,8 +83,8 @@ function DeTaiNCKH() {
     ]
 
     const levelDisable = [
-        { value: '0', label: 'Hiển thị' },
-        { value: '1', label: 'Không hiển thị' },
+        { value: 1, label: 'Hiển thị' },
+        { value: 0, label: 'Không hiển thị' },
     ]
 
     // Lấy keyRoute tương ứng từ URL
@@ -424,6 +424,7 @@ function DeTaiNCKH() {
 
     const onSearch = (values) => {
         const { scientificResearchId, scientificResearchName, instructorName, level, status, isDisable } = values;
+        const isDisableConvert = isDisable === 0 ? false : true;
         const originalList = showFilter2 ? listSRJoinOriginal : dataOriginal;
         const filteredList = originalList.filter((SRRegister) => {
             const item = SRRegister;
@@ -432,7 +433,9 @@ function DeTaiNCKH() {
             const matchesInstructorName = instructorName ? item.instructor?.fullname?.toLowerCase().includes(instructorName.toLowerCase()) : true;
             const matchesLevel = level ? item.level === level : true;
             const matchesStatus = status?.value ? item.status.statusId === status?.value : true;
-            const matchesDisabled = isDisable?.value ? item.isDisable === isDisable?.value : true;
+            const matchesDisabled = isDisable !== undefined && isDisable !== null
+                ? item.isDisable === isDisableConvert
+                : true;
 
             return matchesSRId && matchesSRName && matchesInstructorName && matchesLevel && matchesStatus && matchesDisabled;
         });

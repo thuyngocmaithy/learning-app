@@ -176,7 +176,7 @@ function ImportExcelKhoiKienThuc({
                         onChange={handleFileChange}
                         style={{ width: '100%' }}
                     >
-                        <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                        <Button icon={<UploadOutlined />}>Chọn file tải lên</Button>
                     </Upload>
                     {previewData.length > 0 && (
                         <Table

@@ -181,7 +181,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 scientificResearchName: values.scientificResearchName,
                 description: values.description,
                 instructorId: values.instructor,
-                status: values.status,
+                status: values.status?.value || values.status,
                 numberOfMember: values.numberOfMember,
                 level: values.level,
                 scientificResearchGroup: SRGId || values.srgroup.value,
@@ -210,9 +210,13 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            console.error(error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

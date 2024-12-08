@@ -365,6 +365,7 @@ function NhomDeTaiNCKH() {
         try {
             // Lấy value ID của ngành từ select
             values.faculty = values.faculty?.value || undefined;
+            values.status = values.status?.value || undefined;
 
             const response = await getWhere(values);
 
@@ -373,7 +374,8 @@ function NhomDeTaiNCKH() {
                     var currentDate = new Date();
                     return {
                         ...item,
-                        faculty: item.faculty.facultyName,
+                        facultyName: item.faculty.facultyName,
+                        statusName: item.status.statusName,
                         // startCreateSRDate và endCreateSRDate đều null
                         // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh

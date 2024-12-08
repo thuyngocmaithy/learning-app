@@ -63,9 +63,14 @@ export const TrangThaiUpdate = memo(function TrangThaiUpdate({ title, isUpdate, 
                     setShowModal(false);
                 }
             }
+            return true;
         } catch (error) {
-            console.error(`Failed to ${isUpdate ? 'update' : 'create'} status:`, error);
             message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} trạng thái thất bại!`);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

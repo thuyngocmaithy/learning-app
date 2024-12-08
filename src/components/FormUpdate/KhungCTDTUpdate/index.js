@@ -122,10 +122,13 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
                 if (isUpdate) handleCloseModal();
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            if (error.errorFields.length === 0)
-                console.error(`[ KhungCTDTUpdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} KhungCTDTUpdate `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

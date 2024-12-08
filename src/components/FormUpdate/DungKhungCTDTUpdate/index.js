@@ -6,7 +6,7 @@ import classNames from 'classnames/bind';
 import TreeFrame from '../../TreeFrame';
 import Button from '../../Core/Button';
 import ThanhPhanKhungDTFormSelect from '../../FormSelect/ThanhPhanKhungDTSelect';
-import { saveTreeFrameStructure } from '../../../services/frameStructureService';
+import { deleteFrameStructures, saveTreeFrameStructure } from '../../../services/frameStructureService';
 import { DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { getWhereFrameStructures } from '../..//../services/frameStructureService';
 import { getWheresubject_studyFrameComp } from '../../../services/subject_studyFrameCompService';
@@ -104,8 +104,13 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     const handleSubmit = async () => {
         try {
             const treeDataSave = cleanTreeData(treeData);
-
-            const response = await saveTreeFrameStructure(treeDataSave)
+            let response;
+            if (treeData.length === 0) {
+                response = await deleteFrameStructures(showModal.frameId);
+            }
+            else {
+                response = await saveTreeFrameStructure(treeDataSave)
+            }
 
             if (response.status === 200) {
                 message.success('Lưu cấu trúc khung đào tạo thành công');
@@ -227,6 +232,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 description: item.studyFrameComponent?.description,
                 creditHour: item.studyFrameComponent?.creditHour,
                 listSubject: item.listSubject,
+                major: item.major,
                 children: buildTreeData(list, item.studyFrameComponent?.id), // Đệ quy bất đồng bộ
 
             }));
@@ -258,7 +264,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                     return {
                         subjectId: item.subject?.subjectId,
                         subjectName: item.subject?.subjectName,
-                        creditHour: item.subject?.creditHour
+                        creditHour: item.subject?.creditHour,
                     }
                 }
                 ) || [];
@@ -297,7 +303,8 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                             studyFrame: frameData,
                             studyFrameComponent: studyFrameComponent,
                             studyFrameComponentParent: null,
-                            listSubject: listSubjectOfFrameComp
+                            listSubject: listSubjectOfFrameComp,
+                            major: item.studyFrameComponent?.major
                         });
                     }
                 });

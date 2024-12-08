@@ -137,9 +137,13 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            console.error(`[ DeTaiKhoaLuan - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesisGroup `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

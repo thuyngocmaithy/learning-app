@@ -140,9 +140,13 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 if (!isUpdate) handleSendNotification(response.data);
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearchGroup `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(`[ DeTaiNCKH - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearchGroup `, error);
+            else {
+                return false;
+            }
         }
     };
 

@@ -88,10 +88,13 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 if (isUpdate) handleCloseModal();
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            if (error.errorFields.length === 0)
-                console.error(`[ HocKy - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} HocKy `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 
@@ -116,7 +119,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
                     label="Học kỳ"
                     rules={[{ required: true, message: 'Vui lòng nhập học kỳ' }]}
                 >
-                    <Input />
+                    <Input disabled={isUpdate ? true : false} />
                 </FormItem>
                 <FormItem
                     name="cycle"

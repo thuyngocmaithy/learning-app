@@ -15,6 +15,7 @@ import ExcelJS from "exceljs"
 import { saveAs } from "file-saver";
 import { getWhere as getWhereSemester } from '../../../../services/semesterService';
 import { useConfirm } from '../../../../hooks/useConfirm';
+import Loader from '../../../../components/Loader';
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
@@ -554,9 +555,15 @@ function MoHocPhan() {
                             primary
                             verysmall
                             onClick={async () => {
-                                setIsLoadingFrame(true);
-                                await handleArrange(record.frameId);
-                                setIsLoadingFrame(false);
+                                if (dataArrange?.frameId !== record.frameId) {
+                                    setIsLoadingFrame(true);
+                                    window.scrollTo({
+                                        top: document.body.scrollHeight,
+                                        behavior: 'smooth'
+                                    });
+                                    await handleArrange(record.frameId);
+                                    setIsLoadingFrame(false);
+                                }
                             }}
                         >
                             Sắp xếp
@@ -633,7 +640,10 @@ function MoHocPhan() {
                             </div>
                             {/* Hiển thị bảng nếu chọn khung đào tạo*/}
                             {isLoadingFrame
-                                ? <Skeleton />
+                                ?
+                                <div className={cx('container-loading')} style={{ height: '40vh' }}>
+                                    <Loader />
+                                </div>
                                 : <TableHP
                                     frameComponents={frameComponents}
                                     totalSubject={totalSubject}

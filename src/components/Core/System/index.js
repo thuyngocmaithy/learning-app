@@ -49,8 +49,7 @@ function System({ dataInfoSystem, dataFollower, reLoad }) {
     const followerUpdateMemoized = useMemo(() => {
         return (
             <FollowerUpdate
-                title={'người theo dõi'}
-                isUpdate={false}
+                isUpdate={true}
                 showModal={showModal}
                 setShowModal={setShowModal}
                 reLoad={reLoad}

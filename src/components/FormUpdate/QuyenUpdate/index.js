@@ -63,9 +63,13 @@ const QuyenUpdate = memo(function QuyenUpdate({
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} quyền thành công!`);
                 if (reLoad) reLoad(true);
             }
-
+            return true;
         } catch (error) {
-            console.error(`[ Quyen - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

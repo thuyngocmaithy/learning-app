@@ -175,7 +175,7 @@ const ImportScore = memo(({ showModal, onClose }) => {
                 maxCount={1}
                 onChange={handleFileChange}
             >
-                <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                <Button icon={<UploadOutlined />}>Chọn file tải lên</Button>
             </Upload>
         </Modal>
     );

@@ -4,6 +4,24 @@
     align-items: center;
 }
 
+.title-item {
+    display: flex;
+
+    .featureId {
+        font-weight: 600;
+    }
+
+    ._ {
+        margin: 0 7px;
+    }
+
+    .featureName {
+        font-weight: 400;
+    }
+}
+
+
+
 .btnDetail {
     margin-right: 5px;
 

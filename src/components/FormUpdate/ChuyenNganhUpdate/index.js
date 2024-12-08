@@ -13,7 +13,6 @@ import { createMajor, updateMajorById } from '../../../services/majorService';
 export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const [form] = Form.useForm();
     const [facultyOptions, setFacultyOptions] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
 
     useEffect(() => {
         const fetchFaculties = async () => {
@@ -25,21 +24,16 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                         label: faculty.facultyName,
                     }));
                     setFacultyOptions(options);
-
-                    const facultyId = showModal.faculty.facultyId;
-                    setSelectedFaculty(facultyId);
-                    form.setFieldValue('facultyId', facultyId);
-
                 }
             } catch (error) {
                 console.error('Error fetching faculties:', error);
             }
         };
 
-        if (showModal && isUpdate)
+        if (showModal)
             fetchFaculties();
 
-    }, [showModal, form, isUpdate]);
+    }, [showModal]);
 
 
     useEffect(() => {
@@ -50,7 +44,6 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                 facultyId: showModal.facultyId,
                 facultyName: showModal.facultyName,
             });
-            setSelectedFaculty(showModal.facultyId);
         }
     }, [showModal, isUpdate, form]);
 
@@ -81,16 +74,16 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} chuyên ngành thành công!`);
                 if (reLoad) reLoad();
             }
+            return true;
         } catch (error) {
-            console.error(`Failed to ${isUpdate ? 'update' : 'create'} major:`, error);
             message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} chuyên ngành thất bại!`);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
-
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-    };
-
 
     return (
         <Update
@@ -121,8 +114,6 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                         showSearch
                         placeholder="Chọn ngành"
                         optionFilterProp="children"
-                        onChange={handleFacultySelect}
-                        value={selectedFaculty}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }

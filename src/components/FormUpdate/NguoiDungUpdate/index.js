@@ -18,11 +18,13 @@ import {
 } from '../../../services/userService';
 import { getAllFaculty } from '../../../services/facultyService';
 import { getWhere } from '../../../services/majorService';
-import moment from 'moment';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
+dayjs.extend(utc);
 
 
 const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
@@ -111,7 +113,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 setIsStudent(showModal.isStudent);
             }
             // Convert date string to moment object for DatePicker
-            const dateOfBirth = showModal.dateOfBirth ? moment(showModal.dateOfBirth) : null;
+            const dateOfBirth = showModal.dateOfBirth ? dayjs(showModal.dateOfBirth).utc().format('DD-MM-YYYY') : null;
 
             form.setFieldsValue({
                 userId: showModal.userId,
@@ -130,8 +132,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 hoc_vi: showModal.hoc_vi,
                 isActive: showModal.isActive,
                 nien_khoa: [
-                    moment(showModal.firstAcademicYear, 'YYYY'),
-                    moment(showModal.lastAcademicYear, 'YYYY'),
+                    dayjs(`${showModal.firstAcademicYear}-12-31`).startOf('year'), // Ngày bắt đầu niên khóa
+                    dayjs(`${showModal.lastAcademicYear}-12-31`).endOf('year')   // Ngày kết thúc niên khóa
                 ]
             });
 
@@ -195,7 +197,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 khoi: values.khoi || '',
                 bac_he_dao_tao: values.bac_he_dao_tao || '',
                 hoc_vi: values.hoc_vi || '',
-                isActive: values.isActive || undefined,
+                isActive: values.isActive,
                 avatar: values.avatar || '',
                 createUser: userId || 'admin',
                 lastModifyUser: userId || 'admin',
@@ -214,11 +216,13 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} người dùng thành công!`);
                 if (reLoad) reLoad();
             }
+            return true;
         } catch (error) {
-            console.error(
-                `[ NguoiDung - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} NguoiDung `,
-                error,
-            );
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 
@@ -390,6 +394,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                         >
                             <RangePicker
                                 picker="year"
+                                format="YYYY"
                                 id={{
                                     start: 'Năm học',
                                     end: 'Năm kết thúc',

@@ -11,16 +11,15 @@ import { createFollowerDetail } from '../../../services/followerDetailService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import notifications from '../../../config/notifications';
+import { getThesisById } from '../../../services/thesisService';
 
 const FollowerUpdate = memo(function FollowerUpdate({
-    title,
     isUpdate,
     showModal,
     setShowModal,
     reLoad
 }) {
     const [form] = useForm();
-    const [selectedUser, setSelectedUser] = useState(null);
     const [userOptions, setUserOptions] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
@@ -31,6 +30,10 @@ const FollowerUpdate = memo(function FollowerUpdate({
 
     //Lấy SRID
     const SRIdFromUrl = queryParams.get('scientificResearch');
+
+    //Lấy SRID
+    const ThesisIDFromUrl = queryParams.get('thesis');
+
 
     // Fetch danh sách người dùng
     useEffect(() => {
@@ -43,10 +46,6 @@ const FollowerUpdate = memo(function FollowerUpdate({
                         label: `${student.userId} - ${student.fullname}`,
                     }));
                     setUserOptions(options);
-                    // Nếu có giá trị đã chọn, set lại giá trị đó
-                    if (selectedUser) {
-                        setSelectedUser(selectedUser);
-                    }
                 }
             } catch (error) {
                 console.error(' [ DeTaiNCKHRegister - fetchStudent - Error ] :', error);
@@ -54,7 +53,7 @@ const FollowerUpdate = memo(function FollowerUpdate({
         };
 
         fetchStudent();
-    }, [selectedUser]);
+    }, []);
 
     const handleCloseModal = () => {
         if (showModal !== false) {
@@ -62,10 +61,17 @@ const FollowerUpdate = memo(function FollowerUpdate({
         }
     };
 
-    const handleSendNotification = async (SR) => {
+    const handleSendNotification = async (SR, thesis) => {
         try {
             const user = await getUserById(userId);
-            const ListNotification = await notifications.getNCKHNotification('follow', SR, user.data);
+            let ListNotification;
+            if (SR) {
+                ListNotification = await notifications.getNCKHNotification('follow', SR, user.data);
+            }
+            if (thesis) {
+                ListNotification = await notifications.getKhoaLuanNotification('follow', thesis, user.data);
+
+            }
 
             ListNotification.forEach(async (itemNoti) => {
                 await sendNotification(itemNoti);
@@ -79,20 +85,41 @@ const FollowerUpdate = memo(function FollowerUpdate({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-
-            const followerData = {
-                scientificResearchId: SRIdFromUrl,
-                userId: values.userId,
+            let followerData = null;
+            if (SRIdFromUrl) {
+                followerData = {
+                    scientificResearchId: SRIdFromUrl,
+                    userId: values.userId,
+                }
             }
 
+            if (ThesisIDFromUrl) {
+                followerData = {
+                    thesisId: ThesisIDFromUrl,
+                    userId: values.userId,
+                }
+            }
+            if (!followerData) return;
             const responseAdd = await createFollowerDetail(followerData);
             if (responseAdd) {
                 message.success(`Thêm người theo dõi thành công`);
+                handleCloseModal();
                 // Thêm thông báo cho user được add follow
-                const user = await getUserById(values.userId);
-                const SR = await getSRById(SRIdFromUrl);
-                const dataSendNoti = { ...SR.data, toUsers: [user.data] }
-                handleSendNotification(dataSendNoti);
+                let listUserData = [];
+                values?.userId?.forEach(async (item) => {
+                    const userData = await getUserById(item);
+                    listUserData.push(userData.data);
+                })
+                if (SRIdFromUrl) {
+                    const SR = await getSRById(SRIdFromUrl);
+                    const dataSendNoti = { ...SR.data, toUsers: listUserData }
+                    handleSendNotification(dataSendNoti, null);
+                }
+                if (ThesisIDFromUrl) {
+                    const ThesisData = await getThesisById(ThesisIDFromUrl);
+                    const dataSendNoti = { ...ThesisData.data, toUsers: listUserData }
+                    handleSendNotification(null, dataSendNoti);
+                }
             }
 
         } catch (error) {
@@ -106,11 +133,12 @@ const FollowerUpdate = memo(function FollowerUpdate({
     return (
         <Update
             form={form}
-            title={title}
+            fullTitle={'Thêm người theo dõi'}
             isUpdate={isUpdate}
             showModal={showModal !== false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
+            width='600px'
         >
             <Form form={form}>
                 <FormItem
@@ -124,16 +152,15 @@ const FollowerUpdate = memo(function FollowerUpdate({
                     ]}
                 >
                     <Select
+                        mode="multiple"
                         showSearch
                         placeholder="Chọn người dùng"
                         optionFilterProp="children"
-                        value={selectedUser}
-                        onChange={(value) => setSelectedUser(value)}
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
                         options={userOptions}
-                        style={{ width: '250px' }}
+                        style={{ width: '100%' }}
                     />
                 </FormItem>
             </Form>

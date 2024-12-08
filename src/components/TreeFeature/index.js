@@ -32,7 +32,11 @@ const TreeFeature = ({ treeData, setTreeData, setSelectedFeature, reLoad, setSho
             .sort((a, b) => a.orderNo - b.orderNo)
             .map(item => ({
                 title: <div className={cx("item-feature")}>
-                    <p>{item.featureName}</p>
+                    <div className={cx("title-item")}>
+                        <p className={cx("featureId")}>{item.featureId}</p>
+                        <p className={cx("_")}>-</p>
+                        <p className={cx("featureName")}>{item.featureName}</p>
+                    </div>
                     <div className={cx("option")}>
                         <Button className={cx('btnDetail')} leftIcon={<EyeOutlined />} outline verysmall onClick={() => { setShowModalDetail(item) }}>
                             Chi tiết

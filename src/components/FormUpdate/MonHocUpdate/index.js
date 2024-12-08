@@ -94,9 +94,14 @@ const MonHocUpdate = memo(function MonHocUpdate({ title, isUpdate, showModal, se
                 if (reLoad) reLoad();
                 if (isUpdate) handleCloseModal();
             }
+            return true;
         } catch (error) {
-            console.error(`Failed to ${isUpdate ? 'update' : 'create'} subject:`, error);
             message.error(`${isUpdate ? 'Cập nhật' : 'Tạo'} môn học thất bại!`);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

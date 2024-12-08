@@ -225,10 +225,13 @@ const ThanhPhanKhungDTUpdate = memo(function ThanhPhanKhungDTUpdate({
                 if (isUpdate) handleCloseModal();
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            if (error.errorFields?.length === 0)
-                console.error(`[ ThanhPhanKhungDTUpdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} ThanhPhanKhungDTUpdate `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

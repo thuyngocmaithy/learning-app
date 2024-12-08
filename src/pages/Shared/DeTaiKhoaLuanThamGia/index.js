@@ -164,7 +164,7 @@ function DeTaiKhoaLuanThamGia() {
         }
         const loadingMessage = message.loading('Đang tải tệp lên', 0);
         try {
-            await uploadFile(files, userId, ThesisIdFromUrl); // Gọi hàm upload file
+            await uploadFile(files, userId, null, ThesisIdFromUrl); // Gọi hàm upload file
             message.success('File đã được tải lên thành công');
         } catch (error) {
             console.error('Upload failed:', error);

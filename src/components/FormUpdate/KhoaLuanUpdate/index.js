@@ -193,12 +193,17 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     handleCloseModal();
                     if (reLoad) reLoad();
                 }
+                return true;
             } else {
                 message.error('Vui lòng chọn thời gian thực hiện!');
+                return false;
             }
         } catch (error) {
-            console.error(`[ Ngànhluanupdate - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} thesis `, error);
-            message.error(`Có lỗi xảy ra khi ${isUpdate ? 'cập nhật' : 'tạo'} khóa luận: ${error.response?.data?.message || error.message}`);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

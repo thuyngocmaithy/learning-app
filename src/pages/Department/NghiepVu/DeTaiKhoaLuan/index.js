@@ -386,6 +386,7 @@ function DeTaiKhoaLuan() {
 
     const onSearch = async (values) => {
         const { thesisId, thesisName, instructorName, status, isDisable } = values;
+        const isDisableConvert = isDisable === 0 ? false : true;
         const originalList = showFilter2 ? listThesisJoinOriginal : dataOriginal;
         const filteredList = originalList.filter((thesisRegister) => {
             const item = thesisRegister;
@@ -393,7 +394,9 @@ function DeTaiKhoaLuan() {
             const matchesThesisName = thesisName ? item.thesisName?.toLowerCase().includes(thesisName.toLowerCase()) : true;
             const matchesInstructorName = instructorName ? item.instructor?.fullname?.toLowerCase().includes(instructorName.toLowerCase()) : true;
             const matchesStatus = status?.value ? item.status.statusId === status?.value : true;
-            const matchesDisabled = isDisable?.value ? item.isDisable === isDisable?.value : true;
+            const matchesDisabled = isDisable !== undefined && isDisable !== null
+                ? item.isDisable === isDisableConvert
+                : true;
 
             return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled;
         });

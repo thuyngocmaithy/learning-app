@@ -190,10 +190,12 @@ export const updateUserById = async (userId, userData) => {
 export const deleteUserById = async (params) => {
 	try {
 		const response = await api.delete('/users', { params });
+		if (response.status === 204) {
+			return false;
+		}
 		return response.data;
 	}
 	catch (error) {
-		console.error('[userServive - deleteUserById - error] : ', error);
 		throw error;
 	}
 };

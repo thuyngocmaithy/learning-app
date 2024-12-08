@@ -367,11 +367,26 @@ function NhomDeTaiKhoaLuan() {
         try {
             // Lấy value ID của ngành từ select
             values.faculty = values.faculty?.value || undefined;
+            values.status = values.status?.value || undefined;
 
             const response = await getWhere(values);
 
             if (response.status === 200) {
-                setData(response.data.data);
+                var currentDate = new Date();
+                const resultData = response.data.data.map((item) => {
+                    return {
+                        ...item,
+                        facultyName: item.faculty.facultyName,
+                        // startCreateThesisDate và endCreateThesisDate đều null
+                        // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
+                        // => Còn hạn thao tác cho nhóm đề tài nckh
+                        validDate: (item.startCreateThesisDate === null && item.endCreateThesisDate === null) ||
+                            (new Date(item.startCreateThesisDate) <= currentDate && new Date(item.endCreateThesisDate) > currentDate)
+                            ? true
+                            : false
+                    }
+                })
+                setData(resultData);
             }
             if (response.status === 204) {
                 setData([]);

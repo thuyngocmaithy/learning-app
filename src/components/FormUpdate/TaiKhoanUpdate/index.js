@@ -92,9 +92,13 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
                 handleCloseModal();
                 if (reLoad) reLoad();
             }
-
+            return true;
         } catch (error) {
-            console.error(`[ TaiKhoan - handleSubmit ] : Failed to ${isUpdate ? 'update' : 'create'} scientificResearch `, error);
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 
@@ -105,7 +109,7 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
             showModal={showModal !== false ? true : false}
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
-
+            form={form}
         >
             <Form form={form}>
                 {!isUpdate &&

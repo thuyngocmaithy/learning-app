@@ -42,10 +42,14 @@ const ChucNangUpdate = memo(function ChucNangUpdate({
                 reLoad(true);
             }
             message.success('Cập nhật thành công');
+            return true;
         } catch (error) {
-            console.error(error);
-
             message.error('Cập nhật thất bại');
+            if (error?.errorFields?.length === 0 || error?.errorFields === undefined)
+                console.error(error);
+            else {
+                return false;
+            }
         }
     };
 

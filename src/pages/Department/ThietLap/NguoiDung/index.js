@@ -207,15 +207,20 @@ function NguoiDung() {
     const handleDelete = async () => {
         try {
             // Gọi API để xóa các user theo ID
-            await deleteUserById({ ids: selectedRowKeys.join(',') }); // Chuyển đổi mảng ID thành chuỗi
-            // Refresh dữ liệu sau khi xóa thành công
-            fetchData();
-            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            const res = await deleteUserById({ ids: selectedRowKeys.join(',') }); // Chuyển đổi mảng ID thành chuỗi
+            if (!res) {
+                message.warning('Không thể xóa người dùng đang sử dụng');
+            }
+            else {
+                // Refresh dữ liệu sau khi xóa thành công
+                fetchData();
+                setSelectedRowKeys([]); // Xóa các ID đã chọn
 
-            message.success('Xoá thành công');
+                message.success('Xoá thành công');
+            }
         } catch (error) {
-            message.error('Xoá thất bại');
-            console.error(' [ThietLap - NguoiDung - deletedAccount] : Error deleting account:', error);
+            console.error(error);
+
         }
     };
 
@@ -321,20 +326,57 @@ function NguoiDung() {
                 lastAcademicYear: values.lastAcademicYear?.trim() || undefined
             };
 
-            if (!searchParams) {
-                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
-                return;
-            }
-
-
             const response = await getWhereUser(searchParams);
             if (response.status === 200) {
-                if (response.data.data.length === 0) {
-                    setData([]);
-                    message.info('Không tìm thấy kết quả phù hợp');
-                } else {
-                    setData(response.data.data);
-                }
+                let listUser = response?.data?.data.map(user => ({
+                    userId: user.userId,
+                    fullname: user.fullname,
+                    dateOfBirth: user.dateOfBirth,
+                    placeOfBirth: user.placeOfBirth,
+                    phone: user.phone,
+                    email: user.email,
+                    isStudent: user.isStudent,
+                    class: user.class || "",
+                    faculty: user.faculty ? {
+                        facultyId: user.faculty.facultyId,
+                        facultyName: user.faculty.facultyName
+                    } : null,
+                    major: user.major ? {
+                        majorId: user.major.majorId,
+                        majorName: user.major.majorName
+                    } : null,
+                    stillStudy: user.stillStudy,
+                    firstAcademicYear: user.firstAcademicYear,
+                    lastAcademicYear: user.lastAcademicYear,
+                    nien_khoa: user.nien_khoa || "",
+                    sex: user.sex || "",
+                    dan_toc: user.dan_toc || "",
+                    ton_giao: user.ton_giao || "",
+                    quoc_tich: user.quoc_tich || "",
+                    cccd: user.cccd || "",
+                    ho_khau_thuong_tru: user.ho_khau_thuong_tru || "",
+                    khu_vuc: user.khu_vuc || "",
+                    khoi: user.khoi || "",
+                    bac_he_dao_tao: user.bac_he_dao_tao || "",
+                    ma_cvht: user.ma_cvht || "",
+                    ho_ten_cvht: user.ho_ten_cvht || "",
+                    email_cvht: user.email_cvht || "",
+                    dien_thoai_cvht: user.dien_thoai_cvht || "",
+                    ma_cvht_ng2: user.ma_cvht_ng2 || "",
+                    ho_ten_cvht_ng2: user.ho_ten_cvht_ng2 || "",
+                    email_cvht_ng2: user.email_cvht_ng2 || "",
+                    dien_thoai_cvht_ng2: user.dien_thoai_cvht_ng2 || "",
+                    ma_truong: user.ma_truong || "",
+                    ten_truong: user.ten_truong || "",
+                    hoc_vi: user.hoc_vi || "",
+                    isActive: user.isActive,
+                    avatar: user.avatar || "",
+                    permission: user.permission || null,
+                }));
+
+                setData(listUser);
+            } else {
+                setData([])
             }
         } catch (error) {
             console.error('[onSearch - error]: ', error);
