@@ -120,6 +120,10 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         setIsLoading(true);
         const responseKhungCTDT = await findKhungCTDTByUserId(userId);
         const frameId = responseKhungCTDT.data?.data?.frameId;
+        if (!frameId) {
+            setIsLoading(false);
+            return
+        };
         setFrameId(frameId)
         try {
             const [frameComponentsResponse, scoresResponse, expectedScoreResponse] = await Promise.all([

@@ -118,7 +118,7 @@ function DeTaiKhoaLuan() {
         }
     }, [ThesisGroupIdFromUrl, userId]);
 
-    const checkRegisterthesis = useCallback(async () => {
+    const checkRegisterThesis = useCallback(async () => {
         try {
             const response = await getWhere({ userId: userId, srgroupId: ThesisGroupIdFromUrl });
             // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
@@ -150,8 +150,8 @@ function DeTaiKhoaLuan() {
 
     useEffect(() => {
         fetchthesiss()
-        checkRegisterthesis();
-    }, [fetchthesiss, checkRegisterthesis]);
+        checkRegisterThesis();
+    }, [fetchthesiss, checkRegisterThesis]);
 
 
 
@@ -189,7 +189,7 @@ function DeTaiKhoaLuan() {
                 if (responseCancel) {
                     message.success('Hủy đăng ký thành công');
                     // Cập nhật danh sách đề tài đã đăng ký
-                    await checkRegisterthesis();
+                    await checkRegisterThesis();
                     await fetchthesiss(); // Cập nhật danh sách đề tài
 
 
@@ -222,8 +222,9 @@ function DeTaiKhoaLuan() {
             }
             showModal={showModalRegister}
             setShowModal={setShowModalRegister}
+            checkRegisterThesis={checkRegisterThesis}
         />
-    ), [showModalRegister]);
+    ), [checkRegisterThesis, showModalRegister]);
 
     // Set tab được chọn vào state 
     const handleTabClick = (index) => {

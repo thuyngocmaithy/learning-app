@@ -192,7 +192,7 @@ const notifications = {
                 addNotification(
                     messages.registerForInstructor,
                     'warning',
-                    `${config.routes.DeTaiKhoaLuan_Department}?ThesisGroupId=${data.thesisGroup.thesisGroupId}`,
+                    `${config.routes.DeTaiKhoaLuan_Department}`,
                     [data.instructor.userId]
                 );
 
