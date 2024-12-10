@@ -8,8 +8,8 @@ import ResultCustomAnt from './components/Core/ResultCustomAnt';
 import { Spin } from 'antd';
 import { getWhere } from './services/permissionFeatureService';
 import { PermissionDetailContext } from './context/PermissionDetailContext';
-import { api } from './utils/apiConfig';
 import { useAntdApp } from './hooks/useAntdApp';
+import { ConnectServerContext } from './context/ConnectServerContext';
 
 function App() {
     useAntdApp();
@@ -17,7 +17,7 @@ function App() {
     const [listFeature, setListFeature] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
-    const [status, setStatus] = useState('');
+    const { connectServer } = useContext(ConnectServerContext);
 
     useEffect(() => {
         // Kiểm tra Token hết hạn và chuyển hướng nếu cần
@@ -26,6 +26,12 @@ function App() {
             updateUserInfo();
         }
     }, [isTokenExpired, updateUserInfo]);
+
+    useEffect(() => {
+        if (connectServer === 'ok')
+            setIsLoading(false);
+    }, [connectServer])
+
 
     useEffect(() => {
         setIsLoading(true);
@@ -57,23 +63,10 @@ function App() {
             }
         };
 
-
-        const checkDatabaseStatus = async () => {
-            try {
-                const response = await api.get(`${process.env.REACT_APP_URL_API}/statusConnection`);
-                setStatus(response.data.status);
-            } catch (error) {
-                console.error('Error checking database status:', error);
-                setStatus('error');
-            } finally {
-                // Lấy danh sách chức năng sau khi kết nối thành công với database
-                getListFeature();
-            }
-        };
-
-        checkDatabaseStatus();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [permission]);
+        if (permission) {
+            getListFeature();
+        }
+    }, [permission, updatePermissionDetails]);
 
     const findKeyByValue = (obj, value) => {
         return Object.keys(obj).find(key => obj[key] === value);
@@ -165,7 +158,7 @@ function App() {
 
 
     // Nếu trạng thái là lỗi, hiển thị thông báo lỗi
-    if (status === 'error') {
+    if (connectServer === 'error') {
         return <div className="container-loading">Vui lòng tải lại trang</div>;
     }
 

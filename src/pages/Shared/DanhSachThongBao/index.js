@@ -151,12 +151,7 @@ function DanhSachThongBao() {
 
         const filteredList = originalList.filter((item) => {
             const matchesTitle = title ? item.title?.toLowerCase().includes(title.toLowerCase()) : true;
-
-            // Cập nhật kiểm tra content để không trả về true khi content là chuỗi trống hoặc undefined
-            const matchesContent = content && content.trim().length > 0
-                ? item.content?.toLowerCase().includes(content.toLowerCase())
-                : true;
-
+            const matchesContent = content ? item.content?.toLowerCase().includes(content.toLowerCase()) : true;
             const matchesUrl = url ? item.url?.toLowerCase().includes(url.toLowerCase()) : true;
             const matchesType = type ? item.type === type : true;
             const matchesCreateUser = createUser
@@ -169,14 +164,8 @@ function DanhSachThongBao() {
             return matchesTitle && matchesContent && matchesUrl && matchesType && matchesCreateUser;
         });
 
-        // Nếu không có kết quả hợp lệ, trả về danh sách trống
-        if (filteredList.length === 0) {
-            setList([]); // Trả về mảng rỗng
-        } else {
-            setList(filteredList); // Cập nhật danh sách kết quả tìm kiếm
-        }
+        setList(filteredList);
     };
-
 
 
     const getItemsAction = (item) => {

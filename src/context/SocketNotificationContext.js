@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { AccountLoginContext } from './AccountLoginContext';
+import { ConnectServerContext } from './ConnectServerContext';
 
 const SocketNotificationContext = createContext(null);
 
@@ -12,6 +13,7 @@ export const SocketNotificationProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const { userId } = useContext(AccountLoginContext);
+    const { connectServer } = useContext(ConnectServerContext);
 
     // Function để lấy danh sách thông báo
     const getNotifications = (socketIo) => {
@@ -42,7 +44,7 @@ export const SocketNotificationProvider = ({ children }) => {
     useEffect(() => {
         let socketIo;
 
-        if (userId !== null) {
+        if (userId !== null && connectServer === 'ok') {
             // Tạo kết nối socket cho thông báo
             socketIo = io(`${process.env.REACT_APP_URL_API}/notifications`, {
                 transports: ['websocket'],
@@ -105,7 +107,7 @@ export const SocketNotificationProvider = ({ children }) => {
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userId]);
+    }, [userId, connectServer]);
 
 
     // Function để gửi thông báo đến một user cụ thể
