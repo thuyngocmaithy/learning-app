@@ -166,7 +166,7 @@ function App() {
     }
 
     // Nếu đang tải, hiển thị Spinner
-    if (isLoading || !isLoadFeatured) {
+    if (isLoading || (userId && !isLoadFeatured)) {
         return (
             <div className="container-loading">
                 <Spin size="large" />
