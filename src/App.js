@@ -18,6 +18,7 @@ function App() {
     const [isLoading, setIsLoading] = useState(true);
     const { updatePermissionDetails } = useContext(PermissionDetailContext);
     const { connectServer } = useContext(ConnectServerContext);
+    const [isLoadFeatured, setIsLoadFeatured] = useState(false);
 
     useEffect(() => {
         // Kiểm tra Token hết hạn và chuyển hướng nếu cần
@@ -28,15 +29,15 @@ function App() {
     }, [isTokenExpired, updateUserInfo]);
 
     useEffect(() => {
-        if (connectServer === 'ok')
+        if (!permission && connectServer === 'ok')
             setIsLoading(false);
-    }, [connectServer])
+    }, [permission, connectServer])
 
 
     useEffect(() => {
-        setIsLoading(true);
         // Hàm lấy danh sách tính năng
         const getListFeature = async () => {
+            setIsLoading(true);
             try {
                 const response = await getWhere({ permission: permission });
                 if (response.status === 200) {
@@ -60,13 +61,15 @@ function App() {
                 console.error(error);
             } finally {
                 setIsLoading(false);
+                setIsLoadFeatured(true); // Đã load dữ liệu phân quyền
             }
         };
 
-        if (permission) {
+        // Có dữ liệu quyền và chưa load dữ liệu phân quyền
+        if (permission && !isLoadFeatured) {
             getListFeature();
         }
-    }, [permission, updatePermissionDetails]);
+    }, [permission, isLoadFeatured, updatePermissionDetails]);
 
     const findKeyByValue = (obj, value) => {
         return Object.keys(obj).find(key => obj[key] === value);
@@ -163,7 +166,7 @@ function App() {
     }
 
     // Nếu đang tải, hiển thị Spinner
-    if (isLoading) {
+    if (isLoading || !isLoadFeatured) {
         return (
             <div className="container-loading">
                 <Spin size="large" />
@@ -175,7 +178,7 @@ function App() {
         <div className="App">
             <Routes>
                 {/* Điều hướng đến trang dashboard */}
-                {userId && (
+                {userId && isLoadFeatured && (
                     <Route
                         path="/"
                         element={
@@ -187,7 +190,6 @@ function App() {
                 )}
 
                 {memoizedPublicRoutes}
-
                 {memoizedPrivateRoutes}
             </Routes>
         </div>
