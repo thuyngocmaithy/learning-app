@@ -63,3 +63,14 @@ export const importMajor = async (data) => {
         throw error;
     }
 };
+
+export const checkRelatedData = async (ids) => {
+    try {
+        const url = `/majors/checkRelatedData?ids=${ids}`;
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        console.error('Check related data error:', error);
+        throw error;
+    }
+};

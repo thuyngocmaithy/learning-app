@@ -63,3 +63,13 @@ export const getWhere = async (conditions) => {
         throw error;
     }
 };
+export const checkRelatedData = async (ids) => {
+    try {
+        const url = `/semesters/checkRelatedData?ids=${ids}`;
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        console.error('Check related data error:', error);
+        throw error;
+    }
+};

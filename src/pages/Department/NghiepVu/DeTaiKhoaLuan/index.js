@@ -447,6 +447,8 @@ function DeTaiKhoaLuan() {
                         />
                         <Divider />
                     </div>
+                    {console.log(listThesisJoined.length)
+                    }
                     {listThesisJoined.length === 0 &&
                         <Empty className={cx("empty")} description="Không có dữ liệu" />
                     }

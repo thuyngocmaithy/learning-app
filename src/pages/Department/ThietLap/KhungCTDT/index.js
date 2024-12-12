@@ -10,7 +10,7 @@ import { BuildOutlined, EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import KhungCTDTUpdate from '../../../../components/FormUpdate/KhungCTDTUpdate';
 import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
-import { getAll as getAllStudyFrame, getWhere } from '../../../../services/studyFrameService';
+import { checkRelatedData, getAll as getAllStudyFrame, getWhere } from '../../../../services/studyFrameService';
 import { getAll as getAllCycle } from '../../../../services/cycleService';
 import DungKhungCTDTUpdate from '../../../../components/FormUpdate/DungKhungCTDTUpdate';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -168,12 +168,18 @@ function KhungCTDT() {
 
     const handleDelete = async () => {
         try {
-            await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
-            // Refresh dữ liệu sau khi xóa thành công
-            fetchData();
-            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            const checkUsed = await checkRelatedData(selectedRowKeys);
+            if (!checkUsed?.data?.success) {
+                message.warning(checkUsed?.data?.message);
+            }
+            else {
+                await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
+                // Refresh dữ liệu sau khi xóa thành công
+                fetchData();
+                setSelectedRowKeys([]); // Xóa các ID đã chọn
 
-            message.success('Xoá thành công');
+                message.success('Xoá thành công');
+            }
         } catch (error) {
             message.error('Xoá thất bại');
             console.error(' [ThietLap - KhungCTDT - handleDelete - Error]:', error);

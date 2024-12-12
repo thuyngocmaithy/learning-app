@@ -10,7 +10,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
-import { deleteSRs, getAllSR, getBySRGId, updateSRByIds, importScientificResearch, getListSRJoined } from '../../../../services/scientificResearchService';
+import { deleteSRs, getAllSR, getBySRGId, updateSRByIds, importScientificResearch, getListSRJoined, checkRelatedData } from '../../../../services/scientificResearchService';
 import { getByListSRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
@@ -31,7 +31,7 @@ const cx = classNames.bind(styles);
 
 
 function DeTaiNCKH() {
-    const { deleteConfirm, disableConfirm, enableConfirm } = useConfirm();
+    const { deleteConfirm, disableConfirm, enableConfirm, warningConfirm } = useConfirm();
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
@@ -544,6 +544,18 @@ function DeTaiNCKH() {
         },
     ];
 
+    // Hàm kiểm tra đề tài đã dùng 
+    const handleCheckFeatureUsed = async () => {
+        try {
+            const checkUsed = await checkRelatedData(selectedRowKeys);
+            if (!checkUsed?.data?.success) {
+                warningConfirm(checkUsed?.data?.message, handleDelete)
+            }
+        } catch (error) {
+            message.error(error);
+        }
+    };
+
     const handleDelete = async () => {
         try {
             await deleteSRs(selectedRowKeys);
@@ -721,7 +733,7 @@ function DeTaiNCKH() {
                                 }
                                 <Toolbar
                                     type={'Xóa'}
-                                    onClick={() => deleteConfirm('đề tài nghiên cứu', handleDelete)}
+                                    onClick={() => deleteConfirm('đề tài nghiên cứu', handleCheckFeatureUsed)}
                                     isVisible={permissionDetailData.isDelete}
                                 />
                                 <Toolbar

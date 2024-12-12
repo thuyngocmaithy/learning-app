@@ -8,7 +8,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import HocKyUpdate from '../../../../components/FormUpdate/HocKyUpdate';
-import { deleteSemesters, getSemesters } from '../../../../services/semesterService';
+import { checkRelatedData, deleteSemesters, getSemesters } from '../../../../services/semesterService';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import config from '../../../../config';
@@ -113,12 +113,17 @@ function HocKy() {
 
     const handleDelete = async () => {
         try {
-            await deleteSemesters(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
-            // Refresh dữ liệu sau khi xóa thành công
-            fetchData();
-            setSelectedRowKeys([]); // Xóa các ID đã chọn
-
-            message.success('Xoá thành công');
+            const checkUsed = await checkRelatedData(selectedRowKeys);
+            if (!checkUsed?.data?.success) {
+                message.warning(checkUsed?.data?.message);
+            }
+            else {
+                await deleteSemesters(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
+                // Refresh dữ liệu sau khi xóa thành công
+                fetchData();
+                setSelectedRowKeys([]); // Xóa các ID đã chọn
+                message.success('Xoá thành công');
+            }
         } catch (error) {
             message.error('Xoá thất bại');
             console.error(' [ThietLap - HocKy - handleDelete] : Error deleting semester:', error);

@@ -49,11 +49,21 @@ export const useConfirm = () => {
         });
     };
 
+    const warningConfirm = (title, onEnable) => {
+        showConfirm({
+            title: `Cảnh báo`,
+            content: `${title}`,
+            okText: 'Xác nhận',
+            onOk: onEnable,
+        });
+    };
+
     return {
         deleteConfirm,
         cancelRegisterConfirm,
         cancelApproveConfirm,
         disableConfirm,
         enableConfirm,
+        warningConfirm
     };
 };

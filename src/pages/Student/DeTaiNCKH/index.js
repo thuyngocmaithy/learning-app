@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiNCKH.module.scss';
-import { Breadcrumb, Card, Col, Divider, Input, List, Row, Select, Tabs, Tag } from 'antd';
+import { Breadcrumb, Card, Col, Divider, Empty, Input, List, Row, Select, Tabs, Tag } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
@@ -426,6 +426,9 @@ function DeTaiNCKH() {
                         />
                         <Divider />
                     </div>
+                    {(listSRRegister?.length === 0 || !listSRRegister) &&
+                        <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    }
                     {listSRRegister && listSRRegister.map((item, index) => {
                         return (
                             <Card

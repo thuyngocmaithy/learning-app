@@ -9,7 +9,7 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import Toolbar from '../../../../components/Core/Toolbar';
 import { getAllFaculty, deleteFacultyById, getWhereFaculty, importFaculty } from '../../../../services/facultyService';
-import { getAll as getAllMajors, deleteMajorById, getWhere, importMajor } from '../../../../services/majorService';
+import { getAll as getAllMajors, deleteMajorById, getWhere, importMajor, checkRelatedData } from '../../../../services/majorService';
 import { NganhUpdate } from '../../../../components/FormUpdate/NganhUpdate';
 import { ChuyenNganhUpdate } from '../../../../components/FormUpdate/ChuyenNganhUpdate';
 import { NganhDetail } from '../../../../components/FormDetail/NganhDetail';
@@ -26,7 +26,7 @@ import { useConfirm } from '../../../../hooks/useConfirm';
 const cx = classNames.bind(styles);
 
 function NganhChuyenNganh() {
-    const { deleteConfirm } = useConfirm();
+    const { deleteConfirm, warningConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -62,7 +62,7 @@ function NganhChuyenNganh() {
 
 
     // Import 
-    const [showModalImportNgành, setShowModalImportNgành] = useState(false);
+    const [showModalImportNgành, setShowModalImportNganh] = useState(false);
     const [showModalImportChuyenNganh, setShowModalImportChuyenNganh] = useState(false);
 
 
@@ -113,23 +113,30 @@ function NganhChuyenNganh() {
     }, []);
 
     // Delete handlers
-    const handleNgànhDelete = async () => {
+    const handleNganhDelete = async () => {
         try {
             await deleteFacultyById({ ids: nganhSelectedKeys.join(',') });
             fetchFacultyData();
             setNganhSelectedKeys([]);
             message.success('Xoá ngành thành công');
         } catch (error) {
-            message.error('Xoá ngành thất bại');
+            message.error(error?.response?.data?.message);
         }
     };
 
+
     const handleMajorDelete = async () => {
         try {
-            await deleteMajorById({ ids: majorSelectedKeys.join(',') });
-            fetchMajorData();
-            setMajorSelectedKeys([]);
-            message.success('Xoá chuyên ngành thành công');
+            const checkUsed = await checkRelatedData(majorSelectedKeys);
+            if (!checkUsed?.data?.success) {
+                message.warning(checkUsed?.data?.message);
+            }
+            else {
+                await deleteMajorById({ ids: majorSelectedKeys.join(',') });
+                fetchMajorData();
+                setMajorSelectedKeys([]);
+                message.success('Xoá chuyên ngành thành công');
+            }
         } catch (error) {
             message.error('Xoá chuyên ngành thất bại');
         }
@@ -484,12 +491,12 @@ function NganhChuyenNganh() {
                             />
                             <Toolbar
                                 type={'Xóa'}
-                                onClick={() => deleteConfirm('ngành', handleNgànhDelete)}
+                                onClick={() => deleteConfirm('ngành', handleNganhDelete)}
                                 isVisible={permissionDetailData?.isDelete}
                             />
                             <Toolbar
                                 type={'Nhập file Excel'}
-                                onClick={() => setShowModalImportNgành(true)}
+                                onClick={() => setShowModalImportNganh(true)}
                                 isVisible={permissionDetailData?.isAdd}
                             />
                             <Toolbar type={'Xuất file Excel'} onClick={handleExportExcelNganh} />
@@ -545,7 +552,7 @@ function NganhChuyenNganh() {
             <ImportExcel
                 title={'Ngành'}
                 showModal={showModalImportNgành}
-                setShowModal={setShowModalImportNgành}
+                setShowModal={setShowModalImportNganh}
                 reLoad={fetchFacultyData}
                 type={config.imports.FACULTY}
                 onImport={importFaculty}

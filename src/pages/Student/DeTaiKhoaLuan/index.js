@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Breadcrumb, Card, Divider, Input, List, Select, Skeleton, Tabs, Tag } from 'antd';
+import { Breadcrumb, Card, Divider, Empty, Input, List, Select, Skeleton, Tabs, Tag } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
@@ -408,6 +408,9 @@ function DeTaiKhoaLuan() {
                         />
                         <Divider />
                     </div>
+                    {(listthesisRegister?.length === 0 || !listthesisRegister) &&
+                        <Empty className={cx("empty")} description="Không có dữ liệu" />
+                    }
                     {listthesisRegister && listthesisRegister.map((item, index) => {
                         return (
                             <Card

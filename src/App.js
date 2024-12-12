@@ -116,9 +116,6 @@ function App() {
 
             if (userId !== 0) {
                 if (permission !== null) {
-                    console.log(permission)
-                    console.log(listFeature);
-
                     if (isLoadFeatured) {
                         // Kiểm tra quyền truy cập của người dùng
                         const matchedFeature = listFeature.find(data => data.feature.keyRoute === key);

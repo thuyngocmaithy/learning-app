@@ -8,7 +8,7 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { deleteSubjectById, getAll, getWhereSubject, importSubject } from '../../../../services/subjectService';
+import { checkRelatedData, deleteSubjectById, getAll, getWhereSubject, importSubject } from '../../../../services/subjectService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
 import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -77,10 +77,16 @@ function MonHoc() {
 
     const handleDelete = async () => {
         try {
-            await deleteSubjectById({ ids: selectedRowKeys.join(',') });
-            fetchData();
-            setSelectedRowKeys([]);
-            message.success('Xoá thành công');
+            const checkUsed = await checkRelatedData(selectedRowKeys);
+            if (!checkUsed?.data?.success) {
+                message.warning(checkUsed?.data?.message);
+            }
+            else {
+                await deleteSubjectById({ ids: selectedRowKeys.join(',') });
+                fetchData();
+                setSelectedRowKeys([]);
+                message.success('Xoá thành công');
+            }
         } catch (error) {
             message.error('Xoá thất bại');
             console.error('[ThietLap - MonHoc - deletedSubject] : Error deleting subject:', error);

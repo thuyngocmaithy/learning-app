@@ -10,7 +10,7 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { getAllStatus, deleteStatusById, getWhereStatus, importStatus } from '../../../../services/statusService';
+import { getAllStatus, deleteStatusById, getWhereStatus, importStatus, checkRelatedData } from '../../../../services/statusService';
 import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpdate';
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
 import ImportExcel from '../../../../components/Core/ImportExcel';
@@ -79,10 +79,16 @@ function TrangThai() {
 
     const handleDelete = async () => {
         try {
-            await deleteStatusById({ ids: selectedRowKeys.join(',') });
-            fetchData();
-            setSelectedRowKeys([]);
-            message.success('Xoá thành công');
+            const checkUsed = await checkRelatedData(selectedRowKeys);
+            if (!checkUsed?.data?.success) {
+                message.warning(checkUsed?.data?.message);
+            }
+            else {
+                await deleteStatusById({ ids: selectedRowKeys.join(',') });
+                fetchData();
+                setSelectedRowKeys([]);
+                message.success('Xoá thành công');
+            }
         } catch (error) {
             message.error('Xoá thất bại');
             console.error('[ThietLap - TrangThai - handleDelete] : Error deleting status:', error);
