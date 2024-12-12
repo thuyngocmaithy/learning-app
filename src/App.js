@@ -64,12 +64,14 @@ function App() {
                 setIsLoadFeatured(true); // Đã load dữ liệu phân quyền
             }
         };
-
+        if (!userId) {
+            setIsLoadFeatured(false);
+        }
         // Có dữ liệu quyền và chưa load dữ liệu phân quyền
         if (permission && !isLoadFeatured) {
             getListFeature();
         }
-    }, [permission, isLoadFeatured, updatePermissionDetails]);
+    }, [userId, permission, isLoadFeatured, updatePermissionDetails]);
 
     const findKeyByValue = (obj, value) => {
         return Object.keys(obj).find(key => obj[key] === value);
@@ -114,23 +116,12 @@ function App() {
 
             if (userId !== 0) {
                 if (permission !== null) {
-                    // Kiểm tra quyền truy cập của người dùng
-                    const matchedFeature = listFeature.find(data => data.feature.keyRoute === key);
-                    if (matchedFeature) {
-                        const MemoizedPage = <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />;
-                        element = (
-                            <Layout>
-                                {MemoizedPage}
-                            </Layout>
-                        );
-                    } else {
-                        // Kiểm tra quyền phụ thuộc URL
-                        const matchedFeature = route.urlDepend && listFeature.find(data =>
-                            Array.isArray(route.urlDepend)
-                                ? route.urlDepend.some(url => data.feature.keyRoute === url)
-                                : data.feature.keyRoute === route.urlDepend
-                        );
+                    console.log(permission)
+                    console.log(listFeature);
 
+                    if (isLoadFeatured) {
+                        // Kiểm tra quyền truy cập của người dùng
+                        const matchedFeature = listFeature.find(data => data.feature.keyRoute === key);
                         if (matchedFeature) {
                             const MemoizedPage = <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />;
                             element = (
@@ -139,8 +130,27 @@ function App() {
                                 </Layout>
                             );
                         } else {
-                            element = <ResultCustomAnt />;
+                            // Kiểm tra quyền phụ thuộc URL
+                            const matchedFeature = route.urlDepend && listFeature.find(data =>
+                                Array.isArray(route.urlDepend)
+                                    ? route.urlDepend.some(url => data.feature.keyRoute === url)
+                                    : data.feature.keyRoute === route.urlDepend
+                            );
+
+                            if (matchedFeature) {
+                                const MemoizedPage = <Page featureId={matchedFeature.feature.featureId} permissionDetail={matchedFeature.permissionDetail} />;
+                                element = (
+                                    <Layout>
+                                        {MemoizedPage}
+                                    </Layout>
+                                );
+                            } else {
+                                element = <ResultCustomAnt />; // Không có quyền truy cập
+                            }
                         }
+                    } else {
+                        // Đang chờ load listFeature
+                        element = <div className="container-loading"><Spin size="large" /></div>;
                     }
                 } else {
                     element = <Navigate to={config.routes.Login} replace={true} />;
@@ -157,7 +167,8 @@ function App() {
                 />
             );
         });
-    }, [listFeature, userId, permission]);  // Chỉ tái tạo khi quyền truy cập thay đổi
+    }, [listFeature, userId, permission, isLoadFeatured]); // Thêm isLoadFeatured vào dependency
+
 
 
     // Nếu trạng thái là lỗi, hiển thị thông báo lỗi
