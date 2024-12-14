@@ -139,11 +139,11 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
 
         // Xóa khỏi selectedFrameComp
         setSelectedFrameComp((prevSelectedFrameComp) =>
-            prevSelectedFrameComp.filter(id => id !== itemDel.studyFrameComponent?.id)
+            prevSelectedFrameComp?.filter(id => id !== itemDel.studyFrameComponent?.id)
         )
         // Xóa khỏi dữ liệu lấy từ db
         setFrameStructureByFrameId((prevItem) =>
-            prevItem.filter(item => item.studyFrameComponent?.id !== itemDel.studyFrameComponent?.id)
+            prevItem?.filter(item => item.studyFrameComponent?.id !== itemDel.studyFrameComponent?.id)
         )
 
 

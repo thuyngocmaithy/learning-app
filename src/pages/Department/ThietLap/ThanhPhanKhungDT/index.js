@@ -9,7 +9,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import ThanhPhanKhungDTUpdate from '../../../../components/FormUpdate/ThanhPhanKhungDTUpdate';
-import { deleteStudyFrameComponents, getWhere } from '../../../../services/studyFrameCompService';
+import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
 import { getAllStudyFrameComponent } from '../../../../services/studyFrameCompService';
 import ThanhPhanKhungDTDetail from '../../../../components/FormDetail/ThanhPhanKhungDTDetail';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -41,6 +41,7 @@ function ThanhPhanKhungDT() {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [majorOptions, setMajorOptions] = useState([
         {
             value: "",
@@ -138,13 +139,13 @@ function ThanhPhanKhungDT() {
         try {
             const result = await getAllStudyFrameComponent();
             if (result.status === 200) {
-                setData(
-                    result.data.data.map(({ id, ...item }) => ({
-                        ...item,
-                        majorId: item.major?.majorId,
-                        majorName: item.major?.majorName,
-                    }))
-                );
+                const dataResult = result.data.data.map(({ id, ...item }) => ({
+                    ...item,
+                    majorId: item.major?.majorId,
+                    majorName: item.major?.majorName,
+                }))
+                setData(dataResult);
+                setDataOriginal(dataResult);
             }
             setIsLoading(false);
         } catch (error) {
@@ -174,7 +175,7 @@ function ThanhPhanKhungDT() {
                 selectedRowKeys.map(async (item) => {
                     // kiểm tra có sử dụng trong frame structure chưa
                     const resCheckUsed = await getWhereFrameStructures({ studyFrameComponent: item });
-                    if (resCheckUsed?.data?.data?.length !== 0) {
+                    if (resCheckUsed.status === 200) {
                         checkUsed = true;
                     }
                 })
@@ -253,37 +254,16 @@ function ThanhPhanKhungDT() {
     ]
 
     const onSearch = async (values) => {
-        try {
-            const searchParams = {
-                frameComponentId: values.frameComponentId?.trim() || undefined,
-                frameComponentName: values.frameComponentName?.trim() || undefined,
-                description: values.description?.trim() || undefined,
-                major: values.major?.value || undefined
-            };
-
-            const response = await getWhere(searchParams);
-
-            if (response.status === 200) {
-                if (response.data.data.length === 0) {
-                    setData([]);
-                } else {
-                    setData(
-                        response.data.data.map(({ id, ...item }) => ({
-                            ...item,
-                            majorId: item.major?.majorId,
-                            majorName: item.major?.majorName,
-                        }))
-                    );
-                }
-            }
-            else {
-                setData([]);
-            }
-
-        } catch (error) {
-            console.error('[onSearch - error]: ', error);
-            message.error('Có lỗi xảy ra khi tìm kiếm');
-        }
+        const { frameComponentId, frameComponentName, major, description } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const matchesFrameComponentId = frameComponentId ? item.frameComponentId?.toLowerCase().includes(frameComponentId.toLowerCase()) : true;
+            const matchesFrameComponentName = frameComponentName ? item.frameComponentName?.toLowerCase().includes(frameComponentName.toLowerCase()) : true;
+            const matchesMajor = major?.value ? item.major?.majorId === major?.value : true;
+            const matchesDescription = description ? item.description?.toLowerCase().includes(description.toLowerCase()) : true;
+            return matchesFrameComponentId && matchesFrameComponentName && matchesMajor && matchesDescription;
+        });
+        setData(filteredList);
     };
 
 

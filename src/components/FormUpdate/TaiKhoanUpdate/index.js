@@ -89,7 +89,6 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
 
             if (response && response.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} tài khoản thành công!`);
-                handleCloseModal();
                 if (reLoad) reLoad();
             }
             return true;

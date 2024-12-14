@@ -10,7 +10,7 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from 'antd/es/form/FormItem';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { getAllStatus, deleteStatusById, getWhereStatus, importStatus, checkRelatedData } from '../../../../services/statusService';
+import { getAllStatus, deleteStatusById, importStatus, checkRelatedData } from '../../../../services/statusService';
 import { TrangThaiUpdate } from '../../../../components/FormUpdate/TrangThaiUpdate';
 import { TrangThaiDetail } from '../../../../components/FormDetail/TrangThaiDetail';
 import ImportExcel from '../../../../components/Core/ImportExcel';
@@ -35,6 +35,7 @@ function TrangThai() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [isChangeStatus, setIsChangeStatus] = useState(false);
@@ -59,6 +60,7 @@ function TrangThai() {
                 })) : [];
 
             setData(listStatus);
+            setDataOriginal(listStatus);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -108,6 +110,10 @@ function TrangThai() {
         {
             label: 'Tiến độ nhóm đề tài NCKH',
             value: 'Tiến độ nhóm đề tài NCKH'
+        },
+        {
+            label: 'Tiến độ nhóm đề tài khóa luận',
+            value: 'Tiến độ nhóm đề tài khóa luận'
         }
     ];
 
@@ -138,33 +144,15 @@ function TrangThai() {
     ]
 
     const onSearchStatus = async (values) => {
-        try {
-            const searchParams = {
-                statusId: values.statusId?.trim() || undefined,
-                statusName: values.statusName?.trim() || undefined,
-                type: values.type || undefined
-            };
-
-            if (!searchParams.statusId && !searchParams.statusName && !searchParams.type) {
-                message.info('Vui lòng nhập ít nhất một điều kiện tìm kiếm');
-                return;
-            }
-
-            const response = await getWhereStatus(searchParams);
-
-            if (response.status === 200) {
-                if (response.data.data.length === 0) {
-                    setData([]);
-                    message.info('Không tìm thấy kết quả phù hợp');
-                } else {
-                    setData(response.data.data);
-                }
-            }
-
-        } catch (error) {
-            console.error('[onSearch - error]: ', error);
-            message.error('Có lỗi xảy ra khi tìm kiếm');
-        }
+        const { statusId, statusName, type } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const matchesStatusId = statusId ? item.statusId?.toLowerCase().includes(statusId.toLowerCase()) : true;
+            const matchesStatusName = statusName ? item.statusName?.toLowerCase().includes(statusName.toLowerCase()) : true;
+            const matchesType = type ? item.type === type : true;
+            return matchesStatusId && matchesStatusName && matchesType;
+        });
+        setData(filteredList);
     };
 
 

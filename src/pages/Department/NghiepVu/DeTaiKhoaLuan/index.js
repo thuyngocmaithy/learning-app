@@ -290,6 +290,7 @@ function DeTaiKhoaLuan() {
             // Kết hợp dữ liệu khóa luận và số lượng đăng ký
             const thesiss = thesisData.map((data) => ({
                 ...data,
+                createUser: data?.createUser?.userId,
                 numberOfRegister: thesisMap.get(data.thesisId) || 0, // Mặc định là 0 nếu không tìm thấy
             }));
 

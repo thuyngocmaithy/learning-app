@@ -9,7 +9,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import NhomDeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/NhomDeTaiKhoaLuanUpdate';
-import { deleteThesisGroups, getAllThesisGroup, getWhere, updateThesisGroupByIds, importThesisGroup } from '../../../../services/thesisGroupService';
+import { deleteThesisGroups, getAllThesisGroup, updateThesisGroupByIds, importThesisGroup } from '../../../../services/thesisGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereThesis } from '../../../../services/thesisService';
@@ -32,6 +32,7 @@ function NhomDeTaiKhoaLuan() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [listThesisJoined, setListThesisJoined] = useState([]);
@@ -197,7 +198,8 @@ function NhomDeTaiKhoaLuan() {
                 const resultData = result.data.data.map((item) => {
                     return {
                         ...item,
-                        facultyName: item.faculty.facultyName,
+                        facultyName: item?.faculty?.facultyName,
+                        createUser: item?.createUser?.userId,
                         // startCreateThesisDate và endCreateThesisDate đều null
                         // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh
@@ -208,6 +210,7 @@ function NhomDeTaiKhoaLuan() {
                     }
                 })
                 setData(resultData);
+                setDataOriginal(resultData);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -363,37 +366,21 @@ function NhomDeTaiKhoaLuan() {
         </FormItem>
     ]
 
-    const onSearch = async (values) => {
-        try {
-            // Lấy value ID của ngành từ select
-            values.faculty = values.faculty?.value || undefined;
-            values.status = values.status?.value || undefined;
 
-            const response = await getWhere(values);
+    const onSearch = (values) => {
+        const { thesisGroupId, thesisGroupName, startYear, finishYear, faculty, status } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const matchesThesisGroupId = thesisGroupId ? item.thesisGroupId?.toLowerCase().includes(thesisGroupId.toLowerCase()) : true;
+            const matchesthesisGroupName = thesisGroupName ? item.thesisGroupName?.toLowerCase().includes(thesisGroupName.toLowerCase()) : true;
+            const matchesstartYear = startYear ? item.startYear.toString().includes(startYear) : true;
+            const matchesfinishYear = finishYear ? item.finishYear.toString().includes(finishYear) : true;
+            const matchesfaculty = faculty?.value ? item.faculty?.facultyId === faculty?.value : true;
+            const matchesStatus = status?.value ? item.status?.statusId === status?.value : true;
 
-            if (response.status === 200) {
-                var currentDate = new Date();
-                const resultData = response.data.data.map((item) => {
-                    return {
-                        ...item,
-                        facultyName: item.faculty.facultyName,
-                        // startCreateThesisDate và endCreateThesisDate đều null
-                        // hoặc startCreateThesisDate <= currentDate && endCreateThesisDate > currentDate
-                        // => Còn hạn thao tác cho nhóm đề tài nckh
-                        validDate: (item.startCreateThesisDate === null && item.endCreateThesisDate === null) ||
-                            (new Date(item.startCreateThesisDate) <= currentDate && new Date(item.endCreateThesisDate) > currentDate)
-                            ? true
-                            : false
-                    }
-                })
-                setData(resultData);
-            }
-            if (response.status === 204) {
-                setData([]);
-            }
-        } catch (error) {
-            console.error(error);
-        }
+            return matchesThesisGroupId && matchesthesisGroupName && matchesstartYear && matchesfinishYear && matchesfaculty && matchesStatus;
+        });
+        setData(filteredList);
     };
 
     const handleEnable = async () => {

@@ -310,6 +310,7 @@ function DeTaiNCKH() {
             // Kết hợp dữ liệu khóa luận và số lượng đăng ký
             const SRs = scientificResearchData.map((data) => ({
                 ...data,
+                createUser: data?.createUser?.userId,
                 numberOfRegister: SRMap.get(data.scientificResearchId) || 0, // Mặc định là 0 nếu không tìm thấy
             }));
 

@@ -36,6 +36,7 @@ function MonHoc() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
@@ -57,6 +58,7 @@ function MonHoc() {
                 }
             })
             setData(dataHandle || []);
+            setDataOriginal(dataHandle || [])
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -173,41 +175,17 @@ function MonHoc() {
     ];
 
     const onSearchSubject = async (values) => {
-        try {
-            let searchParams = {
-                subjectId: values.subjectId?.trim() || undefined,
-                subjectName: values.subjectName?.trim() || undefined,
-                creditHour: values.creditHour?.trim() || undefined,
-            };
+        const { subjectId, subjectName, creditHour } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const matchesSubjectId = subjectId ? item.subjectId?.toLowerCase().includes(subjectId.toLowerCase()) : true;
+            const matchesSubjectName = subjectName ? item.subjectName?.toLowerCase().includes(subjectName.toLowerCase()) : true;
+            const matchesCreditHour = creditHour ? item.creditHour === Number(creditHour) : true;
 
-            const response = await getWhereSubject(searchParams);
-            if (response.status === 200) {
-                if (response.data.data.length === 0) {
-                    setData([]);
-                    message.info('Không tìm thấy kết quả phù hợp');
-                } else {
-                    setData(response.data.data);
-                }
-            }
-            else {
-                setData([]);
-            }
-        } catch (error) {
-            console.error('[onSearch - error]: ', error);
-            message.error('Có lỗi xảy ra khi tìm kiếm');
-        }
+            return matchesSubjectId && matchesSubjectName && matchesCreditHour;
+        });
+        setData(filteredList);
     };
-
-    const typeOptions = [
-        {
-            label: 'Có',
-            value: true
-        },
-        {
-            label: "Không",
-            value: false
-        }
-    ];
 
     const filterFieldsSubject = [
         <FormItem name="subjectId" label="Mã môn học" >
@@ -222,10 +200,10 @@ function MonHoc() {
     ];
 
     const schemas = [
-        { label: "Mã môn học", prop: "subjectId" },
-        { label: "Tên môn học", prop: "subjectName" },
-        { label: "Mã môn trước", prop: "subjectBefore" },
-        { label: "Số tín chỉ", prop: "creditHour" },
+        { label: "Mã môn học", prop: "subjectId", width: '20', textAlign: "center" },
+        { label: "Tên môn học", prop: "subjectName", width: '70', textAlign: "left" },
+        { label: "Mã môn trước", prop: "subjectBefore", width: '20', textAlign: "center" },
+        { label: "Số tín chỉ", prop: "creditHour", width: '10', textAlign: "center" },
     ];
 
 
@@ -237,8 +215,6 @@ function MonHoc() {
             headerContent: "DANH SÁCH MÔN HỌC",
         });
     };
-
-
 
     return (
         <div className={cx('wrapper')}>

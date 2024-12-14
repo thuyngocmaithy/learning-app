@@ -9,8 +9,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { BuildOutlined, EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import KhungCTDTUpdate from '../../../../components/FormUpdate/KhungCTDTUpdate';
-import { deleteStudyFrameComponents } from '../../../../services/studyFrameCompService';
-import { checkRelatedData, getAll as getAllStudyFrame, getWhere } from '../../../../services/studyFrameService';
+import { checkRelatedData, deleteStudyFrames, getAll as getAllStudyFrame, getWhere } from '../../../../services/studyFrameService';
 import { getAll as getAllCycle } from '../../../../services/cycleService';
 import DungKhungCTDTUpdate from '../../../../components/FormUpdate/DungKhungCTDTUpdate';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -37,6 +36,7 @@ function KhungCTDT() {
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [showModalBuildFrame, setShowModalBuildFrame] = useState(false); // hiển thị model dựng khung
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [facultyOptions, setFacultyOptions] = useState([]);
@@ -144,7 +144,7 @@ function KhungCTDT() {
         try {
             const result = await getAllStudyFrame();
             if (result.status === 200) {
-                setData(result.data.data.map((item) => {
+                const dataResult = result.data.data.map((item) => {
                     return {
                         ...item,
                         facultyName: item.faculty.facultyName,
@@ -152,7 +152,9 @@ function KhungCTDT() {
                         cycleName: item.cycle.cycleName,
                         cycleId: item.cycle.cycleId,
                     }
-                }));
+                })
+                setData(dataResult);
+                setDataOriginal(dataResult);
             }
             setIsLoading(false);
         } catch (error) {
@@ -173,7 +175,7 @@ function KhungCTDT() {
                 message.warning(checkUsed?.data?.message);
             }
             else {
-                await deleteStudyFrameComponents(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
+                await deleteStudyFrames(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
                 // Refresh dữ liệu sau khi xóa thành công
                 fetchData();
                 setSelectedRowKeys([]); // Xóa các ID đã chọn
@@ -253,38 +255,18 @@ function KhungCTDT() {
         </FormItem>
     ]
 
-    const onSearch = async (values) => {
-        try {
-            const searchParams = {
-                frameId: values.frameId?.trim() || undefined,
-                frameName: values.frameName?.trim() || undefined,
-                faculty: values.faculty || undefined,
-                cycle: values.cycle?.value || undefined
-            };
+    const onSearch = (values) => {
+        const { frameId, frameName, faculty, cycle } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const matchesFrameId = frameId ? item.frameId?.toLowerCase().includes(frameId.toLowerCase()) : true;
+            const matchesFrameName = frameName ? item.frameName?.toLowerCase().includes(frameName.toLowerCase()) : true;
+            const matchesfaculty = faculty ? item.facultyId === faculty : true;
+            const matchesCycle = cycle?.value ? item.cycle?.cycleId === cycle?.value : true;
 
-            const response = await getWhere(searchParams);
-
-            if (response.status === 200) {
-                if (response.data.data.length === 0) {
-                    setData([]);
-                } else {
-                    setData(response.data.data.map((item) => {
-                        return {
-                            ...item,
-                            facultyName: item.faculty.facultyName,
-                            cycleName: item.cycle.cycleName,
-                        }
-                    }));
-                }
-            }
-            else {
-                setData([]);
-            }
-
-        } catch (error) {
-            console.error('[onSearch - error]: ', error);
-            message.error('Có lỗi xảy ra khi tìm kiếm');
-        }
+            return matchesFrameId && matchesFrameName && matchesfaculty && matchesCycle;
+        });
+        setData(filteredList);
     };
 
 

@@ -123,7 +123,8 @@ function DeTaiKhoaLuanThamGia() {
                             id: data.id,
                             filename: data.filename,
                             createDate: dayjs(data.createDate).format('DD/MM/YYYY HH:mm'),
-                            createUser: data.createUser.fullname
+                            createUserName: data.createUser.fullname,
+                            createUser: data.createUser.userId,
                         }
                     })
                     setDataAttach(dataAttach)
@@ -189,7 +190,7 @@ function DeTaiKhoaLuanThamGia() {
 
     // Hàm xóa file
     const handleDelete = async () => {
-        const loadingMessage = message.loading('Đang tải tệp lên', 0);
+        const loadingMessage = message.loading('Tệp đang được xóa', 0);
         try {
             await deleteFiles(selectedRowKeys);
             message.success('Xóa tệp thành công');
@@ -243,8 +244,8 @@ function DeTaiKhoaLuanThamGia() {
         },
         {
             title: 'Người đính kèm',
-            key: 'createUser',
-            dataIndex: 'createUser',
+            key: 'createUserName',
+            dataIndex: 'createUserName',
         },
     ];
 
