@@ -22,7 +22,7 @@ function System({ dataInfoSystem, dataFollower, reLoad }) {
         const handleListFollower = async () => {
 
             const promises = dataFollower.map(async (item) => {
-                return { id: item.id, title: item.user.fullname, image: item.user.avatar };
+                return { id: item.id, title: item.fullname, image: item.avatar };
             });
 
             const processed = await Promise.all(promises);

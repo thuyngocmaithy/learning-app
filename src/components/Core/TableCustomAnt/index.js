@@ -55,12 +55,6 @@ function TableCustomAnt({
         }
     };
 
-    useEffect(() => {
-        data.forEach((item) => {
-            console.log(item);
-        });
-    }, [data]);
-
     const rowSelection = {
         selectedRowKeys,
         onChange: onSelectChange,

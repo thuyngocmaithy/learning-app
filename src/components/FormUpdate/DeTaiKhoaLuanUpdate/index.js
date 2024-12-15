@@ -180,6 +180,12 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             };
             let response;
             if (isUpdate) {
+                const createUserResponse = await getUserById(userId);
+                const lastModifyUserId = createUserResponse.data;
+                thesisData = {
+                    ...thesisData,
+                    lastModifyUserId: lastModifyUserId,
+                }
                 response = await updateThesisById(showModal.thesisId, thesisData);
                 handleCloseModal();
             } else {

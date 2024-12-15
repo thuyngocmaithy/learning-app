@@ -27,6 +27,7 @@ function DeTaiNCKHThamGia() {
     const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
+
     // Lấy keyRoute tương ứng từ URL
     const currentPath = location.pathname;
     const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
@@ -135,7 +136,6 @@ function DeTaiNCKHThamGia() {
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true); // Bắt đầu quá trình load
-
             try {
                 await Promise.all([getInfoscientificResearch(), getAttach()]); // Đợi cả 2 function hoàn thành
             } catch (error) {

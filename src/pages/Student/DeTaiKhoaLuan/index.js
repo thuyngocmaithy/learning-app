@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useContext, useRef, useCallback } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Breadcrumb, Card, Divider, Empty, Input, List, Select, Skeleton, Tabs, Tag } from 'antd';
+import { Breadcrumb, Divider, Input, List, Select, Skeleton, Tabs } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../assets/icons';
 import Button from '../../../components/Core/Button';
@@ -22,19 +22,21 @@ import { getStatusByType } from '../../../services/statusService';
 import SearchForm from '../../../components/Core/SearchForm';
 import Toolbar from '../../../components/Core/Toolbar';
 import { useConfirm } from '../../../hooks/useConfirm';
+import TabDeTaiKhoaLuanThamGia from '../../../components/TabDeTaiKhoaLuanThamGia';
 
 const cx = classNames.bind(styles);
 
 function DeTaiKhoaLuan() {
     const [list, setList] = useState([]);
+    const [reLoadListJoinThesis, setReLoadListJoinThesis] = useState(false);
     const { cancelRegisterConfirm } = useConfirm();
     const [listOriginal, setListOriginal] = useState([]);
     const { userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
-    const [listthesisRegister, setListThesisRegister] = useState([]);
-    const [listThesisRegisterOriginal, setListThesisRegisterOriginal] = useState([]);
+    const [listThesisJoin, setListThesisJoin] = useState([]);
+    const [listThesisJoinOriginal, setListThesisJoinOriginal] = useState([]);
     const [ThesisGroupName, setThesisGroupName] = useState();
     const thesisCancelRef = useRef(null);
     const { deleteNotification } = useSocketNotification();
@@ -44,6 +46,7 @@ function DeTaiKhoaLuan() {
     const [showFilter1, setShowFilter1] = useState(false);
     const [showFilter2, setShowFilter2] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
+    const [loadedListThesisJoin, setLoadedListThesisJoin] = useState(false); // đã load danh sách tham giá
 
     // Sử dụng useEffect để theo dõi thay đổi của screenWidth
     useEffect(() => {
@@ -118,19 +121,6 @@ function DeTaiKhoaLuan() {
         }
     }, [ThesisGroupIdFromUrl, userId]);
 
-    const checkRegisterThesis = useCallback(async () => {
-        try {
-            const response = await getWhere({ userId: userId, srgroupId: ThesisGroupIdFromUrl });
-            // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
-            // const registeredthesiss = response.data.data.map(data => data.thesis.thesisId);
-            setListThesisRegister(response.data.data);
-            setListThesisRegisterOriginal(response.data.data)
-        } catch (error) {
-            console.error('Error fetching registered thesiss:', error);
-        }
-    }, [ThesisGroupIdFromUrl, userId]);
-
-
     useEffect(() => {
         const getThesisGroupName = async () => {
             try {
@@ -148,10 +138,41 @@ function DeTaiKhoaLuan() {
     }, [ThesisGroupIdFromUrl])
 
 
+    const checkJoinThesis = useCallback(async () => {
+        try {
+            let result;
+
+            if (ThesisGroupIdFromUrl) {
+                const response = await getWhere({ userId: userId, srgroupId: ThesisGroupIdFromUrl });
+                result = response?.data?.data;
+
+            } else {
+                const response = await getWhere({ userId: userId });
+                result = response?.data?.data;
+            }
+
+            // Hiển thị trạng thái Đăng ký/ Hủy đăng ký
+            // const registeredthesiss = response.data.data.map(data => data.thesis.thesisId);
+            setListThesisJoin(result);
+            setListThesisJoinOriginal(result)
+        } catch (error) {
+            console.error('Error fetching registered thesiss:', error);
+        }
+        finally {
+            setLoadedListThesisJoin(true);
+        }
+    }, [ThesisGroupIdFromUrl, setListThesisJoin, setListThesisJoinOriginal, userId]);
+
+
+    useEffect(() => {
+        if (!loadedListThesisJoin) {
+            checkJoinThesis();
+        }
+    }, [checkJoinThesis, loadedListThesisJoin]);
+
     useEffect(() => {
         fetchthesiss()
-        checkRegisterThesis();
-    }, [fetchthesiss, checkRegisterThesis]);
+    }, [fetchthesiss]);
 
 
 
@@ -189,7 +210,7 @@ function DeTaiKhoaLuan() {
                 if (responseCancel) {
                     message.success('Hủy đăng ký thành công');
                     // Cập nhật danh sách đề tài đã đăng ký
-                    await checkRegisterThesis();
+                    setReLoadListJoinThesis(true);
                     await fetchthesiss(); // Cập nhật danh sách đề tài
 
 
@@ -222,9 +243,9 @@ function DeTaiKhoaLuan() {
             }
             showModal={showModalRegister}
             setShowModal={setShowModalRegister}
-            checkRegisterThesis={checkRegisterThesis}
+            setReLoadListJoinThesis={setReLoadListJoinThesis}
         />
-    ), [checkRegisterThesis, showModalRegister]);
+    ), [showModalRegister]);
 
     // Set tab được chọn vào state 
     const handleTabClick = (index) => {
@@ -291,7 +312,7 @@ function DeTaiKhoaLuan() {
 
     const onSearchDeTaiKhoaLuan = (values) => {
         const { thesisId, thesisName, instructorName, level } = values;
-        const originalList = showFilter2 ? listThesisRegisterOriginal : listOriginal;
+        const originalList = showFilter2 ? listThesisJoinOriginal : listOriginal;
         const filteredList = originalList.filter((SRRegister) => {
             const item = showFilter2 ? SRRegister.thesis : SRRegister;
             const matchesSRId = thesisId ? item.thesisId?.toLowerCase().includes(thesisId.toLowerCase()) : true;
@@ -302,7 +323,7 @@ function DeTaiKhoaLuan() {
             return matchesSRId && matchesSRName && matchesInstructorName && matchesLevel;
         });
         if (showFilter2) {
-            setListThesisRegister(filteredList);
+            setListThesisJoin(filteredList);
         }
         else {
             setList(filteredList);
@@ -337,7 +358,7 @@ function DeTaiKhoaLuan() {
                                     <Button outline verysmall onClick={() => setShowModalDetail(item)}>
                                         Chi tiết
                                     </Button>,
-                                    listthesisRegister && listthesisRegister.some(thesisRegister => thesisRegister.thesis.thesisId === item.thesisId) ?
+                                    listThesisJoin && listThesisJoin.some(thesisRegister => thesisRegister.thesis.thesisId === item.thesisId) ?
                                         <Button
                                             colorRed
                                             outline
@@ -397,64 +418,21 @@ function DeTaiKhoaLuan() {
         },
         {
             id: 2,
-            title: 'Đề tài tham gia (theo nhóm đề tài)',
+            title: 'Đề tài tham gia',
             children: (
-                <div>
-                    <div className={`slide ${showFilter2 ? 'open' : ''}`}>
-                        <SearchForm
-                            getFields={filterFieldsDeTaiKhoaLuan}
-                            onSearch={onSearchDeTaiKhoaLuan}
-                            onReset={() => { setListThesisRegister(listThesisRegisterOriginal) }}
-                        />
-                        <Divider />
-                    </div>
-                    {(listthesisRegister?.length === 0 || !listthesisRegister) &&
-                        <Empty className={cx("empty")} description="Không có dữ liệu" />
-                    }
-                    {listthesisRegister && listthesisRegister.map((item, index) => {
-                        return (
-                            <Card
-                                className={cx('card-DeTaiKhoaLuanThamGia')}
-                                key={index}
-                                type="inner"
-                                title={item.thesis.thesisId + " - " + item.thesis.thesisName}
-                                extra={
-                                    <Button primary verysmall
-                                        onClick={() => {
-                                            if (!item.isApprove) {
-                                                // Nếu chưa được duyệt  => hiện modal thông tin chi tiết
-                                                setShowModalDetail(item.thesis);
-                                            }
-                                            else {
-                                                // Nếu đã được duyệt => Chuyển vào page DeTaiKhoaLuanThamGia
-                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesis.thesisId}`);
-                                            }
-                                        }}
-                                    >
-
-                                        Chi tiết
-                                    </Button>
-                                }
-                            >
-                                <div className={cx('container-detail')}>
-                                    <p className={cx('label-detail')}>Thời gian thực hiện: </p>
-                                    {item.startDate && item.finishDate
-                                        ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                        : <p>Chưa có</p>
-                                    }
-                                </div>
-                                <div className={cx('container-detail')}>
-                                    <p className={cx('label-detail')}>Trạng thái: </p>
-                                    <Tag
-                                        color={item.isApprove ? item.thesis.status.color : 'red'}
-                                    >
-                                        {item.isApprove ? item.thesis.status.statusName : 'Chờ duyệt'}
-                                    </Tag>
-                                </div>
-                            </Card>
-                        );
-                    })}
-                </div>
+                <TabDeTaiKhoaLuanThamGia
+                    listThesisJoin={listThesisJoin}
+                    listThesisJoinOriginal={listThesisJoinOriginal}
+                    setListThesisJoin={setListThesisJoin}
+                    setListThesisJoinOriginal={setListThesisJoinOriginal}
+                    showFilter={showFilter2}
+                    filterFields={filterFieldsDeTaiKhoaLuan}
+                    onSearch={onSearchDeTaiKhoaLuan}
+                    setShowModalDetail={setShowModalDetail}
+                    reLoadListJoinThesis={reLoadListJoinThesis}
+                    loadedList={loadedListThesisJoin}
+                    setLoadedList={setLoadedListThesisJoin}
+                />
             ),
         },
     ];
