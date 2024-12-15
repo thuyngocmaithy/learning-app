@@ -312,6 +312,9 @@ function DeTaiNCKH() {
                 }
             />
         </FormItem>,
+    ]
+
+    showFilter2 && filterFieldsDeTaiNCKH.push(
         <FormItem
             name={'status'}
             label={'Trạng thái'}
@@ -326,8 +329,8 @@ function DeTaiNCKH() {
                 options={statusOptions}
                 labelInValue
             />
-        </FormItem>,
-    ]
+        </FormItem>
+    )
 
     const onSearchDeTaiNCKH = (values) => {
         const { scientificResearchId, scientificResearchName, instructorName, level, status } = values;

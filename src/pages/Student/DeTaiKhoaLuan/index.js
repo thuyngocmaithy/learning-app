@@ -293,6 +293,8 @@ function DeTaiKhoaLuan() {
         >
             <Input />
         </FormItem>,
+    ]
+    showFilter2 && filterFieldsDeTaiKhoaLuan.push(
         <FormItem
             name={'status'}
             label={'Trạng thái'}
@@ -307,8 +309,7 @@ function DeTaiKhoaLuan() {
                 options={statusOptions}
                 labelInValue
             />
-        </FormItem>
-    ]
+        </FormItem>)
 
     const onSearchDeTaiKhoaLuan = (values) => {
         const { thesisId, thesisName, instructorName, level } = values;
