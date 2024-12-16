@@ -8,7 +8,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import ChuKyUpdate from '../../../../components/FormUpdate/ChuKyUpdate';
-import { deleteCycles, getAll } from '../../../../services/cycleService';
+import { deleteCycles, getAll, getWhere } from '../../../../services/cycleService';
 import config from '../../../../config';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
@@ -107,12 +107,27 @@ function ChuKy() {
 
     const handleDelete = async () => {
         try {
-            await deleteCycles(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
-            // Refresh dữ liệu sau khi xóa thành công
-            fetchData();
-            setSelectedRowKeys([]); // Xóa các ID đã chọn
+            if (selectedRowKeys.length === 0) return;
+            let checkUsed = false;
+            await Promise.all(
+                selectedRowKeys.map(async (item) => {
+                    // kiểm tra có sử dụng trong frame structure chưa
+                    const resCheckUsed = await getWhere({ cycleId: item });
+                    if (resCheckUsed?.data?.data?.length !== 0) {
+                        checkUsed = true;
+                    }
+                })
+            );
+            if (checkUsed) {
+                message.warning('Chu kỳ đã được sử dụng. Bạn không thể xóa');
+            } else {
+                await deleteCycles(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
+                // Refresh dữ liệu sau khi xóa thành công
+                fetchData();
+                setSelectedRowKeys([]); // Xóa các ID đã chọn
 
-            message.success('Xoá thành công');
+                message.success('Xoá thành công');
+            }
         } catch (error) {
             message.error('Xoá thất bại');
             console.error(' [ThietLap - ChuKy - handleDelete] : Error deleting cycle:', error);

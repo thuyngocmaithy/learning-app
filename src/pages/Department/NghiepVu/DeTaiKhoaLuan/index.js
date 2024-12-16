@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './DeTaiKhoaLuan.module.scss';
-import { Card, Tabs, Tag, Breadcrumb, Input, Empty, Divider, Select, Row, Col } from 'antd';
+import { Tabs, Tag, Breadcrumb, Input, Divider, Select } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import config from "../../../../config"
@@ -10,11 +10,10 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
-import { deleteThesiss, getAllThesis, getByThesisGroupId, updateThesisByIds, importThesis, getListThesisJoined } from '../../../../services/thesisService';
+import { deleteThesiss, getAllThesis, getByThesisGroupId, updateThesisByIds, importThesis } from '../../../../services/thesisService';
 import { getByListThesisId } from '../../../../services/thesisUserService';
 import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
 import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
-import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -23,13 +22,14 @@ import { getStatusByType } from '../../../../services/statusService';
 import { checkValidDateCreateThesis } from '../../../../services/thesisGroupService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
-import dayjs from 'dayjs';
 import { useConfirm } from '../../../../hooks/useConfirm';
+import TabDeTaiKhoaLuanThamGia from '../../../../components/TabDeTaiKhoaLuanThamGia';
 
 const cx = classNames.bind(styles);
 
 function DeTaiKhoaLuan() {
     const { deleteConfirm, disableConfirm, enableConfirm } = useConfirm();
+    const [reLoadListJoinThesis, setReLoadListJoinThesis] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
@@ -39,8 +39,7 @@ function DeTaiKhoaLuan() {
     const [showModalListRegister, setShowModalListRegister] = useState(false)
     const [isChangeStatus, setIsChangeStatus] = useState(false);
     const [showModalDetail, setShowModalDetail] = useState(false);
-    const { userId } = useContext(AccountLoginContext);
-    const [listThesisJoined, setListThesisJoined] = useState([]);
+    const [listThesisJoin, setListThesisJoin] = useState([]);
     const [listThesisJoinOriginal, setListThesisJoinOriginal] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
@@ -49,26 +48,8 @@ function DeTaiKhoaLuan() {
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
     // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
     const [disableToolbar, setDisableToolbar] = useState(false);
-    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
     const [showFilter1, setShowFilter1] = useState(false);
     const [showFilter2, setShowFilter2] = useState(false);
-
-
-    // Sử dụng useEffect để theo dõi thay đổi của screenWidth
-    useEffect(() => {
-        // Hàm xử lý khi screenWidth thay đổi
-        function handleResize() {
-            setScreenWidth(window.innerWidth);
-        }
-
-        // Thêm một sự kiện lắng nghe sự thay đổi của cửa sổ
-        window.addEventListener('resize', handleResize);
-
-        // Loại bỏ sự kiện lắng nghe khi component bị hủy
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
 
     const statusType = 'Tiến độ đề tài khóa luận';
 
@@ -216,19 +197,6 @@ function DeTaiKhoaLuan() {
             ),
         }
     ];
-    const listRegisterthesisJoined = useCallback(async () => {
-        try {
-            const response = await getListThesisJoined(userId, ThesisGroupIdFromUrl);
-            if (response.status === 200 && response.data.data) {
-                setListThesisJoined(response.data.data);
-                setListThesisJoinOriginal(response.data.data)
-            }
-
-        } catch (error) {
-            console.error('Error fetching registered thesiss:', error);
-            setIsLoading(false);
-        }
-    }, [ThesisGroupIdFromUrl, userId]);
 
     const fetchData = useCallback(async () => {
         try {
@@ -290,6 +258,7 @@ function DeTaiKhoaLuan() {
             // Kết hợp dữ liệu khóa luận và số lượng đăng ký
             const thesiss = thesisData.map((data) => ({
                 ...data,
+                createUser: data?.createUser?.userId,
                 numberOfRegister: thesisMap.get(data.thesisId) || 0, // Mặc định là 0 nếu không tìm thấy
             }));
 
@@ -308,11 +277,11 @@ function DeTaiKhoaLuan() {
 
     useEffect(() => {
         fetchData();
-        listRegisterthesisJoined();
+        setReLoadListJoinThesis(true)
         if (isChangeStatus) {
             setIsChangeStatus(false);
         }
-    }, [fetchData, listRegisterthesisJoined, isChangeStatus]);
+    }, [fetchData, isChangeStatus]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài khóa luận"
     useEffect(() => {
@@ -401,7 +370,7 @@ function DeTaiKhoaLuan() {
             return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled;
         });
         if (showFilter2) {
-            setListThesisJoined(filteredList);
+            setListThesisJoin(filteredList);
         }
         else {
             setData(filteredList);
@@ -438,67 +407,17 @@ function DeTaiKhoaLuan() {
             id: 2,
             title: 'Đề tài tham gia (theo nhóm đề tài)',
             children: (
-                <div>
-                    <div className={`slide ${showFilter2 ? 'open' : ''}`}>
-                        <SearchForm
-                            getFields={filterFields}
-                            onSearch={onSearch}
-                            onReset={() => { setListThesisJoined(listThesisJoinOriginal) }}
-                        />
-                        <Divider />
-                    </div>
-                    {listThesisJoined.length === 0 &&
-                        <Empty className={cx("empty")} description="Không có dữ liệu" />
-                    }
-                    {listThesisJoined.map((item, index) => {
-                        return (
-                            <Card
-                                className={cx('card-DeTaiKhoaLuanThamGia')}
-                                key={index}
-                                type="inner"
-                                title={item.thesisId + " - " + item.thesisName}
-                                extra={
-                                    <ButtonCustom
-                                        primary
-                                        verysmall
-                                        onClick={() => {
-                                            ThesisGroupIdFromUrl ?
-                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?ThesisGroup=${ThesisGroupIdFromUrl}&thesis=${item.thesisId}`) :
-                                                navigate(`${config.routes.DeTaiKhoaLuanThamGia}?thesis=${item.thesisId}`);
-                                        }}
-                                    >
-                                        Chi tiết
-                                    </ButtonCustom>
-                                }
-                            >
-                                <Row gutter={[16]}>
-                                    <Col span={12}>
-                                        <p className={cx('item-description')}>Cấp: {item?.level}</p>
-                                        <p className={cx('item-description')}>Chủ nhiệm đề tài: {item?.instructor?.fullname}</p>
-                                        <p className={cx('item-description')}>
-                                            Trạng thái:
-                                            <Tag color={item?.status?.color} className={cx('tag-status')}>
-                                                {item?.status?.statusName}
-                                            </Tag>
-                                        </p>
-                                    </Col>
-                                    <Col span={12}>
-                                        <div
-                                            className={cx('container-deadline-register')}
-                                            style={{ display: screenWidth < 768 ? 'none' : 'flex' }}
-                                        >
-                                            <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
-                                            {item.startDate && item.finishDate
-                                                ? <p>{dayjs(item.startDate).format('DD/MM/YYYY HH:mm')} - {dayjs(item.finishDate).format('DD/MM/YYYY HH:mm')}</p>
-                                                : <p>Chưa có</p>
-                                            }
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </Card >
-                        );
-                    })}
-                </div >
+                <TabDeTaiKhoaLuanThamGia
+                    listThesisJoin={listThesisJoin}
+                    listThesisJoinOriginal={listThesisJoinOriginal}
+                    setListThesisJoin={setListThesisJoin}
+                    setListThesisJoinOriginal={setListThesisJoinOriginal}
+                    showFilter={showFilter2}
+                    filterFields={filterFields}
+                    onSearch={onSearch}
+                    setShowModalDetail={setShowModalDetail}
+                    reLoadListJoinThesis={reLoadListJoinThesis}
+                />
             ),
         },
     ];
@@ -508,7 +427,7 @@ function DeTaiKhoaLuan() {
             await deleteThesiss(selectedRowKeys);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
-            listRegisterthesisJoined();
+            setReLoadListJoinThesis(true)
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Xoá thành công');
         } catch (error) {
@@ -525,7 +444,7 @@ function DeTaiKhoaLuan() {
             await updateThesisByIds(selectedRowKeys, thesisData);
             // Refresh dữ liệu sau khi xóa thành công
             fetchData();
-            listRegisterthesisJoined();
+            setReLoadListJoinThesis(true)
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Hiển thị thành công');
         } catch (error) {
@@ -542,7 +461,7 @@ function DeTaiKhoaLuan() {
             await updateThesisByIds(selectedRowKeys, thesisData);
             // Refresh dữ liệu sau khi disable thành công
             fetchData();
-            listRegisterthesisJoined();
+            setReLoadListJoinThesis(true)
             setSelectedRowKeys([]); // Xóa các ID đã chọn
             message.success('Ẩn thành công');
         } catch (error) {

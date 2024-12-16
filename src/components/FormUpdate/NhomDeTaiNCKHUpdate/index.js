@@ -122,6 +122,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             let response;
             if (isUpdate) {
+                const lastModifyUserResponse = await getUserById(userId);
+                const lastModifyUserId = lastModifyUserResponse.data;
+                scientificResearchGroupData = {
+                    ...scientificResearchGroupData,
+                    lastModifyUserId: lastModifyUserId
+                }
                 response = await updateScientificResearchGroupById(showModal.scientificResearchGroupId, scientificResearchGroupData);
                 handleCloseModal();
             } else {

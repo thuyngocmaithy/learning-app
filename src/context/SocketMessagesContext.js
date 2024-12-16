@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { io } from 'socket.io-client';
 import { AccountLoginContext } from './AccountLoginContext';
 import { SRAndThesisJoinContext } from './SRAndThesisJoinContext';
+import { ConnectServerContext } from './ConnectServerContext';
 
 const SocketMessagesContext = createContext(null);
 
@@ -14,6 +15,7 @@ export const SocketMessagesProvider = ({ children }) => {
     const { userId } = useContext(AccountLoginContext);
     const { listSRAndThesisIdJoin } = useContext(SRAndThesisJoinContext)
     const [messagesMap, setMessagesMap] = useState({});
+    const { connectServer } = useContext(ConnectServerContext);
 
     const fetchAllMessages = useCallback(async (listSRAndThesisIdJoin, socketIo) => {
         try {
@@ -63,7 +65,7 @@ export const SocketMessagesProvider = ({ children }) => {
     useEffect(() => {
         let socketIo;
 
-        if (userId !== null && listSRAndThesisIdJoin.length > 0) {
+        if (userId !== null && listSRAndThesisIdJoin.length > 0 && connectServer === 'ok') {
             // Tạo kết nối socket cho for messages
             socketIo = io(`${process.env.REACT_APP_URL_API}/messages`, {
                 transports: ['websocket'],
@@ -142,7 +144,7 @@ export const SocketMessagesProvider = ({ children }) => {
             };
         }
 
-    }, [userId, listSRAndThesisIdJoin, fetchAllMessages]);
+    }, [userId, listSRAndThesisIdJoin, fetchAllMessages, connectServer]);
 
 
     // Function để gửi message đến room

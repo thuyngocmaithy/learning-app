@@ -167,8 +167,6 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
     const handleChangeIsStudent = (value) => {
         setIsStudent(value);
-        console.log(value);
-
     };
 
     const handleSubmit = async () => {

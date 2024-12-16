@@ -4,8 +4,8 @@ import { ListCourseActiveIcon } from '../../../../assets/icons';
 import Button from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { useEffect, useState, useCallback, useRef, useMemo, useContext } from 'react';
-import { deletePermissions, getAll as getAllPermission } from '../../../../services/permissionService';
-import { deleteFeatures, saveTreeFeature } from '../../../../services/featureService';
+import { checkRelatedData as checkRelatedDataPermission, deletePermissions, getAll as getAllPermission } from '../../../../services/permissionService';
+import { checkRelatedData as checkRelatedDataFeature, deleteFeatures, saveTreeFeature } from '../../../../services/featureService';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
@@ -23,7 +23,7 @@ import { useConfirm } from '../../../../hooks/useConfirm';
 const cx = classNames.bind(styles);
 
 function PhanQuyenChucNang() {
-    const { deleteConfirm } = useConfirm();
+    const { deleteConfirm, warningConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -87,7 +87,17 @@ function PhanQuyenChucNang() {
     }, []);
 
     // =======================================QUẢN LÝ CHỨC NĂNG================================================
-
+    // Hàm kiểm tra chức năng đã dùng 
+    const handleCheckFeatureUsed = async () => {
+        try {
+            const checkUsed = await checkRelatedDataFeature(selectedFeature.checked);
+            if (!checkUsed?.data?.success) {
+                warningConfirm(checkUsed?.data?.message, handleDeleteFeature)
+            }
+        } catch (error) {
+            message.error(error);
+        }
+    };
     // Hàm xử lý xóa các chức năng đã chọn
     const handleDeleteFeature = async () => {
         try {
@@ -97,7 +107,7 @@ function PhanQuyenChucNang() {
             setSelectedFeature([]); // Xóa các hàng đã chọn sau khi xóa thành công
             setReLoadStructureFeature(true); // Tải lại dữ liệu
         } catch (error) {
-            message.error('Xóa thất bại');
+            message.error(error?.response?.data?.message);
         }
     };
 
@@ -193,6 +203,18 @@ function PhanQuyenChucNang() {
         ],
         [permissionDetailData],
     );
+
+    // Hàm kiểm tra quyền đã dùng 
+    const handleCheckPermissionUsed = async () => {
+        try {
+            const checkUsed = await checkRelatedDataPermission(selectedPermission);
+            if (!checkUsed?.data?.success) {
+                warningConfirm(checkUsed?.data?.message, handledeletePermissions)
+            }
+        } catch (error) {
+            message.error(error);
+        }
+    };
 
     // Hàm xử lý xóa các quyền đã chọn
     const handledeletePermissions = async () => {
@@ -293,10 +315,10 @@ function PhanQuyenChucNang() {
                         type={'Xóa'}
                         onClick={() => {
                             if (tabActive === 2) {
-                                deleteConfirm('chức năng', handleDeleteFeature)
+                                deleteConfirm('chức năng', handleCheckFeatureUsed)
                             }
                             if (tabActive === 1) {
-                                deleteConfirm('quyền', handledeletePermissions)
+                                deleteConfirm('quyền', handleCheckPermissionUsed)
                             }
                         }}
                         isVisible={permissionDetailData?.isDelete}

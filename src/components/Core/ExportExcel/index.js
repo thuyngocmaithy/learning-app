@@ -6,26 +6,45 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        // **1. Thiết lập Header chính**
-        worksheet.mergeCells("A1:B3");
-        const headerCell = worksheet.getCell("B1");
-        headerCell.value = "UBND THÀNH PHỐ HỒ CHÍ MINH\nTRƯỜNG ĐẠI HỌC SÀI GÒN";
-        headerCell.font = { bold: true, size: 12 };
-        headerCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        // Tính tổng số cột
+        const totalColumns = schemas.length;
 
-        worksheet.mergeCells("E1:I3");
-        const subHeaderCell = worksheet.getCell("F2");
-        subHeaderCell.value = "Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam\nĐộc lập - Tự do - Hạnh phúc";
-        subHeaderCell.font = { bold: true, size: 12 };
-        subHeaderCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        // Hàm chuyển đổi số thứ tự cột thành ký tự
+        const getColumnLetter = (colIndex) => {
+            let letter = '';
+            while (colIndex > 0) {
+                const remainder = (colIndex - 1) % 26;
+                letter = String.fromCharCode(65 + remainder) + letter;
+                colIndex = Math.floor((colIndex - 1) / 26);
+            }
+            return letter;
+        };
 
-        if (headerContent) {
-            worksheet.mergeCells("A4:I5");
-            const titleCell = worksheet.getCell("A4");
-            titleCell.value = headerContent;
-            titleCell.font = { bold: true, size: 16 };
-            titleCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-        }
+        // Xác định cột cuối cùng
+        const lastColumn = getColumnLetter(totalColumns);
+
+        // **Header bên trái**
+        const headerCell1 = worksheet.getCell("A1");
+        headerCell1.value = "     UBND THÀNH PHỐ HỒ CHÍ MINH";
+        headerCell1.font = { size: 12 };
+        headerCell1.alignment = { vertical: "middle" };
+
+        const headerCell2 = worksheet.getCell("A2");
+        headerCell2.value = "        TRƯỜNG ĐẠI HỌC SÀI GÒN";
+        headerCell2.font = { bold: true, size: 12 };
+        headerCell2.alignment = { vertical: "middle" };
+
+        // **Header bên phải**
+        const subHeaderCell1 = worksheet.getCell(`${lastColumn}1`);
+        subHeaderCell1.value = "Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam";
+        subHeaderCell1.font = { bold: true, size: 12 };
+        subHeaderCell1.alignment = { horizontal: "right", vertical: "middle" };
+
+        const subHeaderCell2 = worksheet.getCell(`${lastColumn}2`);
+        subHeaderCell2.value = "Độc lập - Tự do - Hạnh phúc      ";
+        subHeaderCell2.font = { bold: true, size: 12 };
+        subHeaderCell2.alignment = { horizontal: "right", vertical: "middle" };
+
 
         // **2. Thiết lập tiêu đề cột**
         const headerRowIndex = headerContent ? 6 : 5;
@@ -41,7 +60,7 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
                 bottom: { style: "medium" },
                 right: { style: "medium" },
             };
-            worksheet.getColumn(index + 1).width = schema.type === "number" ? 12 : 30;
+            worksheet.getColumn(index + 1).width = schema.width ? schema.width : schema.type === "number" ? 12 : 30;
         });
 
         // **3. Thêm dữ liệu**
@@ -50,7 +69,11 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
             schemas.forEach((schema, colIndex) => {
                 const cell = row.getCell(colIndex + 1);
                 cell.value = item[schema.prop];
-                cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+                cell.alignment = {
+                    horizontal: schema.textAlign, // Căn giữa theo chiều ngang
+                    vertical: "middle",    // Căn giữa theo chiều dọc
+                    wrapText: true
+                };
                 cell.border = {
                     top: { style: "medium" },
                     left: { style: "medium" },
@@ -60,29 +83,7 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
             });
         });
 
-        // **4. Thêm viền đậm cho toàn bộ bảng**
-        const startRow = headerContent ? 7 : 6; // Dòng tiêu đề bắt đầu
-        const endRow = headerRowIndex + data.length; // Dòng cuối cùng (bao gồm dữ liệu)
-        const totalCols = schemas.length;
-
-        for (let row = startRow; row <= endRow; row++) {
-            for (let col = 1; col <= totalCols; col++) {
-                const cell = worksheet.getCell(row, col);
-                cell.alignment = {
-                    horizontal: "center", // Căn giữa theo chiều ngang
-                    vertical: "middle"    // Căn giữa theo chiều dọc
-                };
-                cell.border = {
-                    top: { style: "medium" },
-                    left: { style: "medium" },
-                    bottom: { style: "medium" },
-                    right: { style: "medium" },
-                };
-            }
-        }
-
-
-        // **5. Xuất file**
+        // **4. Xuất file**
         const buffer = await workbook.xlsx.writeBuffer();
         saveAs(new Blob([buffer], { type: "application/octet-stream" }), `${fileName}_${Date.now()}.xlsx`);
     } catch (error) {

@@ -1,7 +1,8 @@
 import classNames from 'classnames/bind';
 import styles from './TableCustomAnt.module.scss';
 import { Checkbox, List, Table } from 'antd';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
@@ -20,6 +21,7 @@ function TableCustomAnt({
     size,
     ...props
 }) {
+    const { userId } = useContext(AccountLoginContext);
     // State để lưu trạng thái phân trang
     const [paginationState, setPaginationState] = useState({
         current: 1,
@@ -53,10 +55,12 @@ function TableCustomAnt({
         }
     };
 
-
     const rowSelection = {
         selectedRowKeys,
         onChange: onSelectChange,
+        getCheckboxProps: (record) => ({
+            disabled: record.createUser ? record?.createUser !== userId : false, // Vô hiệu hóa nếu không đúng người tạo
+        }),
     };
 
     const columnsWithSTT = [
@@ -195,6 +199,7 @@ function TableCustomAnt({
                 locale={{
                     emptyText: 'No data available',
                 }}
+
                 {...props}
             />
         </div>

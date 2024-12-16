@@ -27,6 +27,7 @@ function DeTaiNCKHThamGia() {
     const { deleteConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
+
     // Lấy keyRoute tương ứng từ URL
     const currentPath = location.pathname;
     const keyRoute = Object.keys(config.routes).find(key => config.routes[key] === currentPath);
@@ -120,7 +121,8 @@ function DeTaiNCKHThamGia() {
                             id: data.id,
                             filename: data.filename,
                             createDate: dayjs(data.createDate).format('DD/MM/YYYY HH:mm'),
-                            createUser: data.createUser.fullname
+                            createUserName: data.createUser.fullname,
+                            createUser: data.createUser.userId
                         }
                     })
                     setDataAttach(dataAttach)
@@ -134,7 +136,6 @@ function DeTaiNCKHThamGia() {
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true); // Bắt đầu quá trình load
-
             try {
                 await Promise.all([getInfoscientificResearch(), getAttach()]); // Đợi cả 2 function hoàn thành
             } catch (error) {
@@ -185,7 +186,7 @@ function DeTaiNCKHThamGia() {
 
     // Hàm xóa file
     const handleDelete = async () => {
-        const loadingMessage = message.loading('Đang tải tệp lên', 0);
+        const loadingMessage = message.loading('Tệp đang được xóa', 0);
         try {
             await deleteFiles(selectedRowKeys);
             message.success('Xóa tệp thành công');
@@ -235,8 +236,8 @@ function DeTaiNCKHThamGia() {
         },
         {
             title: 'Người đính kèm',
-            key: 'createUser',
-            dataIndex: 'createUser',
+            key: 'createUserName',
+            dataIndex: 'createUserName',
         },
     ];
 

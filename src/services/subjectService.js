@@ -86,3 +86,14 @@ export const importSubject = async (data) => {
     throw error;
   }
 };
+
+export const checkRelatedData = async (ids) => {
+  try {
+    const url = `/subjects/checkRelatedData?ids=${ids}`;
+    const response = await api.get(url);
+    return response;
+  } catch (error) {
+    console.error('Check related data error:', error);
+    throw error;
+  }
+};

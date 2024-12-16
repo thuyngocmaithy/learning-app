@@ -191,6 +191,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
             let response;
             if (isUpdate) {
+                const createUserResponse = await getUserById(userId);
+                const lastModifyUserId = createUserResponse.data;
+                scientificResearchData = {
+                    ...scientificResearchData,
+                    lastModifyUserId: lastModifyUserId
+                }
                 response = await updateSRById(showModal.scientificResearchId, scientificResearchData);
                 handleCloseModal();
             } else {

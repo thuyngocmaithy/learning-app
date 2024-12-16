@@ -11,7 +11,7 @@ import Toolbar from '../../../../components/Core/Toolbar';
 import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { NguoiDungDetail } from '../../../../components/FormDetail/NguoiDungDetail';
 import { deleteUserById, importUser } from '../../../../services/userService';
-import { getAllUser, getWhereUser } from '../../../../services/userService';
+import { getAllUser } from '../../../../services/userService';
 import { getWhere } from '../../../../services/majorService';
 import { getAllFaculty } from '../../../../services/facultyService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
@@ -22,6 +22,7 @@ import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import ExportExcel from '../../../../components/Core/ExportExcel';
 import { useConfirm } from '../../../../hooks/useConfirm';
+import { getAll } from '../../../../services/cycleService';
 
 const cx = classNames.bind(styles);
 
@@ -39,6 +40,7 @@ function NguoiDung() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [isChangeStatus, setIsChangeStatus] = useState(false);
@@ -178,17 +180,17 @@ function NguoiDung() {
                 isActive: user.isActive,
                 avatar: user.avatar || "",
                 permission: user.permission || null,
+                createUser: user?.createUser?.userId,
             }));
 
             setData(listUser);
+            setDataOriginal(listUser);
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
             setIsLoading(false);
         }
     };
-
-
 
     useEffect(() => {
         fetchData();
@@ -201,8 +203,6 @@ function NguoiDung() {
             setIsChangeStatus(false);
         }
     }, [isChangeStatus]);
-
-
 
     const handleDelete = async () => {
         try {
@@ -224,8 +224,6 @@ function NguoiDung() {
         }
     };
 
-
-
     const NguoiDungUpdateMemoized = useMemo(() => {
         return (
             <NguoiDungUpdate
@@ -246,34 +244,9 @@ function NguoiDung() {
         />
     ), [showModalDetail]);
 
-
     const typeUser = [
         { label: 'Sinh viên', value: 1 },
         { label: 'Giảng viên', value: 0 },
-    ];
-
-
-    const typeNienNgành = [
-        {
-            label: "2020-2024",
-            value: "2020-2024"
-        },
-        {
-            label: "2021-2025",
-            value: "2021-2025"
-        },
-        {
-            label: "2022-2026",
-            value: "2022-2026"
-        },
-        {
-            label: "2023-2027",
-            value: "2023-2027"
-        },
-        {
-            label: "2024-2028",
-            value: "2024-2028"
-        },
     ];
 
 
@@ -312,76 +285,21 @@ function NguoiDung() {
     };
 
     const onSearchUser = async (values) => {
-        try {
+        const { userId, fullname, faculty, major, isStudent, firstAcademicYear, lastAcademicYear } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const dataIsStudent = item.isStudent === true ? 1 : 0;
+            const matchesUserId = userId ? item.userId?.toLowerCase().includes(userId.toLowerCase()) : true;
+            const matchesFullName = fullname ? item.fullname?.toLowerCase().includes(fullname.toLowerCase()) : true;
+            const matchesfaculty = faculty?.value ? item.faculty?.facultyId === faculty?.value : true;
+            const matchesMajor = major?.value ? item.major?.majorId === major?.value : true;
+            const matchesIsStudent = isStudent !== undefined ? dataIsStudent === isStudent : true;
+            const matcheFirstAcademicYear = firstAcademicYear ? item.firstAcademicYear === Number(firstAcademicYear) : true;
+            const matcheLastAcademicYear = lastAcademicYear ? item.lastAcademicYear === Number(lastAcademicYear) : true;
 
-            let searchParams = {
-                userId: values.userId?.trim() || undefined,
-                fullname: values.fullname?.trim() || undefined,
-                class: values.class?.trim() || undefined,
-                facultyId: values.faculty?.value || undefined,
-                majorId: values.major?.value || undefined,
-                isStudent: values.isStudent,
-                nien_khoa: values.nien_khoa,
-                firstAcademicYear: values.firstAcademicYear?.trim() || undefined,
-                lastAcademicYear: values.lastAcademicYear?.trim() || undefined
-            };
-
-            const response = await getWhereUser(searchParams);
-            if (response.status === 200) {
-                let listUser = response?.data?.data.map(user => ({
-                    userId: user.userId,
-                    fullname: user.fullname,
-                    dateOfBirth: user.dateOfBirth,
-                    placeOfBirth: user.placeOfBirth,
-                    phone: user.phone,
-                    email: user.email,
-                    isStudent: user.isStudent,
-                    class: user.class || "",
-                    faculty: user.faculty ? {
-                        facultyId: user.faculty.facultyId,
-                        facultyName: user.faculty.facultyName
-                    } : null,
-                    major: user.major ? {
-                        majorId: user.major.majorId,
-                        majorName: user.major.majorName
-                    } : null,
-                    stillStudy: user.stillStudy,
-                    firstAcademicYear: user.firstAcademicYear,
-                    lastAcademicYear: user.lastAcademicYear,
-                    nien_khoa: user.nien_khoa || "",
-                    sex: user.sex || "",
-                    dan_toc: user.dan_toc || "",
-                    ton_giao: user.ton_giao || "",
-                    quoc_tich: user.quoc_tich || "",
-                    cccd: user.cccd || "",
-                    ho_khau_thuong_tru: user.ho_khau_thuong_tru || "",
-                    khu_vuc: user.khu_vuc || "",
-                    khoi: user.khoi || "",
-                    bac_he_dao_tao: user.bac_he_dao_tao || "",
-                    ma_cvht: user.ma_cvht || "",
-                    ho_ten_cvht: user.ho_ten_cvht || "",
-                    email_cvht: user.email_cvht || "",
-                    dien_thoai_cvht: user.dien_thoai_cvht || "",
-                    ma_cvht_ng2: user.ma_cvht_ng2 || "",
-                    ho_ten_cvht_ng2: user.ho_ten_cvht_ng2 || "",
-                    email_cvht_ng2: user.email_cvht_ng2 || "",
-                    dien_thoai_cvht_ng2: user.dien_thoai_cvht_ng2 || "",
-                    ma_truong: user.ma_truong || "",
-                    ten_truong: user.ten_truong || "",
-                    hoc_vi: user.hoc_vi || "",
-                    isActive: user.isActive,
-                    avatar: user.avatar || "",
-                    permission: user.permission || null,
-                }));
-
-                setData(listUser);
-            } else {
-                setData([])
-            }
-        } catch (error) {
-            console.error('[onSearch - error]: ', error);
-            message.error('Có lỗi xảy ra khi tìm kiếm');
-        }
+            return matchesUserId && matchesFullName && matchesfaculty && matchesMajor && matchesIsStudent && matcheFirstAcademicYear && matcheLastAcademicYear;
+        });
+        setData(filteredList);
     };
 
     const filterFieldsUser = [
@@ -427,14 +345,6 @@ function NguoiDung() {
                 placeholder="Chọn chức danh"
             />
         </FormItem>,
-        <FormItem name="nien_khoa" label="Niên khoá">
-            <Select
-                style={{ width: '100%' }}
-                options={typeNienNgành}
-                allowClear
-                placeholder="Chọn niên khoá"
-            />
-        </FormItem>,
         <FormItem name="firstAcademicYear" label="Năm bắt đầu">
             <Input />
         </FormItem>,
@@ -459,14 +369,8 @@ function NguoiDung() {
         { label: "Số điện thoại", prop: "phone" },
         { label: "Ngày sinh", prop: "dateOfBirth" },
         { label: "Nơi sinh", prop: "placeOfBirth" },
-        // { label: "Dân tộc", prop: "dan_toc" },
-        // { label: "Tôn giáo", prop: "ton_giao" },
-        // { label: "CCCD/CMND", prop: "cccd" },
-        // { label: "Hộ khẩu", prop: "ho_khau_thuong_tru" },
-        // { label: "Khu vực", prop: "khu_vuc" },
         { label: "Khối", prop: "khoi" },
         { label: "Bậc hệ đào tạo", prop: "bac_he_dao_tao" },
-        // { label: "Cố vấn học tập", prop: "ho_ten_cvht" },
         { label: "Học vị", prop: "hoc_vi" }
 
     ];

@@ -23,7 +23,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
     const DISCRIPTION_ITEMS = [
         {
             key: '0-info',
-            label: 'Nhóm đề tài khóa luận',
+            label: 'Nhóm đề tài NCKH',
             children: scientificResearch ? scientificResearch.scientificResearchGroup?.scientificResearchGroupName : '',
         },
         {
@@ -55,6 +55,21 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
             key: '6-info',
             label: 'Ngân sách',
             children: scientificResearch ? scientificResearch.budget : '',
+        },
+        {
+            key: '7-info',
+            label: 'Sinh viên thực hiện',
+            children: scientificResearch
+                ?
+                scientificResearch?.users?.length > 0 &&
+                <ul className={cx('list-student-perform')}>
+                    {scientificResearch?.users?.map(itemUser => {
+                        // const userPerform = itemUser.
+                        if (itemUser.isApprove === 1)
+                            return <li key={itemUser.userId} className={cx('student-perform')}>{itemUser.userId} - {itemUser.fullname}</li>
+                    })}
+                </ul>
+                : '',
         },
     ];
 

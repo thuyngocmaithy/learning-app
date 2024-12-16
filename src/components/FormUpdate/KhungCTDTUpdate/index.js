@@ -143,6 +143,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
 
     return (
         <Update
+            form={form}
             title={title}
             isUpdate={isUpdate}
             showModal={showModal !== false ? true : false}

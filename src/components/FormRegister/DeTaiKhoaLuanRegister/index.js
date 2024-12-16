@@ -14,7 +14,7 @@ const DeTaiKhoaLuanRegister = memo(function DeTaiKhoaLuanRegister({
     title,
     showModal,
     setShowModal,
-    checkRegisterThesis
+    setReLoadListJoinThesis
 }) {
     const [form] = Form.useForm();
     const { userId } = useContext(AccountLoginContext);
@@ -103,7 +103,7 @@ const DeTaiKhoaLuanRegister = memo(function DeTaiKhoaLuanRegister({
             }
             const responseAdd = await createThesisUser(registerData);
             if (responseAdd) {
-                await checkRegisterThesis();
+                setReLoadListJoinThesis(true);
                 message.success(`Đăng ký thành công`);
                 await handleSendNotification();
             }

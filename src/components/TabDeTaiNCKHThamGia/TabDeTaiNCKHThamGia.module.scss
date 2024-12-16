@@ -1,0 +1,52 @@
+.container-deadline-register {
+    font-style: italic;
+    display: flex;
+}
+
+.card-DeTaiNCKHThamGia {
+    margin-bottom: 30px;
+}
+
+.tag-status {
+    margin-left: 10px;
+}
+
+.title-model-register {
+    margin-top: 10px;
+}
+
+.container-detail {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.label-detail {
+    margin-right: 10px;
+}
+
+.item-description {
+    margin-top: 7px;
+}
+
+.list-student-perform {
+    margin-left: 5px;
+}
+
+.student-perform {
+    margin-top: 7px;
+}
+
+@media only screen and (max-width: 768px) {
+    :global .ant-list-item-action {
+        display: grid;
+
+        >li {
+            padding: 0 !important;
+        }
+
+        .btnDetail {
+            margin-bottom: 5px;
+        }
+    }
+}

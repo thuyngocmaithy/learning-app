@@ -109,3 +109,13 @@ export const getByListSRId = async (scientificResearchIds) => {
     }
 }
 
+export const checkIsApproved = async (SRGId) => {
+    try {
+        const response = await api.get(`/scientificResearch-user/checkIsApproved/${SRGId}`);
+        return response.data;
+    } catch (error) {
+        console.error('[scientificResearch-userServive - checkIsApproved - error] : ', error);
+        throw error;
+    }
+}
+

@@ -14,7 +14,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
     title,
     showModal,
     setShowModal,
-    checkRegisterSR
+    setReLoadListJoinSR
 }) {
     const [form] = Form.useForm();
     const { userId } = useContext(AccountLoginContext);
@@ -103,7 +103,7 @@ const DeTaiNCKHRegister = memo(function DeTaiNCKHRegister({
             }
             const responseAdd = await createSRU(registerData);
             if (responseAdd) {
-                await checkRegisterSR();
+                setReLoadListJoinSR(true);
                 message.success(`Đăng ký thành công`);
                 await handleSendNotification();
             }

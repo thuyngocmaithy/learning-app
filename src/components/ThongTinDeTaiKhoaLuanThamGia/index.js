@@ -56,11 +56,20 @@ function ThongTinDeTaiKhoaLuanThamGia({ thesis }) {
             label: 'Ngân sách',
             children: thesis ? thesis.budget : '',
         },
-        // {
-        //     key: '6-info',
-        //     label: 'Sinh viên thực hiện',
-        //     children: thesis ? thesis.user.fullname : '',
-        // },
+        {
+            key: '7-info',
+            label: 'Sinh viên thực hiện',
+            children: thesis
+                ?
+                thesis?.users?.length > 0 &&
+                <ul className={cx('list-student-perform')}>
+                    {thesis?.users?.map(itemUser => {
+                        if (itemUser.isApprove === 1)
+                            return <li key={itemUser.userId} className={cx('student-perform')}>{itemUser.userId} - {itemUser.fullname}</li>
+                    })}
+                </ul>
+                : '',
+        },
     ];
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"

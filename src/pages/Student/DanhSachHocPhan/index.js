@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, memo, useCallback } from 'react';
+import { useState, useEffect, useContext, memo } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DanhSachHocPhan.module.scss';
 import Table from '../../../components/Table';
@@ -8,7 +8,7 @@ import {
     getUserById,
     saveRegisterSubjects
 } from '../../../services/userService';
-import { Descriptions, Empty, Radio, Spin, Tabs } from 'antd';
+import { Descriptions, Empty, Radio, Tabs } from 'antd';
 import { message } from '../../../hooks/useAntdApp';
 import { findKhungCTDTByUserId } from '../../../services/studyFrameService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';

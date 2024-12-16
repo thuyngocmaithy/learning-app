@@ -119,6 +119,12 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
             let response;
             if (isUpdate) {
+                const lastModifyUserResponse = await getUserById(userId);
+                const lastModifyUserId = lastModifyUserResponse.data;
+                thesisGroupData = {
+                    ...thesisGroupData,
+                    lastModifyUserId: lastModifyUserId
+                }
                 response = await updateThesisGroupById(showModal.thesisGroupId, thesisGroupData);
                 handleCloseModal();
             } else {

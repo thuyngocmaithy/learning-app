@@ -9,7 +9,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import NhomDeTaiNCKHUpdate from '../../../../components/FormUpdate/NhomDeTaiNCKHUpdate';
-import { deleteScientificResearchGroups, getAllSRGroup, getWhere, updateSRGByIds, importScientificResearchGroup } from '../../../../services/scientificResearchGroupService';
+import { deleteScientificResearchGroups, getAllSRGroup, updateSRGByIds, importScientificResearchGroup } from '../../../../services/scientificResearchGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereSR } from '../../../../services/scientificResearchService';
@@ -31,6 +31,7 @@ function NhomDeTaiNCKH() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModalUpdate, setShowModalUpdate] = useState(false); // hiển thị model updated
     const [data, setData] = useState([]);
+    const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
@@ -197,6 +198,7 @@ function NhomDeTaiNCKH() {
                         ...item,
                         facultyName: item.faculty.facultyName,
                         statusName: item.status.statusName,
+                        createUser: item?.createUser?.userId,
                         // startCreateSRDate và endCreateSRDate đều null
                         // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
                         // => Còn hạn thao tác cho nhóm đề tài nckh
@@ -207,6 +209,7 @@ function NhomDeTaiNCKH() {
                     }
                 })
                 setData(resultData);
+                setDataOriginal(resultData);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -361,38 +364,20 @@ function NhomDeTaiNCKH() {
         </FormItem>
     ];
 
-    const onSearch = async (values) => {
-        try {
-            // Lấy value ID của ngành từ select
-            values.faculty = values.faculty?.value || undefined;
-            values.status = values.status?.value || undefined;
+    const onSearch = (values) => {
+        const { scientificResearchGroupId, scientificResearchGroupName, startYear, finishYear, faculty, status } = values;
+        const originalList = dataOriginal;
+        const filteredList = originalList.filter((item) => {
+            const matchesSRGId = scientificResearchGroupId ? item.scientificResearchGroupId?.toLowerCase().includes(scientificResearchGroupId.toLowerCase()) : true;
+            const matchesSRGName = scientificResearchGroupName ? item.scientificResearchGroupName?.toLowerCase().includes(scientificResearchGroupName.toLowerCase()) : true;
+            const matchesstartYear = startYear ? item.startYear.toString().includes(startYear) : true;
+            const matchesfinishYear = finishYear ? item.finishYear.toString().includes(finishYear) : true;
+            const matchesfaculty = faculty?.value ? item.faculty?.facultyId === faculty?.value : true;
+            const matchesStatus = status?.value ? item.status?.statusId === status?.value : true;
 
-            const response = await getWhere(values);
-
-            if (response.status === 200) {
-                const resultData = response.data.data.map((item) => {
-                    var currentDate = new Date();
-                    return {
-                        ...item,
-                        facultyName: item.faculty.facultyName,
-                        statusName: item.status.statusName,
-                        // startCreateSRDate và endCreateSRDate đều null
-                        // hoặc startCreateSRDate <= currentDate && endCreateSRDate > currentDate
-                        // => Còn hạn thao tác cho nhóm đề tài nckh
-                        validDate: (item.startCreateSRDate === null && item.endCreateSRDate === null) ||
-                            (new Date(item.startCreateSRDate) <= currentDate && new Date(item.endCreateSRDate) > currentDate)
-                            ? true
-                            : false
-                    }
-                })
-                setData(resultData);
-            }
-            if (response.status === 204) {
-                setData([]);
-            }
-        } catch (error) {
-            console.error(error);
-        }
+            return matchesSRGId && matchesSRGName && matchesstartYear && matchesfinishYear && matchesfaculty && matchesStatus;
+        });
+        setData(filteredList);
     };
 
     const handleEnable = async () => {

@@ -80,3 +80,15 @@ export const saveTreeFeature = async (treeData) => {
         throw error;
     }
 };
+
+
+export const checkRelatedData = async (ids) => {
+    try {
+        const url = `/features/checkRelatedData?ids=${ids}`;
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        console.error('Check related data error:', error);
+        throw error;
+    }
+};

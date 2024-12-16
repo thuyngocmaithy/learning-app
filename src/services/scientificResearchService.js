@@ -130,3 +130,13 @@ export const importScientificResearch = async (data) => {
     }
 };
 
+export const checkRelatedData = async (ids) => {
+    try {
+        const url = `/scientificResearchs/checkRelatedData?ids=${ids}`;
+        const response = await api.get(url);
+        return response;
+    } catch (error) {
+        console.error('Check related data error:', error);
+        throw error;
+    }
+};
