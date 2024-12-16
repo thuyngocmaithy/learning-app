@@ -62,7 +62,7 @@ function NganhChuyenNganh() {
 
 
     // Import 
-    const [showModalImportNgành, setShowModalImportNgành] = useState(false);
+    const [showModalImportFaculty, setshowModalImportFaculty] = useState(false);
     const [showModalImportChuyenNganh, setShowModalImportChuyenNganh] = useState(false);
 
 
@@ -489,7 +489,7 @@ function NganhChuyenNganh() {
                             />
                             <Toolbar
                                 type={'Nhập file Excel'}
-                                onClick={() => setShowModalImportNgành(true)}
+                                onClick={() => setshowModalImportFaculty(true)}
                                 isVisible={permissionDetailData?.isAdd}
                             />
                             <Toolbar type={'Xuất file Excel'} onClick={handleExportExcelNganh} />
@@ -544,8 +544,8 @@ function NganhChuyenNganh() {
             </div>
             <ImportExcel
                 title={'Ngành'}
-                showModal={showModalImportNgành}
-                setShowModal={setShowModalImportNgành}
+                showModal={showModalImportFaculty}
+                setShowModal={setshowModalImportFaculty}
                 reLoad={fetchFacultyData}
                 type={config.imports.FACULTY}
                 onImport={importFaculty}
