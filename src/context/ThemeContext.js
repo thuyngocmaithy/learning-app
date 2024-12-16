@@ -31,6 +31,7 @@ function ThemeProvider({ children }) {
             document.documentElement.style.setProperty('--color-bg-container-item-hover', themeConfig.token.colorBgContainerItem_Hover);
             document.documentElement.style.setProperty('--color-bg-container-item-red-hover', themeConfig.token.colorBgContainerItemRed_Hover);
             document.documentElement.style.setProperty('--color-divider', themeConfig.token.colorDivider);
+            document.documentElement.style.setProperty('--color-icon', themeConfig.token.colorIcon);
 
             // Các biến màu cho button
             document.documentElement.style.setProperty('--color-btn-primary', themeConfig.token.colorBtnPrimary); // Màu nền button chính
