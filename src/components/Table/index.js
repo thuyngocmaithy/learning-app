@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useContext, memo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio } from '@mui/material';
-import { Skeleton } from 'antd';
 import { message } from "../../hooks/useAntdApp"
 import classNames from 'classnames/bind';
 import styles from './Table.module.scss';
@@ -11,6 +10,7 @@ import { AccountLoginContext } from '../../context/AccountLoginContext';
 import { getWhere } from '../../services/subject_course_openingService';
 import { ThemeContext } from '../../context/ThemeContext';
 import Loader from '../Loader';
+import { Tooltip } from 'antd';
 
 const cx = classNames.bind(styles);
 
@@ -96,7 +96,9 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
             return response.data.data.map((item) => {
                 return {
                     subjectId: item.subject?.subjectId,
-                    semesterId: getSemesterIndex(item.semester?.semesterId)
+                    semesterId: getSemesterIndex(item.semester?.semesterId),
+                    disabled: item.disabled,
+                    instructor: item.instructor
                 }
             });
         } catch (error) {
@@ -244,13 +246,47 @@ const SubjectCell = memo(({
         const isRegistered = registeredInfo?.semesterIndex === semesterIndex;
         const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
         // Kiểm tra môn học đang mở kì này
+        const findIsScoreOpen = courseOpen?.find(
+            open => open.subjectId === subject.subjectId && open.semesterId === semesterIndex
+        ); // Tìm môn học được mở     
+        const instructor = findIsScoreOpen?.instructor; // Giảng viên dạy
+        // Kiểm tra môn học đang mở kì này
         const isOpen = courseOpen?.some(
             open => open.subjectId === subject.subjectId && open.semesterId === semesterIndex
         );
-        return { isRegistered, hasScore, isOpen };
+        return { isRegistered, hasScore, isOpen, instructor };
     }, [registeredInfo?.semesterIndex, semesterIndex, scoreInfo, courseOpen, subject.subjectId]);
 
-    const { isRegistered, hasScore, isOpen } = cellState;
+    const { isRegistered, hasScore, isOpen, instructor } = cellState;
+    const isShowTeacher = !courseOpen[0]?.disabled;
+
+    const radioElement = useMemo(() => {
+        const radioProps = {
+            checked: hasScore || isRegistered,// Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
+            onChange: () => handleChange(subject.subjectId, semesterIndex),
+            disabled: hasScore || disableCheckbox,// Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
+            size: "small",
+            style: {
+                color: theme === "dark" ? "rgb(39 61 157)" : "#000",
+                opacity: (hasScore || disableCheckbox) ? "0.3" : "1",
+            },
+        };
+
+        return hasScore
+            ? <div className={cx('radio-check')}>
+                <Radio {...radioProps} />
+                <span>{scoreInfo.finalScore10}</span>
+            </div>
+            : <Radio {...radioProps} />
+    }, [hasScore, isRegistered, scoreInfo, disableCheckbox, theme, subject.subjectId, semesterIndex, handleChange]);
+
+    const renderCellContent = (isShowTeacher && instructor) ? (
+        <Tooltip title={instructor} color={'#108ee9'} key={`tooltip-${subject.subjectId}-${semesterIndex}`}>
+            <div style={{ background: '#66b0ff2e', borderRadius: '999px' }}>{radioElement}</div>
+        </Tooltip>
+    ) : (
+        radioElement
+    );
 
     return (
         <TableCell
@@ -260,31 +296,7 @@ const SubjectCell = memo(({
                 color: isOpen ? '#000' : 'var(--color-text-base)'
             }}
         >
-            {hasScore
-                ? <div className={cx('radio-check')}>
-                    <Radio
-                        checked={hasScore || isRegistered} // Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
-                        onChange={() => handleChange(subject.subjectId, semesterIndex)}
-                        disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
-                        size="small"
-                        style={{
-                            color: theme === 'dark' ? 'rgb(39 61 157)' : '#000',
-                            opacity: (hasScore || disableCheckbox) ? '0.3' : '1'
-                        }}
-                    />
-                    <span>{scoreInfo.finalScore10}</span>
-                </div>
-                : <Radio
-                    checked={hasScore || isRegistered} // Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
-                    onChange={() => handleChange(subject.subjectId, semesterIndex)}
-                    disabled={hasScore || disableCheckbox} // Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
-                    size="small"
-                    style={{
-                        color: theme === 'dark' ? 'rgb(39 61 157)' : '#000',
-                        opacity: (hasScore || disableCheckbox) ? '0.3' : '1'
-                    }}
-                />
-            }
+            {renderCellContent}
         </TableCell>
     );
 }, (prevProps, nextProps) => {

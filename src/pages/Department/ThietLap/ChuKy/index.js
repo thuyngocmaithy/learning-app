@@ -8,16 +8,17 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import ChuKyUpdate from '../../../../components/FormUpdate/ChuKyUpdate';
-import { deleteCycles, getAll, getWhere } from '../../../../services/cycleService';
+import { checkRelatedData, deleteCycles, getAll } from '../../../../services/cycleService';
 import config from '../../../../config';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import { useConfirm } from '../../../../hooks/useConfirm';
+import { getWhere } from '../../../../services/studyFrameService';
 
 const cx = classNames.bind(styles);
 
 function ChuKy() {
-    const { deleteConfirm } = useConfirm();
+    const { deleteConfirm, warningConfirm } = useConfirm();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
     // Lấy keyRoute tương ứng từ URL
@@ -105,21 +106,35 @@ function ChuKy() {
 
 
 
+    // Hàm kiểm tra chu kỳ đã dùng 
+    const handleCheckCycleUsed = async () => {
+        try {
+            const checkUsed = await checkRelatedData(selectedRowKeys);
+            if (!checkUsed?.data?.success) {
+                warningConfirm(checkUsed?.data?.message, handleDelete)
+            } else {
+                handleDelete();
+            }
+        } catch (error) {
+            message.error(error);
+        }
+    };
+
     const handleDelete = async () => {
         try {
             if (selectedRowKeys.length === 0) return;
             let checkUsed = false;
             await Promise.all(
                 selectedRowKeys.map(async (item) => {
-                    // kiểm tra có sử dụng trong frame structure chưa
-                    const resCheckUsed = await getWhere({ cycleId: item });
-                    if (resCheckUsed?.data?.data?.length !== 0) {
+                    // kiểm tra có sử dụng trong studyframe chưa
+                    const resCheckUsed = await getWhere({ cycle: item });
+                    if (resCheckUsed?.data?.data?.length !== 0 && resCheckUsed.status === 200) {
                         checkUsed = true;
                     }
                 })
             );
             if (checkUsed) {
-                message.warning('Chu kỳ đã được sử dụng. Bạn không thể xóa');
+                message.warning('Chu kỳ đã được sử dụng trong dữ liệu khung đào tạo. Bạn không thể xóa');
             } else {
                 await deleteCycles(selectedRowKeys); // Gọi API để xóa các hàng đã chọn
                 // Refresh dữ liệu sau khi xóa thành công
@@ -167,7 +182,7 @@ function ChuKy() {
                     />
                     <Toolbar
                         type={'Xóa'}
-                        onClick={() => deleteConfirm('chu kỳ', handleDelete)}
+                        onClick={() => deleteConfirm('chu kỳ', handleCheckCycleUsed)}
                         isVisible={permissionDetailData?.isDelete}
                     />
                 </div>
