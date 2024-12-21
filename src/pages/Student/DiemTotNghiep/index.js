@@ -86,6 +86,11 @@ function DiemTotNghiep() {
             ).toFixed(2));
         }
 
+        // Ensure GPA is set to 0 if any grade is below 4 (F)
+        if (creditsDNum > 0) {
+            newGPA = 0;
+        }
+
         const remainingCredits = totalCreditsNum - (currentCreditsNum - improvedCreditsNum);
 
         setCalculatedGPA(isNaN(newGPA) ? 0 : newGPA);

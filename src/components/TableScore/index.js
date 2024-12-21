@@ -33,6 +33,7 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const [numericGrades, setNumericGrades] = useState({});
     const [showModalDetail, setShowModalDetail] = useState(false);
     const didMountRef = useRef(false);
+    const [calculatedGPA, setCalculatedGPA] = useState(0);
 
 
     // // Tính toán số tín chỉ đã học - trừ những môn Thể chất và quốc phòng
@@ -111,6 +112,11 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                 expectedScore10: numValue,
                 expectedScoreLetter: letterGrade
             });
+
+            // Ensure GPA is set to 0 if any grade is below 4 (F)
+            if (numValue < 4) {
+                setCalculatedGPA(0);
+            }
         }
     }, [handleChange, onSubjectModification]);
 
