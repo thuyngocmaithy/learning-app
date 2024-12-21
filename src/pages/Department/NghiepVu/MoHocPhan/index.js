@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Empty, Progress, Skeleton, Switch, Tag } from 'antd';
+import { Empty, Progress, Switch, Tag } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
 import ButtonCustom from '../../../../components/Core/Button';
 import TableHP from '../../../../components/TableDepartment';
@@ -188,6 +188,7 @@ function MoHocPhan() {
     }, [fetchDataAssignment, fetchDataFrameArrange]);
 
     const handleOpeningCourse = async () => {
+        const loadingMessage = message.loading('Đang mở học phần', 0);
         const dataSave = [];
 
         selectedSemesters.forEach((id) => {
@@ -216,6 +217,9 @@ function MoHocPhan() {
         } catch (error) {
             message.error('Mở học phần thất bại')
             console.error(error);
+        }
+        finally {
+            loadingMessage();
         }
     };
 

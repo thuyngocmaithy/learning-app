@@ -97,7 +97,7 @@
     margin-left: 20px;
     font-size: 3.5rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--color-text-link);
 
 }
 
@@ -132,7 +132,7 @@
 :global .ant-table-title {
     font-weight: 700;
     font-size: 18px;
-    color: var(--primary);
+    color: var(--color-text-link);
 }
 
 @media only screen and (max-width: 768px) {

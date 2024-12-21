@@ -45,11 +45,11 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 form.resetFields();
                 form.setFieldsValue({
                     semesterName: showModal.semesterName,
-                    ...(showModal.cycle && {
-                        cycle: {
-                            value: showModal.cycle.cycleId,
-                            label: showModal.cycle.cycleName
-                        }
+                    ...(showModal.cycles && {
+                        cycle: showModal.cycles.map(cycle => ({
+                            value: cycle.cycleId,
+                            label: cycle.cycleName
+                        }))
                     }),
                     academicYear: showModal.academicYear
                 });
@@ -73,7 +73,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
 
             let semesterData = {
                 semesterName: values.semesterName,
-                cycle: values.cycle?.value,
+                cycle: values.cycle?.map(c => c.value), // Lấy danh sách cycleId từ selected cycles
                 academicYear: values.academicYear
             };
 
@@ -112,6 +112,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
             form={form}
+            width='700px'
         >
             <Form form={form}>
                 <FormItem
@@ -144,6 +145,7 @@ const HocKyUpdate = memo(function HocKyUpdate({
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
                         options={cycleOptions}
+                        mode="multiple"
                     />
                 </FormItem>
                 <FormItem

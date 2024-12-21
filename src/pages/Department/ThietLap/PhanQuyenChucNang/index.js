@@ -93,6 +93,8 @@ function PhanQuyenChucNang() {
             const checkUsed = await checkRelatedDataFeature(selectedFeature.checked);
             if (!checkUsed?.data?.success) {
                 warningConfirm(checkUsed?.data?.message, handleDeleteFeature)
+            } else {
+                handleDeleteFeature();
             }
         } catch (error) {
             message.error(error);
@@ -210,6 +212,8 @@ function PhanQuyenChucNang() {
             const checkUsed = await checkRelatedDataPermission(selectedPermission);
             if (!checkUsed?.data?.success) {
                 warningConfirm(checkUsed?.data?.message, handledeletePermissions)
+            } else {
+                handledeletePermissions();
             }
         } catch (error) {
             message.error(error);

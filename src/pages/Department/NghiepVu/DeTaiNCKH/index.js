@@ -465,11 +465,13 @@ function DeTaiNCKH() {
     ];
 
     // Hàm kiểm tra đề tài đã dùng 
-    const handleCheckFeatureUsed = async () => {
+    const handleCheckSRUsed = async () => {
         try {
             const checkUsed = await checkRelatedData(selectedRowKeys);
             if (!checkUsed?.data?.success) {
                 warningConfirm(checkUsed?.data?.message, handleDelete)
+            } else {
+                handleDelete();
             }
         } catch (error) {
             message.error(error);
@@ -650,7 +652,7 @@ function DeTaiNCKH() {
                                 }
                                 <Toolbar
                                     type={'Xóa'}
-                                    onClick={() => deleteConfirm('đề tài nghiên cứu', handleCheckFeatureUsed)}
+                                    onClick={() => deleteConfirm('đề tài nghiên cứu', handleCheckSRUsed)}
                                     isVisible={permissionDetailData.isDelete}
                                 />
                                 <Toolbar

@@ -47,7 +47,6 @@ function DeTaiNCKH() {
     const [showFilter2, setShowFilter2] = useState(false);
     const [statusOptions, setStatusOptions] = useState([]);
     const [loadedListSRJoin, setLoadedListSRJoin] = useState(false); // đã load danh sách tham gia
-    const [SRIsApproved, setSRIsApproved] = useState(false); // đã load danh sách tham gia
 
     // Sử dụng useEffect để theo dõi thay đổi của screenWidth
     useEffect(() => {

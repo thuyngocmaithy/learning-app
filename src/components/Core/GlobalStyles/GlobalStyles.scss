@@ -11,14 +11,16 @@
     --black: #000;
     --white: #fff;
     --text-gray-color: #e9e9e9;
-    --text-gray-dark-color: #778aa2;
+    // --text-gray-dark-color: #778aa2;
+    --text-color: #ffffff;
+    --text-gray-dark-color: #c0aeae;
     --text-black-color: #000;
     --red-100: #fceeee;
     --red-200: #fee2e2;
     --red-300: #f39595;
     --color-subject-open: rgb(198 234 252);
-    --color-subject-correct: #7fe789;
-    --color-subject-error: #fd9393de;
+    --color-subject-correct: #d9ffdd;
+    --color-subject-error: #ffdfdfd6;
 
 
     // BOX-SHADOW
@@ -498,5 +500,14 @@ body {
     .ant-pagination {
         background-color: var(--color-bg-container);
         padding-bottom: 15px;
+    }
+
+    .apexcharts-menu {
+        background: var(--color-bg-container);
+    }
+
+    .apexcharts-tooltip.apexcharts-theme-light {
+        border: 1px solid #e3e3e3;
+        color: var(--text-black-color);
     }
 }

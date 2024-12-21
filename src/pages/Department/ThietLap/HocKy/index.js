@@ -84,11 +84,14 @@ function HocKy() {
             const result = await getSemesters();
             if (result.status === 200) {
                 const semesterData = result.data.data.map((item) => {
+                    // Tạo chuỗi cycleName từ mảng cycles
+                    const cycleNames = item.cycles?.map(cycle => cycle.cycleName).join(', ') || '';
+
                     return {
                         ...item,
-                        cycleName: item.cycle?.cycleName
+                        cycleName: cycleNames, // Gán chuỗi cycleName vào data
                     };
-                })
+                });
                 setData(semesterData);
             }
             setIsLoading(false);

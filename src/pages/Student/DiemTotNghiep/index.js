@@ -153,6 +153,7 @@ function DiemTotNghiep() {
     }, []);
 
     const saveExpectedScore = async () => {
+        const loadingMessage = message.loading('Đang cập nhật điểm dự kiến', 0);
         try {
 
             const subjectsToCreate = [];
@@ -216,6 +217,9 @@ function DiemTotNghiep() {
         } catch (error) {
             console.error('Error saving expected scores:', error);
             message.error('Cập nhật điểm dự kiến thất bại');
+        }
+        finally {
+            loadingMessage()
         }
     };
 
