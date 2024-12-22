@@ -35,9 +35,9 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 console.error('HocKyUpdate - fetchCycle - error:', error);
             }
         };
-
-        fetchCycle();
-    }, []);
+        if (showModal)
+            fetchCycle();
+    }, [showModal]);
 
     useEffect(() => {
         if (form && showModal) {

@@ -295,7 +295,7 @@ function ThanhPhanKhungDT() {
                         onClick={() => {
                             // Kiểm tra các khối kiến thức không được xóa
                             // Danh sách ID không cho phép xóa
-                            const restrictedIds = ['MAKHUNG2', 'GDDC_BB', 'GDDC_TC', 'GDDC', 'CSN', 'NGANH', 'CHUYENNGANH', 'CHUYENNGHIEP'];
+                            const restrictedIds = ['GDDC_BB', 'GDDC_TC', 'GDDC', 'CSN', 'NGANH', 'CHUYENNGANH', 'CHUYENNGHIEP'];
 
                             // Kiểm tra xem selectedRowKeys có chứa bất kỳ ID nào trong restrictedIds không
                             const hasRestrictedId = selectedRowKeys.some((id) => restrictedIds.includes(id));

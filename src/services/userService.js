@@ -55,9 +55,9 @@ export const loginToSgu = async (username, password, isSync) => {
 	}
 };
 
-export const getUsersByFaculty = async (facultyId) => {
+export const getUsersByFaculty = async (majorId) => {
 	try {
-		const response = await api.get(`/users/users-by-faculty/${facultyId}`);
+		const response = await api.get(`/users/users-by-major/${majorId}`);
 		return response.data;
 	} catch (error) {
 		console.error('[userService - getUsersByFaculty - error] : ', error);
@@ -218,8 +218,8 @@ export const getWhereUser = async (params) => {
 				userId: params?.userId || undefined,
 				fullname: params?.fullname || undefined,
 				class: params?.class || undefined,
-				facultyId: params?.facultyId || undefined,
 				majorId: params?.majorId || undefined,
+				specializationId: params?.specializationId || undefined,
 				isStudent: params?.isStudent,
 				nien_khoa: params?.nien_khoa || undefined,
 				firstAcademicYear: params?.firstAcademicYear || undefined,

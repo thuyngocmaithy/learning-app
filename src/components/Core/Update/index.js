@@ -26,8 +26,10 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
         return isUpdate || fullTitle
             ? [
                 <ButtonCustom key={'save'} primary small onClick={async () => {
-                    await onUpdate();
-                    handleCancel();
+                    // await onUpdate();
+                    // handleCancel();
+                    const resUpdate = await onUpdate();
+                    if (resUpdate) handleCancel();
                 }}>
                     Lưu
                 </ButtonCustom>,
@@ -50,7 +52,7 @@ function Update({ form, title = '', fullTitle = null, children, isUpdate, hideFo
                     Lưu & Sao chép
                 </ButtonCustom>,
             ];
-    }, [isUpdate, onUpdate, form, fullTitle]);
+    }, [isUpdate, fullTitle, onUpdate, handleCancel, form]);
 
     const modalTitle = useMemo(() => {
         if (fullTitle) return fullTitle;

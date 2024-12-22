@@ -42,16 +42,6 @@ export const updateSubjectById = async (subjectId, subjectData) => {
   }
 };
 
-export const getAllSubjectDetail = async () => {
-  try {
-    const response = await api.get('/subjects/detail/');
-    return response;
-  } catch (error) {
-    console.error('[subjectService - getAllSubjectDetail - error]:', error);
-    throw error;
-  }
-}
-
 export const getWhereSubject = async (params) => {
   try {
     const response = await api.get('/subjects/getWhere', {

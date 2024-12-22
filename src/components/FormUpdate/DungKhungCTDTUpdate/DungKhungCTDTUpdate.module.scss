@@ -24,8 +24,18 @@
 }
 
 .item-subject,
+.subject-info,
 .title-frame {
     display: flex;
+}
+
+.item-subject {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.checkbox-semester {
+    margin-right: 7px;
 }
 
 .dash {

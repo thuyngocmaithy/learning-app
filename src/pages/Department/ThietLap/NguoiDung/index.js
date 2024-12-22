@@ -22,7 +22,6 @@ import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import ExportExcel from '../../../../components/Core/ExportExcel';
 import { useConfirm } from '../../../../hooks/useConfirm';
-import { getAll } from '../../../../services/cycleService';
 
 const cx = classNames.bind(styles);
 

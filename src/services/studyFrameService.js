@@ -50,17 +50,6 @@ export const deleteStudyFrames = async (ids) => {
     }
 };
 
-export const GetSubjectByMajor = async (userId) => {
-    try {
-        const response = await api.get(`/study-frames/major/${userId}`);
-        return response.data;
-    } catch (error) {
-        console.error('[study-frames - GetSubjectByMajor - error]:', error);
-        throw error;
-    }
-};
-
-
 export const findKhungCTDTByUserId = async (userId) => {
     try {
         const response = await api.get(`/study-frames/findKhungCTDTByUserId?userId=${userId}`);
@@ -71,10 +60,10 @@ export const findKhungCTDTByUserId = async (userId) => {
     }
 };
 
-export const findKhungCTDTDepartment = async (facultyId, cycleId) => {
+export const findKhungCTDTDepartment = async (majorId, cycleId) => {
     try {
         const params = {
-            facultyId,
+            majorId,
             cycleId
         };
 

@@ -2,12 +2,12 @@ import { memo } from 'react';
 import FormItem from '../../Core/FormItem';
 import Detail from '../../Core/Detail';
 import classNames from 'classnames/bind';
-import styles from './ChuyenNganhDetail.module.scss';
+import styles from './KhoaDetail.module.scss';
 import { Form } from 'antd';
 
 const cx = classNames.bind(styles);
 
-export const ChuyenNganhDetail = memo(function ChuyenNganhDetail({
+export const KhoaDetail = memo(function KhoaDetail({
     title,
     showModal,
     setShowModal
@@ -20,6 +20,7 @@ export const ChuyenNganhDetail = memo(function ChuyenNganhDetail({
             setShowModal(false);
         }
     };
+
     return (
         <Detail
             title={title}
@@ -27,13 +28,10 @@ export const ChuyenNganhDetail = memo(function ChuyenNganhDetail({
             onClose={handleCloseModal}
             className={cx('wrapper-modal-detail')}>
             <Form className={cx('container-detail')}>
-                <FormItem label={'Mã chuyên ngành'} name="majorId">
-                    <p>{showModal?.majorId || ''}</p>
+                <FormItem label={'Mã khoa'} name="facultyId">
+                    <p>{showModal?.facultyId || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên chuyên ngành'} name="majorName">
-                    <p>{showModal?.majorName || ''}</p>
-                </FormItem>
-                <FormItem label={'Tên ngành'} name="facultyName">
+                <FormItem label={'Tên khoa'} name="facultyName">
                     <p>{showModal?.facultyName || ''}</p>
                 </FormItem>
             </Form>

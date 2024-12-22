@@ -13,7 +13,7 @@ async function processCourseRegister(userId) {
 
     const registeredMap = {};
     if (registeredSubjectsRes?.length) {
-        registeredSubjectsRes.map((registration) => {
+        registeredSubjectsRes.forEach((registration) => {
             const { semesterId, semesterName, academicYear } = registration.semester;
             const semesterKey = `Học kỳ ${semesterName} - Năm ${academicYear}`;
 

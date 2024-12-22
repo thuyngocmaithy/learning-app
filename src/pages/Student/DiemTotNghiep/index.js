@@ -51,7 +51,7 @@ function DiemTotNghiep() {
         const fetchPoint = async () => {
             const userData = await getUserById(userId);
             const gpa = parseFloat(userData.data.GPA) || 0;
-            const totalCredits = parseInt(userData.data.faculty.creditHourTotal);
+            const totalCredits = parseInt(userData.data.major?.creditHourTotal);
             const currentCreditHour = parseInt(userData.data.currentCreditHour);
             setTotalCredits(totalCredits);
             setCurrentGPA(gpa);

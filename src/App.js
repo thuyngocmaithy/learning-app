@@ -170,7 +170,7 @@ function App() {
 
     // Nếu trạng thái là lỗi, hiển thị thông báo lỗi
     if (connectServer === 'error') {
-        return <div className="container-loading">Vui lòng tải lại trang</div>;
+        return <ResultCustomAnt tile='Không thể kết nối đến server. Vui lòng tải lại trang.' />
     }
 
     // Nếu đang tải, hiển thị Spinner

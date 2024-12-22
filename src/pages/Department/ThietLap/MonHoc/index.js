@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './MonHoc.module.scss';
-import { Tag, Divider, Input, Select, Form } from 'antd';
+import { Divider, Input, Form } from 'antd';
 import { message } from '../../../../hooks/useAntdApp';
 import { ProjectIcon } from '../../../../assets/icons';
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -8,7 +8,7 @@ import ButtonCustom from '../../../../components/Core/Button';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
-import { checkRelatedData, deleteSubjectById, getAll, getWhereSubject, importSubject } from '../../../../services/subjectService';
+import { checkRelatedData, deleteSubjectById, getAll, importSubject } from '../../../../services/subjectService';
 import MonHocUpdate from '../../../../components/FormUpdate/MonHocUpdate';
 import { MonHocDetail } from '../../../../components/FormDetail/MonHocDetail';
 import SearchForm from '../../../../components/Core/SearchForm';

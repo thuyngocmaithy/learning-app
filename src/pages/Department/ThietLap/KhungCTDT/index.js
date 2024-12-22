@@ -9,12 +9,12 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { BuildOutlined, EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import KhungCTDTUpdate from '../../../../components/FormUpdate/KhungCTDTUpdate';
-import { checkRelatedData, deleteStudyFrames, getAll as getAllStudyFrame, getWhere } from '../../../../services/studyFrameService';
+import { checkRelatedData, deleteStudyFrames, getAll as getAllStudyFrame } from '../../../../services/studyFrameService';
 import { getAll as getAllCycle } from '../../../../services/cycleService';
 import DungKhungCTDTUpdate from '../../../../components/FormUpdate/DungKhungCTDTUpdate';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
-import { getAllFaculty } from '../../../../services/facultyService';
+import { getAll as getAllMajor } from '../../../../services/majorService';
 import { useLocation } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import config from '../../../../config';
@@ -35,11 +35,12 @@ function KhungCTDT() {
     const [isUpdate, setIsUpdate] = useState(false);
     const [showModal, setShowModal] = useState(false); // hiển thị model updated
     const [showModalBuildFrame, setShowModalBuildFrame] = useState(false); // hiển thị model dựng khung
+    const [buildFrameData, setBuildFrameData] = useState(false); // Data khung để dựng
     const [data, setData] = useState([]);
     const [dataOriginal, setDataOriginal] = useState([]);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
-    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
     const [cycleOptions, setCycleOptions] = useState([]);
 
@@ -56,7 +57,7 @@ function KhungCTDT() {
                     setCycleOptions(options);
                 }
             } catch (error) {
-                console.error('HocKyUpdate - fetchCycle - error:', error);
+                console.error('KhungCTDT - fetchCycle - error:', error);
             }
         };
 
@@ -66,13 +67,13 @@ function KhungCTDT() {
     useEffect(() => {
         const fetchFaculties = async () => {
             try {
-                const response = await getAllFaculty();
+                const response = await getAllMajor();
                 if (response && response.data) {
-                    const options = response.data.map((faculty) => ({
-                        value: faculty.facultyId,
-                        label: faculty.facultyName,
+                    const options = response.data.map((major) => ({
+                        value: major.majorId,
+                        label: major.majorName,
                     }));
-                    setFacultyOptions(options);
+                    setMajorOptions(options);
                 }
             } catch (error) {
                 console.error('Error fetching faculties:', error);
@@ -96,8 +97,8 @@ function KhungCTDT() {
         },
         {
             title: 'Ngành',
-            dataIndex: 'facultyName',
-            key: 'facultyName',
+            dataIndex: 'majorName',
+            key: 'majorName',
         },
         {
             title: 'Chu kỳ',
@@ -117,7 +118,8 @@ function KhungCTDT() {
                         outline
                         verysmall
                         onClick={() => {
-                            setShowModalBuildFrame(record);
+                            setShowModalBuildFrame(true);
+                            setBuildFrameData(record)
                         }}
                     >
                         Xây dựng khung
@@ -147,8 +149,8 @@ function KhungCTDT() {
                 const dataResult = result.data.data.map((item) => {
                     return {
                         ...item,
-                        facultyName: item.faculty.facultyName,
-                        facultyId: item.faculty.facultyId,
+                        majorName: item.major.majorName,
+                        majorId: item.major.majorId,
                         cycleName: item.cycle.cycleName,
                         cycleId: item.cycle.cycleId,
                     }
@@ -203,14 +205,11 @@ function KhungCTDT() {
 
     const dungKhungCTDTMemoized = useMemo(() => {
         return (
-            <div>
-                {showModalBuildFrame ? <DungKhungCTDTUpdate
-                    showModal={showModalBuildFrame}
-                    setShowModal={setShowModalBuildFrame}
-                // reLoad={fetchData}
-                /> : null}
-            </div>
-
+            <DungKhungCTDTUpdate
+                showModal={showModalBuildFrame}
+                setShowModal={setShowModalBuildFrame}
+                buildFrameData={buildFrameData}
+            />
         );
     }, [showModalBuildFrame]);
 
@@ -227,7 +226,7 @@ function KhungCTDT() {
         >
             <Input />
         </FormItem>,
-        <FormItem name="faculty" label="Ngành">
+        <FormItem name="major" label="Ngành">
             <Select
                 showSearch
                 placeholder="Chọn ngành"
@@ -235,7 +234,7 @@ function KhungCTDT() {
                 filterOption={(input, option) =>
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
-                options={facultyOptions}
+                options={majorOptions}
             />
         </FormItem>,
         <FormItem
@@ -256,15 +255,15 @@ function KhungCTDT() {
     ]
 
     const onSearch = (values) => {
-        const { frameId, frameName, faculty, cycle } = values;
+        const { frameId, frameName, major, cycle } = values;
         const originalList = dataOriginal;
         const filteredList = originalList.filter((item) => {
             const matchesFrameId = frameId ? item.frameId?.toLowerCase().includes(frameId.toLowerCase()) : true;
             const matchesFrameName = frameName ? item.frameName?.toLowerCase().includes(frameName.toLowerCase()) : true;
-            const matchesfaculty = faculty ? item.facultyId === faculty : true;
+            const matchesmajor = major ? item.majorId === major : true;
             const matchesCycle = cycle?.value ? item.cycle?.cycleId === cycle?.value : true;
 
-            return matchesFrameId && matchesFrameName && matchesfaculty && matchesCycle;
+            return matchesFrameId && matchesFrameName && matchesmajor && matchesCycle;
         });
         setData(filteredList);
     };

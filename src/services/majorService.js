@@ -74,3 +74,13 @@ export const checkRelatedData = async (ids) => {
         throw error;
     }
 };
+
+export const getMajorById = async (id) => {
+    try {
+        const response = await api.get(`/majors/${id}`);
+        return response;
+    } catch (error) {
+        console.error('[majorService - getMajorById - error] : ', error);
+        throw error;
+    }
+};
