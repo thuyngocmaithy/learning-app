@@ -126,6 +126,24 @@ function DeTaiKhoaLuan() {
             align: 'center',
         },
         {
+            title: 'SL đăng ký',
+            dataIndex: 'numberOfRegister',
+            key: 'numberOfRegister',
+            align: 'center',
+            render: (numberOfRegister, record) =>
+                numberOfRegister.length > 0 ? (
+                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
+                        onClick={() => setShowModalListRegister({
+                            ...record,
+                            numberOfRegister,
+                        })} >
+                        Danh sách đăng ký: {numberOfRegister.length}
+                    </ButtonCustom >
+                ) : (
+                    '0'
+                ),
+        },
+        {
             title: 'Trạng thái',
             key: 'status',
             dataIndex: ['status'],
@@ -146,24 +164,6 @@ function DeTaiKhoaLuan() {
             render: (isDisable) => (
                 <Input type='checkbox' checked={isDisable} readOnly />
             ),
-        },
-        {
-            title: 'SL đăng ký',
-            dataIndex: 'numberOfRegister',
-            key: 'numberOfRegister',
-            align: 'center',
-            render: (numberOfRegister, record) =>
-                numberOfRegister.length > 0 ? (
-                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
-                        onClick={() => setShowModalListRegister({
-                            ...record,
-                            numberOfRegister,
-                        })} >
-                        Danh sách đăng ký: {numberOfRegister.length}
-                    </ButtonCustom >
-                ) : (
-                    '0'
-                ),
         },
         {
             title: 'Action',

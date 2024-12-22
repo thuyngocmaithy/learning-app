@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useContext, useMemo, memo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Button from "../../components/Core/Button"
-import { Input, Empty } from 'antd';
+import { Spin, Input, Empty, Form, Divider, Select } from 'antd';
 import classNames from 'classnames/bind';
+import FormItem from '../Core/FormItem';
+import Toolbar from '../Core/Toolbar';
 import styles from './TableScore.module.scss';
 import { getScoreByStudentId, getExpectedScoreByStudentId } from '../../services/scoreService';
 import { callKhungCTDT, findKhungCTDTByUserId } from '../../services/studyFrameService';
@@ -10,6 +12,8 @@ import { AccountLoginContext } from '../../context/AccountLoginContext';
 import { DiemDetail } from '../FormDetail/DiemDetail';
 import { EyeOutlined } from '@ant-design/icons';
 import Loader from '../Loader';
+import SearchForm from '../Core/SearchForm';
+
 const cx = classNames.bind(styles);
 
 // Hàm chuyển đổi điểm số sang điểm chữ
@@ -33,34 +37,11 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
     const [numericGrades, setNumericGrades] = useState({});
     const [showModalDetail, setShowModalDetail] = useState(false);
     const didMountRef = useRef(false);
-    const [calculatedGPA, setCalculatedGPA] = useState(0);
+    const [form] = Form.useForm();
+    const [showFilter, setShowFilter] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
 
 
-    // // Tính toán số tín chỉ đã học - trừ những môn Thể chất và quốc phòng
-    // const calculateTotalCredits = useCallback((scores) => {
-    //     const excludedSubjectIds = frameComponents
-    //         .filter(frame => frame.frameComponentId === "GDDC_TC")
-    //         .flatMap(frame => frame.subjectInfo.map(subject => subject.subjectId));
-
-    //     let totalCredits = 0;
-
-    //     scores.forEach(score => {
-    //         if (score.subject && score.subject.creditHour) {
-    //             const isExcludedSubject =
-    //                 excludedSubjectIds.includes(score.subject.subjectId) ||
-    //                 score.subject.subjectName.includes("Giáo dục quốc phòng") ||
-    //                 score.subject.subjectName.includes("Giáo dục thể chất") ||
-    //                 score.finalScoreLetter.includes("R") ||
-    //                 score.result === false;
-
-    //             if (!isExcludedSubject) {
-    //                 totalCredits += score.subject.creditHour;
-    //             }
-    //         }
-    //     });
-
-    //     return totalCredits;
-    // }, [frameComponents]);
 
     // Xử lý thay đổi điểm
     const handleChange = useCallback((value, subjectId, creditHour) => {
@@ -113,10 +94,6 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                 expectedScoreLetter: letterGrade
             });
 
-            // Ensure GPA is set to 0 if any grade is below 4 (F)
-            if (numValue < 4) {
-                setCalculatedGPA(0);
-            }
         }
     }, [handleChange, onSubjectModification]);
 
@@ -232,18 +209,6 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         });
     }, [onImprovedCreditsChange, onSubjectModification]);
 
-    // useEffect(() => {
-    //     // Gọi hàm handleNumericGradeChange cho tất cả các môn học khi dữ liệu được fetch xong
-    //     if (scores.length > 0) {
-    //         scores.forEach(score => {
-    //             const subjectId = score.subject.subjectId; // Lấy subjectId của môn học
-    //             const subject = score.subject; // Lấy thông tin môn học
-    //             const numericGrade = numericGrades[subjectId] || ''; // Lấy điểm số nếu có, nếu không có thì để là chuỗi rỗng
-    //             handleNumericGradeChange(numericGrade, subjectId, subject.creditHour, subject); // Gọi hàm handleNumericGradeChange với các tham số tương ứng
-    //         });
-    //     }
-    // }, [scores, numericGrades, handleNumericGradeChange]);
-
 
 
     const renderFrameComponentContent = useCallback((frameComponent, level = 0, renderedIds) => {
@@ -292,24 +257,39 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                             <TableCell align="center">
                                 <Input
                                     className={cx('score-10')}
-                                    type="number"
+                                    type="text" // Changed from "number" to "text"
                                     min={0}
                                     max={10}
                                     step={0.1}
-                                    // Giá trị ban đầu là score?.finalScore10 nếu có, nếu không thì là chuỗi rỗng
                                     value={numericGrades[subject.subjectId] !== undefined ? numericGrades[subject.subjectId] : score?.finalScore10 || ''}
                                     onChange={(e) => {
                                         const newValue = e.target.value;
 
-                                        // Nếu giá trị là chuỗi rỗng, set lại giá trị trong numericGrades thành chuỗi rỗng
+                                        // Nếu là chuỗi rỗng
                                         if (newValue === '') {
-                                            handleNumericGradeChange('', subject.subjectId, subject.creditHour, subject);
-                                        } else {
-                                            handleNumericGradeChange(newValue, subject.subjectId, subject.creditHour, subject);
+                                            handleNumericGradeChange(null, subject.subjectId, subject.creditHour, subject);
+                                            return;
+                                        }
+
+                                        // Kiểm tra nếu là số hợp lệ
+                                        const numberValue = parseFloat(newValue);
+                                        if (!isNaN(numberValue) && numberValue >= 0 && numberValue <= 10) {
+                                            handleNumericGradeChange(numberValue, subject.subjectId, subject.creditHour, subject);
+                                        }
+                                    }}
+                                    onKeyPress={(e) => {
+                                        // Chỉ cho phép nhập số và dấu chấm
+                                        const validChars = /[0-9.]|\./;
+                                        if (!validChars.test(e.key)) {
+                                            e.preventDefault();
+                                        }
+                                        // Ngăn nhập nhiều hơn một dấu chấm
+                                        if (e.key === '.' && e.target.value.includes('.')) {
+                                            e.preventDefault();
                                         }
                                     }}
                                     style={{ width: '100px' }}
-                                    disabled={score && !improvementSubjects[subject.subjectId]} // Chỉ cho phép chỉnh sửa nếu môn đang được cải thiện
+                                    disabled={score && !improvementSubjects[subject.subjectId]}
                                 />
                             </TableCell>
                             <TableCell align="center">
@@ -395,9 +375,212 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         );
     }
 
+    const filterFields = [
+        <FormItem name="subjectId" label="Mã học phần">
+            <Input />
+        </FormItem>,
+        <FormItem name="subjectName" label="Tên học phần">
+            <Input />
+        </FormItem>,
+        <FormItem name="creditHour" label="Số tín chỉ">
+            <Input type="number" min={0} />
+        </FormItem>,
+        <FormItem name="score10" label="Điểm hệ 10">
+            <Input
+                type="number"
+                min={0}
+                max={10}
+                step={0.1}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    if (value && (value < 0 || value > 10)) {
+                        form.setFieldValue('score10', '');
+                    }
+                }}
+            />
+        </FormItem>,
+        <FormItem name="scoreLetter" label="Điểm chữ">
+            <Select
+                allowClear
+                style={{ width: '30%' }}
+                options={[
+                    { value: 'A', label: 'A' },
+                    { value: 'B', label: 'B' },
+                    { value: 'C', label: 'C' },
+                    { value: 'D', label: 'D' },
+                    { value: 'F', label: 'F' }
+                ]}
+            />
+        </FormItem>,
+    ];
+
+    const onSearch = (values) => {
+        const { subjectId, subjectName, creditHour, score10, scoreLetter } = values;
+
+        // Check if all search fields are empty
+        const isEmptySearch = !subjectId && !subjectName && !creditHour && !score10 && !scoreLetter;
+
+        // If search is empty, reset to original table
+        if (isEmptySearch) {
+            setFilteredData([]);
+            return;
+        }
+
+        const filteredRows = frameComponents
+            .filter(frameComponent => !frameComponent.parentFrameComponent)
+            .flatMap(frameComponent => {
+                return frameComponent.subjectInfo?.filter(subject => {
+                    const score = scores.find(s => s.subject.subjectId === subject.subjectId);
+                    const currentNumericGrade = numericGrades[subject.subjectId];
+                    const currentLetterGrade = selectedGrades[subject.subjectId]?.grade ||
+                        originalGrades[subject.subjectId] ||
+                        (currentNumericGrade ? convertToLetterGrade(currentNumericGrade) : '');
+
+                    // Match conditions
+                    const matchesSubjectId = !subjectId ||
+                        subject.subjectId.toLowerCase().includes(subjectId.toLowerCase());
+
+                    const matchesSubjectName = !subjectName ||
+                        subject.subjectName.toLowerCase().includes(subjectName.toLowerCase());
+
+                    const matchesCreditHour = !creditHour ||
+                        subject.creditHour === Number(creditHour);
+
+                    const matchesScore10 = !score10 ||
+                        (score?.finalScore10 === Number(score10) ||
+                            currentNumericGrade === Number(score10));
+
+                    const matchesScoreLetter = !scoreLetter ||
+                        (score?.finalScoreLetter === scoreLetter ||
+                            currentLetterGrade === scoreLetter);
+
+                    return matchesSubjectId &&
+                        matchesSubjectName &&
+                        matchesCreditHour &&
+                        matchesScore10 &&
+                        matchesScoreLetter;
+                });
+            });
+
+        setFilteredData(filteredRows);
+    };
+
+    const handleReset = () => {
+        setFilteredData([]); // Reset filtered data
+        form.resetFields(); // Reset form fields
+        setShowFilter(false); // Hide the filter panel (optional)
+    };
+
+
+    const renderFilteredRows = (filteredData) => {
+        return filteredData.map((subject, index) => {
+            const score = scores.find(s => s.subject.subjectId === subject.subjectId);
+            const numericGrade = numericGrades[subject.subjectId] || '';
+
+            return (
+                <TableRow key={`filtered-subject-${subject.subjectId}`}>
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{subject.subjectId}</TableCell>
+                    <TableCell align="left">{subject.subjectName}</TableCell>
+                    <TableCell align="center">{subject.creditHour}</TableCell>
+                    <TableCell align="center">
+                        <Input
+                            className={cx('score-10')}
+                            type="text"
+                            min={0}
+                            max={10}
+                            step={0.1}
+                            value={numericGrades[subject.subjectId] !== undefined ? numericGrades[subject.subjectId] : score?.finalScore10 || ''}
+                            onChange={(e) => {
+                                const newValue = e.target.value;
+
+                                if (newValue === '') {
+                                    handleNumericGradeChange(null, subject.subjectId, subject.creditHour, subject);
+                                    return;
+                                }
+
+                                const numberValue = parseFloat(newValue);
+                                if (!isNaN(numberValue) && numberValue >= 0 && numberValue <= 10) {
+                                    handleNumericGradeChange(numberValue, subject.subjectId, subject.creditHour, subject);
+                                }
+                            }}
+                            onKeyPress={(e) => {
+                                const validChars = /[0-9.]|\./;
+                                if (!validChars.test(e.key)) {
+                                    e.preventDefault();
+                                }
+                                if (e.key === '.' && e.target.value.includes('.')) {
+                                    e.preventDefault();
+                                }
+                            }}
+                            style={{ width: '100px' }}
+                            disabled={score && !improvementSubjects[subject.subjectId]}
+                        />
+                    </TableCell>
+                    <TableCell align="center">
+                        <Input
+                            className={cx('score-letter')}
+                            value={selectedGrades[subject.subjectId]?.grade || originalGrades[subject.subjectId] || (numericGrade ? convertToLetterGrade(numericGrade) : '')}
+                            style={{ width: '100px', textAlign: 'center' }}
+                            disabled={true}
+                        />
+                    </TableCell>
+                    <TableCell align="center">
+                        {score && (
+                            <div className={cx('action-item')}>
+                                <Button
+                                    primary
+                                    verysmall
+                                    onClick={() => handleImprovement(subject.subjectId, subject.creditHour, subject)}
+                                >
+                                    {improvementSubjects[subject.subjectId] ? "Hủy cải thiện" : "Cải thiện"}
+                                </Button>
+                                <Button
+                                    className={cx('btnDetail')}
+                                    leftIcon={<EyeOutlined />}
+                                    outline
+                                    verysmall
+                                    onClick={() => setShowModalDetail({
+                                        ...subject,
+                                        finalScoreLetter: score?.finalScoreLetter || '',
+                                        finalScore4: score?.finalScore4 || '',
+                                        examScore: score?.examScore || '',
+                                        testScore: score?.testScore || '',
+                                        finalScore10: score?.finalScore10 || '',
+                                    })}
+                                >
+                                    Chi tiết
+                                </Button>
+                            </div>
+                        )}
+                    </TableCell>
+                </TableRow>
+            );
+        });
+    };
+
     return (
         frameId ?
             <>
+                <div className={cx('container-header')}>
+                    {/* ... existing header content ... */}
+                    <div className={cx('wrapper-toolbar')}>
+                        <Toolbar
+                            type={'Bộ lọc'}
+                            onClick={() => setShowFilter(!showFilter)}
+                        />
+                        {/* ... other toolbar items ... */}
+                    </div>
+                </div>
+                <div className={`slide ${showFilter ? 'open' : ''}`}>
+                    <SearchForm
+                        form={form}
+                        getFields={filterFields}
+                        onSearch={onSearch}
+                        onReset={handleReset}
+                    />
+                    <Divider />
+                </div>
                 <Paper className={cx('container-table-score')}>
                     <TableContainer sx={{ maxHeight: height }}>
                         <Table stickyHeader>
@@ -415,7 +598,12 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                                     ))}
                                 </TableRow>
                             </TableHead>
-                            <TableBody>{renderTableRows()}</TableBody>
+                            <TableBody>
+                                {filteredData.length > 0
+                                    ? renderFilteredRows(filteredData)
+                                    : renderTableRows()
+                                }
+                            </TableBody>
                         </Table>
                     </TableContainer>
                     {DiemDetailMemoized}
@@ -427,3 +615,4 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
 };
 
 export default memo(TableScore);
+

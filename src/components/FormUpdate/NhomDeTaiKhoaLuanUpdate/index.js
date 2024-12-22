@@ -107,6 +107,13 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
+
+            // Validate that finishYear is greater than or equal to startYear
+            if (values.finishYear < values.startYear) {
+                message.error('Năm kết thúc phải lớn hơn hoặc bằng năm thực hiện');
+                return false;
+            }
+
             let thesisGroupData = {
                 thesisGroupName: values.thesisGroupName,
                 statusId: values.status.value,
@@ -244,14 +251,38 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
                     </Col>
                     <Col span={12}>
-                        <FormItem name="startYear" label={'Năm thực hiện'}>
+                        <FormItem name="startYear" label={'Năm thực hiện'} rules={[
+                            { required: true, message: 'Vui lòng nhập năm thực hiện!' },
+                            {
+                                pattern: /^\d{4}$/,
+                                message: 'Năm thực hiện phải là 4 chữ số',
+                            },
+                        ]}>
                             <InputNumber
                                 style={{ width: '100%' }}
                                 min={2000}
                                 step={1}
                             />
                         </FormItem>
-                        <FormItem name="finishYear" label={'Năm kết thúc'}>
+                        <FormItem
+                            name="finishYear"
+                            label={'Năm kết thúc'}
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập năm kết thúc!' },
+                                {
+                                    pattern: /^\d{4}$/,
+                                    message: 'Năm kết thúc phải là 4 chữ số',
+                                },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('startYear') <= value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Năm kết thúc phải lớn hơn hoặc bằng năm thực hiện'));
+                                    },
+                                }),
+                            ]}
+                        >
                             <InputNumber
                                 style={{ width: '100%' }}
                                 min={2000}

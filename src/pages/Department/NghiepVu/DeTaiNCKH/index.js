@@ -137,6 +137,24 @@ function DeTaiNCKH() {
             align: 'center',
         },
         {
+            title: 'SL đăng ký',
+            dataIndex: 'numberOfRegister',
+            key: 'numberOfRegister',
+            align: 'center',
+            render: (numberOfRegister, record) =>
+                numberOfRegister.length > 0 ? (
+                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
+                        onClick={() => setShowModalListRegister({
+                            ...record,
+                            numberOfRegister,
+                        })} >
+                        Danh sách đăng ký: {numberOfRegister.length}
+                    </ButtonCustom >
+                ) : (
+                    '0'
+                ),
+        },
+        {
             title: 'Cấp',
             dataIndex: 'level',
             key: 'level',
@@ -163,24 +181,6 @@ function DeTaiNCKH() {
             render: (isDisable) => (
                 <Input type='checkbox' checked={isDisable} readOnly />
             ),
-        },
-        {
-            title: 'SL đăng ký',
-            dataIndex: 'numberOfRegister',
-            key: 'numberOfRegister',
-            align: 'center',
-            render: (numberOfRegister, record) =>
-                numberOfRegister.length > 0 ? (
-                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
-                        onClick={() => setShowModalListRegister({
-                            ...record,
-                            numberOfRegister,
-                        })} >
-                        Danh sách đăng ký: {numberOfRegister.length}
-                    </ButtonCustom >
-                ) : (
-                    '0'
-                ),
         },
         {
             title: 'Action',

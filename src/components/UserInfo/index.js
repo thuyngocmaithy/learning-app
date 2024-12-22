@@ -123,11 +123,14 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
                         <FormItem label={'Lớp'}>
                             <p>{userInfo?.class}</p>
                         </FormItem>
-                        <FormItem label={'Ngành'}>
+                        <FormItem label={'Khoa'}>
                             <p>{userInfo && userInfo?.faculty?.facultyName}</p>
                         </FormItem>
-                        <FormItem label={'Chuyên ngành'}>
+                        <FormItem label={'Ngành'}>
                             <p>{userInfo && userInfo?.major?.majorName}</p>
+                        </FormItem>
+                        <FormItem label={'Chuyên ngành'}>
+                            <p>{userInfo && userInfo?.specialization?.specializationName}</p>
                         </FormItem>
                         <FormItem label={'Bậc hệ đào tạo'}>
                             <p>{userInfo?.bac_he_dao_tao}</p>
