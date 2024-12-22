@@ -5,7 +5,7 @@ import { useForm } from 'antd/es/form/Form';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
 import { createStudyFrame, updateStudyFrame } from '../../../services/studyFrameService';
-import { getAllFaculty } from '../../../services/facultyService';
+import { getAll as getAllMajor } from '../../../services/majorService';
 import { getAll } from '../../../services/cycleService';
 
 
@@ -17,7 +17,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
     reLoad
 }) {
     const [form] = useForm();
-    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([]);
     const [cycleOptions, setCycleOptions] = useState([]);
 
     // Fetch danh sách chu kỳ
@@ -39,13 +39,13 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
     // Danh sách ngành
     const fetchFaculties = async () => {
         try {
-            const response = await getAllFaculty();
+            const response = await getAllMajor();
             if (response && response.data) {
-                const options = response.data.map((faculty) => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyName,
+                const options = response.data.map((major) => ({
+                    value: major.majorId,
+                    label: major.majorName,
                 }));
-                setFacultyOptions(options);
+                setMajorOptions(options);
 
             }
         } catch (error) {
@@ -75,10 +75,10 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
                             label: showModal.cycle.cycleName
                         }
                     }),
-                    ...(showModal.faculty && {
-                        faculty: {
-                            value: showModal.faculty.facultyId,
-                            label: showModal.faculty.facultyName
+                    ...(showModal.major && {
+                        major: {
+                            value: showModal.major.majorId,
+                            label: showModal.major.majorName
                         }
                     }),
                 });
@@ -103,7 +103,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
             if (isUpdate) {
                 let frameData = {
                     frameName: values.frameName,
-                    facultyId: values.faculty?.value,
+                    majorId: values.major?.value,
                     cycleId: values.cycle?.value,
                 };
                 response = await updateStudyFrame(showModal.frameId, frameData);
@@ -111,7 +111,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
                 let frameData = {
                     frameId: values.frameId,
                     frameName: values.frameName,
-                    facultyId: values.faculty?.value,
+                    majorId: values.major?.value,
                     cycleId: values.cycle?.value,
                 };
                 response = await createStudyFrame(frameData);
@@ -167,7 +167,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
                     <Input />
                 </FormItem>
                 <FormItem
-                    name="faculty"
+                    name="major"
                     label="Ngành"
                     rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
                 >
@@ -178,7 +178,7 @@ const KhungCTDTUpdate = memo(function KhungCTDTUpdate({
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
-                        options={facultyOptions}
+                        options={majorOptions}
                         labelInValue
                     />
                 </FormItem>

@@ -12,6 +12,7 @@ import { getUserById } from '../../../services/userService';
 import { Spin } from 'antd';
 import { getExpectedScoreByStudentId, getScoreByStudentId } from '../../../services/scoreService';
 import { ThemeContext } from '../../../context/ThemeContext';
+import { getMajorById } from '../../../services/majorService';
 
 const cx = classNames.bind(styles);
 
@@ -209,14 +210,14 @@ function Home() {
                 const responseScore = await getScoreByStudentId(userId);
                 setScores(responseScore)
                 // Lấy ngành và năm học đầu tiên, số tín chỉ hiện tại của user
-                const faculty = responseUser.data.faculty.facultyId;
+                const major = responseUser.data.major.majorId;
                 const firstAcademicYear = responseUser.data.firstAcademicYear;
                 setFirstYear(firstAcademicYear);
                 const cdCurrent = responseUser.data.currentCreditHour;
                 setCreditHourCurrent(cdCurrent);
 
                 // Lấy số tín chỉ của ngành
-                const responseFaculty = await getFacultyById(faculty);
+                const responseFaculty = await getMajorById(major);
                 const cdTotal = responseFaculty.data.data.creditHourTotal;
                 setCreditHourTotal(cdTotal);
                 // Math.trunc lấy phần nguyên

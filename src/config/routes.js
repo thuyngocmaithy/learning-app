@@ -37,12 +37,12 @@ const routes = {
     PhanQuyenChucNang: '/Department/ThietLap/PhanQuyenChucNang',
     TaiKhoan: '/Department/ThietLap/TaiKhoan',
     NguoiDung: '/Department/ThietLap/NguoiDung',
-    HocKy: '/Department/ThietLap/HocKy',
+    HocKy_ChuKy: '/Department/ThietLap/HocKyChuKy',
     ChuKy: '/Department/ThietLap/ChuKy',
     MonHoc: '/Department/ThietLap/MonHoc',
     Ngành: '/Department/ThietLap/Ngành',
     ChuyenNganh: '/Department/ThietLap/ChuyenNganh',
-    NganhChuyenNganh: '/Department/ThietLap/NganhChuyenNganh',
+    KhoaNganhChuyenNganh: '/Department/ThietLap/KhoaNganhChuyenNganh',
     TrangThai: '/Department/ThietLap/TrangThai',
 
 };

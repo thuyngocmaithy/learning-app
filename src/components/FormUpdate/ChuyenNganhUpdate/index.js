@@ -7,31 +7,31 @@ import {
 import { message } from '../../../hooks/useAntdApp';
 import FormItem from '../../Core/FormItem';
 import Update from '../../Core/Update';
-import { getAllFaculty } from '../../../services/facultyService';
-import { createMajor, updateMajorById } from '../../../services/majorService';
+import { getAll as getAllMajor } from '../../../services/majorService';
+import { createSpecialization, updateSpecializationById } from '../../../services/specializationService';
 
 export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpdate, showModal, setShowModal, reLoad }) {
     const [form] = Form.useForm();
-    const [facultyOptions, setFacultyOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([]);
 
     useEffect(() => {
-        const fetchFaculties = async () => {
+        const fetchMajor = async () => {
             try {
-                const response = await getAllFaculty();
+                const response = await getAllMajor();
                 if (response && response.data) {
-                    const options = response.data.map((faculty) => ({
-                        value: faculty.facultyId,
-                        label: faculty.facultyName,
+                    const options = response.data.map((major) => ({
+                        value: major.majorId,
+                        label: major.majorName,
                     }));
-                    setFacultyOptions(options);
+                    setMajorOptions(options);
                 }
             } catch (error) {
-                console.error('Error fetching faculties:', error);
+                console.error('Error fetching major:', error);
             }
         };
 
         if (showModal)
-            fetchFaculties();
+            fetchMajor();
 
     }, [showModal]);
 
@@ -39,10 +39,10 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
     useEffect(() => {
         if (showModal && isUpdate && form) {
             form.setFieldsValue({
+                specializationId: showModal.specializationId,
+                specializationName: showModal.specializationName,
                 majorId: showModal.majorId,
                 majorName: showModal.majorName,
-                facultyId: showModal.facultyId,
-                facultyName: showModal.facultyName,
             });
         }
     }, [showModal, isUpdate, form]);
@@ -56,19 +56,19 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const majorData = {
-                majorId: values.majorId,
-                majorName: values.majorName,
-                faculty: {
-                    facultyId: values.facultyId,
+            const specializationData = {
+                specializationId: values.specializationId,
+                specializationName: values.specializationName,
+                major: {
+                    majorId: values.majorId,
                 },
-                facultyName: values.facultyName,
+                majorName: values.majorName,
             };
 
 
             const response = isUpdate
-                ? await updateMajorById(showModal.majorId, majorData)
-                : await createMajor(majorData);
+                ? await updateSpecializationById(showModal.specializationId, specializationData)
+                : await createSpecialization(specializationData);
 
             if (response?.data) {
                 message.success(`${isUpdate ? 'Cập nhật' : 'Tạo'} chuyên ngành thành công!`);
@@ -96,20 +96,20 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
             form={form}>
             <Form form={form}>
                 <FormItem
-                    name="majorId"
+                    name="specializationId"
                     label="Mã chuyên ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập mã chuyên ngành' }]}
                 >
                     <Input disabled={isUpdate} />
                 </FormItem>
                 <FormItem
-                    name="majorName"
+                    name="specializationName"
                     label="Tên chuyên ngành"
                     rules={[{ required: true, message: 'Vui lòng nhập tên chuyên ngành' }]}
                 >
                     <Input />
                 </FormItem>
-                <FormItem name="facultyId" label="Ngành" rules={[{ required: true, message: 'Vui lòng chọn ngành' }]}>
+                <FormItem name="majorId" label="Ngành" rules={[{ required: true, message: 'Vui lòng chọn ngành' }]}>
                     <Select
                         showSearch
                         placeholder="Chọn ngành"
@@ -117,7 +117,7 @@ export const ChuyenNganhUpdate = memo(function ChuyenNganhUpdate({ title, isUpda
                         filterOption={(input, option) =>
                             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
-                        options={facultyOptions}
+                        options={majorOptions}
                     />
                 </FormItem>
             </Form>

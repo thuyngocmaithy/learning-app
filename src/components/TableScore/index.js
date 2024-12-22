@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useContext, useMemo, memo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Button from "../../components/Core/Button"
-import { Spin, Input, Empty } from 'antd';
+import { Input, Empty } from 'antd';
 import classNames from 'classnames/bind';
 import styles from './TableScore.module.scss';
 import { getScoreByStudentId, getExpectedScoreByStudentId } from '../../services/scoreService';

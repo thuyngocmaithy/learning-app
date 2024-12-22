@@ -2,6 +2,7 @@ const imports = {
     USER: "../../TemplateImport/template_import_user.xlsx",
     SUBJECT: "../../TemplateImport/template_import_subject.xlsx",
     MAJOR: "../../TemplateImport/template_import_major.xlsx",
+    SPECIALIZATION: "../../TemplateImport/template_import_specialization.xlsx",
     FACULTY: "../../TemplateImport/template_import_faculty.xlsx",
     STATUS: "../../TemplateImport/template_import_status.xlsx",
     THESISGROUP: "../../TemplateImport/template_import_thesisgroup.xlsx",

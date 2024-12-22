@@ -6,7 +6,7 @@ import { ProjectIcon } from '../../../assets/icons';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { deleteNotifications, getWhere, updateNotificationByIds } from '../../../services/notificationService';
 import dayjs from 'dayjs';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Toolbar from '../../../components/Core/Toolbar';
 import { PermissionDetailContext } from '../../../context/PermissionDetailContext';
 import config from '../../../config';
@@ -31,7 +31,6 @@ function DanhSachThongBao() {
     // Lấy permissionDetail từ Context dựa trên keyRoute
     const permissionDetailData = permissionDetails[keyRoute];
 
-    const navigate = useNavigate();
     const [list, setList] = useState([]);
     const [originalList, setOriginalList] = useState([]); // Bản sao danh sách ban đầu
     const { userId } = useContext(AccountLoginContext);
@@ -105,7 +104,7 @@ function DanhSachThongBao() {
                 reLoad={fetchDataNoti}
             />
         );
-    }, [showModalUpdate, isUpdate]);
+    }, [isUpdate, showModalUpdate, fetchDataNoti]);
 
     // Tạo field cho bộ lọc
     const filterFields = [

@@ -81,3 +81,13 @@ export const getWheresubject_studyFrameComp = async (conditions) => {
         throw error;
     }
 };
+
+export const saveSemestersForSubjects = async (data) => {
+    try {
+        const response = await api.post('/subject_studyFrameComps/saveSemestersForSubjects', data);
+        return response;
+    } catch (error) {
+        console.error('Save Semesters For Subjects error:', error);
+        throw error;
+    }
+};
