@@ -9,7 +9,10 @@ const TreeFrame = ({
     treeData, // Dữ liệu cấu trúc cây
     setTreeData, // Set dữ liệu cấu trúc cây
     expandedKeys, // Key để mở rộng khối kiến thức
-    isLoading
+    isLoading,
+    draggable = true,
+    height = "auto",
+    ...props
 }) => {
 
 
@@ -103,10 +106,12 @@ const TreeFrame = ({
                             checkStrictly
                             className="draggable-tree"
                             expandedKeys={expandedKeys}
-                            draggable
+                            draggable={draggable}
                             blockNode
                             onDrop={onDrop}
                             treeData={treeData}
+                            height={height}
+                            {...props}
                         />
                     </>
                 }

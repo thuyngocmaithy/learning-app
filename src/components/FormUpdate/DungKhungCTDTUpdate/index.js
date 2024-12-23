@@ -109,36 +109,41 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
     };
 
     const handleSubmit = async () => {
+        const loadingMessage = message.loading('Đang lưu dữ liệu', 0);
+
         try {
             const treeDataSave = cleanTreeData(treeData);
             let response;
+
             if (treeData.length === 0) {
                 response = await deleteFrameStructures(buildFrameData.frameId);
-            }
-            else {
+            } else {
                 response = await saveTreeFrameStructure(treeDataSave);
+
                 // Lưu danh sách học kỳ thực hiện
-                // Hoặc duyệt qua tất cả `frameComponentId`:
-                Object.keys(checkedSemesterState).forEach(async (frameComponentId) => {
-                    // Lưu entity subject_studyFrameComp
-                    let SSMData = {
+                const saveSemesterPromises = Object.keys(checkedSemesterState).map((frameComponentId) => {
+                    const SSMData = {
                         subjectSemesterMap: checkedSemesterState[frameComponentId],
-                        studyFrameComponentId: frameComponentId
-                    }
-                    response = await saveSemestersForSubjects(SSMData);
+                        studyFrameComponentId: frameComponentId,
+                    };
+                    return saveSemestersForSubjects(SSMData);
                 });
+
+                // Chờ tất cả các lời gọi hoàn tất
+                await Promise.all(saveSemesterPromises);
             }
 
-            if (response.status === 200) {
+            if (response?.status === 200) {
                 message.success('Lưu cấu trúc khung đào tạo thành công');
             }
-
-
         } catch (error) {
-            console.error('Lưu cấu trúc khung đào tạo thất bại:' + error);
+            console.error('Lưu cấu trúc khung đào tạo thất bại:', error);
+            message.error('Lưu cấu trúc khung đào tạo thất bại');
+        } finally {
+            loadingMessage();
         }
+    };
 
-    }
 
 
     useEffect(() => {
@@ -352,7 +357,7 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 const listSubjectOfFrameComp = listSujectOfFrameCompRes.data.data?.map((subjectItem) => {
                     const semesters = subjectItem.semesters?.map((semester) => ({
                         semesterId: semester.semesterId,
-                        semesterName: semester.semesterName, // Giả sử có thuộc tính này
+                        semesterName: semester.semesterName,
                     })) || [];
 
                     return {
@@ -645,7 +650,6 @@ const DungKhungCTDTUpdate = memo(function DungKhungCTDTUpdate({
                 selectedFrameComp={selectedFrameComp}
                 expandedKeys={expandedKeys}
                 isLoading={isLoadingFrame}
-
             />
             {thanhPhanKhungDTFormSelectMemoized}
             {thanhphankhungdtDetailMemoized}

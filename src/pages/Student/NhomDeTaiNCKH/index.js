@@ -12,12 +12,14 @@ import { getWhere as getWhereSRG } from '../../../services/scientificResearchGro
 import FormItem from '../../../components/Core/FormItem';
 import SearchForm from '../../../components/Core/SearchForm';
 import Toolbar from '../../../components/Core/Toolbar';
-import { getAllFaculty } from '../../../services/facultyService';
 import { getStatusByType } from '../../../services/statusService';
+import { useContext } from 'react';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
 function NhomDeTaiNCKH() {
+    const { faculty } = useContext(AccountLoginContext);
     const [list, setList] = useState([]);
     const [originalList, setOriginalList] = useState([]); // Bản sao danh sách ban đầu
     const [isLoading, setIsLoading] = useState(true); // load ds nhóm đề tài NCKH
@@ -27,29 +29,7 @@ function NhomDeTaiNCKH() {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // Số lượng mục trên mỗi trang
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-    const [facultyOptions, setFacultyOptions] = useState([]);
     const [nhomDeTaistatusOptions, setNhomDeTaiStatusOptions] = useState([]);
-
-
-    //lấy danh sách các ngành ra ngoài thẻ select
-    useEffect(() => {
-        const fetchFaculties = async () => {
-            try {
-                const response = await getAllFaculty();
-                if (response && response.data) {
-                    const options = response.data.map((faculty) => ({
-                        value: faculty.facultyId,
-                        label: faculty.facultyName,
-                    }));
-                    setFacultyOptions(options);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchFaculties();
-    }, []);
 
 
     // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài nghiên cứu"
@@ -93,7 +73,7 @@ function NhomDeTaiNCKH() {
     const navigate = useNavigate();
     const fetchSRG = useCallback(async () => {
         try {
-            const result = await getWhereSRG({ disabled: false })
+            const result = await getWhereSRG({ faculty: faculty, disabled: false })
             if (result.status === 200) {
                 setList(result.data.data);
                 setOriginalList(result.data.data);
@@ -136,21 +116,6 @@ function NhomDeTaiNCKH() {
             label={'Năm kết thúc'}
         >
             <Input />
-        </FormItem>,
-        <FormItem
-            name={'faculty'}
-            label={'Ngành'}
-        >
-            <Select
-                style={{ width: '100%' }}
-                showSearch
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                options={facultyOptions}
-                labelInValue
-            />
         </FormItem>,
         <FormItem
             name={'status'}
@@ -274,7 +239,7 @@ function NhomDeTaiNCKH() {
                                                 <p style={{ marginRight: '10px' }}>Thời gian thực hiện: </p>
                                                 <p style={{ marginRight: '10px' }}>{item.startYear} - {item.finishYear} </p>
                                             </div>
-                                            <p>Ngành: {item.faculty.facultyName}</p>
+                                            <p>Khoa: {item.faculty.facultyName}</p>
                                             <p style={{ margin: "7px 0" }}>
                                                 Trạng thái:
                                                 <Tag color={item.status.color} className={cx('tag-status')}>

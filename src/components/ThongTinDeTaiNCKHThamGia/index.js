@@ -28,7 +28,7 @@ function ThongTinDeTaiNCKHThamGia({ scientificResearch }) {
         },
         {
             key: '1-info',
-            label: 'Ngành',
+            label: 'Khoa',
             children: scientificResearch ? scientificResearch.scientificResearchGroup?.faculty?.facultyName : '',
         },
         {

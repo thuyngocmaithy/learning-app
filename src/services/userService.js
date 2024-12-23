@@ -55,9 +55,9 @@ export const loginToSgu = async (username, password, isSync) => {
 	}
 };
 
-export const getUsersByFaculty = async (majorId) => {
+export const getUsersByFaculty = async (facultyId) => {
 	try {
-		const response = await api.get(`/users/users-by-major/${majorId}`);
+		const response = await api.get(`/users/users-by-faculty/${facultyId}`);
 		return response.data;
 	} catch (error) {
 		console.error('[userService - getUsersByFaculty - error] : ', error);

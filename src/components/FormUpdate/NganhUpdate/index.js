@@ -113,7 +113,7 @@ export const NganhUpdate = memo(function NganhUpdate({ title, isUpdate, showModa
                 >
                     <Input />
                 </FormItem>
-                <FormItem name="facultyId" label="Ngành" rules={[{ required: true, message: 'Vui lòng chọn khoa' }]}>
+                <FormItem name="facultyId" label="Khoa" rules={[{ required: true, message: 'Vui lòng chọn khoa' }]}>
                     <Select
                         showSearch
                         placeholder="Chọn khoa"

@@ -7,10 +7,9 @@ import { callKhungCTDT } from '../../services/studyFrameService';
 import { getScoreByStudentId } from '../../services/scoreService';
 import { getUserById, getUserRegisteredSubjects } from '../../services/userService';
 import { AccountLoginContext } from '../../context/AccountLoginContext';
-import { getWhere } from '../../services/subject_course_openingService';
 import { ThemeContext } from '../../context/ThemeContext';
 import Loader from '../Loader';
-import { Tooltip } from 'antd';
+import ButtonCustom from "../Core/Button"
 
 const cx = classNames.bind(styles);
 
@@ -90,35 +89,15 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
         return ((year - firstYear) * 3) + (semester - 1);
     };
 
-    const getSubjectCourseOpening = (async (studyFrameId) => {
-        try {
-            const response = await getWhere({ studyFrame: studyFrameId });
-            return response.data.data.map((item) => {
-                return {
-                    subjectId: item.subject?.subjectId,
-                    semesterId: getSemesterIndex(item.semester?.semesterId),
-                    disabled: item.disabled,
-                    instructor: item.instructor
-                }
-            });
-        } catch (error) {
-            console.error('Error fetching subject course opening:', error);
-            return [];
-        }
-    });
 
     // useEffect để fetch danh sách môn học mở khi studentInfo được cập nhật
     useEffect(() => {
         if (!frameId || !studentInfo) return;
 
-        const fetchCourseOpen = async () => {
+        const fetchCourseRegister = async () => {
             try {
-                const [registeredSubjectsRes, courseOpenRes] = await Promise.all([
-                    getUserRegisteredSubjects(userId),
-                    getSubjectCourseOpening(frameId)
-                ]);
-                // Set danh sách môn học mở
-                setCourseOpen(courseOpenRes);
+                const registeredSubjectsRes = await getUserRegisteredSubjects(userId);
+
 
                 const registeredMap = {};
                 if (registeredSubjectsRes?.length) {
@@ -141,7 +120,7 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
             }
         };
 
-        fetchCourseOpen();
+        fetchCourseRegister();
     }, [frameId, studentInfo]);
 
 
@@ -237,34 +216,24 @@ const SubjectCell = memo(({
     semesterIndex,
     registeredInfo,
     scoreInfo,
-    courseOpen,
     disableCheckbox,
-    handleChange
+    handleChange,
+    cellStyle
 }) => {
     const { theme } = useContext(ThemeContext);
     const cellState = useMemo(() => {
         const isRegistered = registeredInfo?.semesterIndex === semesterIndex;
         const hasScore = scoreInfo && scoreInfo.finalScore10 !== undefined;
-        // Kiểm tra môn học đang mở kì này
-        const findIsScoreOpen = courseOpen?.find(
-            open => open.subjectId === subject.subjectId && open.semesterId === semesterIndex
-        ); // Tìm môn học được mở     
-        const instructor = findIsScoreOpen?.instructor; // Giảng viên dạy
-        // Kiểm tra môn học đang mở kì này
-        const isOpen = courseOpen?.some(
-            open => open.subjectId === subject.subjectId && open.semesterId === semesterIndex
-        );
-        return { isRegistered, hasScore, isOpen, instructor };
-    }, [registeredInfo?.semesterIndex, semesterIndex, scoreInfo, courseOpen, subject.subjectId]);
+        return { isRegistered, hasScore };
+    }, [registeredInfo?.semesterIndex, semesterIndex, scoreInfo]);
 
-    const { isRegistered, hasScore, isOpen, instructor } = cellState;
-    const isShowTeacher = !courseOpen[0]?.disabled;
+    const { isRegistered, hasScore } = cellState;
 
     const radioElement = useMemo(() => {
         const radioProps = {
             checked: hasScore || isRegistered,// Chỉ kiểm tra nếu môn học được đăng ký ở kỳ này
             onChange: () => handleChange(subject.subjectId, semesterIndex),
-            disabled: hasScore || disableCheckbox,// Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable
+            disabled: hasScore || disableCheckbox,// Vô hiệu hóa checkbox nếu có điểm hoặc checkbox bị disable            
             size: "small",
             style: {
                 color: theme === "dark" ? "rgb(39 61 157)" : "#000",
@@ -274,29 +243,21 @@ const SubjectCell = memo(({
 
         return hasScore
             ? <div className={cx('radio-check')}>
-                <Radio {...radioProps} />
-                <span>{scoreInfo.finalScore10}</span>
+                {/* <Radio {...radioProps} /> */}
+                <ButtonCustom verysmall style={{ cursor: "unset", padding: "unset", minWidth: "40px" }}>{scoreInfo.finalScore10}</ButtonCustom>
             </div>
             : <Radio {...radioProps} />
     }, [hasScore, isRegistered, scoreInfo, disableCheckbox, theme, subject.subjectId, semesterIndex, handleChange]);
-
-    const renderCellContent = (isShowTeacher && instructor) ? (
-        <Tooltip title={instructor} color={'#108ee9'} key={`tooltip-${subject.subjectId}-${semesterIndex}`}>
-            <div style={{ background: '#66b0ff2e', borderRadius: '999px' }}>{radioElement}</div>
-        </Tooltip>
-    ) : (
-        radioElement
-    );
 
     return (
         <TableCell
             align="center"
             style={{
-                backgroundColor: isOpen ? 'var(--color-subject-open)' : 'transparent',
-                color: isOpen ? '#000' : 'var(--color-text-base)'
+                backgroundColor: cellStyle?.backgroundColor || 'transparent',
+                color: cellStyle?.color || 'var(--color-text-base)',
             }}
         >
-            {renderCellContent}
+            {radioElement}
         </TableCell>
     );
 }, (prevProps, nextProps) => {
@@ -325,8 +286,8 @@ const SubjectRow = memo(({
     // Kiểm tra xem có học kỳ nào đã có điểm trước học kỳ đăng ký không
     const disableCheckboxIndexes = useMemo(() => {
         const indexes = [];
-        let highlightRow = false;
-        let redRow = false;
+        const highlightedCells = {};
+        const redCells = {};
 
         for (let i = 0; i < repeatHK; i++) {
             const scoreInfo = scores.find(score =>
@@ -340,20 +301,26 @@ const SubjectRow = memo(({
                     indexes.push(j);
                 }
 
-                // Nếu có điểm, kiểm tra xem học kỳ đăng ký có nhỏ hơn học kỳ có điểm không
+                // Nếu có điểm, kiểm tra học kỳ đăng ký để tô màu cho từng ô
                 if (i >= registeredInfo?.semesterIndex) {
-                    highlightRow = true; // Đánh dấu dòng cần tô màu
+                    highlightedCells[i] = true; // Chỉ tô màu ô cần highlight
                 }
             }
 
             // Tô đỏ chỉ khi học kỳ hiện tại lớn hơn học kỳ đăng ký
-            if (i < currentSemester && i > registeredInfo?.semesterIndex) {
-                redRow = true; // Đánh dấu dòng cần tô màu đỏ
+            // Nếu là ô đăng ký
+            if (i === registeredInfo?.semesterIndex) {
+                if (currentSemester > registeredInfo.semesterIndex) {
+                    redCells[i] = true; // Tô màu đỏ ô đăng ký nếu học kỳ hiện tại lớn hơn học kỳ đăng ký
+                } else {
+                    highlightedCells[i] = true; // Tô màu xanh nếu học kỳ hiện tại không lớn hơn học kỳ đăng ký
+                }
             }
         }
 
-        return { indexes, highlightRow, redRow }; // Trả về cả chỉ số cần disable và trạng thái cần tô màu
+        return { indexes, highlightedCells, redCells }; // Trả về trạng thái tô màu cho từng ô
     }, [subject, repeatHK, scores, currentSemester, getSemesterIndex, registeredInfo]);
+
 
     const semesterCells = useMemo(() => {
         if (!subject) return null;
@@ -363,6 +330,17 @@ const SubjectRow = memo(({
                 score.subject.subjectId === subject.subjectId &&
                 getSemesterIndex(score.semester.semesterId) === i
             );
+
+            const cellStyle = {
+                backgroundColor: disableCheckboxIndexes.highlightedCells[i]
+                    ? 'var(--color-subject-correct)'
+                    : disableCheckboxIndexes.redCells[i]
+                        ? 'var(--color-subject-error)'
+                        : 'transparent',
+                color: disableCheckboxIndexes.highlightedCells[i] || disableCheckboxIndexes.redCells[i]
+                    ? '#000'
+                    : 'var(--color-text-base)',
+            };
 
             return (
                 <SubjectCell
@@ -374,10 +352,12 @@ const SubjectRow = memo(({
                     disableCheckbox={disableCheckboxIndexes.indexes.includes(i)} // Vô hiệu hóa checkbox nếu nằm trong các cột có điểm hoặc trước cột đó
                     handleChange={handleChangeCell}
                     courseOpen={courseOpen}
+                    cellStyle={cellStyle} // Truyền style cho từng ô
                 />
             );
         });
-    }, [subject, repeatHK, registeredInfo, scores, courseOpen, getSemesterIndex, disableCheckboxIndexes.indexes, handleChangeCell]);
+    }, [subject, repeatHK, registeredInfo, scores, courseOpen, getSemesterIndex, disableCheckboxIndexes, handleChangeCell]);
+
 
     if (!subject) return null;
 

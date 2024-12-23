@@ -58,6 +58,7 @@ export const useConfirm = () => {
         });
     };
 
+
     return {
         deleteConfirm,
         cancelRegisterConfirm,

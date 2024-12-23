@@ -8,7 +8,6 @@ import { getUserById, getUsersByFaculty } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createSRGroup, updateScientificResearchGroupById } from '../../../services/scientificResearchGroupService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
-import { getAllFaculty } from '../../../services/facultyService';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import notifications from '../../../config/notifications';
@@ -27,8 +26,8 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const { sendNotification } = useSocketNotification();
     const [form] = useForm(); // Sử dụng hook useForm
     const [statusOptions, setStatusOptions] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
-    const [facultyOptions, setFacultyOptions] = useState([]);
+    const { userId, faculty } = useContext(AccountLoginContext);
+
 
     const statusType = 'Tiến độ nhóm đề tài NCKH';
 
@@ -45,32 +44,12 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                     setStatusOptions(options);
                 }
             } catch (error) {
-                console.error(' [ Ngànhluanupdate - fetchStatusByType - Error ] :', error);
+                console.error(error);
             }
         };
 
         fetchStatusByType();
     }, [statusType]);
-
-    // Fetch data khi component được mount
-    //lấy danh sách các ngành ra ngoài thẻ select
-    useEffect(() => {
-        const fetchFaculties = async () => {
-            const response = await getAllFaculty();
-            if (response && response.data) {
-                const options = response.data.map((faculty) => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyId + " - " + faculty.facultyName,
-                }));
-                setFacultyOptions(options);
-            }
-        };
-
-        fetchFaculties();
-    }, []);
-
-
-
 
     useEffect(() => {
         if (showModal && isUpdate) {
@@ -80,11 +59,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
             form.setFieldsValue({
                 scientificResearchGroupName: showModal.scientificResearchGroupName,
                 description: showModal.description,
-                ...(showModal.faculty && {
-                    faculty: {
-                        value: showModal.faculty.facultyId,
-                    }
-                }),
                 ...(showModal.status && {
                     status: {
                         value: showModal.status.statusId,
@@ -115,7 +89,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                 statusId: values.status.value,
                 startYear: values.startYear,
                 finishYear: values.finishYear,
-                facultyId: values.faculty.value,
+                facultyId: faculty,
                 startCreateSRDate: new Date(values.createSRDate[0].$d),
                 endCreateSRDate: new Date(values.createSRDate[1].$d),
             };
@@ -160,7 +134,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         try {
             const user = await getUserById(userId);
 
-            //lấy danh sách giảng viên theo ngành
+            //lấy danh sách giảng viên theo khoa
             const responseIntructor = await getUsersByFaculty(SRGData.faculty.facultyId);
             if (responseIntructor && responseIntructor.data) {
                 var listUserReceived = responseIntructor.data;
@@ -211,23 +185,6 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
                         >
                             <Input.TextArea />
                         </FormItem>
-                        <FormItem
-                            name="faculty"
-                            label="Ngành"
-                            rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
-                        >
-                            <Select
-                                showSearch
-                                placeholder="Chọn ngành"
-                                optionFilterProp="children"
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={facultyOptions}
-                                labelInValue
-                            />
-                        </FormItem>
-
                         <FormItem
                             name="status"
                             label="Trạng thái"

@@ -16,11 +16,12 @@ import {
     createUser,
     updateUserById,
 } from '../../../services/userService';
-import { getAllFaculty } from '../../../services/facultyService';
-import { getWhere } from '../../../services/majorService';
+import { getWhere as getWhereSpecialization } from '../../../services/specializationService';
 import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { getAll } from '../../../services/majorService';
+import { getWhere as getWhereAccount } from '../../../services/accountService';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -31,83 +32,103 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
     const { userId } = useContext(AccountLoginContext)
     const [form] = Form.useForm();
     const [isStudent, setIsStudent] = useState(true);
-    const [facultyOptions, setFacultyOptions] = useState([]);
-    const [selectedFaculty, setSelectedFaculty] = useState(null);
     const [majorOptions, setMajorOptions] = useState([]);
     const [selectedMajor, setSelectedMajor] = useState(null);
+    const [specializationOptions, setSpecializationOptions] = useState([]);
+    const [selectedSpecialization, setSelectedSpecialization] = useState(null);
+    const [accountOptions, setAccountOptions] = useState([]);
 
     useEffect(() => {
-        const fetchFaculties = async () => {
+        const fetchMajor = async () => {
             try {
-                const response = await getAllFaculty();
+                const response = await getAll();
                 if (response && response.data) {
-                    const options = response.data.map((faculty) => ({
-                        value: faculty.facultyId,
-                        label: faculty.facultyName,
+                    const options = response.data.map((major) => ({
+                        value: major.majorId,
+                        label: major.majorName,
                     }));
-                    setFacultyOptions(options);
+                    setMajorOptions(options);
 
-                    // Check if we have faculty data in showModal
-                    if (showModal && isUpdate && showModal.faculty) {
-                        const facultyId = showModal.faculty.facultyId;
-                        setSelectedFaculty(facultyId);
-                        form.setFieldValue('facultyId', facultyId);
+                    // Check if we have major data in showModal
+                    if (showModal && isUpdate && showModal.major) {
+                        const majorId = showModal.major.majorId;
+                        setSelectedMajor(majorId);
+                        form.setFieldValue('majorId', majorId);
                     }
                 }
             } catch (error) {
                 console.error('Error fetching faculties:', error);
             }
         };
-        fetchFaculties();
+        fetchMajor();
     }, [showModal, form, isUpdate]);
 
     //lấy danh sách chuyên ngành theo ngành
     useEffect(() => {
-        const fetchMajor = async () => {
-            if (selectedFaculty) {
+        const fetchSpecialization = async () => {
+            if (selectedMajor) {
                 try {
-                    const response = await getWhere({ facultyId: selectedFaculty });
+                    const response = await getWhereSpecialization({ majorId: selectedMajor });
                     // Thay đổi cách truy cập data ở đây
                     if (response?.data?.data && Array.isArray(response.data.data)) {
-                        const options = response.data.data.map((major) => ({
-                            value: major.majorId,
-                            label: major.majorName,
+                        const options = response.data.data.map((specialization) => ({
+                            value: specialization.specializationId,
+                            label: specialization.specializationName,
                         }));
-                        setMajorOptions(options);
+                        setSpecializationOptions(options);
 
-                        if (showModal?.major) {
-                            const majorId = showModal.major.majorId;
-                            setSelectedMajor(majorId);
-                            form.setFieldValue('majorId', majorId);
+                        if (showModal?.specialization) {
+                            const specializationId = showModal.specialization.specializationId;
+                            setSelectedSpecialization(specializationId);
+                            form.setFieldValue('specializationId', specializationId);
                         }
                     }
                 } catch (error) {
-                    console.error('Error fetching majors:', error);
-                    setMajorOptions([]);
+                    console.error('Error fetching specializations:', error);
+                    setSpecializationOptions([]);
                 }
             } else {
-                setMajorOptions([]);
-                setSelectedMajor(null);
-                form.setFieldValue('majorId', '');
+                setSpecializationOptions([]);
+                setSelectedSpecialization(null);
+                form.setFieldValue('specializationId', '');
             }
         };
         if (showModal)
-            fetchMajor();
-    }, [selectedFaculty, showModal, form]);
+            fetchSpecialization();
+    }, [selectedMajor, showModal, form]);
 
+
+    // Lây danh sách tài khoản
+    useEffect(() => {
+        const fetchAccount = async () => {
+            try {
+                const response = await getWhereAccount({ isUnused: true });
+                if (response && response.data?.data) {
+                    const options = response.data?.data?.map((account) => ({
+                        value: account.id,
+                        label: account.username,
+                    }));
+                    setAccountOptions(options);
+                }
+            } catch (error) {
+                console.error('Error fetchAccount:', error);
+            }
+        };
+        fetchAccount();
+    }, [showModal, form, isUpdate]);
 
     useEffect(() => {
         if (showModal && isUpdate && form) {
             // Set selected values for dropdowns
-            if (showModal.faculty) {
-                const facultyId = showModal.faculty;
-                setSelectedFaculty(facultyId);
-                form.setFieldValue('facultyId', facultyId);
-            }
             if (showModal.major) {
                 const majorId = showModal.major;
                 setSelectedMajor(majorId);
                 form.setFieldValue('majorId', majorId);
+            }
+            if (showModal.specialization) {
+                const specializationId = showModal.specialization;
+                setSelectedSpecialization(specializationId);
+                form.setFieldValue('specializationId', specializationId);
             }
             if (showModal.isStudent !== undefined) {
                 setIsStudent(showModal.isStudent);
@@ -122,8 +143,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 phone: showModal.phone,
                 dateOfBirth: dateOfBirth,
                 placeOfBirth: showModal.placeOfBirth,
-                faculty: showModal.faculty?.facultyId,
                 major: showModal.major?.majorId,
+                specialization: showModal.specialization?.specializationId,
                 isStudent: showModal.isStudent,
                 sex: showModal.sex,
                 cccd: showModal.cccd,
@@ -132,9 +153,14 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 hoc_vi: showModal.hoc_vi,
                 isActive: showModal.isActive,
                 nien_khoa: [
-                    dayjs(`${showModal.firstAcademicYear}-12-31`).startOf('year'), // Ngày bắt đầu niên khóa
+                    dayjs(`${showModal.firstAcademicYear}-01-01`).startOf('year'), // Ngày bắt đầu niên khóa
                     dayjs(`${showModal.lastAcademicYear}-12-31`).endOf('year')   // Ngày kết thúc niên khóa
-                ]
+                ],
+                accountId: {
+                    value: showModal.account?.id,
+                    label: showModal.account?.username
+                }
+
             });
 
 
@@ -149,20 +175,20 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
         if (showModal !== false) {
             setShowModal(false);
             form.resetFields();
-            setSelectedFaculty(null);
             setSelectedMajor(null);
+            setSelectedSpecialization(null);
         }
-    };
-
-    const handleFacultySelect = (value) => {
-        setSelectedFaculty(value);
-        setSelectedMajor(null);
-        form.setFieldValue('majorId', null);
     };
 
     const handleMajorSelect = (value) => {
         setSelectedMajor(value);
-        form.setFieldValue('majorId', value);
+        setSelectedSpecialization(null);
+        form.setFieldValue('specializationId', null);
+    };
+
+    const handleSpecializationSelect = (value) => {
+        setSelectedSpecialization(value);
+        form.setFieldValue('specializationId', value);
     };
 
     const handleChangeIsStudent = (value) => {
@@ -185,8 +211,8 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 phone: values.phone,
                 isStudent: values.isStudent,
                 class: values.class || '',
-                faculty: selectedFaculty,
                 major: selectedMajor,
+                specialization: selectedSpecialization,
                 nien_khoa: (startYear?.year() && endYear?.year()) ? startYear?.year() + "-" + endYear?.year() : null,
                 firstAcademicYear: startYear?.year(),
                 lastAcademicYear: endYear?.year(),
@@ -199,6 +225,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                 avatar: values.avatar || '',
                 createUser: userId || 'admin',
                 lastModifyUser: userId || 'admin',
+                account: values.accountId
             };
 
             if (isUpdate) {
@@ -329,22 +356,7 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
 
                 <Row gutter={16}>
                     <Col span={12}>
-                        <FormItem name="facultyId" label="Ngành">
-                            <Select
-                                showSearch
-                                placeholder="Chọn ngành"
-                                optionFilterProp="children"
-                                onChange={handleFacultySelect}
-                                value={selectedFaculty}
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={facultyOptions}
-                            />
-                        </FormItem>
-                    </Col>
-                    <Col span={12}>
-                        <FormItem name="majorId" label="Chuyên ngành">
+                        <FormItem name="majorId" label="Ngành">
                             <Select
                                 showSearch
                                 placeholder="Chọn ngành"
@@ -355,6 +367,21 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                 }
                                 options={majorOptions}
+                            />
+                        </FormItem>
+                    </Col>
+                    <Col span={12}>
+                        <FormItem name="specializationId" label="Chuyên ngành">
+                            <Select
+                                showSearch
+                                placeholder="Chọn ngành"
+                                optionFilterProp="children"
+                                onChange={handleSpecializationSelect}
+                                value={selectedSpecialization}
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={specializationOptions}
                             />
                         </FormItem>
                     </Col>
@@ -412,6 +439,23 @@ const NguoiDungUpdate = memo(function NguoiDungUpdate({ title, isUpdate, showMod
                                 <Option value="Phó giáo sư">Phó giáo sư</Option>
                                 <Option value="Giáo sư">Giáo sư</Option>
                             </Select>
+                        </FormItem>
+                    </Col>
+                </Row>
+
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <FormItem name="accountId" label="Tài khoản">
+                            <Select
+                                labelInValue
+                                showSearch
+                                placeholder="Chọn tài khoản"
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={accountOptions}
+                            />
                         </FormItem>
                     </Col>
                     {isUpdate &&

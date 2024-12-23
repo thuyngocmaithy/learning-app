@@ -48,14 +48,17 @@ const LoginForm = () => {
                     userId: response.data.user.userId,
                     token: response.data.accessToken,
                     permission: response.data.user.roles,
-                    facultyId: response.data.user?.faculty || "",
-                    avatar: response.data.user.avatar
+                    faculty: response.data.user?.faculty || "",
+                    avatar: response.data.user.avatar,
+                    major: response.data.user?.major
                 }));
                 await updateUserInfo();
                 await updateSRAndThesisJoin();
                 if (response.data.user.roles === "SINHVIEN") {
                     navigate('/Dashboard', { replace: true });
-                } else if (response.data.user.roles === "GIANGVIEN" || response.data.user.roles === "ADMIN") {
+                } else if (response.data.user.roles === "ADMIN") {
+                    navigate('/ThongBao', { replace: true });
+                } else {
                     navigate('/Department/Dashboard', { replace: true });
                 }
             } else {

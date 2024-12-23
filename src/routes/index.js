@@ -15,6 +15,8 @@ import NhomDeTaiKhoaLuan_Department from '../pages/Department/NghiepVu/NhomDeTai
 import DeTaiKhoaLuan_Department from '../pages/Department/NghiepVu/DeTaiKhoaLuan';
 import NhomDeTaiNCKH_Department from '../pages/Department/NghiepVu/NhomDeTaiNCKH';
 import DeTaiNCKH_Department from '../pages/Department/NghiepVu/DeTaiNCKH';
+import MoHocPhan from '../pages/Department/NghiepVu/MoHocPhan';
+
 
 // THIẾT LẬP
 import PhanQuyenChucNang_Department from '../pages/Department/ThietLap/PhanQuyenChucNang';
@@ -57,6 +59,7 @@ const privateRoutes = [
     { path: config.routes.DeTaiKhoaLuan_Department, component: DeTaiKhoaLuan_Department, layout: DepartmentLayout, urlDepend: "NhomDeTaiKhoaLuan_Department" },
     { path: config.routes.NhomDeTaiNCKH_Department, component: NhomDeTaiNCKH_Department, layout: DepartmentLayout },
     { path: config.routes.NhomDeTaiKhoaLuan_Department, component: NhomDeTaiKhoaLuan_Department, layout: DepartmentLayout },
+    { path: config.routes.MoHocPhan, component: MoHocPhan, layout: DepartmentLayout },
 
     // THIẾT LẬP
     { path: config.routes.KhungCTDT, component: KhungCTDT, layout: DepartmentLayout },

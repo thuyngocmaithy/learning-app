@@ -54,7 +54,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
         }
     };
 
-    //lấy danh sách giảng viên theo ngành
+    //lấy danh sách giảng viên theo khoa
     const fetchInstructors = useCallback(async (ThesisGroupIdInput) => {
         const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
         const response = await getUsersByFaculty(ThesisGroup?.data?.data?.faculty?.facultyId);
