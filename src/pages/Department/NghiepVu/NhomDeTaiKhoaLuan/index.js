@@ -9,7 +9,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import NhomDeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/NhomDeTaiKhoaLuanUpdate';
-import { deleteThesisGroups, getAllThesisGroup, updateThesisGroupByIds, importThesisGroup } from '../../../../services/thesisGroupService';
+import { deleteThesisGroups, updateThesisGroupByIds, importThesisGroup, getWhere } from '../../../../services/thesisGroupService';
 import config from '../../../../config';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 import { getWhere as getWhereThesis } from '../../../../services/thesisService';
@@ -17,7 +17,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
-import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
@@ -36,11 +35,10 @@ function NhomDeTaiKhoaLuan() {
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [listThesisJoined, setListThesisJoined] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
+    const { userId, faculty } = useContext(AccountLoginContext);
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
-    const [facultyOptions, setFacultyOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
@@ -102,7 +100,7 @@ function NhomDeTaiKhoaLuan() {
             width: '200px'
         },
         {
-            title: 'Ngành',
+            title: 'Khoa',
             dataIndex: 'facultyName',
             key: 'facultyName',
         },
@@ -192,7 +190,7 @@ function NhomDeTaiKhoaLuan() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const result = await getAllThesisGroup()
+            const result = await getWhere({ faculty: faculty })
             if (result.status === 200) {
                 var currentDate = new Date();
                 const resultData = result.data.data.map((item) => {
@@ -266,26 +264,6 @@ function NhomDeTaiKhoaLuan() {
         );
     }, [showModalUpdate, isUpdate]);
 
-    //lấy danh sách các ngành ra ngoài thẻ select
-    useEffect(() => {
-        const fetchFaculties = async () => {
-            try {
-                const response = await getAllFaculty();
-                if (response && response.data) {
-                    const options = response.data.map((faculty) => ({
-                        value: faculty.facultyId,
-                        label: faculty.facultyName,
-                    }));
-                    setFacultyOptions(options);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchFaculties();
-    }, []);
-
     const statusType = 'Tiến độ nhóm đề tài khóa luận';
 
     // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài khóa luận"
@@ -353,21 +331,6 @@ function NhomDeTaiKhoaLuan() {
             ]}
         >
             <Input />
-        </FormItem>,
-        <FormItem
-            name={'faculty'}
-            label={'Ngành'}
-        >
-            <Select
-                style={{ width: '100%' }}
-                showSearch
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                options={facultyOptions}
-                labelInValue
-            />
         </FormItem>,
         <FormItem
             name={'status'}
@@ -518,7 +481,7 @@ function NhomDeTaiKhoaLuan() {
     const schemas = [
         { label: "Mã nhóm đề tài", prop: "thesisGroupId" },
         { label: "Tên nhóm đề tài", prop: "thesisGroupName" },
-        { label: "Ngành", prop: "faculty" },
+        { label: "Khoa", prop: "faculty" },
         { label: "Năm thực hiện", prop: "startYear" },
         { label: "Năm kết thúc", prop: "finishYear" },
         { label: "Trạng thái", prop: "status" }

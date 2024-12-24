@@ -186,15 +186,22 @@ function App() {
         <div className="App">
             <Routes>
                 {/* Điều hướng đến trang dashboard */}
+
                 {userId && isLoadFeatured && (
-                    <Route
-                        path="/"
-                        element={
-                            permission === "SINHVIEN"
-                                ? <Navigate to={config.routes.Dashboard} replace />
-                                : <Navigate to={config.routes.Dashboard_Department} replace />
+                    <>
+                        <Route
+                            path="/"
+                            element={
+                                permission === "SINHVIEN"
+                                    ? <Navigate to={config.routes.Dashboard} replace />
+                                    : permission === "ADMIN"
+                                        ? <Navigate to={config.routes.ThongBao} replace />
+                                        : <Navigate to={config.routes.Dashboard_Department} replace />
+                            }
+                        />
+                        {console.log(permission === "ADMIN")
                         }
-                    />
+                    </>
                 )}
 
                 {memoizedPublicRoutes}

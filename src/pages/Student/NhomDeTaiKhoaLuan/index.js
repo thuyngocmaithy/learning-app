@@ -69,7 +69,7 @@ function NhomDeTaiKhoaLuan() {
 
 
     // SEARCH NHÓM ĐỀ TÀI KHÓA LUẬN
-    //lấy danh sách các ngành ra ngoài thẻ select
+    //lấy danh sách các khoa ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             try {
@@ -157,7 +157,7 @@ function NhomDeTaiKhoaLuan() {
         </FormItem>,
         <FormItem
             name={'faculty'}
-            label={'Ngành'}
+            label={'Khoa'}
         >
             <Select
                 style={{ width: '100%' }}
@@ -289,7 +289,7 @@ function NhomDeTaiKhoaLuan() {
                                             >
                                                 Thời gian thực hiện: {item.startYear} - {item.finishYear}
                                             </p>
-                                            <p>Ngành: {item.faculty.facultyName}</p>
+                                            <p>Khoa: {item.faculty.facultyName}</p>
                                             <p style={{ margin: "7px 0" }}>
                                                 Trạng thái:
                                                 <Tag color={item.status.color} className={cx('tag-status')}>

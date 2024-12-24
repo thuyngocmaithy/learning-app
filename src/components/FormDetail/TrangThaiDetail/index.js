@@ -31,7 +31,7 @@ export const TrangThaiDetail = memo(function TrangThaiDetail({
                 <FormItem label={'Mã trạng thái'} name="statusId">
                     <p>{showModal?.statusId || ''}</p>
                 </FormItem>
-                <FormItem label={'Tên ngành'} name="statusName">
+                <FormItem label={'Tên trạng thái'} name="statusName">
                     <p>{showModal?.statusName || ''}</p>
                 </FormItem>
                 <FormItem label={'Loại trạng thái'} name="type">

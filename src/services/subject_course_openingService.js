@@ -10,42 +10,12 @@ export const getAll = async () => {
     }
 };
 
-export const deleteSubjectCourseOpening = async (cycleId, studyFrameId) => {
-    try {
-        const response = await api.delete(`/subject_course_openings?cycleId=${cycleId}&studyFrameId=${studyFrameId}`);
-        return response;
-    } catch (error) {
-        console.error('deleteSubjectCourseOpening error:', error);
-        throw error;
-    }
-};
-
-export const updateSubjectCourseOpening = async (id, data) => {
-    try {
-        const response = await api.put(`/subject_course_openings/${id}`, data);
-        return response;
-    } catch (error) {
-        console.error('Update SubjectCourseOpening error:', error);
-        throw error;
-    }
-};
-
 export const saveMulti = async (data) => {
     try {
         const response = await api.post('/subject_course_openings/saveMulti', data);
         return response;
     } catch (error) {
         console.error('Save multiple subject_course_openings error:', error);
-        throw error;
-    }
-};
-
-export const getTeacherAssignmentsAndSemesters = async () => {
-    try {
-        const response = await api.get('/subject_course_openings/teacher-assignments');
-        return response.data;
-    } catch (error) {
-        console.error('[API getTeacherAssignmentsAndSemesters Error]:', error);
         throw error;
     }
 };
@@ -58,6 +28,28 @@ export const getWhere = async (conditions) => {
         const response = await api.get(url);
         return response;
     } catch (error) {
+        throw error;
+    }
+};
+
+// Xóa Subject_Course_Opening theo semesterId và majorId
+export const deleteBySemesterAndMajor = async (semesterId, majorId) => {
+    try {
+        const response = await api.delete(`/subject_course_openings/${semesterId}/${majorId}`);
+        return response;
+    } catch (error) {
+        console.error('Delete subject_course_opening error:', error);
+        throw error;
+    }
+};
+
+// Lấy danh sách grouped by subject theo semesterIds
+export const getGroupedBySubjectForSemesters = async (major, semesterIds) => {
+    try {
+        const response = await api.post('/subject_course_openings/grouped-by-subject', { major, semesterIds });
+        return response;
+    } catch (error) {
+        console.error('Get grouped subject_course_openings error:', error);
         throw error;
     }
 };

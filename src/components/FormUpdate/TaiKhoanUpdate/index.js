@@ -38,7 +38,7 @@ const TaiKhoanUpdate = memo(function TaiKhoanUpdate({
                     }
                 }
             } catch (error) {
-                console.error(' [ Ngànhluanupdate - fetchAccount - Error ] :', error);
+                console.error(error);
             }
         };
 

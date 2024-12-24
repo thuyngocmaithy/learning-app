@@ -42,8 +42,8 @@ export const NguoiDungDetail = memo(function NguoiDungDetail({ title, showModal,
                             <FormItem label={'Nơi sinh'} name="placeOfBirth">
                                 <p>{showModal?.placeOfBirth || ''}</p>
                             </FormItem>
-                            <FormItem label={'Ngành'} name="faculty">
-                                <p>{showModal?.faculty?.facultyName || ''}</p>
+                            <FormItem label={'Ngành'} name="major">
+                                <p>{showModal?.major?.majorName || ''}</p>
                             </FormItem>
                             <FormItem label={'Số căn cước công dân'} name="cccd">
                                 <p>{showModal?.cccd || ''}</p>

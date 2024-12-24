@@ -39,7 +39,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     const statusType = 'Tiến độ đề tài khóa luận';
 
     // Fetch data khi component được mount
-    //lấy danh sách các ngành ra ngoài thẻ select
+    //lấy danh sách các khoa ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             const response = await getAllFaculty();
@@ -63,7 +63,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         fetchFaculties();
     }, [selectedFaculty]);
 
-    //lấy danh sách giảng viên theo ngành
+    //lấy danh sách giảng viên theo khoa
     useEffect(() => {
         const fetchSupervisors = async () => {
             if (selectedFaculty) {
@@ -108,7 +108,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     }
                 }
             } catch (error) {
-                console.error(' [ Ngànhluanupdate - fetchStatusByType - Error ] :', error);
+                console.error(error);
             }
         };
 
@@ -246,12 +246,12 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                 </FormItem>
                 <FormItem
                     name="faculty"
-                    label="Ngành"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
+                    label="Khoa"
+                    rules={[{ required: true, message: 'Vui lòng chọn khoa!' }]}
                 >
                     <Select
                         showSearch
-                        placeholder="Chọn ngành"
+                        placeholder="Chọn khoa"
                         optionFilterProp="children"
                         onChange={handleFacultySelect}
                         value={selectedFaculty}

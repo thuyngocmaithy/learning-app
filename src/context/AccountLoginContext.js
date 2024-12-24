@@ -40,6 +40,17 @@ function AccountLoginProvider({ children }) {
 
     const [isTokenExpired, setIsTokenExpired] = useState(false);
 
+    const [faculty, setFaculty] = useState(() => {
+        const initialData = getLocalStorageWithExpiration('userLogin');
+        return initialData?.faculty || null;
+    });
+
+    const [major, setMajor] = useState(() => {
+        const initialData = getLocalStorageWithExpiration('userLogin');
+        return initialData?.major || null;
+    });
+
+
 
 
     // Kiểm tra token khi component khởi tạo
@@ -72,6 +83,8 @@ function AccountLoginProvider({ children }) {
         setPermission(userlogin ? userlogin.permission : null);
         setAvatar(userlogin ? userlogin.avatar : null);
         setAccess_token(userlogin ? userlogin.token : null);
+        setFaculty(userlogin ? userlogin.faculty : null);
+        setMajor(userlogin ? userlogin.major : null);
     }, []);
 
     useEffect(() => {
@@ -79,7 +92,7 @@ function AccountLoginProvider({ children }) {
     }, [updateUserInfo]);
 
     return (
-        <AccountLoginContext.Provider value={{ userId, permission, avatar, access_token, isTokenExpired, updateUserInfo }}>
+        <AccountLoginContext.Provider value={{ userId, permission, faculty, major, avatar, access_token, isTokenExpired, updateUserInfo }}>
             {children}
         </AccountLoginContext.Provider>
     );

@@ -36,7 +36,7 @@
     color: var(--primary);
 }
 
-.description {
+.description-tiendo {
     margin-bottom: 20px;
     border-radius: 8px;
     padding: 10px;
@@ -87,6 +87,82 @@
 
     &.subject-open {
         background-color: var(--color-subject-open);
+    }
+}
+
+// Khung tiến độ
+.container-header-frame-subject {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btnDetail {
+    margin-right: 5px;
+}
+
+.item-subject,
+.subject-info,
+.title-frame {
+    display: flex;
+}
+
+.item-subject {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.checkbox-semester {
+    margin-right: 7px;
+}
+
+.dash {
+    margin: 0 8px;
+}
+
+.description {
+    font-weight: 300;
+    font-size: 15px;
+}
+
+.creditHour {
+    margin-left: 8px;
+    color: var(--primary);
+}
+
+.tree-frame {
+    box-shadow: var(--box-shadow-1);
+    border-radius: 10px;
+}
+
+.container-semester {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    .item-subject-semester {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 5.5vw;
+
+        div {
+            text-align: center;
+        }
+    }
+}
+
+
+:global .ant-tooltip-open:hover {
+    .tag-open-course {
+        display: none !important;
+    }
+
+    .btnAddSubject {
+        display: flex !important;
+        width: 4.8vw;
+        height: 41px;
     }
 }
 

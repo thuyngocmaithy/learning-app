@@ -24,6 +24,7 @@ import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
 import { useConfirm } from '../../../../hooks/useConfirm';
 import TabDeTaiKhoaLuanThamGia from '../../../../components/TabDeTaiKhoaLuanThamGia';
+import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
@@ -44,6 +45,7 @@ function DeTaiKhoaLuan() {
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
+    const { permission } = useContext(AccountLoginContext);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
     // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
@@ -405,7 +407,7 @@ function DeTaiKhoaLuan() {
         },
         {
             id: 2,
-            title: 'Đề tài tham gia (theo nhóm đề tài)',
+            title: 'Đề tài tham gia',
             children: (
                 <TabDeTaiKhoaLuanThamGia
                     listThesisJoin={listThesisJoin}
@@ -616,19 +618,39 @@ function DeTaiKhoaLuan() {
                         ) : null}
                     </div>
                 </div>
-
-                <Tabs
-                    activeKey={tabActive}
-                    onChange={handleTabChange}
-                    centered
-                    items={ITEM_TABS.map((item, index) => {
-                        return {
-                            label: item.title,
-                            key: index + 1,
-                            children: item.children,
-                        };
-                    })}
-                />
+                {permission !== "KHOA"
+                    ? <Tabs
+                        activeKey={tabActive}
+                        onChange={handleTabChange}
+                        centered
+                        items={ITEM_TABS.map((item, index) => {
+                            return {
+                                label: item.title,
+                                key: index + 1,
+                                children: item.children,
+                            };
+                        })}
+                    />
+                    : <>
+                        <div className={`slide ${showFilter1 ? 'open' : ''}`}>
+                            <SearchForm
+                                getFields={filterFields}
+                                onSearch={onSearch}
+                                onReset={() => { setData(dataOriginal) }}
+                            />
+                            <Divider />
+                        </div>
+                        <TableCustomAnt
+                            height={'600px'}
+                            columns={columns(setShowModalUpdate)}
+                            data={data}
+                            setSelectedRowKeys={setSelectedRowKeys}
+                            selectedRowKeys={selectedRowKeys}
+                            keyIdChange='thesisId'
+                            loading={isLoading}
+                        />
+                    </>
+                }
 
 
             </div>

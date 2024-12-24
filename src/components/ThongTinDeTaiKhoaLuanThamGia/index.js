@@ -28,7 +28,7 @@ function ThongTinDeTaiKhoaLuanThamGia({ thesis }) {
         },
         {
             key: '1-info',
-            label: 'Ngành',
+            label: 'Khoa',
             children: thesis ? thesis.thesisGroup?.faculty?.facultyName : '',
         },
         {

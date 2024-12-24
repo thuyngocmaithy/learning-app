@@ -9,6 +9,7 @@ const imports = {
     THESIS: "../../TemplateImport/template_import_thesis.xlsx",
     SCIENRESEARCHGROUP: "../../TemplateImport/template_import_scientificgroup.xlsx",
     SCIENRESEARCH: "../../TemplateImport/template_import_scientific.xlsx",
+    OPEN_GROUP_COURSE: "../../TemplateImport/template_import_open_course.xlsx",
 };
 
 export default imports;

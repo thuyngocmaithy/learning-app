@@ -40,8 +40,6 @@ const routes = {
     HocKy_ChuKy: '/Department/ThietLap/HocKyChuKy',
     ChuKy: '/Department/ThietLap/ChuKy',
     MonHoc: '/Department/ThietLap/MonHoc',
-    Ngành: '/Department/ThietLap/Ngành',
-    ChuyenNganh: '/Department/ThietLap/ChuyenNganh',
     KhoaNganhChuyenNganh: '/Department/ThietLap/KhoaNganhChuyenNganh',
     TrangThai: '/Department/ThietLap/TrangThai',
 

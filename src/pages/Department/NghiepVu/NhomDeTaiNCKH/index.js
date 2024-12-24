@@ -17,12 +17,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDetailContext } from '../../../../context/PermissionDetailContext';
 import SearchForm from '../../../../components/Core/SearchForm';
 import FormItem from '../../../../components/Core/FormItem';
-import { getAllFaculty } from '../../../../services/facultyService';
 import { getStatusByType } from '../../../../services/statusService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
 import dayjs from 'dayjs';
 import { useConfirm } from '../../../../hooks/useConfirm';
+import { getWhere as getWhereSRG } from '../../../../services/scientificResearchGroupService';
+
 
 const cx = classNames.bind(styles);
 
@@ -35,11 +36,10 @@ function NhomDeTaiNCKH() {
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Trạng thái để lưu hàng đã chọn
     const [listScientificResearchJoined, setListscientificResearchJoined] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
+    const { userId, faculty } = useContext(AccountLoginContext);
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
-    const [facultyOptions, setFacultyOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showFilter, setShowFilter] = useState(false);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
@@ -101,7 +101,7 @@ function NhomDeTaiNCKH() {
             width: '200px'
         },
         {
-            title: 'Ngành',
+            title: 'Khoa',
             dataIndex: ['facultyName'],
             key: 'facultyName',
         },
@@ -190,7 +190,7 @@ function NhomDeTaiNCKH() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const result = await getAllSRGroup()
+            const result = await getWhereSRG({ faculty: faculty })
             if (result.status === 200) {
                 var currentDate = new Date();
                 const resultData = result.data.data.map((item) => {
@@ -264,26 +264,6 @@ function NhomDeTaiNCKH() {
         );
     }, [showModalUpdate, isUpdate]);
 
-    //lấy danh sách các ngành ra ngoài thẻ select
-    useEffect(() => {
-        const fetchFaculties = async () => {
-            try {
-                const response = await getAllFaculty();
-                if (response && response.data) {
-                    const options = response.data.map((faculty) => ({
-                        value: faculty.facultyId,
-                        label: faculty.facultyName,
-                    }));
-                    setFacultyOptions(options);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchFaculties();
-    }, []);
-
     const statusType = 'Tiến độ nhóm đề tài NCKH';
 
     // Fetch danh sách trạng thái theo loại "Tiến độ nhóm đề tài nghiên cứu"
@@ -333,21 +313,6 @@ function NhomDeTaiNCKH() {
             <Input />
         </FormItem>,
         <FormItem
-            name={'faculty'}
-            label={'Ngành'}
-        >
-            <Select
-                style={{ width: '100%' }}
-                showSearch
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                options={facultyOptions}
-                labelInValue
-            />
-        </FormItem>,
-        <FormItem
             name={'status'}
             label={'Trạng thái'}
         >
@@ -365,17 +330,16 @@ function NhomDeTaiNCKH() {
     ];
 
     const onSearch = (values) => {
-        const { scientificResearchGroupId, scientificResearchGroupName, startYear, finishYear, faculty, status } = values;
+        const { scientificResearchGroupId, scientificResearchGroupName, startYear, finishYear, status } = values;
         const originalList = dataOriginal;
         const filteredList = originalList.filter((item) => {
             const matchesSRGId = scientificResearchGroupId ? item.scientificResearchGroupId?.toLowerCase().includes(scientificResearchGroupId.toLowerCase()) : true;
             const matchesSRGName = scientificResearchGroupName ? item.scientificResearchGroupName?.toLowerCase().includes(scientificResearchGroupName.toLowerCase()) : true;
             const matchesstartYear = startYear ? item.startYear.toString().includes(startYear) : true;
             const matchesfinishYear = finishYear ? item.finishYear.toString().includes(finishYear) : true;
-            const matchesfaculty = faculty?.value ? item.faculty?.facultyId === faculty?.value : true;
             const matchesStatus = status?.value ? item.status?.statusId === status?.value : true;
 
-            return matchesSRGId && matchesSRGName && matchesstartYear && matchesfinishYear && matchesfaculty && matchesStatus;
+            return matchesSRGId && matchesSRGName && matchesstartYear && matchesfinishYear && matchesStatus;
         });
         setData(filteredList);
     };
@@ -493,7 +457,7 @@ function NhomDeTaiNCKH() {
     const schemas = [
         { label: "Mã nhóm đề tài", prop: "scientificResearchGroupId" },
         { label: "Tên nhóm đề tài", prop: "scientificResearchGroupName" },
-        { label: "Ngành", prop: "faculty" },
+        { label: "Khoa", prop: "faculty" },
         { label: "Năm thực hiện", prop: "startYear" },
         { label: "Năm kết thúc", prop: "finishYear" },
         { label: "Trạng thái", prop: "status" }

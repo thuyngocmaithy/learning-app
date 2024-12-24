@@ -54,7 +54,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
         }
     };
 
-    //lấy danh sách giảng viên theo ngành
+    //lấy danh sách giảng viên theo khoa
     const fetchInstructors = useCallback(async (SRGIdInput) => {
         const SRG = await getScientificResearchGroupById(SRGIdFromUrl || SRGIdInput.value);
         const response = await getUsersByFaculty(SRG.data.data?.faculty?.facultyId);

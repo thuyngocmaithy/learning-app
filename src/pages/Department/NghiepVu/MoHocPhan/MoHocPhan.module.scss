@@ -1,0 +1,93 @@
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+
+    .info {
+        display: flex;
+        margin-bottom: 30px;
+
+        .title {
+            margin-left: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            display: flex;
+            width: 30px;
+            color: var(--primary);
+        }
+    }
+}
+
+
+.wrapper-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: 100%;
+
+    >div {
+        margin-bottom: 10px;
+    }
+}
+
+.container-arrange {
+    height: 100%;
+    margin: 50px 0 30px 0;
+
+    .form-data-arrange>input {
+        margin: 0 10px;
+        text-align: center;
+    }
+
+    .info-warning {
+        color: rgb(210, 0, 0);
+    }
+
+    // BUTTON SAVE
+    .btnSave {
+        display: flex;
+        float: right;
+        margin-top: 10px;
+        margin-bottom: 30px;
+    }
+
+
+    .table-arrange {
+        height: calc(100% - 60px);
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        .footer-table {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+}
+
+
+.action-item {
+    display: fles;
+
+    .btnDelete {
+        margin-right: 7px;
+
+    }
+}
+
+.title-list-course-opening {
+    margin: 25px 0;
+    background-color: #f6ffed;
+    padding: 20px 50px;
+    color: #389e0d;
+    letter-spacing: 2.5px;
+    font-weight: 500;
+    font-size: 21px;
+    text-align: center;
+    box-shadow: var(--box-shadow-3);
+}

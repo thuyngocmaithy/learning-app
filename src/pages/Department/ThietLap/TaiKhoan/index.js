@@ -46,12 +46,21 @@ function TaiKhoan() {
             dataIndex: ['permission', 'permissionName'],
             align: 'center',
             render: (_, record) => {
+                let color = 'red';
+                if (record.permission.permissionId === 'GIANGVIEN') {
+                    color = 'green'
+                }
+                if (record.permission.permissionId === 'SINHVIEN') {
+                    color = 'blue'
+                }
+                if (record.permission.permissionId === 'DAOTAO') {
+                    color = 'gold'
+                }
+                if (record.permission.permissionId === 'KHOA') {
+                    color = 'magenta'
+                }
                 return (
-                    <Tag color={
-                        record.permission.permissionId === 'GIANGVIEN' ? 'green'
-                            : record.permission.permissionId === 'SINHVIEN' ? 'blue'
-                                : 'red'
-                    }>
+                    <Tag color={color}>
                         {record.permission.permissionName.toUpperCase()}
                     </Tag >
                 )
@@ -132,7 +141,7 @@ function TaiKhoan() {
     };
 
 
-    const taingànhnUpdateMemoized = useMemo(() => {
+    const taiKhoanUpdateMemoized = useMemo(() => {
         return (
             <TaiKhoanUpdate
                 title={'tài khoản'}
@@ -178,7 +187,7 @@ function TaiKhoan() {
                 setSelectedRowKeys={setSelectedRowKeys}
                 loading={isLoading}
             />
-            {taingànhnUpdateMemoized}
+            {taiKhoanUpdateMemoized}
 
         </div>
     );

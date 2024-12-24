@@ -12,8 +12,8 @@ import NguoiDungUpdate from '../../../../components/FormUpdate/NguoiDungUpdate';
 import { NguoiDungDetail } from '../../../../components/FormDetail/NguoiDungDetail';
 import { deleteUserById, importUser } from '../../../../services/userService';
 import { getAllUser } from '../../../../services/userService';
-import { getWhere } from '../../../../services/majorService';
-import { getAllFaculty } from '../../../../services/facultyService';
+import { getWhere } from '../../../../services/specializationService';
+import { getAll as getAllMajor } from '../../../../services/majorService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import config from '../../../../config';
 import SearchForm from '../../../../components/Core/SearchForm';
@@ -48,8 +48,8 @@ function NguoiDung() {
 
     // Filter
     const [showFilter, setShowFilter] = useState(false);
-    const [facultyOptions, setFacultyOptions] = useState([]);
     const [majorOptions, setMajorOptions] = useState([]);
+    const [specializationOptions, setSpecializationOptions] = useState([]);
 
     const columns = (showModal) => [
         {
@@ -76,13 +76,13 @@ function NguoiDung() {
         },
         {
             title: 'Ngành',
-            dataIndex: ['faculty', 'facultyName'],
-            key: 'facultyName',
+            dataIndex: ['major', 'majorName'],
+            key: 'majorName',
         },
         {
             title: 'Chuyên ngành',
-            dataIndex: ['major', 'majorName'],
-            key: 'majorName',
+            dataIndex: ['specialization', 'specializationName'],
+            key: 'specializationName',
         },
         {
             title: 'Năm học',
@@ -144,13 +144,13 @@ function NguoiDung() {
                 email: user.email,
                 isStudent: user.isStudent,
                 class: user.class || "",
-                faculty: user.faculty ? {
-                    facultyId: user.faculty.facultyId,
-                    facultyName: user.faculty.facultyName
-                } : null,
                 major: user.major ? {
                     majorId: user.major.majorId,
                     majorName: user.major.majorName
+                } : null,
+                specialization: user.specialization ? {
+                    specializationId: user.specialization.specializationId,
+                    specializationName: user.specialization.specializationName
                 } : null,
                 stillStudy: user.stillStudy,
                 firstAcademicYear: user.firstAcademicYear,
@@ -180,6 +180,10 @@ function NguoiDung() {
                 avatar: user.avatar || "",
                 permission: user.permission || null,
                 createUser: user?.createUser?.userId,
+                account: user.account ? {
+                    id: user.account.id,
+                    username: user.account.username
+                } : null,
             }));
 
             setData(listUser);
@@ -193,7 +197,7 @@ function NguoiDung() {
 
     useEffect(() => {
         fetchData();
-        fetchFacultyData();
+        fetchMajorData();
     }, []);
 
     useEffect(() => {
@@ -249,54 +253,54 @@ function NguoiDung() {
     ];
 
 
-    const fetchFacultyData = async () => {
+    const fetchMajorData = async () => {
         try {
-            const result = await getAllFaculty();
-            let listFaculty = Array.isArray(result.data)
-                ? result.data.map(faculty => ({
-                    value: faculty.facultyId,
-                    label: faculty.facultyName,
+            const result = await getAllMajor();
+            let listMajor = Array.isArray(result.data)
+                ? result.data.map(major => ({
+                    value: major.majorId,
+                    label: major.majorName,
                 })) : [];
-            setFacultyOptions(listFaculty);
+            setMajorOptions(listMajor);
         } catch (error) {
-            console.error('Error fetching faculty data:', error);
+            console.error('Error fetching major data:', error);
         }
     };
 
-    const fetchMajorData = async (facultyId) => {
+    const fetchSpecializationData = async (majorId) => {
         try {
             const response = await getWhere({
-                facultyId: facultyId,
+                majorId: majorId,
             });
             if (response?.data?.data && Array.isArray(response.data.data)) {
-                const options = response.data.data.map((major) => ({
-                    value: major.majorId,
-                    label: major.majorName,
+                const options = response.data.data.map((specialization) => ({
+                    value: specialization.specializationId,
+                    label: specialization.specializationName,
                 }));
-                setMajorOptions(options); // Cập nhật majors dựa vào ngành
+                setSpecializationOptions(options); // Cập nhật specializations dựa vào ngành
             } else {
-                setMajorOptions([]); // Nếu không có dữ liệu, đặt mảng rỗng
+                setSpecializationOptions([]); // Nếu không có dữ liệu, đặt mảng rỗng
             }
         } catch (error) {
-            console.error('Error fetching majors:', error);
-            setMajorOptions([]); // Đặt majors rỗng nếu lỗi
+            console.error('Error fetching specializations:', error);
+            setSpecializationOptions([]); // Đặt specializations rỗng nếu lỗi
         }
     };
 
     const onSearchUser = async (values) => {
-        const { userId, fullname, faculty, major, isStudent, firstAcademicYear, lastAcademicYear } = values;
+        const { userId, fullname, major, specialization, isStudent, firstAcademicYear, lastAcademicYear } = values;
         const originalList = dataOriginal;
         const filteredList = originalList.filter((item) => {
             const dataIsStudent = item.isStudent === true ? 1 : 0;
             const matchesUserId = userId ? item.userId?.toLowerCase().includes(userId.toLowerCase()) : true;
             const matchesFullName = fullname ? item.fullname?.toLowerCase().includes(fullname.toLowerCase()) : true;
-            const matchesfaculty = faculty?.value ? item.faculty?.facultyId === faculty?.value : true;
-            const matchesMajor = major?.value ? item.major?.majorId === major?.value : true;
+            const matchesmajor = major?.value ? item.major?.majorId === major?.value : true;
+            const matchesSpecialization = specialization?.value ? item.specialization?.specializationId === specialization?.value : true;
             const matchesIsStudent = isStudent !== undefined ? dataIsStudent === isStudent : true;
             const matcheFirstAcademicYear = firstAcademicYear ? item.firstAcademicYear === Number(firstAcademicYear) : true;
             const matcheLastAcademicYear = lastAcademicYear ? item.lastAcademicYear === Number(lastAcademicYear) : true;
 
-            return matchesUserId && matchesFullName && matchesfaculty && matchesMajor && matchesIsStudent && matcheFirstAcademicYear && matcheLastAcademicYear;
+            return matchesUserId && matchesFullName && matchesmajor && matchesSpecialization && matchesIsStudent && matcheFirstAcademicYear && matcheLastAcademicYear;
         });
         setData(filteredList);
     };
@@ -308,23 +312,7 @@ function NguoiDung() {
         <FormItem name="fullname" label="Họ tên">
             <Input />
         </FormItem>,
-        <FormItem name="faculty" label="Ngành">
-            <Select
-                style={{ width: '100%' }}
-                showSearch
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                options={facultyOptions}
-                labelInValue
-                onChange={(selectedFaculty) => {
-                    fetchMajorData(selectedFaculty.value);
-                    form.setFieldsValue({ major: null });
-                }}
-            />
-        </FormItem>,
-        <FormItem name="major" label="Chuyên ngành">
+        <FormItem name="major" label="Ngành">
             <Select
                 style={{ width: '100%' }}
                 showSearch
@@ -333,6 +321,22 @@ function NguoiDung() {
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
                 options={majorOptions}
+                labelInValue
+                onChange={(selectedMajor) => {
+                    fetchSpecializationData(selectedMajor.value);
+                    form.setFieldsValue({ specialization: null });
+                }}
+            />
+        </FormItem>,
+        <FormItem name="specialization" label="Chuyên ngành">
+            <Select
+                style={{ width: '100%' }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={specializationOptions}
                 labelInValue
             />
         </FormItem>,
@@ -360,8 +364,8 @@ function NguoiDung() {
         { label: "Lớp", prop: "class" },
         { label: "Chức danh", prop: "isStudent" },
         { label: "Giới tính", prop: "sex" },
-        { label: "Ngành", prop: "facultyName" },
-        { label: "Chuyên ngành", prop: "majorName" },
+        { label: "Ngành", prop: "majorName" },
+        { label: "Chuyên ngành", prop: "specializationName" },
         { label: "Năm học", prop: "firstAcademicYear" },
         { label: "Năm kết thúc", prop: "lastAcademicYear" },
         { label: "Email", prop: "email" },
@@ -385,8 +389,8 @@ function NguoiDung() {
     const processedData = data.map(item => ({
         ...item,
         isStudent: item.isStudent ? 'Sinh viên' : 'Giảng viên',
-        facultyName: item.faculty?.facultyName,
         majorName: item.major?.majorName,
+        specializationName: item.specialization?.specializationName,
         ho_ten_cvht: item?.ho_ten_cvht,
         dateOfBirth: formatDate(item.dateOfBirth)
     }));
