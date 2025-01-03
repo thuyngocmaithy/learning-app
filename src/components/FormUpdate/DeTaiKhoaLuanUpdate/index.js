@@ -115,6 +115,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     const handleChangeMajor = (value) => {
         setSelectedMajor(value);
         setSelectedSpecialization(null);
+        setSpecializationOptions([]); // Clear specialization options
     };
 
     const handleChangeSpecialization = (value) => {
@@ -385,7 +386,6 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 <FormItem
                     name="specialization"
                     label="Bộ môn"
-                    rules={[{ required: true, message: 'Vui lòng chọn bộ môn!' }]}
                 >
                     <Select
                         showSearch

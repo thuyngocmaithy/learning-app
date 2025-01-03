@@ -26,6 +26,8 @@ import { useConfirm } from '../../../../hooks/useConfirm';
 import TabDeTaiKhoaLuanThamGia from '../../../../components/TabDeTaiKhoaLuanThamGia';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 
+import exportThesisList from './exportThesisList';
+
 const cx = classNames.bind(styles);
 
 function DeTaiKhoaLuan() {
@@ -271,7 +273,7 @@ function DeTaiKhoaLuan() {
             const thesiss = thesisData.map((data) => ({
                 ...data,
                 createUser: data?.createUser?.userId,
-                numberOfRegister: thesisMap.get(data.thesisId) || 0, // Mặc định là 0 nếu không tìm thấy
+                numberOfRegister: thesisMap.get(data.thesisId) || [], // Mặc định là mảng rỗng nếu không tìm thấy
             }));
 
             // Lưu dữ liệu vào state
@@ -285,7 +287,6 @@ function DeTaiKhoaLuan() {
             setIsLoading(false);
         }
     }, [ThesisGroupIdFromUrl]);
-
 
     useEffect(() => {
         fetchData();
@@ -549,13 +550,41 @@ function DeTaiKhoaLuan() {
     }));
 
 
-    const handleExportExcel = async () => {
-        ExportExcel({
-            fileName: "Danh_sach_detaikhoaluan",
-            data: processedData,
-            schemas,
-            headerContent: "DANH SÁCH ĐỀ TÀI KHOÁ LUẬN",
+    // const handleExportExcel = async () => {
+    //     ExportExcel({
+    //         fileName: "Danh_sach_detaikhoaluan",
+    //         data: processedData,
+    //         schemas,
+    //         headerContent: "DANH SÁCH ĐỀ TÀI KHOÁ LUẬN",
 
+    //     });
+    // };
+
+    const handleExportExcel = async () => {
+        // Transform data if needed
+        const exportData = data.flatMap(item => {
+            if (Array.isArray(item.numberOfRegister) && item.numberOfRegister.length > 0) {
+                return item.numberOfRegister.map(register => ({
+                    ...item,
+                    studentName: register.user?.fullname || '',
+                    studentId: register.user?.userId || '',
+                    credits: register.user?.currentCreditHour || '',
+                    gpa: register.user?.GPA || ''
+                }));
+            } else {
+                return {
+                    ...item,
+                    studentName: '',
+                    studentId: '',
+                    credits: '',
+                    gpa: ''
+                };
+            }
+        });
+
+        await exportThesisList({
+            data: exportData,
+            currentDate: new Date()
         });
     };
 
