@@ -122,6 +122,16 @@ function DeTaiKhoaLuan() {
             key: 'instructor',
         },
         {
+            title: 'Bộ môn',
+            dataIndex: ['specialization', 'specializationName'],
+            key: 'specialization',
+        },
+        {
+            title: 'Ngành',
+            dataIndex: ['major', 'majorName'],
+            key: 'major',
+        },
+        {
             title: 'SL thành viên',
             dataIndex: 'numberOfMember',
             key: 'numberOfMember',
@@ -320,6 +330,12 @@ function DeTaiKhoaLuan() {
             <Input />
         </FormItem>,
         <FormItem
+            name={'specialization'}
+            label={'Bộ môn'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
             name={'instructorName'}
             label={'Chủ nhiệm đề tài'}
         >
@@ -356,7 +372,7 @@ function DeTaiKhoaLuan() {
     ];
 
     const onSearch = async (values) => {
-        const { thesisId, thesisName, instructorName, status, isDisable } = values;
+        const { thesisId, thesisName, instructorName, specializationName, status, isDisable } = values;
         const isDisableConvert = isDisable === 0 ? false : true;
         const originalList = showFilter2 ? listThesisJoinOriginal : dataOriginal;
         const filteredList = originalList.filter((thesisRegister) => {
@@ -365,11 +381,12 @@ function DeTaiKhoaLuan() {
             const matchesThesisName = thesisName ? item.thesisName?.toLowerCase().includes(thesisName.toLowerCase()) : true;
             const matchesInstructorName = instructorName ? item.instructor?.fullname?.toLowerCase().includes(instructorName.toLowerCase()) : true;
             const matchesStatus = status?.value ? item.status.statusId === status?.value : true;
+            const matchesSpecialization = specializationName ? item.specializationName?.toLowerCase().includes(specializationName.toLowerCase()) : true;
             const matchesDisabled = isDisable !== undefined && isDisable !== null
                 ? item.isDisable === isDisableConvert
                 : true;
 
-            return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled;
+            return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled && matchesSpecialization;
         });
         if (showFilter2) {
             setListThesisJoin(filteredList);

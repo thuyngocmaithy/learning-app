@@ -10,13 +10,14 @@ import { getAllFaculty } from '../../../services/facultyService';
 import { getUsersByFaculty, getUseridFromLocalStorage } from '../../../services/userService';
 import { getStatusByType } from '../../../services/statusService';
 import { createThesis, updateThesisById } from '../../../services/thesisService';
+import { getWhere as getMajorsWhere } from '../../../services/majorService';
+import { getWhere as getSpecializationsWhere } from '../../../services/specializationService';
 
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
 const userid = getUseridFromLocalStorage();
 const adminid = '0ad0941f-579e-11ef-aca7-1aa268f50191';
-
 
 const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     title,
@@ -35,11 +36,14 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
     const [statusOptions, setStatusOptions] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedMemberCount, setSelectedMemberCount] = useState(null);
+    const [specializationOptions, setSpecializationOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([]);
+    const [selectedMajor, setSelectedMajor] = useState(null);
+    const [selectedSpecialization, setSelectedSpecialization] = useState(null);
 
     const statusType = 'Tiến độ đề tài khóa luận';
 
     // Fetch data khi component được mount
-    //lấy danh sách các khoa ra ngoài thẻ select
     useEffect(() => {
         const fetchFaculties = async () => {
             const response = await getAllFaculty();
@@ -50,7 +54,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                 }));
                 setFacultyOptions(options);
 
-                // Nếu selectedFaculty đã có giá trị, cập nhật lại giá trị đó
                 if (selectedFaculty) {
                     const selectedOption = options.find((option) => option.value === selectedFaculty);
                     if (selectedOption) {
@@ -63,7 +66,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         fetchFaculties();
     }, [selectedFaculty]);
 
-    //lấy danh sách giảng viên theo khoa
     useEffect(() => {
         const fetchSupervisors = async () => {
             if (selectedFaculty) {
@@ -75,7 +77,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     }));
                     setSupervisorOptions(options);
 
-                    // Nếu selectedSupervisor đã có giá trị, cập nhật lại giá trị đó
                     if (selectedSupervisor) {
                         const selectedOption = options.find((option) => option.value === selectedSupervisor);
                         if (selectedOption) {
@@ -89,9 +90,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         fetchSupervisors();
     }, [selectedFaculty, selectedSupervisor]);
 
-    // Fetch danh sách trạng thái theo loại "Tiến độ đề tài khóa luận"
-
-
     useEffect(() => {
         const fetchStatusByType = async () => {
             try {
@@ -102,7 +100,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                         label: status.statusName,
                     }));
                     setStatusOptions(options);
-                    // Nếu có giá trị đã chọn, set lại giá trị đó
                     if (selectedStatus) {
                         setSelectedStatus(selectedStatus);
                     }
@@ -115,6 +112,39 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         fetchStatusByType();
     }, [statusType, selectedStatus]);
 
+    useEffect(() => {
+        const fetchMajors = async () => {
+            if (selectedFaculty) {
+                const response = await getMajorsWhere({ facultyId: selectedFaculty });
+                if (response && response.data) {
+                    const options = response.data.map((major) => ({
+                        value: major.majorId,
+                        label: major.majorName,
+                    }));
+                    setMajorOptions(options);
+                }
+            }
+        };
+
+        fetchMajors();
+    }, [selectedFaculty]);
+
+    useEffect(() => {
+        const fetchSpecializations = async () => {
+            if (selectedMajor) {
+                const response = await getSpecializationsWhere({ majorId: selectedMajor });
+                if (response && response.data) {
+                    const options = response.data.map((specialization) => ({
+                        value: specialization.specializationId,
+                        label: specialization.specializationName,
+                    }));
+                    setSpecializationOptions(options);
+                }
+            }
+        };
+
+        fetchSpecializations();
+    }, [selectedMajor]);
 
     useEffect(() => {
         if (selectedThesis && isUpdate) {
@@ -131,11 +161,11 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
             setSelectedSupervisor(selectedThesis.supervisor.id);
             setSelectedStatus(selectedThesis.status.statusId);
             setSelectedMemberCount(selectedThesis.registrationCount);
+            setSelectedMajor(selectedThesis.major.majorId);
+            setSelectedSpecialization(selectedThesis.specialization.specializationId);
         }
     }, [selectedThesis, isUpdate, form]);
 
-
-    // Hàm để đóng modal và cập nhật trạng thái showModalAdd thành false
     const handleCloseModal = () => {
         if (showModal !== false) {
             setShowModal(false);
@@ -144,20 +174,26 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
 
     const handleFacultySelect = (value) => {
         setSelectedFaculty(value);
+        setSelectedMajor(null);
+        setSelectedSpecialization(null);
     };
 
     const handleChangeSupervisor = (value) => {
         setSelectedSupervisor(value);
     };
 
-
-    //hàm chỉ cho phép nhập số 
-    const formatValue = (value) => {
-        // Chỉ cho phép nhập số
-        return value.replace(/[^0-9]/g, '');
+    const handleChangeMajor = (value) => {
+        setSelectedMajor(value);
+        setSelectedSpecialization(null);
     };
 
+    const handleChangeSpecialization = (value) => {
+        setSelectedSpecialization(value);
+    };
 
+    const formatValue = (value) => {
+        return value.replace(/[^0-9]/g, '');
+    };
 
     const handleSubmit = async () => {
         try {
@@ -184,7 +220,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                 if (isUpdate) {
                     response = await updateThesisById(selectedThesis.id, thesisData);
                 } else {
-                    // thesisData.createUserId = userid ?? adminid;
                     response = await createThesis(thesisData);
                 }
 
@@ -207,8 +242,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
         }
     };
 
-
-
     return (
         <Update
             title={title}
@@ -217,10 +250,7 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
             onClose={handleCloseModal}
             onUpdate={handleSubmit}
         >
-
             <Form form={form}>
-
-
                 <FormItem
                     name="title"
                     label="Tên đề tài"
@@ -236,7 +266,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     <TextArea
                         showCount
                         maxLength={1000}
-                        // onChange={' '}
                         placeholder="Mô tả đề tài"
                         style={{
                             height: 120,
@@ -299,6 +328,40 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                     />
                 </FormItem>
                 <FormItem
+                    name="major"
+                    label="Ngành"
+                    rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn ngành"
+                        optionFilterProp="children"
+                        value={selectedMajor}
+                        onChange={handleChangeMajor}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={majorOptions}
+                    />
+                </FormItem>
+                <FormItem
+                    name="specialization"
+                    label="Bộ môn"
+                    rules={[{ required: true, message: 'Vui lòng chọn bộ môn!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn bộ môn"
+                        optionFilterProp="children"
+                        value={selectedSpecialization}
+                        onChange={handleChangeSpecialization}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={specializationOptions}
+                    />
+                </FormItem>
+                <FormItem
                     name="memberCount"
                     label="Số lượng thành viên"
                     rules={[{ required: true, message: 'Vui lòng nhập số lượng thành viên!' }]}
@@ -323,7 +386,6 @@ const KhoaLuanUpdate = memo(function KhoaLuanUpdate({
                         showTime={{
                             format: 'HH:mm',
                         }}
-                        // placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
                         format="YYYY-MM-DD HH:mm"
                     />
                 </FormItem>

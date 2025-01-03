@@ -11,6 +11,8 @@ import { AccountLoginContext } from '../../../context/AccountLoginContext';
 import { useSocketNotification } from '../../../context/SocketNotificationContext';
 import { useLocation } from 'react-router-dom';
 import { getThesisGroupById, getWhere } from '../../../services/thesisGroupService';
+import { getWhere as getMajorsWhere } from '../../../services/majorService';
+import { getWhere as getSpecializationsWhere } from '../../../services/specializationService';
 import notifications from '../../../config/notifications';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -31,6 +33,11 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     const [instructorOptions, setInstructorOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [thesisgroupOptions, setThesisGroupOptions] = useState([]);
+    const [majorOptions, setMajorOptions] = useState([]);
+    const [specializationOptions, setSpecializationOptions] = useState([]);
+    const [selectedMajor, setSelectedMajor] = useState(null);
+    const [selectedSpecialization, setSelectedSpecialization] = useState(null);
+    const [userData, setUserData] = useState(null);
     const { userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
     const location = useLocation();
@@ -42,9 +49,18 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     // Xử lý lấy ThesisGroupId    
     const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId');
 
+    // lấy userinfo
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const response = await getUserById(userId);
+            setUserData(response.data);
+        };
+        fetchUserData();
+    }, [userId]);
+
     //lấy danh sách nhóm đề tài khóa luận
-    const fetchThesisGroups = async () => {
-        const response = await getWhere({ stillValue: true });
+    const fetchThesisGroups = useCallback(async () => {
+        const response = await getWhere({ stillValue: true, faculty: userData?.faculty?.facultyId });
         if (response.status === 200) {
             const options = response.data.data.map((ThesisGroup) => ({
                 value: ThesisGroup.thesisGroupId,
@@ -52,13 +68,13 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             }));
             setThesisGroupOptions(options);
         }
-    };
+    }, [userData]);
 
     //lấy danh sách giảng viên theo khoa
     const fetchInstructors = useCallback(async (ThesisGroupIdInput) => {
         const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
         const response = await getUsersByFaculty(ThesisGroup?.data?.data?.faculty?.facultyId);
-        if (response && response.data) {
+        if (response && Array.isArray(response.data)) {
             const options = response.data.map((user) => ({
                 value: user.userId,
                 label: `${user.fullname}`,
@@ -67,18 +83,62 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
         }
     }, [ThesisGroupIdFromUrl]);
 
+    const fetchMajors = useCallback(async (ThesisGroupIdInput) => {
+        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
+        const response = await getMajorsWhere({
+            facultyId: ThesisGroup?.data?.data?.faculty?.facultyId
+        });
+
+        if (response && Array.isArray(response.data.data)) {
+            const options = response.data.data.map((major) => ({
+                value: major.majorId,
+                label: major.majorName,
+            }));
+            setMajorOptions(options);
+        }
+    }, [ThesisGroupIdFromUrl]);
+
+    const fetchSpecializations = useCallback(async (majorId) => {
+        const response = await getSpecializationsWhere({ majorId: majorId });
+        if (response && Array.isArray(response.data.data)) {
+            const options = response.data.data.map((specialization) => ({
+                value: specialization.specializationId,
+                label: specialization.specializationName,
+            }));
+            setSpecializationOptions(options);
+        }
+    }, []);
+
+
+
+
+    const handleChangeMajor = (value) => {
+        setSelectedMajor(value);
+        setSelectedSpecialization(null);
+    };
+
+    const handleChangeSpecialization = (value) => {
+        setSelectedSpecialization(value);
+    };
+
     useEffect(() => {
         if (showModal) {
             if (ThesisGroupIdFromUrl) {
                 fetchInstructors();
+                fetchMajors();
             }
             else {
                 fetchThesisGroups();
             }
         }
 
-    }, [showModal, ThesisGroupIdFromUrl, fetchInstructors]);
+    }, [showModal, ThesisGroupIdFromUrl, fetchInstructors, fetchMajors, fetchThesisGroups]);
 
+    useEffect(() => {
+        if (selectedMajor) {
+            fetchSpecializations(selectedMajor);
+        }
+    }, [selectedMajor, fetchSpecializations]);
 
     // Fetch danh sách trạng thái theo loại "Tiến độ đề tài nghiên cứu"
     useEffect(() => {
@@ -138,8 +198,12 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                     thesisDate: [startDate, finishDate]
                 } : {
                     thesisDate: []
-                }
+                },
+                major: showModal.major?.majorName,
+                specialization: showModal.specialization?.specializationName
             });
+            setSelectedMajor(showModal.major?.majorId);
+            setSelectedSpecialization(showModal.specialization?.specializationId);
         }
         if (showModal && isUpdate) {
             setDataInitial()
@@ -155,6 +219,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
     const handleChangeThesisGroup = (value) => {
         fetchInstructors(value);
+        fetchMajors(value);
     };
 
     //hàm chỉ cho phép nhập số 
@@ -177,6 +242,8 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 thesisGroup: ThesisGroupId || values.thesisgroup.value,
                 startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.thesisDate[1].format('YYYY-MM-DD HH:mm')),
+                majorId: values.major,
+                specializationId: values.specialization,
             };
             let response;
             if (isUpdate) {
@@ -298,6 +365,42 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                         options={instructorOptions}
                     />
                 </FormItem>
+                <FormItem
+                    name="major"
+                    label="Ngành"
+                    rules={[{ required: true, message: 'Vui lòng chọn ngành!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn ngành"
+                        optionFilterProp="children"
+                        value={selectedMajor}
+                        onChange={handleChangeMajor}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={majorOptions}
+                    />
+                </FormItem>
+                <FormItem
+                    name="specialization"
+                    label="Bộ môn"
+                    rules={[{ required: true, message: 'Vui lòng chọn bộ môn!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Chọn bộ môn"
+                        optionFilterProp="children"
+                        value={selectedSpecialization}
+                        onChange={handleChangeSpecialization}
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                        options={specializationOptions}
+                    />
+                </FormItem>
+
+
                 <FormItem
                     name="numberOfMember"
                     label="Số lượng thành viên"
