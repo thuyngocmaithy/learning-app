@@ -59,7 +59,6 @@ const DeTaiKhoaLuanDetail = memo(function DeTaiKhoaLuanDetail({
                     </FormItem>
                     <FormItem label={'Kinh phí'}>
                         <p>{convertToVND(showModal.budget)}</p>
-
                     </FormItem>
                 </div>
             </div>

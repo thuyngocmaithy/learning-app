@@ -31,7 +31,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     const [instructorOptions, setInstructorOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [thesisgroupOptions, setThesisGroupOptions] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
+    const { faculty, userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -44,7 +44,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
     //lấy danh sách nhóm đề tài khóa luận
     const fetchThesisGroups = async () => {
-        const response = await getWhere({ stillValue: true });
+        const response = await getWhere({ stillValue: true, faculty: faculty });
         if (response.status === 200) {
             const options = response.data.data.map((ThesisGroup) => ({
                 value: ThesisGroup.thesisGroupId,

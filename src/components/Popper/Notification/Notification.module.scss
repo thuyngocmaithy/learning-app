@@ -5,7 +5,7 @@
 
 .wrapper-notification a,
 .wrapper-notification a:hover {
-    color: white;
+    color: var(--color-text-notification);
 }
 
 // POPPER
@@ -65,7 +65,7 @@
 
         p {
             font-style: italic;
-            color: var(--text-gray-dark-color);
+            color: var(--color-time-notification);
             font-size: 13px;
         }
     }

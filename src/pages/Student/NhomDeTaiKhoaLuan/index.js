@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './NhomDeTaiKhoaLuan.module.scss';
 import { Divider, Input, List, Select, Skeleton, Tag } from 'antd';
@@ -14,10 +14,12 @@ import { getStatusByType } from '../../../services/statusService';
 import { getAllFaculty } from '../../../services/facultyService';
 import SearchForm from '../../../components/Core/SearchForm';
 import Toolbar from '../../../components/Core/Toolbar';
+import { AccountLoginContext } from '../../../context/AccountLoginContext';
 
 const cx = classNames.bind(styles);
 
 function NhomDeTaiKhoaLuan() {
+    const { faculty } = useContext(AccountLoginContext);
     const [list, setList] = useState([]);
     const [originalList, setOriginalList] = useState([]); // Bản sao danh sách ban đầu
     const [isLoading, setIsLoading] = useState(true); // load ds nhóm đề tài khóa luận
@@ -50,7 +52,7 @@ function NhomDeTaiKhoaLuan() {
 
     const fetchThesis = async () => {
         try {
-            const result = await getWhereThesisGroup({ disabled: false })
+            const result = await getWhereThesisGroup({ faculty: faculty, disabled: false })
             if (result.status === 200) {
                 setList(result.data.data);
                 setOriginalList(result.data.data)

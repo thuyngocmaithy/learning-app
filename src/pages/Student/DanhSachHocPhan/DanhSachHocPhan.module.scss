@@ -114,6 +114,7 @@
 
 .checkbox-semester {
     margin-right: 7px;
+
 }
 
 .dash {
@@ -154,7 +155,7 @@
 }
 
 
-:global .ant-tooltip-open:hover {
+:global .open-course.ant-tooltip-open:hover {
     .tag-open-course {
         display: none !important;
     }

@@ -53,3 +53,13 @@ export const getGroupedBySubjectForSemesters = async (major, semesterIds) => {
         throw error;
     }
 };
+
+export const updateSubjectCourseOpening = async (id, data) => {
+    try {
+        const response = await api.put(`/subject_course_openings/${id}`, data);
+        return response;
+    } catch (error) {
+        console.error('Update SubjectCourseOpening error:', error);
+        throw error;
+    }
+};

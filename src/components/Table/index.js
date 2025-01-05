@@ -17,7 +17,6 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
     const [frameComponents, setFrameComponents] = useState([]);
     const [scores, setScores] = useState([]);
     const [studentInfo, setStudentInfo] = useState(null);
-    const [courseOpen, setCourseOpen] = useState(null); // Môn học được mở
     const [isLoading, setIsLoading] = useState(true);
 
     const repeatHK = 15;
@@ -25,39 +24,29 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
     const [semesterList, setSemesterList] = useState([]);
     const [currentSemester, setCurrentSemester] = useState(1);
 
-    // Tính học kỳ hiện tại
-    const calculateCurrentSemester = (startYear) => {
-        // Lấy năm hiện tại và tháng hiện tại
+    // Tính học kỳ hiện tại (memo hóa để tránh tính toán lại)
+    const calculateCurrentSemester = useMemo(() => (startYear) => {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth() + 1; // Tháng trong JS tính từ 0
+        const currentMonth = currentDate.getMonth() + 1;
 
-        // Tính số năm đã trôi qua từ startYear
         const yearsPassed = currentYear - startYear;
+        let semestersPassed = yearsPassed * 3;
 
-        // Tính số học kỳ đã trôi qua
-        let semestersPassed = yearsPassed * 3; // Mỗi năm có 3 học kỳ
-
-        // Xác định học kỳ của năm hiện tại dựa trên tháng
         if (currentMonth >= 9 && currentMonth <= 12) {
-            // Tháng 9, 10, 11, 12 là học kỳ thứ 3 của năm
             semestersPassed += 3;
         } else if (currentMonth >= 5 && currentMonth <= 8) {
-            // Tháng 5, 6, 7, 8 là học kỳ thứ 2 của năm
             semestersPassed += 2;
         } else if (currentMonth >= 1 && currentMonth <= 4) {
-            // Tháng 1, 2, 3, 4 là học kỳ thứ 1 của năm
             semestersPassed += 1;
         }
 
         return semestersPassed;
-    }
+    }, []);
 
-
-    const generateSemesterMap = (firstYear, lastYear) => {
+    const generateSemesterMap = useCallback((firstYear, lastYear) => {
         const semesterMap = {};
         let counter = 1;
-
         for (let year = firstYear; year <= lastYear; year++) {
             for (let semester = 1; semester <= 3; semester++) {
                 semesterMap[counter] = `${year}${semester}`;
@@ -65,67 +54,57 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
             }
         }
         return semesterMap;
-    };
+    }, []);
 
     useEffect(() => {
         if (studentInfo) {
-            const firstYear = studentInfo?.firstAcademicYear;
-            const lastYear = studentInfo?.lastAcademicYear;
-            if (firstYear) {
-                setCurrentSemester(calculateCurrentSemester(firstYear));
+            const { firstAcademicYear, lastAcademicYear } = studentInfo;
+            if (firstAcademicYear) {
+                setCurrentSemester(calculateCurrentSemester(firstAcademicYear));
             }
-            if (firstYear && lastYear) {
-                setSemesterList(generateSemesterMap(firstYear, lastYear))
+            if (firstAcademicYear && lastAcademicYear) {
+                setSemesterList(generateSemesterMap(firstAcademicYear, lastAcademicYear));
             }
         }
-    }, [studentInfo])
+    }, [studentInfo, calculateCurrentSemester, generateSemesterMap]);
 
-
-    const getSemesterIndex = (semesterId) => {
-        const firstYear = studentInfo?.firstAcademicYear;
-        if (!semesterId || !firstYear) return;
+    const getSemesterIndex = useCallback((semesterId) => {
+        if (!semesterId || !studentInfo?.firstAcademicYear) return;
         const year = parseInt(semesterId.substring(0, 4));
         const semester = parseInt(semesterId.substring(4));
-        return ((year - firstYear) * 3) + (semester - 1);
-    };
+        return ((year - studentInfo.firstAcademicYear) * 3) + (semester - 1);
+    }, [studentInfo]);
 
-
-    // useEffect để fetch danh sách môn học mở khi studentInfo được cập nhật
-    useEffect(() => {
+    const fetchCourseRegister = useCallback(async () => {
         if (!frameId || !studentInfo) return;
+        try {
+            const registeredSubjectsRes = await getUserRegisteredSubjects(userId);
+            const registeredMap = {};
 
-        const fetchCourseRegister = async () => {
-            try {
-                const registeredSubjectsRes = await getUserRegisteredSubjects(userId);
-
-
-                const registeredMap = {};
-                if (registeredSubjectsRes?.length) {
-                    registeredSubjectsRes?.forEach(registration => {
-                        const semesterIndex = getSemesterIndex(registration.semester.semesterId);
-                        registeredMap[registration.subject.subjectId] = {
-                            semesterIndex,
-                            semesterId: registration.semester.semesterId,
-                            registerDate: registration.registerDate
-                        };
-                    });
-                }
-                // Set danh sách môn học đăng ký
-                setRegisteredSubjects(registeredMap);
-            } catch (error) {
-                console.error('Lỗi khi tải danh sách môn học mở:', error);
+            if (registeredSubjectsRes?.length) {
+                registeredSubjectsRes.forEach(registration => {
+                    const semesterIndex = getSemesterIndex(registration.semester.semesterId);
+                    registeredMap[registration.subject.subjectId] = {
+                        semesterIndex,
+                        semesterId: registration.semester.semesterId,
+                        registerDate: registration.registerDate,
+                    };
+                });
             }
-            finally {
-                setIsLoading(false);
-            }
-        };
 
+            setRegisteredSubjects(registeredMap);
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách môn học mở:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [frameId, studentInfo, userId, getSemesterIndex, setRegisteredSubjects]);
+
+    useEffect(() => {
         fetchCourseRegister();
-    }, [frameId, studentInfo]);
+    }, [fetchCourseRegister]);
 
-
-
-    const fetchData = (async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
             const userData = await getUserById(userId);
@@ -134,30 +113,23 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
                 getScoreByStudentId(userId),
             ]);
 
-            // set thông tin info trước
             if (scoresRes?.length) {
                 setStudentInfo({
                     ...scoresRes[0].student,
                     firstAcademicYear: userData.data.firstAcademicYear,
-                    lastAcademicYear: userData.data.lastAcademicYear
+                    lastAcademicYear: userData.data.lastAcademicYear,
                 });
             }
 
-            // Tạo danh sách các subjectId đã có điểm
-            const scoredSubjects = new Set(
-                scoresRes?.map((score) => score.subject.subjectId) || []
-            );
-
-            // Lọc các subjectInfo trong frameComponentsRes
+            const scoredSubjects = new Set(scoresRes?.map(score => score.subject.subjectId) || []);
             let filteredFrameComponents = [];
 
             if (status === 'Tất cả') {
                 filteredFrameComponents = frameComponentsRes;
-            }
-            else {
-                filteredFrameComponents = frameComponentsRes.map((component) => ({
+            } else {
+                filteredFrameComponents = frameComponentsRes.map(component => ({
                     ...component,
-                    subjectInfo: component.subjectInfo.filter((subject) =>
+                    subjectInfo: component.subjectInfo.filter(subject =>
                         status === 'Chưa học' ? !scoredSubjects.has(subject.subjectId) : scoredSubjects.has(subject.subjectId)
                     ),
                 }));
@@ -168,34 +140,28 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
         } catch (error) {
             console.error('Error fetching data:', error);
             message.error('Failed to load data');
+        } finally {
+            setIsLoading(false);
         }
-    });
-
-    useEffect(() => {
-        if (userId && frameId && status)
-            fetchData();
     }, [userId, frameId, status]);
 
+    useEffect(() => {
+        if (userId && frameId && status) {
+            fetchData();
+        }
+    }, [fetchData]);
 
-    const handleSelectSubject = (subjectId, semesterIndex) => {
+    const handleSelectSubject = useCallback((subjectId, semesterIndex) => {
         setRegisteredSubjects(prev => {
             const updatedRegisteredSubjects = { ...prev };
-
-            // Nếu môn học chưa có trong registeredSubjects, thêm vào
-            if (!updatedRegisteredSubjects[subjectId]) {
-                updatedRegisteredSubjects[subjectId] = {};
-            }
-
-            // Cập nhật lại semesterIndex và semesterId cho môn học đã đăng ký
             updatedRegisteredSubjects[subjectId] = {
                 ...updatedRegisteredSubjects[subjectId],
-                semesterIndex, // Cập nhật semesterIndex mới
-                semesterId: semesterList[semesterIndex + 1]    // Cập nhật semesterId mới
+                semesterIndex,
+                semesterId: semesterList[semesterIndex + 1],
             };
-
             return updatedRegisteredSubjects;
         });
-    };
+    }, [setRegisteredSubjects, semesterList]);
 
     return {
         frameComponents,
@@ -205,9 +171,8 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
         isLoading,
         repeatHK,
         currentSemester,
-        courseOpen,
         getSemesterIndex,
-        handleSelectSubject
+        handleSelectSubject,
     };
 };
 
@@ -276,7 +241,6 @@ const SubjectRow = memo(({
     registeredSubjects,
     scores,
     currentSemester,
-    courseOpen,
     getSemesterIndex,
     handleChangeCell
 }) => {
@@ -351,12 +315,11 @@ const SubjectRow = memo(({
                     scoreInfo={scoreInfo}
                     disableCheckbox={disableCheckboxIndexes.indexes.includes(i)} // Vô hiệu hóa checkbox nếu nằm trong các cột có điểm hoặc trước cột đó
                     handleChange={handleChangeCell}
-                    courseOpen={courseOpen}
                     cellStyle={cellStyle} // Truyền style cho từng ô
                 />
             );
         });
-    }, [subject, repeatHK, registeredInfo, scores, courseOpen, getSemesterIndex, disableCheckboxIndexes, handleChangeCell]);
+    }, [subject, repeatHK, registeredInfo, scores, getSemesterIndex, disableCheckboxIndexes, handleChangeCell]);
 
 
     if (!subject) return null;
@@ -466,7 +429,6 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
         isLoading,
         repeatHK,
         currentSemester,
-        courseOpen,
         getSemesterIndex,
         handleSelectSubject
     } = useTableLogic(userId, frameId, status, registeredSubjects, setRegisteredSubjects);
@@ -496,9 +458,8 @@ const ColumnGroupingTable = ({ frameId, registeredSubjects, setRegisteredSubject
             getSemesterIndex={getSemesterIndex}
             handleChangeCell={handleSelectSubject}
             currentSemester={currentSemester}
-            courseOpen={courseOpen}
         />
-    ), [repeatHK, registeredSubjects, scores, currentSemester, courseOpen, handleSelectSubject, getSemesterIndex]);
+    ), [repeatHK, registeredSubjects, scores, currentSemester, handleSelectSubject, getSemesterIndex]);
 
     const calculateLeft = (columns, currentIndex) => {
         return columns.slice(0, currentIndex).reduce((total, column) => total + (column.minWidth || 0), 0);

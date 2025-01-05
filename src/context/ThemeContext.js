@@ -59,7 +59,9 @@ function ThemeProvider({ children }) {
             document.documentElement.style.setProperty('--color-bg-title', themeConfig.token.colorBgTitle); // Màu nền title
             document.documentElement.style.setProperty('--color-text-title', themeConfig.token.colorTextTitle); // Màu chữ title
 
-
+            // UI
+            document.documentElement.style.setProperty('--color-text-notification', themeConfig.token.colorTextNotification); // Màu chữ thông báo
+            document.documentElement.style.setProperty('--color-time-notification', themeConfig.token.colorTimeNotification); // Màu thời gian thông báo
         };
 
         setCSSVariables();

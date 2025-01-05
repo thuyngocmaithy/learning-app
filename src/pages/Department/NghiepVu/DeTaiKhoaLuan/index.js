@@ -10,7 +10,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import DeTaiKhoaLuanUpdate from '../../../../components/FormUpdate/DeTaiKhoaLuanUpdate';
-import { deleteThesiss, getAllThesis, getByThesisGroupId, updateThesisByIds, importThesis } from '../../../../services/thesisService';
+import { deleteThesiss, getByThesisGroupId, updateThesisByIds, importThesis, getWhere } from '../../../../services/thesisService';
 import { getByListThesisId } from '../../../../services/thesisUserService';
 import DeTaiKhoaLuanListRegister from '../../../../components/FormListRegister/DeTaiKhoaLuanListRegister';
 import DeTaiKhoaLuanDetail from '../../../../components/FormDetail/DeTaiKhoaLuanDetail';
@@ -29,6 +29,7 @@ import { AccountLoginContext } from '../../../../context/AccountLoginContext';
 const cx = classNames.bind(styles);
 
 function DeTaiKhoaLuan() {
+    const { faculty } = useContext(AccountLoginContext);
     const { deleteConfirm, disableConfirm, enableConfirm } = useConfirm();
     const [reLoadListJoinThesis, setReLoadListJoinThesis] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
@@ -224,7 +225,7 @@ function DeTaiKhoaLuan() {
                 }
             } else {
                 // Nếu không có ID nhóm, lấy tất cả khóa luận
-                const result = await getAllThesis();
+                const result = await getWhere({ facultyId: faculty });
                 if (result.status === 200) {
                     thesisData = result.data.data || result.data;
                 }

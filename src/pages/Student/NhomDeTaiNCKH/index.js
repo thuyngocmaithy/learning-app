@@ -74,6 +74,7 @@ function NhomDeTaiNCKH() {
     const fetchSRG = useCallback(async () => {
         try {
             const result = await getWhereSRG({ faculty: faculty, disabled: false })
+            console.log(faculty);
             if (result.status === 200) {
                 setList(result.data.data);
                 setOriginalList(result.data.data);

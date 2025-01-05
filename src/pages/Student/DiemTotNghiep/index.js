@@ -187,8 +187,6 @@ function DiemTotNghiep() {
                         expectedScore10: subject.expectedScore10,
                         expectedScoreLetter: subject.expectedScoreLetter,
                         expectedGPA: calculatedGPA,
-                        expectedCreditHourTotal: totalCredits,
-                        expectedCreditType: subject.expectedScoreLetter,
                     };
                     return createExpectedScore(expectedScoreData);
                 }),
@@ -198,8 +196,6 @@ function DiemTotNghiep() {
                         expectedScore10: subject.expectedScore10,
                         expectedScoreLetter: subject.expectedScoreLetter,
                         expectedGPA: calculatedGPA,
-                        expectedCreditHourTotal: totalCredits,
-                        expectedCreditType: subject.expectedScoreLetter,
                     };
                     return updateExpectedScore(subject.subjectId, userId, expectedScoreData);
                 }),
