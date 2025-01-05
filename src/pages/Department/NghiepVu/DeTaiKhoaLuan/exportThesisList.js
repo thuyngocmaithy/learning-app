@@ -1,57 +1,77 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { getThesisGroupById } from "../../../../services/thesisGroupService";
 
-const exportThesisList = async ({ data, currentDate = new Date() }) => {
+
+const exportThesisList = async ({ data, currentDate = new Date(), ThesisGroupIdFromUrl }) => {
     try {
-        // 1. Create workbook and worksheet
+
+        // 1. Tạo workbook và worksheet
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet("Sheet1");
 
-        // 2. Set column widths
+        // 2. Thiết lập độ rộng cho các cột
         worksheet.columns = [
             { width: 8 },   // STT
             { width: 45 },  // Tên đề tài
-            { width: 25 },  // Họ tên sinh viên
-            { width: 15 },  // Mã số SV  
-            { width: 12 },  // Số tín chỉ
-            { width: 12 },  // Điểm TB
+            { width: 25 },  // Sinh viên thực hiện đề tài (Gộp Họ tên + Mã số SV)
+            { width: 15 },  // (Dòng dưới) Họ tên sinh viên
+            { width: 12 },  // Số tín chỉ tích lũy
+            { width: 12 },  // Điểm TB tích lũy
             { width: 25 },  // Họ tên giảng viên
             { width: 25 }   // Đơn vị công tác
         ];
 
-        // 3. Add document headers
+        // 3. Thêm tiêu đề chính của tài liệu
+        const thesisGroupRes = await getThesisGroupById(ThesisGroupIdFromUrl);
+        const thesisGroup = thesisGroupRes?.data?.data;
         const headers = [
             ['CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM'],
             ['Độc lập – Tự do – Hạnh phúc'],
-            [`Thành phố Hồ Chí Minh, ngày ${currentDate.getDate()} tháng ${currentDate.getMonth() + 1} năm ${currentDate.getFullYear()}`],
-            ['DANH SÁCH SINH VIÊN THỰC HIỆN KHÓA LUẬN TỐT NGHIỆP HK... NĂM HỌC 202...-202...'],
+            [`Thành phố Hồ Chí Minh, ngày ... tháng ... năm ${currentDate.getFullYear()}`],
+            [`DANH SÁCH SINH VIÊN THỰC HIỆN KHÓA LUẬN TỐT NGHIỆP NĂM HỌC ${thesisGroup.startYear}-${thesisGroup.finishYear}`],
             ['Ngành đào tạo: Công nghệ Thông tin, Kỹ thuật phần mềm , Khoa Công nghệ Thông tin (Hệ Chính quy đại trà)']
         ];
 
         headers.forEach((header, index) => {
             const rowIndex = index + 1;
-            worksheet.mergeCells(`A${rowIndex}:H${rowIndex}`);
+            worksheet.mergeCells(`A${rowIndex}:H${rowIndex}`); // Gộp các ô từ A -> H
             const cell = worksheet.getCell(`A${rowIndex}`);
             cell.value = header[0];
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
-            if (index <= 3) cell.font = { bold: true, size: 13 };
+
+            // Thiết lập font đậm cho dòng 1 và 4
+            if (index === 0 || index === 3) {
+                cell.font = { bold: true, size: 13 };
+            } else {
+                cell.font = { size: 13 }; // Font thường cho các dòng khác
+            }
         });
 
-        // 4. Add table headers
-        const tableHeaders = [
+        // 4. Thêm tiêu đề cho bảng dữ liệu
+        const headerRow1 = worksheet.getRow(7); // Dòng tiêu đề đầu tiên
+        const headerRow2 = worksheet.getRow(8); // Dòng tiêu đề thứ hai
+
+        // Tiêu đề dòng 1
+        const tableHeaders1 = [
             'STT',
             'Tên đề tài',
-            'Họ tên sinh viên',
-            'Mã số SV',
+            'Sinh viên thực hiện đề tài',
+            'Sinh viên thực hiện đề tài',
             'Số tín chỉ tích lũy',
             'Điểm TB tích lũy',
-            'Họ Tên (Giảng viên)',
-            'Đơn vị công tác'
+            'Giảng viên hướng dẫn',
+            'Giảng viên hướng dẫn'
         ];
 
-        const headerRow = worksheet.getRow(6);
-        tableHeaders.forEach((header, i) => {
-            const cell = headerRow.getCell(i + 1);
+        // Gộp ô 'Sinh viên thực hiện đề tài'
+        worksheet.mergeCells('C7:D7');
+        // Gộp ô 'Giảng viên hướng dẫn'
+        worksheet.mergeCells('G7:H7');
+
+        // Điền dữ liệu cho dòng tiêu đề 1
+        tableHeaders1.forEach((header, i) => {
+            const cell = headerRow1.getCell(i + 1);
             cell.value = header;
             cell.font = { bold: true };
             cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
@@ -63,7 +83,41 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
             };
         });
 
-        // 5. Process and group data
+        // Tiêu đề dòng 2
+        const tableHeaders2 = [
+            '', // Không có giá trị ở cột 1 (STT)
+            '', // Không có giá trị ở cột 2 (Tên đề tài)
+            'Họ tên sinh viên', // Cột phụ của 'Sinh viên thực hiện đề tài'
+            'Mã số SV',         // Cột phụ của 'Sinh viên thực hiện đề tài'
+            '', // Không có giá trị ở cột 5 (Số tín chỉ tích lũy)
+            '', // Không có giá trị ở cột 6 (Điểm TB tích lũy)
+            'Họ Tên',           // Cột phụ của 'Giảng viên hướng dẫn'
+            'Đơn vị công tác'   // Cột phụ của 'Giảng viên hướng dẫn'
+        ];
+
+        // Điền dữ liệu cho dòng tiêu đề 2
+        tableHeaders2.forEach((header, i) => {
+            const cell = headerRow2.getCell(i + 1);
+            cell.value = header;
+            cell.font = { bold: true };
+            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        // Điều chỉnh chiều cao cho các dòng tiêu đề
+        headerRow1.height = 20; // Dòng 7
+        headerRow2.height = 18; // Dòng 8
+
+        worksheet.mergeCells('A7:A8');
+        worksheet.mergeCells('B7:B8');
+        worksheet.mergeCells('E7:E8');
+        worksheet.mergeCells('F7:F8');
+
         const processData = (rawData) => {
             const grouped = {};
 
@@ -94,36 +148,34 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
 
             return grouped;
         };
-
-        // 6. Add data to worksheet
-        const groupedData = processData(data);
-        let currentRow = 7;
+        // 5. Thêm dữ liệu từ danh sách
+        const groupedData = processData(data); // Gọi hàm xử lý dữ liệu
+        let currentRow = 9; // Bắt đầu từ dòng thứ 9
         let stt = 1;
 
         for (const [department, theses] of Object.entries(groupedData)) {
-            // Add department header
+            // Thêm tiêu đề bộ môn
             const deptRow = worksheet.getRow(currentRow);
             worksheet.mergeCells(`A${currentRow}:H${currentRow}`);
-            deptRow.getCell(1).value = `BỘ MÔN: ${department}`;
+            deptRow.getCell(1).value = `BỘ MÔN: ${department.toUpperCase()}`;
             deptRow.getCell(1).font = { bold: true };
             currentRow++;
 
-            // Add theses
+            // Thêm dữ liệu cho từng đề tài
             for (const thesis of theses.values()) {
                 const startRow = currentRow;
                 const studentCount = thesis.students.length;
 
-                // Add students
+                // Thêm thông tin sinh viên
                 thesis.students.forEach((student, index) => {
                     const row = worksheet.getRow(currentRow + index);
 
-                    // Student info
-                    row.getCell(3).value = student.name;
-                    row.getCell(4).value = student.id;
-                    row.getCell(5).value = student.credits;
-                    row.getCell(6).value = student.gpa;
+                    row.getCell(3).value = student.name; // Họ tên sinh viên
+                    row.getCell(4).value = student.id;   // Mã số SV
+                    row.getCell(5).value = student.credits; // Số tín chỉ
+                    row.getCell(6).value = student.gpa;     // Điểm TB
 
-                    // Cell styling
+                    // Căn chỉnh và thêm viền cho từng ô
                     for (let col = 1; col <= 8; col++) {
                         const cell = row.getCell(col);
                         cell.border = {
@@ -133,15 +185,13 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
                             right: { style: 'thin' }
                         };
                         cell.alignment = { vertical: 'middle', wrapText: true };
-
-                        // Center align specific columns
                         if ([1, 4, 5, 6].includes(col)) {
                             cell.alignment.horizontal = 'center';
                         }
                     }
                 });
 
-                // Merge cells for common information
+                // Gộp ô cho thông tin chung nếu có nhiều sinh viên
                 if (studentCount > 1) {
                     ['A', 'B', 'G', 'H'].forEach(col => {
                         worksheet.mergeCells(
@@ -150,19 +200,19 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
                     });
                 }
 
-                // Fill common information
+                // Điền thông tin chung
                 const firstRow = worksheet.getRow(startRow);
-                firstRow.getCell(1).value = stt;
-                firstRow.getCell(2).value = thesis.thesisName;
-                firstRow.getCell(7).value = thesis.instructor?.fullname;
-                firstRow.getCell(8).value = thesis.department;
+                firstRow.getCell(1).value = stt; // STT
+                firstRow.getCell(2).value = thesis.thesisName; // Tên đề tài
+                firstRow.getCell(7).value = thesis.instructor?.fullname; // Tên giảng viên
+                firstRow.getCell(8).value = thesis.department; // Đơn vị công tác
 
                 currentRow += studentCount;
                 stt++;
             }
         }
 
-        // 7. Generate and save file
+        // 6. Tạo và lưu file Excel
         const buffer = await workbook.xlsx.writeBuffer();
         saveAs(
             new Blob([buffer], { type: 'application/octet-stream' }),
@@ -170,7 +220,7 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
         );
 
     } catch (error) {
-        console.error('Error exporting thesis list:', error);
+        console.error('Lỗi xuất danh sách khóa luận:', error);
         throw error;
     }
 };

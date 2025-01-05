@@ -523,33 +523,6 @@ function DeTaiKhoaLuan() {
     ), [showModalDetail]);
 
 
-    const schemas = [
-        { label: "Mã đề tài", prop: "thesisId" },
-        { label: "Tên đề tài", prop: "thesisName" },
-        { label: "Chủ nhiệm đề tài", prop: "instructor" },
-        { label: "Số lượng thành viên", prop: "numberOfMember" },
-        { label: "Trạng thái", prop: "status" },
-        { label: "Thời điểm bắt đầu", prop: "startDate" },
-        { label: "Thời điểm hoàn thành", prop: "finishDate" },
-
-    ];
-
-    const formatDate = (isoDate) => {
-        const date = new Date(isoDate); // Chuyển chuỗi ISO thành đối tượng Date
-        const day = String(date.getDate()).padStart(2, '0'); // Lấy ngày, thêm 0 nếu cần
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Lấy tháng (0-indexed)
-        const year = date.getFullYear(); // Lấy năm
-        return `${day}/${month}/${year}`; // Định dạng dd/mm/yyyy
-    };
-    const processedData = data.map(item => ({
-        ...item, // Giữ nguyên các trường khác
-        status: item.status?.statusName,
-        instructor: item.instructor?.fullname || "",
-        startDate: formatDate(item.startDate), // Định dạng ngày bắt đầu
-        finishDate: formatDate(item.finishDate), // Định dạng ngày hoàn thành
-    }));
-
-
     // const handleExportExcel = async () => {
     //     ExportExcel({
     //         fileName: "Danh_sach_detaikhoaluan",
@@ -584,7 +557,8 @@ function DeTaiKhoaLuan() {
 
         await exportThesisList({
             data: exportData,
-            currentDate: new Date()
+            currentDate: new Date(),
+            ThesisGroupIdFromUrl: ThesisGroupIdFromUrl
         });
     };
 
@@ -656,10 +630,12 @@ function DeTaiKhoaLuan() {
                                     onClick={() => enableConfirm('đề tài khóa luận', handleEnable)}
                                     isVisible={permissionDetailData?.isEdit}
                                 />
-                                {!disableToolbar &&
+                                {!disableToolbar && ThesisGroupIdFromUrl &&
                                     <Toolbar type={'Nhập file Excel'} isVisible={permissionDetailData?.isAdd} onClick={() => setShowModalImport(true)} />
                                 }
-                                <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
+                                {ThesisGroupIdFromUrl &&
+                                    <Toolbar type={'Xuất file Excel'} onClick={handleExportExcel} />
+                                }
                             </>
                         ) : null}
                     </div>

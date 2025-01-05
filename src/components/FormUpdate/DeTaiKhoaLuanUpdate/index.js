@@ -49,7 +49,6 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     const ThesisGroupIdFromUrl = queryParams.get('ThesisGroupId');
 
     //lấy danh sách nhóm đề tài khóa luận
-
     const fetchThesisGroups = useCallback(async () => {
         const response = await getWhere({ stillValue: true, faculty: faculty });
         if (response.status === 200) {
@@ -63,7 +62,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
     //lấy danh sách giảng viên theo khoa
     const fetchInstructors = useCallback(async (ThesisGroupIdInput) => {
-        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
+        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput?.value);
         const response = await getUsersByFaculty(ThesisGroup?.data?.data?.faculty?.facultyId);
         if (response && Array.isArray(response.data)) {
             const options = response.data.map((user) => ({
@@ -75,10 +74,19 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     }, [ThesisGroupIdFromUrl]);
 
     const fetchMajors = useCallback(async (ThesisGroupIdInput) => {
-        const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
-        const response = await getMajorsWhere({
-            facultyId: ThesisGroup?.data?.data?.faculty?.facultyId
-        });
+        let response;
+        if (ThesisGroupIdFromUrl) {
+            const ThesisGroup = await getThesisGroupById(ThesisGroupIdFromUrl || ThesisGroupIdInput.value);
+            response = await getMajorsWhere({
+                facultyId: ThesisGroup?.data?.data?.faculty?.facultyId
+            });
+
+        }
+        else {
+            response = await getMajorsWhere({
+                facultyId: faculty
+            });
+        }
 
         if (response && Array.isArray(response.data.data)) {
             const options = response.data.data.map((major) => ({
@@ -87,7 +95,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
             }));
             setMajorOptions(options);
         }
-    }, [ThesisGroupIdFromUrl]);
+    }, [ThesisGroupIdFromUrl, faculty]);
 
     const fetchSpecializations = useCallback(async (majorId) => {
         const response = await getSpecializationsWhere({ majorId: majorId });
@@ -100,9 +108,6 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
         }
     }, []);
 
-
-
-
     const handleChangeMajor = (value) => {
         setSelectedMajor(value);
         setSelectedSpecialization(null);
@@ -114,15 +119,17 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
     };
 
     useEffect(() => {
-        if (showModal) {
+        const fetchDataOption = async () => {
             if (ThesisGroupIdFromUrl) {
-                fetchInstructors();
-                fetchMajors();
-            }
-            else {
                 fetchThesisGroups();
             }
+            fetchInstructors();
+            fetchMajors();
         }
+        if (showModal) {
+            fetchDataOption();
+        }
+
 
     }, [showModal, ThesisGroupIdFromUrl, fetchInstructors, fetchMajors, fetchThesisGroups]);
 
@@ -191,8 +198,14 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 } : {
                     thesisDate: []
                 },
-                major: showModal.major?.majorName,
-                specialization: showModal.specialization?.specializationName
+                major: {
+                    value: showModal.major?.majorId,
+                    label: showModal.major?.majorName
+                },
+                specialization: {
+                    value: showModal.specialization?.specializationId,
+                    label: showModal.specialization?.specializationName
+                },
             });
             setSelectedMajor(showModal.major?.majorId);
             setSelectedSpecialization(showModal.specialization?.specializationId);
@@ -234,8 +247,8 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
                 thesisGroup: ThesisGroupId || values.thesisgroup.value,
                 startDate: new Date(values.thesisDate[0].format('YYYY-MM-DD HH:mm')),
                 finishDate: new Date(values.thesisDate[1].format('YYYY-MM-DD HH:mm')),
-                majorId: values.major,
-                specializationId: values.specialization,
+                major: { majorId: values.major?.value || values.major },
+                specialization: { specializationId: values.specialization?.value || values.specialization },
             };
             let response;
             if (isUpdate) {
