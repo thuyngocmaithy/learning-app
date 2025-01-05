@@ -118,9 +118,18 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 <FormItem
                     name="semesterName"
                     label="Học kỳ"
-                    rules={[{ required: true, message: 'Vui lòng nhập học kỳ' }]}
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập học kỳ' },
+                        {
+                            pattern: /^[0-9]+$/,
+                            message: 'Học kỳ chỉ được chứa chữ số'
+                        },
+                    ]}
                 >
-                    <Input disabled={isUpdate ? true : false} />
+                    <Input
+                        disabled={isUpdate ? true : false}
+                        maxLength={3} // Giới hạn số ký tự nếu cần
+                    />
                 </FormItem>
                 <FormItem
                     name="cycle"
@@ -142,17 +151,21 @@ const HocKyUpdate = memo(function HocKyUpdate({
                 <FormItem
                     name="academicYear"
                     label="Năm học"
-                    rules={[{ required: true, message: 'Vui lòng chọn năm học' }]}
+                    rules={[
+                        { required: true, message: 'Vui lòng chọn năm học' },
+                        {
+                            pattern: /^[0-9]{4}$/,
+                            message: 'Năm học phải là số và có 4 chữ số'
+                        },
+                    ]}
                 >
-                    <InputNumber
+                    <Input
                         style={{ width: '100%' }}
-                        min={0o0}
-                        max={5000}
-                        step={1}
-                        parser={formatValue}
+                        maxLength={4} // Chặn người dùng nhập quá 4 ký tự
                     />
                 </FormItem>
             </Form>
+
         </Update>
     );
 });

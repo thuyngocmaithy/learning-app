@@ -21,10 +21,11 @@ import FormItem from '../../../../components/Core/FormItem';
 import { getStatusByType } from '../../../../services/statusService';
 import { checkValidDateCreateThesis } from '../../../../services/thesisGroupService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
-import ExportExcel from '../../../../components/Core/ExportExcel';
 import { useConfirm } from '../../../../hooks/useConfirm';
 import TabDeTaiKhoaLuanThamGia from '../../../../components/TabDeTaiKhoaLuanThamGia';
 import { AccountLoginContext } from '../../../../context/AccountLoginContext';
+
+import exportThesisList from './exportThesisList';
 
 const cx = classNames.bind(styles);
 
@@ -123,10 +124,38 @@ function DeTaiKhoaLuan() {
             key: 'instructor',
         },
         {
+            title: 'Bộ môn',
+            dataIndex: ['specialization', 'specializationName'],
+            key: 'specialization',
+        },
+        {
+            title: 'Ngành',
+            dataIndex: ['major', 'majorName'],
+            key: 'major',
+        },
+        {
             title: 'SL thành viên',
             dataIndex: 'numberOfMember',
             key: 'numberOfMember',
             align: 'center',
+        },
+        {
+            title: 'SL đăng ký',
+            dataIndex: 'numberOfRegister',
+            key: 'numberOfRegister',
+            align: 'center',
+            render: (numberOfRegister, record) =>
+                numberOfRegister.length > 0 ? (
+                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
+                        onClick={() => setShowModalListRegister({
+                            ...record,
+                            numberOfRegister,
+                        })} >
+                        Danh sách đăng ký: {numberOfRegister.length}
+                    </ButtonCustom >
+                ) : (
+                    '0'
+                ),
         },
         {
             title: 'Trạng thái',
@@ -149,24 +178,6 @@ function DeTaiKhoaLuan() {
             render: (isDisable) => (
                 <Input type='checkbox' checked={isDisable} readOnly />
             ),
-        },
-        {
-            title: 'SL đăng ký',
-            dataIndex: 'numberOfRegister',
-            key: 'numberOfRegister',
-            align: 'center',
-            render: (numberOfRegister, record) =>
-                numberOfRegister.length > 0 ? (
-                    <ButtonCustom text verysmall style={{ color: 'var(--primary)' }}
-                        onClick={() => setShowModalListRegister({
-                            ...record,
-                            numberOfRegister,
-                        })} >
-                        Danh sách đăng ký: {numberOfRegister.length}
-                    </ButtonCustom >
-                ) : (
-                    '0'
-                ),
         },
         {
             title: 'Action',
@@ -277,7 +288,6 @@ function DeTaiKhoaLuan() {
         }
     }, [ThesisGroupIdFromUrl]);
 
-
     useEffect(() => {
         fetchData();
         setReLoadListJoinThesis(true)
@@ -321,6 +331,12 @@ function DeTaiKhoaLuan() {
             <Input />
         </FormItem>,
         <FormItem
+            name={'specialization'}
+            label={'Bộ môn'}
+        >
+            <Input />
+        </FormItem>,
+        <FormItem
             name={'instructorName'}
             label={'Chủ nhiệm đề tài'}
         >
@@ -357,7 +373,7 @@ function DeTaiKhoaLuan() {
     ];
 
     const onSearch = async (values) => {
-        const { thesisId, thesisName, instructorName, status, isDisable } = values;
+        const { thesisId, thesisName, instructorName, specializationName, status, isDisable } = values;
         const isDisableConvert = isDisable === 0 ? false : true;
         const originalList = showFilter2 ? listThesisJoinOriginal : dataOriginal;
         const filteredList = originalList.filter((thesisRegister) => {
@@ -366,11 +382,12 @@ function DeTaiKhoaLuan() {
             const matchesThesisName = thesisName ? item.thesisName?.toLowerCase().includes(thesisName.toLowerCase()) : true;
             const matchesInstructorName = instructorName ? item.instructor?.fullname?.toLowerCase().includes(instructorName.toLowerCase()) : true;
             const matchesStatus = status?.value ? item.status.statusId === status?.value : true;
+            const matchesSpecialization = specializationName ? item.specializationName?.toLowerCase().includes(specializationName.toLowerCase()) : true;
             const matchesDisabled = isDisable !== undefined && isDisable !== null
                 ? item.isDisable === isDisableConvert
                 : true;
 
-            return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled;
+            return matchesThesisId && matchesThesisName && matchesInstructorName && matchesStatus && matchesDisabled && matchesSpecialization;
         });
         if (showFilter2) {
             setListThesisJoin(filteredList);
@@ -533,13 +550,41 @@ function DeTaiKhoaLuan() {
     }));
 
 
-    const handleExportExcel = async () => {
-        ExportExcel({
-            fileName: "Danh_sach_detaikhoaluan",
-            data: processedData,
-            schemas,
-            headerContent: "DANH SÁCH ĐỀ TÀI KHOÁ LUẬN",
+    // const handleExportExcel = async () => {
+    //     ExportExcel({
+    //         fileName: "Danh_sach_detaikhoaluan",
+    //         data: processedData,
+    //         schemas,
+    //         headerContent: "DANH SÁCH ĐỀ TÀI KHOÁ LUẬN",
 
+    //     });
+    // };
+
+    const handleExportExcel = async () => {
+        // Transform data if needed
+        const exportData = data.flatMap(item => {
+            if (Array.isArray(item.numberOfRegister) && item.numberOfRegister.length > 0) {
+                return item.numberOfRegister.map(register => ({
+                    ...item,
+                    studentName: register.user?.fullname || '',
+                    studentId: register.user?.userId || '',
+                    credits: register.user?.currentCreditHour || '',
+                    gpa: register.user?.GPA || ''
+                }));
+            } else {
+                return {
+                    ...item,
+                    studentName: '',
+                    studentId: '',
+                    credits: '',
+                    gpa: ''
+                };
+            }
+        });
+
+        await exportThesisList({
+            data: exportData,
+            currentDate: new Date()
         });
     };
 

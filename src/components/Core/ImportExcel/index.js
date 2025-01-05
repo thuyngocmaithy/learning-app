@@ -19,6 +19,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
     const [previewData, setPreviewData] = useState([]); // Dữ liệu xem trước
     const [saveData, setSaveData] = useState([]); // Dữ liệu lưu
     const [columns, setColumns] = useState([]); // Cột bảng
+    const [errorRows, setErrorRows] = useState([]); // Dòng lỗi
 
     const handleCancel = useCallback(() => {
         setShowModal(false);
@@ -40,6 +41,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
         }
         return false;
     };
+
     const handleFileChange = (e) => {
         const uploadedFile = e?.file; // Lấy file gốc từ sự kiện Upload
         if (!uploadedFile || e.fileList.length === 0) {
@@ -47,6 +49,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
             setPreviewData([]);
             setSaveData([]);
             setColumns([]);
+            setErrorRows([]);
             return;
         }
         setIsLoading(true);
@@ -58,6 +61,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
             const firstSheet = workbook.worksheets[0];
             const tempData = [];
             const tempDataPreview = [];
+            const tempErrorRows = [];
 
             // Lấy dòng thứ 3 làm header
             const headerRow = firstSheet.getRow(3).values.slice(1);
@@ -77,6 +81,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
                     if (rowData[0]) { // Kiểm tra dữ liệu trong cột đầu tiên
                         const entity = {};
                         const entityPreview = {};
+                        let isValid = true; // Đánh dấu dữ liệu hợp lệ
 
                         // set data cho dữ liệu xem trước
                         rowData.forEach((value, index) => {
@@ -98,9 +103,19 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
                             } else {
                                 entity[header] = value; // Giữ nguyên giá trị
                             }
+
+                            // Kiểm tra nếu dữ liệu không hợp lệ
+                            if (!header || value === undefined || value === null || value === "") {
+                                isValid = false;
+                            }
                         });
-                        tempDataPreview.push(entityPreview)
-                        tempData.push(entity); // Thêm vào mảng dữ liệu
+
+                        if (isValid) {
+                            tempDataPreview.push(entityPreview);
+                            tempData.push(entity); // Thêm vào mảng dữ liệu
+                        } else {
+                            tempErrorRows.push({ rowIndex, rowData });
+                        }
                     }
                 }
             });
@@ -108,6 +123,7 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
             setColumns(tempColumns); // Cập nhật cột
             setPreviewData(tempDataPreview); // Cập nhật dữ liệu xem trước
             setSaveData(tempData); // Cập nhật dữ liệu lưu
+            setErrorRows(tempErrorRows); // Cập nhật dòng lỗi
             setIsLoading(false);
         };
         if (e?.file)
@@ -181,6 +197,16 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
                             scroll={{ x: 800 }}
                         />
                     )}
+                    {errorRows.length > 0 && (
+                        <div style={{ marginTop: 16, color: 'red' }}>
+                            <p><strong>Có lỗi ở các dòng sau:</strong></p>
+                            <ul>
+                                {errorRows.map(({ rowIndex }) => (
+                                    <li key={rowIndex}>Dòng {rowIndex}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </Spin>
         </Modal>
@@ -188,4 +214,3 @@ function ImportExcel({ form, title = '', showModal, type, setShowModal, onClose,
 }
 
 export default ImportExcel;
-

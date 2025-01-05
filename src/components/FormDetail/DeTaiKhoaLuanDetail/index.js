@@ -49,6 +49,12 @@ const DeTaiKhoaLuanDetail = memo(function DeTaiKhoaLuanDetail({
                     <FormItem label={'Chủ nhiệm đề tài'}>
                         <p>{showModal.instructor ? showModal.instructor.fullname : ''}</p>
                     </FormItem>
+                    <FormItem label={'Bộ môn'}>
+                        <p>{showModal.specialization ? showModal.specialization.specializationName : ''}</p>
+                    </FormItem>
+                    <FormItem label={'Ngành'}>
+                        <p>{showModal.major ? showModal.major.majorName : ''}</p>
+                    </FormItem>
                 </div>
                 <div>
                     <FormItem label={'Thời điểm bắt đầu'}>

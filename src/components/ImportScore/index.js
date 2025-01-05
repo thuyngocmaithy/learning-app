@@ -166,7 +166,7 @@ const ImportScore = memo(({ showModal, onClose }) => {
         >
 
             <div className={cx('description')}>
-                <h4>Xuất file excel điểm từ trang Thông tin đào tạo SGU để nhập điểm</h4>
+                <h4>Vui lòng xuất file excel điểm từ trang Thông tin đào tạo SGU để nhập điểm</h4>
                 <p>Điểm được nhập chỉ bao gồm điểm tổng kết môn học, không có điểm thành phần</p>
             </div>
             <Upload

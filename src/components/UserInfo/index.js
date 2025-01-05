@@ -123,6 +123,9 @@ function UserInfo({ showModal, onClose, showInfoStudent = false }) {
                         <FormItem label={'Lớp'}>
                             <p>{userInfo?.class}</p>
                         </FormItem>
+                        <FormItem label={'Khoa'}>
+                            <p>{userInfo && userInfo?.faculty?.facultyName}</p>
+                        </FormItem>
                         <FormItem label={'Ngành'}>
                             <p>{userInfo && userInfo?.major?.majorName}</p>
                         </FormItem>

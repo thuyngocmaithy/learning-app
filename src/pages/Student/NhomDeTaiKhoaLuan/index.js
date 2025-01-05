@@ -128,12 +128,32 @@ function NhomDeTaiKhoaLuan() {
         <FormItem
             name={'startYear'}
             label={'Năm thực hiện'}
+            rules={[
+                {
+                    required: false,
+                    message: 'Vui lòng nhập năm thực hiện!'
+                },
+                {
+                    pattern: /^[0-9]{4}$/,
+                    message: 'Năm không hợp lệ! Vui lòng nhập một số gồm 4 chữ số.'
+                },
+            ]}
         >
             <Input />
         </FormItem>,
         <FormItem
             name={'finishYear'}
             label={'Năm kết thúc'}
+            rules={[
+                {
+                    required: false,
+                    message: 'Vui lòng nhập năm kết thúc!'
+                },
+                {
+                    pattern: /^[0-9]{4}$/,
+                    message: 'Năm không hợp lệ! Vui lòng nhập một số gồm 4 chữ số.'
+                },
+            ]}
         >
             <Input />
         </FormItem>,
