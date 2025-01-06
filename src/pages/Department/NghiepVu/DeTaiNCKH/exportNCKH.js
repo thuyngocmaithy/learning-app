@@ -19,14 +19,23 @@ const exportNCKH = async ({ data, currentDate }) => {
     worksheet.mergeCells('E1:I1');
     worksheet.mergeCells('A2:C2');
     worksheet.mergeCells('E2:I2');
-    worksheet.mergeCells('A3:I3');
-    worksheet.mergeCells('E4:I4');
+    worksheet.mergeCells('E3:I3');
+    worksheet.mergeCells('A4:I4');
 
     // Add header text
     worksheet.getCell('A1').value = 'TRƯỜNG ĐẠI HỌC SÀI GÒN';
     worksheet.getCell('E1').value = 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM';
     worksheet.getCell('A2').value = 'KHOA: ..................';
     worksheet.getCell('E2').value = 'Độc lập – Tự do – Hạnh phúc';
+
+    // Date line (moved to row 3)
+    const day = currentDate.getDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    worksheet.getCell('E3').value = `Thành phố Hồ Chí Minh, ngày ${day} tháng ${month} năm ${year}`;
+
+    // Title (moved to row 4)
+    worksheet.getCell('A4').value = 'DANH SÁCH ĐĂNG KÝ NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN NĂM HỌC 2024 – 2025';
 
     // Center align and style
     ['A1', 'A2', 'E1', 'E2'].forEach((cellKey) => {
@@ -35,27 +44,19 @@ const exportNCKH = async ({ data, currentDate }) => {
         cell.font = { name: 'Times New Roman', size: 12, bold: true };
     });
 
-    // Date line
-    const day = currentDate.getDate();
-    const month = currentDate.getMonth() + 1;
-    const year = currentDate.getFullYear();
-    worksheet.getCell('E4').value = `Thành phố Hồ Chí Minh, ngày ${day} tháng ${month} năm ${year}`;
-
-    // Title
-    worksheet.getCell('A3').value = 'DANH SÁCH ĐĂNG KÝ NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN NĂM HỌC 2024 – 2025';
-
     // Style the header
-    ['A1:I1', 'A2:I2', 'A3:I3', 'E4:I4'].forEach(range => {
+    ['A1:I1', 'A2:I2', 'A4:I4', 'E3:I3'].forEach(range => {
         worksheet.getCell(range).alignment = {
             horizontal: 'center',
             vertical: 'middle'
         };
         worksheet.getCell(range).font = {
             name: 'Times New Roman',
-            size: range === 'A3:I3' ? 13 : 12,
-            bold: range === 'A3:I3'
+            size: range === 'A4:I4' ? 13 : 12,
+            bold: range === 'A4:I4'
         };
     });
+
 
     // Add table headers
     const headers = [

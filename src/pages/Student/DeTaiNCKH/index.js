@@ -189,10 +189,11 @@ function DeTaiNCKH() {
     }, [SRGIdFromUrl, setListSRJoin, setListSRJoinOriginal, userId]);
 
     useEffect(() => {
-        if (!loadedListSRJoin) {
+        if (!loadedListSRJoin || reLoadListJoinSR) {
             checkJoinSR();
+            setReLoadListJoinSR(false);
         }
-    }, [checkJoinSR, loadedListSRJoin]);
+    }, [checkJoinSR, loadedListSRJoin, reLoadListJoinSR]);
 
 
     const handleCancelNotification = async () => {

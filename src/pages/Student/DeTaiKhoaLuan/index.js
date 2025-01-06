@@ -165,16 +165,15 @@ function DeTaiKhoaLuan() {
 
 
     useEffect(() => {
-        if (!loadedListThesisJoin) {
+        if (!loadedListThesisJoin || reLoadListJoinThesis) {
             checkJoinThesis();
+            setReLoadListJoinThesis(false);
         }
-    }, [checkJoinThesis, loadedListThesisJoin]);
+    }, [checkJoinThesis, loadedListThesisJoin, reLoadListJoinThesis]);
 
     useEffect(() => {
         fetchthesiss()
     }, [fetchthesiss]);
-
-
 
     const handleCancelNotification = async () => {
         const thesisCancel = thesisCancelRef.current;
