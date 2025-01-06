@@ -1,12 +1,12 @@
 import classNames from 'classnames/bind';
 import styles from './MoHocPhan.module.scss';
 import { ListCourseActiveIcon } from '../../../../assets/icons';
-import { Divider, Empty, Form, InputNumber, Select, Tooltip } from 'antd';
+import { Divider, Empty, Form, InputNumber, Select, Switch, Tooltip } from 'antd';
 import ButtonCustom from '../../../../components/Core/Button';
 import { useCallback, useContext, useEffect, useState } from 'react'; //
 import FormItem from '../../../../components/Core/FormItem';
 import { useForm } from 'antd/es/form/Form';
-import { deleteBySemesterAndMajor, getAll as getAllCourseOpening, getWhere, saveMulti } from '../../../../services/subject_course_openingService';
+import { deleteBySemesterAndMajor, getAll as getAllCourseOpening, getWhere as getWhereCourseOpen, saveMulti, updateSubjectCourseOpening } from '../../../../services/subject_course_openingService';
 import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useConfirm } from '../../../../hooks/useConfirm';
@@ -18,6 +18,8 @@ import { useLocation } from 'react-router-dom';
 import config from '../../../../config';
 import ImportExcelMoNhomHP from '../../../../components/Core/ImportExcelKhoiKienThuc copy';
 import { message } from '../../../../hooks/useAntdApp';
+
+
 
 const cx = classNames.bind(styles); // Tạo hàm cx để sử dụng classNames trong SCSS
 
@@ -42,6 +44,8 @@ function MoHocPhan() {
     // Các state của bảng dữ liệu mở nhóm HP
     const [showFilter, setShowFilter] = useState(false);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
+    const [switchStates, setSwitchStates] = useState({});  // Lưu trạng thái của các Switches
+
 
 
 
@@ -78,7 +82,8 @@ function MoHocPhan() {
                         semesterId: item.semester?.semesterId,
                         semesterName: item.semester?.semesterName,
                         semesterIndex: semesterIndex,
-                        year: year
+                        year: year,
+                        disabled: item.disabled
                     };
                 }));
             }
@@ -136,7 +141,7 @@ function MoHocPhan() {
                 major: major
             }
 
-            const response = await getWhere({ major: major, semester: semesterId })
+            const response = await getWhereCourseOpen({ major: major, semester: semesterId })
             setDataArrange(data);
             if (response.status === 200) {
                 setData(response.data?.data?.map((item) => {
@@ -215,6 +220,46 @@ function MoHocPhan() {
         }
     };
 
+    // Xử lý ẩn/hiện giảng viên
+    const toggleViewIntructor = async (checked, majorId, semesterId) => {
+        // Cập nhật trạng thái UI ngay lập tức
+        const key = `${majorId}-${semesterId}`;
+        setSwitchStates((prevState) => ({
+            ...prevState,
+            [key]: checked,
+        }));
+
+        try {
+            // Gọi API lấy danh sách dữ liệu cần cập nhật
+            const listDataUpdate = await getWhereCourseOpen({ semester: semesterId, major: majorId });
+
+            if (listDataUpdate.status === 200) {
+                // Duyệt qua danh sách và cập nhật trạng thái ẩn/hiện
+                await Promise.all(
+                    listDataUpdate.data.data.map((item) =>
+                        updateSubjectCourseOpening(item.id, { disabled: !checked })
+                    )
+                );
+
+                // Thông báo thành công
+                message.success(`${checked ? 'Hiển thị' : 'Ẩn'} giảng viên thành công`);
+            } else {
+                throw new Error("Không thể lấy danh sách cần cập nhật.");
+            }
+        } catch (error) {
+            console.error("Lỗi hiển thị giảng viên:", error);
+
+            // Khôi phục trạng thái nếu có lỗi
+            setSwitchStates((prevState) => ({
+                ...prevState,
+                [key]: !checked,
+            }));
+
+            // Thông báo lỗi
+            message.error(`${checked ? 'Hiển thị' : 'Ẩn'} giảng viên thất bại`);
+        }
+    };
+
 
 
     const columnCourseOpening = useCallback(
@@ -237,6 +282,28 @@ function MoHocPhan() {
                 title: 'Ngành',
                 dataIndex: 'majorName',
                 key: 'majorName',
+            },
+            {
+                title: 'Hiển thị giảng viên',
+                dataIndex: 'disabled',
+                key: 'disabled',
+                render: (_, record) => {
+                    const { majorId, semesterId } = record;
+                    const key = `${majorId}-${semesterId}`;
+                    const checked = switchStates[key] !== undefined
+                        ? switchStates[key]
+                        : record.disabled === false
+                            ? true
+                            : false;
+
+                    return (
+                        <Switch
+                            checked={checked}
+                            onChange={(checked) => toggleViewIntructor(checked, majorId, semesterId)}
+                        />
+                    );
+                },
+                align: 'center',
             },
             {
                 title: 'Action',
@@ -281,7 +348,7 @@ function MoHocPhan() {
                 align: 'center',
             },
         ],
-        [],
+        [switchStates],
     );
 
     const columns = () => [

@@ -31,7 +31,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
     const [instructorOptions, setInstructorOptions] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
     const [srgroupOptions, setSRGroupOptions] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
+    const { faculty, userId } = useContext(AccountLoginContext);
     const { sendNotification } = useSocketNotification();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -44,7 +44,7 @@ const DeTaiNCKHUpdate = memo(function DeTaiNCKHUpdate({
 
     //lấy danh sách nhóm đề tài NCKH
     const fetchSRGroups = async () => {
-        const response = await getWhere({ stillValue: true });
+        const response = await getWhere({ stillValue: true, faculty: faculty });
         if (response.status === 200) {
             const options = response.data.data.map((SRG) => ({
                 value: SRG.scientificResearchGroupId,

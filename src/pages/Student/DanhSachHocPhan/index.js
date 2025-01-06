@@ -22,6 +22,7 @@ import { getWhereFrameStructures } from '../../../services/frameStructureService
 import { getGroupedBySubjectForSemesters } from '../../../services/subject_course_openingService';
 import { PlusOutlined } from '@ant-design/icons';
 import Table from '../../../components/Table';
+import { getScoreByStudentId } from '../../../services/scoreService';
 
 const cx = classNames.bind(styles);
 function DanhSachHocPhan() {
@@ -47,12 +48,11 @@ function DanhSachHocPhan() {
     const [frameStructureData, setFrameStructureData] = useState([])
     const [shouldFetchData, setShouldFetchData] = useState(false);
     const [frameIdSaved, setFrameIdSaved] = useState(frameId);
+    const [disabledSemestersMap, setDisabledSemestersMap] = useState();
 
 
     // State cho bảng ds nhóm học phần dự kiến mở
     const [dataOpenCourse, setDataOpenCourse] = useState([]);
-
-
 
 
     // XỬ LÝ DỮ LIỆU KHUNG TIẾN ĐỘ
@@ -125,7 +125,8 @@ function DanhSachHocPhan() {
         } catch (error) {
             console.error(error);
         } finally {
-            setIsLoadingFrame(false);
+            fetchDisabledSemesters();
+            // setIsLoadingFrame(false);
         }
     };
 
@@ -163,38 +164,38 @@ function DanhSachHocPhan() {
     }, [shouldFetchData]);
 
     const [listSemester, setListSemester] = useState([]); // Danh sách các học kỳ
-    // Hàm tải danh sách học kỳ
-    const fetchSemester = useCallback(async () => {
-        try {
-            const response = await getWhere({ cycle: cycleId });
-            if (response.status === 200) {
-                const semesters = response.data.data.filter(item => item.semesterName !== 3)
-                setListSemester(semesters);
-                fetchCourseOpening(semesters.map((item) => (item.semesterId)));
-            }
-        } catch (error) {
-            console.error('Lỗi khi tải danh sách học kỳ:', error);
-        }
-    }, [cycleId]);
 
     useEffect(() => {
-        // Tải danh sách học kỳ
-        const fetchDataSemester = async () => {
-            await fetchSemester();
+        // Hàm lấy data subject course opening
+        const fetchCourseOpening = async (semesterIds) => {
+            try {
+                const response = await getGroupedBySubjectForSemesters(major, semesterIds);
+                setDataOpenCourse(response.data.data);
+
+            } catch (error) {
+                console.error('Error fetching course openings:', error);
+            }
         };
-        fetchDataSemester();
-    }, [fetchSemester]);
 
-    // Hàm lấy data subject course opening
-    const fetchCourseOpening = async (semesterIds) => {
-        try {
-            const response = await getGroupedBySubjectForSemesters(major, semesterIds);
-            setDataOpenCourse(response.data.data);
+        // Tải danh sách học kỳ
+        const fetchSemester = async () => {
+            try {
+                const response = await getWhere({ cycle: cycleId });
+                if (response.status === 200) {
+                    const semesters = response.data.data.filter(item => item.semesterName !== 3)
+                    setListSemester(semesters);
+                    fetchCourseOpening(semesters.map((item) => (item.semesterId)));
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách học kỳ:', error);
+            }
+        };
 
-        } catch (error) {
-            console.error('Error fetching course openings:', error);
-        }
-    };
+        if (cycleId && major)
+            fetchSemester();
+    }, [cycleId, major]);
+
+
 
     const getSemesterIndex = async (semesterId) => {
         const responseUser = await getUserById(userId);
@@ -209,16 +210,14 @@ function DanhSachHocPhan() {
         try {
             // Gọi API đăng ký môn học
             const response = await registerSubject(userId, subjectId, semesterId);
-            console.log(response);
 
             // Kiểm tra nếu đăng ký thành công
             if (response.data.success) {
                 // Lấy thông tin môn học và học kỳ
-                const semesterIndex = getSemesterIndex(semesterId);
+                const semesterIndex = await getSemesterIndex(semesterId);
                 const newRegisteredSubject = {
                     semesterIndex,
                     semesterId,
-                    registerDate: response.data.registerDate, // giả sử bạn nhận được registerDate từ API
                 };
 
                 // Cập nhật danh sách môn học đã đăng ký
@@ -226,6 +225,7 @@ function DanhSachHocPhan() {
                     ...prevRegisteredSubjects,
                     [subjectId]: newRegisteredSubject, // Thêm môn học mới vào danh sách
                 }));
+                message.success("Đã thêm vào môn dự kiến học");
             } else {
                 console.error('Đăng ký môn học thất bại');
             }
@@ -233,6 +233,43 @@ function DanhSachHocPhan() {
             console.error('Lỗi khi đăng ký môn học:', error);
         }
     };
+
+    const fetchDisabledSemesters = useCallback(async () => {
+        try {
+            // Lấy danh sách học kỳ và điểm của sinh viên
+            const scoresRes = await getScoreByStudentId(userId); // Hàm fetch danh sách điểm theo sinh viên
+
+            // Tạo map danh sách học kỳ bị disabled theo từng môn học
+            const disabledSemesters = {};
+            scoresRes.forEach(score => {
+                const subjectId = score.subject.subjectId;
+                const semesterIndex = listSemester.findIndex(s => s.semesterId === score.semester.semesterId);
+
+                if (semesterIndex !== -1) {
+                    if (!disabledSemesters[subjectId]) {
+                        disabledSemesters[subjectId] = [];
+                    }
+
+                    // Tất cả học kỳ trước kỳ có điểm sẽ bị disabled
+                    for (let i = 0; i <= semesterIndex; i++) {
+                        const disabledSemesterId = listSemester[i].semesterId;
+                        if (!disabledSemesters[subjectId].includes(disabledSemesterId)) {
+                            disabledSemesters[subjectId].push(disabledSemesterId);
+                        }
+                    }
+                }
+            });
+
+            // Trả về kết quả là map của các học kỳ bị disabled theo môn học
+            setDisabledSemestersMap(disabledSemesters);
+
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách học kỳ bị disabled:', error);
+            message.error('Failed to load disabled semesters');
+        } finally {
+            setIsLoadingFrame(false);
+        }
+    }, [listSemester, userId]);
 
 
     const getCheckboxState = useMemo(() => {
@@ -279,6 +316,7 @@ function DanhSachHocPhan() {
                                         <div className={cx("container-semester")}>
                                             {listSemester.map((itemSemester, index) => {
                                                 var isOpen = dataOpenCourse[`${itemSubject.subjectId}_${itemSemester.semesterId}`];
+                                                const isDisabled = (disabledSemestersMap[itemSubject.subjectId] || []).includes(itemSemester.semesterId);
 
                                                 return (
                                                     <div className={cx("item-subject-semester")} key={Math.random().toString(36).slice(2, 11)}>
@@ -288,12 +326,10 @@ function DanhSachHocPhan() {
                                                             checked={getCheckboxState(`${item.studyFrameComponent?.frameComponentId}/${itemSubject.subjectId}/${itemSemester.semesterId}`)}
                                                         >
                                                             HK{index + 1}
-
-
                                                         </Checkbox>
                                                         {isOpen && isOpen?.openGroup !== 0
                                                             &&
-                                                            <Tooltip className={cx("open-course")} title={
+                                                            <Tooltip className={cx(isDisabled ? "open-course-disabled" : "open-course")} title={
                                                                 <div>
                                                                     {isOpen.instructors?.map((instructor) => (
                                                                         <div key={Math.random().toString(36).slice(2, 11)}>{instructor}</div>
@@ -313,13 +349,14 @@ function DanhSachHocPhan() {
                                                                     size="small"
                                                                     style={{
                                                                         display: 'none',
+                                                                        fontSize: '10px'
                                                                     }}
                                                                     className={cx("btnAddSubject")}
                                                                     onClick={() => {
                                                                         onRegisterSubject(itemSubject.subjectId, itemSemester.semesterId);
                                                                     }}
                                                                 >
-                                                                    Thêm
+                                                                    Dự kiến học
                                                                 </Button>
                                                             </Tooltip>
                                                         }
@@ -352,14 +389,18 @@ function DanhSachHocPhan() {
 
     // Tạo cấu trúc cây với dữ liệu frameStructure
     const treeDataMemoized = useMemo(() => {
-        return buildTreeData(frameStructureData, null);
-    }, [frameStructureData]);
+        if (!isLoadingFrame)
+            return buildTreeData(frameStructureData, null);
+        return [];
+    }, [frameStructureData, isLoadingFrame]);
 
     useEffect(() => {
-        setTreeData(treeDataMemoized);
-        // Mở rộng tất cả các keys trong cây
-        setExpandedKeys(getAllKeys(treeDataMemoized));
-    }, [treeDataMemoized]);
+        if (!isLoadingFrame && treeDataMemoized.length > 0) {
+            setTreeData(treeDataMemoized);
+            // Mở rộng tất cả các keys trong cây
+            setExpandedKeys(getAllKeys(treeDataMemoized));
+        }
+    }, [treeDataMemoized, isLoadingFrame]);
 
     const getAllKeys = (data) => {
         let keys = [];
@@ -529,7 +570,7 @@ function DanhSachHocPhan() {
                         expandedKeys={expandedKeys}
                         isLoading={isLoadingFrame}
                         draggable={false}
-                        height='500px'
+                        height='550px'
                     />
 
                 </>
@@ -565,15 +606,6 @@ function DanhSachHocPhan() {
     ];
 
 
-
-    // if (isLoading) {
-    //     return (
-    //         <div className={cx('container-loading')}>
-    //             <Spin size="large" />
-    //         </div>
-    //     );
-    // }
-
     return (
         <div className={cx('wrapper')}>
             <div className={cx('info')}>
@@ -583,16 +615,18 @@ function DanhSachHocPhan() {
                     </span>
                     <h3 className={cx('title')}>Danh sách các học phần</h3>
                 </div>
-                <div className={cx('toolbar')}>
-                    <div className={cx('filter')}>
-                        <Radio.Group block options={options} defaultValue="Tất cả" optionType="button" onChange={handleChange} />
+                {tabActive === 2 &&
+                    <div className={cx('toolbar')}>
+                        <div className={cx('filter')}>
+                            <Radio.Group block options={options} defaultValue="Tất cả" optionType="button" onChange={handleChange} />
+                        </div>
+                        <div className={cx('action')}>
+                            <ButtonCustom className={cx('btnSave')} primary small onClick={handleSave}>
+                                Lưu
+                            </ButtonCustom>
+                        </div>
                     </div>
-                    <div className={cx('action')}>
-                        <ButtonCustom className={cx('btnSave')} primary small onClick={handleSave}>
-                            Lưu
-                        </ButtonCustom>
-                    </div>
-                </div>
+                }
             </div>
             {frameId
                 ? <Tabs

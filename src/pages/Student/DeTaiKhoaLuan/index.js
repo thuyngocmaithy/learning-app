@@ -31,7 +31,7 @@ function DeTaiKhoaLuan() {
     const [reLoadListJoinThesis, setReLoadListJoinThesis] = useState(false);
     const { cancelRegisterConfirm } = useConfirm();
     const [listOriginal, setListOriginal] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
+    const { faculty, userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); //đang load: true, không load: false
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
@@ -105,7 +105,7 @@ function DeTaiKhoaLuan() {
 
     const fetchthesiss = useCallback(async () => {
         try {
-            const response = await getByThesisGroupIdAndCheckApprove({ userId: userId, ThesisGroupId: ThesisGroupIdFromUrl });
+            const response = await getByThesisGroupIdAndCheckApprove({ userId: userId, ThesisGroupId: ThesisGroupIdFromUrl, faculty: faculty });
 
             if (response.status === 200) {
                 setList(response.data.data);

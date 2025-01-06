@@ -28,6 +28,13 @@ const exportNCKH = async ({ data, currentDate }) => {
     worksheet.getCell('A2').value = 'KHOA: ..................';
     worksheet.getCell('E2').value = 'Độc lập – Tự do – Hạnh phúc';
 
+    // Center align and style
+    ['A1', 'A2', 'E1', 'E2'].forEach((cellKey) => {
+        const cell = worksheet.getCell(cellKey);
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.font = { name: 'Times New Roman', size: 12, bold: true };
+    });
+
     // Date line
     const day = currentDate.getDate();
     const month = currentDate.getMonth() + 1;
@@ -35,7 +42,7 @@ const exportNCKH = async ({ data, currentDate }) => {
     worksheet.getCell('E4').value = `Thành phố Hồ Chí Minh, ngày ${day} tháng ${month} năm ${year}`;
 
     // Title
-    worksheet.getCell('A3').value = 'DANH SÁCH ĐĂNG KÝ NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN NĂM HỌC 2023 – 2024';
+    worksheet.getCell('A3').value = 'DANH SÁCH ĐĂNG KÝ NGHIÊN CỨU KHOA HỌC CỦA SINH VIÊN NĂM HỌC 2024 – 2025';
 
     // Style the header
     ['A1:I1', 'A2:I2', 'A3:I3', 'E4:I4'].forEach(range => {
@@ -116,7 +123,7 @@ const exportNCKH = async ({ data, currentDate }) => {
             cell.alignment = {
                 vertical: 'middle',
                 wrapText: true,
-                horizontal: 'left'  // Căn trái cho nội dung
+                horizontal: 'center'  // Căn giữa cho nội dung
             };
             cell.font = { name: 'Times New Roman', size: 12 };
             cell.border = {
@@ -133,7 +140,7 @@ const exportNCKH = async ({ data, currentDate }) => {
     // Add summary text
     const summaryRow = rowIndex + 1;
     worksheet.mergeCells(`A${summaryRow}:I${summaryRow}`);
-    worksheet.getCell(`A${summaryRow}`).value = `Danh sách gồm có ${data.length} đề tài, ${data.length} sinh viên đăng ký`;
+    worksheet.getCell(`A${summaryRow}`).value = `Danh sách gồm có ${data.length} đề tài, ${data.reduce((acc, item) => acc + item.students.length, 0)} sinh viên đăng ký`;
     worksheet.getCell(`A${summaryRow}`).font = { name: 'Times New Roman', size: 12 };
 
     // Add signature

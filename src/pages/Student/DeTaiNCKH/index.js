@@ -31,7 +31,7 @@ function DeTaiNCKH() {
     const [reLoadListJoinSR, setReLoadListJoinSR] = useState(false);
     const [list, setList] = useState([]);
     const [listOriginal, setListOriginal] = useState([]);
-    const { userId } = useContext(AccountLoginContext);
+    const { faculty, userId } = useContext(AccountLoginContext);
     const [isLoading, setIsLoading] = useState(true); // load tất cả ds đề tài
     const [showModalDetail, setShowModalDetail] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
@@ -123,10 +123,10 @@ function DeTaiNCKH() {
     // Xử lý lấy SRGId    
     const SRGIdFromUrl = queryParams.get('SRGId');
 
-    // Lấy Danh sách đề 
+    // Lấy Danh sách đề tài
     const fetchSR = useCallback(async () => {
         try {
-            const response = await getBySRGIdAndCheckApprove({ userId: userId, SRGId: SRGIdFromUrl });
+            const response = await getBySRGIdAndCheckApprove({ userId: userId, SRGId: SRGIdFromUrl, faculty: faculty });
             if (response.status === 200) {
                 setList(response.data.data);
                 setListOriginal(response.data.data);

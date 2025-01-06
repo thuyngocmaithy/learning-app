@@ -47,7 +47,9 @@ const getThemeConfig = (theme) => ({
         colorBgTitle: theme === 'dark' ? '#34383d' : '#f6ffed', // nền title
         colorTextTitle: theme === 'dark' ? '#ffffff' : '#389e0d', // chữ title
 
-
+        // Text
+        colorTextNotification: theme === 'dark' ? '#ffffff' : '#000', //chữ thông báo
+        colorTimeNotification: theme === 'dark' ? '#c0aeae' : '#778aa2' // time thông báo
     },
     theme: theme === 'dark' ? 'dark' : 'light', // Thiết lập chủ đề tối hoặc sáng
 });

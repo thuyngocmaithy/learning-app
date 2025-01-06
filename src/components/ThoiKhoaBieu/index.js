@@ -15,7 +15,7 @@ async function processCourseRegister(userId) {
     if (registeredSubjectsRes?.length) {
         registeredSubjectsRes.forEach((registration) => {
             const { semesterId, semesterName, academicYear } = registration.semester;
-            const semesterKey = `Học kỳ ${semesterName} - Năm ${academicYear}`;
+            const semesterKey = `Năm ${academicYear} - Học kỳ ${semesterName} `;
 
             // Nếu chưa có semesterId thì khởi tạo dữ liệu
             if (!registeredMap[semesterId]) {
@@ -41,7 +41,7 @@ async function processCourseRegister(userId) {
     return registeredMap;
 }
 
-function ThoiKhoaBieu({ registeredSubjects, frameId }) {
+function ThoiKhoaBieu({ frameId }) {
     const { userId } = useContext(AccountLoginContext);
     const [dataSemester, setDataSemester] = useState([]); // State lưu thông tin học kỳ
     const [activeKeys, setActiveKeys] = useState([]); // State lưu thông tin panel đang mở rộng
@@ -54,7 +54,7 @@ function ThoiKhoaBieu({ registeredSubjects, frameId }) {
 
         const sortedKeys = Object.keys(registeredMap)
             .map(Number)
-            .sort((a, b) => a - b); // Sắp xếp theo semesterId tăng dần
+            .sort((a, b) => b - a); // Sắp xếp theo semesterId tăng dần
 
         const semesters = sortedKeys.map((semesterId) => ({
             key: semesterId,

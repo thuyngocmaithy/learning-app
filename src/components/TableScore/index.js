@@ -385,40 +385,13 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         <FormItem name="creditHour" label="Số tín chỉ">
             <Input type="number" min={0} />
         </FormItem>,
-        <FormItem name="score10" label="Điểm hệ 10">
-            <Input
-                type="number"
-                min={0}
-                max={10}
-                step={0.1}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    if (value && (value < 0 || value > 10)) {
-                        form.setFieldValue('score10', '');
-                    }
-                }}
-            />
-        </FormItem>,
-        <FormItem name="scoreLetter" label="Điểm chữ">
-            <Select
-                allowClear
-                style={{ width: '30%' }}
-                options={[
-                    { value: 'A', label: 'A' },
-                    { value: 'B', label: 'B' },
-                    { value: 'C', label: 'C' },
-                    { value: 'D', label: 'D' },
-                    { value: 'F', label: 'F' }
-                ]}
-            />
-        </FormItem>,
     ];
 
     const onSearch = (values) => {
-        const { subjectId, subjectName, creditHour, score10, scoreLetter } = values;
+        const { subjectId, subjectName, creditHour } = values;
 
         // Check if all search fields are empty
-        const isEmptySearch = !subjectId && !subjectName && !creditHour && !score10 && !scoreLetter;
+        const isEmptySearch = !subjectId && !subjectName && !creditHour;
 
         // If search is empty, reset to original table
         if (isEmptySearch) {
@@ -430,12 +403,6 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
             .filter(frameComponent => !frameComponent.parentFrameComponent)
             .flatMap(frameComponent => {
                 return frameComponent.subjectInfo?.filter(subject => {
-                    const score = scores.find(s => s.subject.subjectId === subject.subjectId);
-                    const currentNumericGrade = numericGrades[subject.subjectId];
-                    const currentLetterGrade = selectedGrades[subject.subjectId]?.grade ||
-                        originalGrades[subject.subjectId] ||
-                        (currentNumericGrade ? convertToLetterGrade(currentNumericGrade) : '');
-
                     // Match conditions
                     const matchesSubjectId = !subjectId ||
                         subject.subjectId.toLowerCase().includes(subjectId.toLowerCase());
@@ -446,19 +413,9 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
                     const matchesCreditHour = !creditHour ||
                         subject.creditHour === Number(creditHour);
 
-                    const matchesScore10 = !score10 ||
-                        (score?.finalScore10 === Number(score10) ||
-                            currentNumericGrade === Number(score10));
-
-                    const matchesScoreLetter = !scoreLetter ||
-                        (score?.finalScoreLetter === scoreLetter ||
-                            currentLetterGrade === scoreLetter);
-
                     return matchesSubjectId &&
                         matchesSubjectName &&
-                        matchesCreditHour &&
-                        matchesScore10 &&
-                        matchesScoreLetter;
+                        matchesCreditHour;
                 });
             });
 
@@ -563,13 +520,11 @@ const TableScore = ({ height = 600, onGradesChange, onCurrentCreditsChange, onIm
         frameId ?
             <>
                 <div className={cx('container-header')}>
-                    {/* ... existing header content ... */}
                     <div className={cx('wrapper-toolbar')}>
                         <Toolbar
                             type={'Bộ lọc'}
                             onClick={() => setShowFilter(!showFilter)}
                         />
-                        {/* ... other toolbar items ... */}
                     </div>
                 </div>
                 <div className={`slide ${showFilter ? 'open' : ''}`}>

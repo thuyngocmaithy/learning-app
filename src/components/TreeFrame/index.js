@@ -1,6 +1,7 @@
 import { Empty, Spin, Tree } from 'antd';
 import classNames from 'classnames/bind';
 import styles from "./TreeFrame.module.scss"
+import Loader from '../Loader';
 
 
 const cx = classNames.bind(styles)
@@ -94,8 +95,8 @@ const TreeFrame = ({
     return (
         isLoading
             ?
-            <div className={('container-loading')}>
-                <Spin size="large" />
+            <div className={cx('container-loading')} style={{ height: '40vh' }}>
+                <Loader />
             </div>
             :
             <>

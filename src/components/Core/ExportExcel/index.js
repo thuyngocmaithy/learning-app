@@ -36,12 +36,12 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
 
         // **Header bên phải**
         const subHeaderCell1 = worksheet.getCell(`${lastColumn}1`);
-        subHeaderCell1.value = "Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam";
+        subHeaderCell1.value = "             Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam";
         subHeaderCell1.font = { bold: true, size: 12 };
         subHeaderCell1.alignment = { horizontal: "right", vertical: "middle" };
 
         const subHeaderCell2 = worksheet.getCell(`${lastColumn}2`);
-        subHeaderCell2.value = "Độc lập - Tự do - Hạnh phúc      ";
+        subHeaderCell2.value = "       Độc lập - Tự do - Hạnh phúc      ";
         subHeaderCell2.font = { bold: true, size: 12 };
         subHeaderCell2.alignment = { horizontal: "right", vertical: "middle" };
 
@@ -70,7 +70,7 @@ const ExportExcel = async ({ fileName, data, schemas, headerContent }) => {
                 const cell = row.getCell(colIndex + 1);
                 cell.value = item[schema.prop];
                 cell.alignment = {
-                    horizontal: schema.textAlign, // Căn giữa theo chiều ngang
+                    horizontal: "center", // Căn giữa theo chiều ngang
                     vertical: "middle",    // Căn giữa theo chiều dọc
                     wrapText: true
                 };

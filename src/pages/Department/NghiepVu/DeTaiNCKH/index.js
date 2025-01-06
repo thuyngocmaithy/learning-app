@@ -10,7 +10,7 @@ import TableCustomAnt from '../../../../components/Core/TableCustomAnt';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import Toolbar from '../../../../components/Core/Toolbar';
 import DeTaiNCKHUpdate from '../../../../components/FormUpdate/DeTaiNCKHUpdate';
-import { deleteSRs, getAllSR, getBySRGId, updateSRByIds, importScientificResearch, checkRelatedData } from '../../../../services/scientificResearchService';
+import { deleteSRs, getBySRGId, updateSRByIds, importScientificResearch, checkRelatedData, getWhere } from '../../../../services/scientificResearchService';
 import { getByListSRId } from '../../../../services/scientificResearchUserService';
 import DeTaiNCKHListRegister from '../../../../components/FormListRegister/DeTaiNCKHListRegister';
 import DeTaiNCKHDetail from '../../../../components/FormDetail/DeTaiNCKHDetail';
@@ -26,10 +26,13 @@ import exportNCKH from './exportNCKH';
 import { useConfirm } from '../../../../hooks/useConfirm';
 import TabDeTaiNCKHThamGia from '../../../../components/TabDeTaiNCKHThamGia';
 import { getUserById } from '../../../../services/userService';
+import { AccountLoginContext } from '../../../../context/AccountLoginContext';
+import { importNCKH } from './importNCKH';
 
 const cx = classNames.bind(styles);
 
 function DeTaiNCKH() {
+    const { faculty } = useContext(AccountLoginContext);
     const { deleteConfirm, disableConfirm, enableConfirm, warningConfirm } = useConfirm();
     const [reLoadListJoinSR, setReLoadListJoinSR] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
@@ -243,7 +246,7 @@ function DeTaiNCKH() {
                 }
             } else {
                 // Nếu không có ID nhóm, lấy tất cả các đề tài
-                const result = await getAllSR();
+                const result = await getWhere({ facultyId: faculty });
                 if (result.status === 200) {
                     scientificResearchData = result.data.data || result.data;
                 }
@@ -743,7 +746,7 @@ function DeTaiNCKH() {
                 setShowModal={setShowModalImport}
                 reLoad={fetchData}
                 type={config.imports.SCIENRESEARCH}
-                onImport={importScientificResearch}
+                onImport={importNCKH}
             />
         </>
     );
