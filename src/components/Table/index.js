@@ -92,7 +92,10 @@ const useTableLogic = (userId, frameId, status, registeredSubjects, setRegistere
                 });
             }
 
-            setRegisteredSubjects(registeredMap);
+            setRegisteredSubjects(prevState => ({
+                ...prevState,
+                ...registeredMap,
+            }));
         } catch (error) {
             console.error('Lỗi khi tải danh sách môn học mở:', error);
         } finally {

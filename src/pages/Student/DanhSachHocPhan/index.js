@@ -214,11 +214,10 @@ function DanhSachHocPhan() {
             // Kiểm tra nếu đăng ký thành công
             if (response.data.success) {
                 // Lấy thông tin môn học và học kỳ
-                const semesterIndex = getSemesterIndex(semesterId);
+                const semesterIndex = await getSemesterIndex(semesterId);
                 const newRegisteredSubject = {
                     semesterIndex,
                     semesterId,
-                    registerDate: response.data.registerDate, // giả sử bạn nhận được registerDate từ API
                 };
 
                 // Cập nhật danh sách môn học đã đăng ký
@@ -226,6 +225,7 @@ function DanhSachHocPhan() {
                     ...prevRegisteredSubjects,
                     [subjectId]: newRegisteredSubject, // Thêm môn học mới vào danh sách
                 }));
+                message.success("Đã thêm vào môn dự kiến học");
             } else {
                 console.error('Đăng ký môn học thất bại');
             }

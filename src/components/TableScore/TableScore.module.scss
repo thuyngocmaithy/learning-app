@@ -42,3 +42,9 @@
     background-color: var(--blue-50);
     border-color: var(--primary);
 }
+
+.wrapper-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
