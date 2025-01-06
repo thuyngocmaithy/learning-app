@@ -47,7 +47,7 @@ function DeTaiKhoaLuan() {
     const navigate = useNavigate();
     const location = useLocation();
     const { permissionDetails } = useContext(PermissionDetailContext);
-    const { permission } = useContext(AccountLoginContext);
+    const { permission, user } = useContext(AccountLoginContext);
     const [statusOptions, setStatusOptions] = useState([]);
     const [showModalImport, setShowModalImport] = useState(false); // hiển thị model import
     // khóa toolbar nhập liệu khi có ThesisGroupId trên url và ThesisGroupId là nhóm đề tài khóa luận hết hạn nhập liệu
@@ -564,8 +564,12 @@ function DeTaiKhoaLuan() {
         // Transform data if needed
         const exportData = data.flatMap(item => {
             if (Array.isArray(item.numberOfRegister) && item.numberOfRegister.length > 0) {
-                return item.numberOfRegister.map(register => ({
-                    ...item,
+                return item.numberOfRegister.map((register, index) => ({
+                    stt: index === 0 ? item.thesisId : '',
+                    thesisName: index === 0 ? item.thesisName : '',
+                    instructor: index === 0 ? item.instructor?.fullname || '' : '',
+                    department: index === 0 ? item.instructor?.faculty?.facultyName || '' : '',
+                    major: index === 0 ? item.major?.majorName || '' : '',
                     studentName: register.user?.fullname || '',
                     studentId: register.user?.userId || '',
                     credits: register.user?.currentCreditHour || '',
@@ -573,7 +577,11 @@ function DeTaiKhoaLuan() {
                 }));
             } else {
                 return {
-                    ...item,
+                    stt: item.thesisId,
+                    thesisName: item.thesisName,
+                    instructor: item.instructor?.fullname || '',
+                    department: item.instructor?.faculty?.facultyName || '',
+                    major: item.major?.majorName || '',
                     studentName: '',
                     studentId: '',
                     credits: '',
@@ -584,7 +592,7 @@ function DeTaiKhoaLuan() {
 
         await exportThesisList({
             data: exportData,
-            currentDate: new Date()
+            currentDate: new Date(),
         });
     };
 

@@ -22,8 +22,10 @@ import { getStatusByType } from '../../../../services/statusService';
 import { checkValidDateCreateSR } from '../../../../services/scientificResearchGroupService';
 import ImportExcel from '../../../../components/Core/ImportExcel';
 import ExportExcel from '../../../../components/Core/ExportExcel';
+import exportNCKH from './exportNCKH';
 import { useConfirm } from '../../../../hooks/useConfirm';
 import TabDeTaiNCKHThamGia from '../../../../components/TabDeTaiNCKHThamGia';
+import { getUserById } from '../../../../services/userService';
 
 const cx = classNames.bind(styles);
 
@@ -585,17 +587,56 @@ function DeTaiNCKH() {
     }));
 
 
-    const handleExportExcel = async () => {
-        ExportExcel({
-            fileName: "Danh_sach_detai",
-            data: processedData,
-            schemas,
-            headerContent: "DANH SÁCH ĐỀ TÀI NGHIÊN CỨU KHOA HỌC",
+    // const handleExportExcel = async () => {
+    //     ExportExcel({
+    //         fileName: "Danh_sach_detai",
+    //         data: processedData,
+    //         schemas,
+    //         headerContent: "DANH SÁCH ĐỀ TÀI NGHIÊN CỨU KHOA HỌC",
 
+    //     });
+    // };
+
+    const handleExportExcel = async () => {
+        const exportData = await Promise.all(data.map(async (item) => {
+            // Lấy thông tin sinh viên với class và major/specialization thông qua API
+            const students = await Promise.all(
+                Array.isArray(item.numberOfRegister)
+                    ? item.numberOfRegister.map(async register => {
+                        const studentId = register.user?.userId || '';
+                        let studentDetails = null;
+                        if (studentId) {
+                            try {
+                                const response = await getUserById(studentId);
+                                studentDetails = response.data || response;
+                            } catch (error) {
+                                console.error('Error fetching student details:', error);
+                            }
+                        }
+                        return {
+                            studentName: register.user?.fullname || '',
+                            studentId: studentId,
+                            class: studentDetails?.class || '',
+                            major: studentDetails?.major?.majorName || '',
+                            specialization: studentDetails?.specialization?.specializationName || ''
+                        };
+                    })
+                    : []
+            );
+
+            return {
+                stt: item.scientificResearchId,
+                thesisName: item.scientificResearchName,
+                students,
+                instructor: item.instructor?.fullname || ''
+            };
+        }));
+
+        await exportNCKH({
+            data: exportData,
+            currentDate: new Date()
         });
     };
-
-
 
     return (
         <>

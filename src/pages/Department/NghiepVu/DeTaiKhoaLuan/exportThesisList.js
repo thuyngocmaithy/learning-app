@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-const exportThesisList = async ({ data, currentDate = new Date() }) => {
+const exportThesisList = async ({ data, currentDate = new Date(), user }) => {
     try {
         // 1. Create workbook and worksheet
         const workbook = new ExcelJS.Workbook();
@@ -25,7 +25,7 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
             ['Độc lập – Tự do – Hạnh phúc'],
             [`Thành phố Hồ Chí Minh, ngày ${currentDate.getDate()} tháng ${currentDate.getMonth() + 1} năm ${currentDate.getFullYear()}`],
             ['DANH SÁCH SINH VIÊN THỰC HIỆN KHÓA LUẬN TỐT NGHIỆP HK... NĂM HỌC 202...-202...'],
-            ['Ngành đào tạo: Công nghệ Thông tin, Kỹ thuật phần mềm , Khoa Công nghệ Thông tin (Hệ Chính quy đại trà)']
+            [`Ngành đào tạo: ${user?.major?.majorName || ''}, Khoa: ${user?.faculty?.facultyName || ''} (Hệ Chính quy đại trà)`]
         ];
 
         headers.forEach((header, index) => {
@@ -80,7 +80,7 @@ const exportThesisList = async ({ data, currentDate = new Date() }) => {
                         thesisName: item.thesisName,
                         instructor: item.instructor,
                         students: [],
-                        department: item.instructor?.faculty || 'Khoa CNTT'
+                        department: item.instructor?.faculty?.facultyName || 'Khoa CNTT'
                     });
                 }
 
