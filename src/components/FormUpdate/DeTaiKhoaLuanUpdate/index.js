@@ -130,7 +130,7 @@ const DeTaiKhoaLuanUpdate = memo(function DeTaiKhoaLuanUpdate({
 
     useEffect(() => {
         const fetchDataOption = async () => {
-            if (ThesisGroupIdFromUrl) {
+            if (!ThesisGroupIdFromUrl) {
                 fetchThesisGroups();
             }
             fetchInstructors();
